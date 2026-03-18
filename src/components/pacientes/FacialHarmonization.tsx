@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { 
   Sparkles, 
   MapPin, 
@@ -9,9 +9,17 @@ import {
   CheckCircle, 
   Activity, 
   Plus,
-  Info
+  Info,
+  Camera
 } from 'lucide-react'
+import html2canvas from 'html2canvas'
 import { cn } from '../../lib/utils'
+import { FileUpload } from '../ui/FileUpload'
+import type { StorageFile } from '../../lib/storage'
+import { StorageHelpers } from '../../lib/storage'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
 import type { HarmonizationZone, ProcedureHarmonization } from '../../types/prontuario'
 
 interface FacialHarmonizationProps {
@@ -35,9 +43,15 @@ const ZONES_CONFIG = [
 ]
 
 export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: FacialHarmonizationProps) {
+  const { user } = useAuthStore()
+  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const { toast } = useToast()
+
   const [selectedZones, setSelectedZones] = useState<HarmonizationZone[]>(initialZones)
   const [activeZoneId, setActiveZoneId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fotosRegistro, setFotosRegistro] = useState<StorageFile[]>([])
+  const mapRef = useRef<HTMLDivElement>(null)
 
   const activeZoneConfig = useMemo(() => ZONES_CONFIG.find(z => z.id === activeZoneId), [activeZoneId])
   const activeZoneData   = useMemo(() => selectedZones.find(z => z.id === activeZoneId), [selectedZones, activeZoneId])
@@ -72,9 +86,38 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
   }
 
   const handleSave = async () => {
+    if (!clinicaId || !mapRef.current) return
     setIsSubmitting(true)
-    await onSave(selectedZones)
-    setIsSubmitting(false)
+
+    try {
+      // SVG -> Canvas -> Blob using html2canvas
+      const canvas = await html2canvas(mapRef.current, { backgroundColor: null, scale: 2 })
+      const dataURL = canvas.toDataURL('image/png')
+      const res = await fetch(dataURL)
+      const blob = await res.blob()
+      
+      const file = new File([blob], `mapa_harmonizacao_${Date.now()}.png`, { type: 'image/png' })
+      const stored = await StorageHelpers.uploadMapaHarmonizacao(clinicaId, pacienteId, file)
+
+      // Assuming table "harmonizacoes" or similar exists, injecting into DB:
+      await supabase.from('harmonizacoes').insert({
+        paciente_id: pacienteId,
+        profissional_id: user?.id || '00000000-0000-0000-0000-000000000000',
+        mapeamento: {
+           url: stored.url,
+           zonas: selectedZones as any // Escape strict Json intersection mismatch
+        },
+      })
+
+      // Wait original hook callback if any
+      await onSave(selectedZones)
+      
+      toast({ title: 'Sucesso', description: 'Mapeamento facial salvo com sucesso.', type: 'success' })
+    } catch(err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message, type: 'error' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -91,7 +134,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
             </div>
          </div>
 
-         <div className="relative">
+         <div className="relative" ref={mapRef}>
             {/* SVG Silhouette */}
             <svg width="300" height="420" viewBox="0 0 300 420" className="drop-shadow-2xl">
               {/* Silhouette Body */}
@@ -252,6 +295,33 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                   <Plus className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
                </div>
             </div>
+         </div>
+
+         {/* Record of Photos (Antes/Depois) */}
+         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+               <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600">
+                  <Camera className="w-5 h-5" />
+               </div>
+               <div>
+                  <h3 className="text-sm font-black text-gray-900 border-none">Registro Fotográfico</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Antes e Depois</p>
+               </div>
+            </div>
+
+            {clinicaId && (
+              <FileUpload 
+                bucket="pacientes-fotos" 
+                clinica_id={clinicaId}
+                paciente_id={pacienteId}
+                label="Adicionar Foto (Antes/Depois)"
+                accept="image/*"
+                multiple
+                onUploadComplete={(files) => setFotosRegistro(prev => [...files, ...prev])}
+                existingFiles={fotosRegistro}
+                onDeleteExisting={(f) => setFotosRegistro(prev => prev.filter(x => x.id !== f.id))}
+              />
+            )}
          </div>
       </div>
     </div>

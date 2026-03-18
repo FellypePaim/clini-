@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
+import { ToastProvider } from '../ui/ToastProvider'
 
 const SIDEBAR_WIDTH = 240 // 60 * 4 = 240px (w-60)
 
@@ -19,6 +20,7 @@ export function MainLayout() {
         <div className="p-6 animate-fade-in">
           <Outlet />
         </div>
+        <ToastProvider />
       </main>
     </div>
   )

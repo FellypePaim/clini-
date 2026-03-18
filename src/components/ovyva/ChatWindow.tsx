@@ -1,23 +1,11 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { 
-  Plus, 
-  Send, 
-  Bot, 
-  User, 
-  Settings, 
-  ChevronRight, 
-  Clock, 
-  CheckCircle, 
-  Activity,
-  Play,
-  Share2,
-  Lock,
-  MessageCircle,
-  Stethoscope
+  Plus, Send, Bot, User, Settings, Clock, CheckCircle, Play, Sparkles, CalendarDays
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { OvyvaConversation, OvyvaMessage } from '../../types/ovyva'
 import { Avatar } from '../ui/Avatar'
+import { Link } from 'react-router-dom'
 
 interface ChatWindowProps {
   conversation: OvyvaConversation
@@ -44,28 +32,90 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
     setInputText('')
   }
 
+  // Agrupar mensagens por sessao_id ou data aproximada
+  const groupedSessions = useMemo(() => {
+    const groups: { label: string, date: Date, msgs: OvyvaMessage[] }[] = []
+    
+    // Fallback simple grouper by date/session
+    let currentGroupId: string | null = null
+    let currentGroup: OvyvaMessage[] = []
+    let lastDate: Date = new Date(0)
+
+    conversation.mensagens.forEach((msg, idx) => {
+      const msgDate = new Date(msg.created_at)
+      const diffHours = (msgDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60)
+      
+      const isNewSession = msg.sessao_inicio || diffHours > 4 || idx === 0
+      
+      const df = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+      const diffDays = (d1: Date, d2: Date) => Math.floor((d1.getTime() - d2.getTime()) / 86400000)
+
+      if (isNewSession) {
+        if (currentGroup.length > 0) {
+          const firstInGroup = new Date(currentGroup[0].created_at)
+          const daysAgo = diffDays(new Date(), firstInGroup)
+          let label = `──────── Hoje ────────`
+          if (daysAgo === 1) label = `──────── Ontem ────────`
+          else if (daysAgo > 1) label = `──────── Retornou após ${daysAgo} dias • ${df.format(firstInGroup)} ────────`
+          else if (idx === 0) label = `──────── Primeira conversa • ${df.format(firstInGroup)} ────────`
+          
+          groups.push({ label, date: firstInGroup, msgs: currentGroup })
+        }
+        currentGroup = [msg]
+        currentGroupId = msg.sessao_id || null
+      } else {
+        currentGroup.push(msg)
+      }
+      lastDate = msgDate
+    })
+
+    if (currentGroup.length > 0) {
+      const firstInGroup = new Date(currentGroup[0].created_at)
+      const df = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+      const diffDays = (d1: Date, d2: Date) => Math.floor((d1.getTime() - d2.getTime()) / 86400000)
+
+      const daysAgo = diffDays(new Date(), firstInGroup)
+      let label = `──────── Hoje ────────`
+      if (daysAgo === 1) label = `──────── Ontem ────────`
+      else if (daysAgo > 1) label = `──────── Sessão • ${df.format(firstInGroup)} ────────`
+      else if (groups.length === 0) label = `──────── Primeira conversa • ${df.format(firstInGroup)} ────────`
+      groups.push({ label, date: firstInGroup, msgs: currentGroup })
+    }
+
+    return groups
+  }, [conversation.mensagens])
+
+  const displayName = conversation.contato_nome || `Novo contato • ${conversation.contato_telefone}`
+  const avatarName = conversation.contato_nome ? conversation.contato_nome : "?"
+
   return (
     <div className="flex-1 flex flex-col bg-gray-50/30 overflow-hidden h-full">
        {/* Chat Header */}
        <div className="bg-white p-6 border-b border-gray-50 shrink-0 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-10 transition-all">
           <div className="flex items-center gap-4">
-             <Avatar nome={conversation.contatoNome} size="lg" className="border-4 border-white shadow-xl shadow-gray-200/50" />
+             <Avatar nome={avatarName} size="lg" className="border-4 border-white shadow-xl shadow-gray-200/50" />
              <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                   <h3 className="text-sm font-black text-gray-900 border-none uppercase tracking-widest">{conversation.contatoNome}</h3>
-                   <div className={cn(
-                    "w-2 h-2 rounded-full animate-pulse",
-                    conversation.status === 'ia_respondendo' ? "bg-green-500" : "bg-orange-500"
-                   )} />
+                   <h3 className="text-sm font-black text-gray-900 border-none uppercase tracking-widest">{displayName}</h3>
+                   {conversation.status === 'ia_ativa' && (
+                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                   )}
+                   {conversation.status === 'aguardando_humano' && (
+                     <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                   )}
                 </div>
                 <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5">
-                   {conversation.status === 'ia_respondendo' ? (
+                   {conversation.status === 'ia_ativa' ? (
                      <span className="flex items-center gap-1.5 text-green-600">
                         <Bot className="w-3.5 h-3.5" /> IA Monitorando Ativamente
                      </span>
-                   ) : (
+                   ) : conversation.status === 'aguardando_humano' ? (
                      <span className="flex items-center gap-1.5 text-orange-600">
-                        <User className="w-3.5 h-3.5" /> Atendimento Humano (Transferido)
+                        <User className="w-3.5 h-3.5" /> Aguardando Humano
+                     </span>
+                   ) : (
+                     <span className="flex items-center gap-1.5 text-gray-500">
+                        <User className="w-3.5 h-3.5" /> Atendimento Humano
                      </span>
                    )}
                 </div>
@@ -73,7 +123,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
           </div>
 
           <div className="flex items-center gap-3">
-             {conversation.status === 'ia_respondendo' ? (
+             {conversation.status === 'ia_ativa' ? (
                <button 
                 onClick={onTakeover}
                 className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-gray-900/10 transition-all hover:scale-105 active:scale-95 flex items-center gap-2"
@@ -96,19 +146,46 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
 
        {/* Messages Area */}
        <div className="flex-1 overflow-y-auto p-12 space-y-8 custom-scrollbar relative">
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur-md border border-white/40 px-6 py-2 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest shadow-sm">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur-md border border-white/40 px-6 py-2 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest shadow-sm z-20">
              Conversa Criptografada ponta-a-ponta
           </div>
 
-          {conversation.mensagens.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} />
+          {conversation.paciente_id && (
+            <div className="w-full flex justify-center mb-8">
+               <Link to={`/pacientes/${conversation.paciente_id}`} className="bg-white hover:bg-green-50 border border-green-100 p-4 rounded-3xl shadow-lg shadow-green-500/5 flex items-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] group">
+                 <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-green-600">
+                    <User className="w-5 h-5" />
+                 </div>
+                 <div>
+                    <h4 className="text-sm font-black text-gray-900 group-hover:text-green-700 capitalize">
+                       {conversation.contato_nome}
+                    </h4>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
+                       <CalendarDays className="w-3 h-3" /> Paciente Cadastrado — Ver Prontuário &rarr;
+                    </p>
+                 </div>
+               </Link>
+            </div>
+          )}
+
+          {groupedSessions.map((session, sIdx) => (
+             <div key={sIdx} className="space-y-6">
+                <div className="flex justify-center my-6">
+                   <div className="px-4 py-1.5 bg-gray-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                      {session.label}
+                   </div>
+                </div>
+                {session.msgs.map(msg => (
+                  <MessageBubble key={msg.id} message={msg} />
+                ))}
+             </div>
           ))}
           <div ref={messagesEndRef} />
        </div>
 
        {/* Input Area */}
        <div className="p-8 bg-white border-t border-gray-50 flex flex-col gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] z-10">
-          {conversation.status === 'ia_respondendo' && (
+          {conversation.status === 'ia_ativa' && (
              <div className="bg-yellow-50/50 border border-yellow-100 p-3 rounded-2xl flex items-center gap-3 animate-slide-in">
                 <Clock className="w-4 h-4 text-orange-400" />
                 <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
@@ -149,8 +226,8 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
 }
 
 function MessageBubble({ message }: { message: OvyvaMessage }) {
-  const isPatient = message.sender === 'paciente'
-  const isIA      = message.sender === 'ia'
+  const isPatient = message.remetente === 'paciente'
+  const isIA      = message.remetente === 'ia'
 
   return (
     <div className={cn(
@@ -193,14 +270,14 @@ function MessageBubble({ message }: { message: OvyvaMessage }) {
                </div>
             </div>
           ) : (
-            <p className="font-medium">{message.texto}</p>
+            <p className="font-medium">{message.conteudo}</p>
           )}
 
           <div className={cn(
             "absolute -bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap",
             isPatient ? "left-0" : "right-0"
           )}>
-             <span className="text-[10px] text-gray-400 font-bold">{new Date(message.data).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+             <span className="text-[10px] text-gray-400 font-bold">{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
              <CheckCircle className="w-3.5 h-3.5 text-green-500" />
           </div>
        </div>

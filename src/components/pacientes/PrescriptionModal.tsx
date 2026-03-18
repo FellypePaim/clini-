@@ -18,6 +18,11 @@ import {
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import html2canvas from 'html2canvas'
+import { jsPDF } from 'jspdf'
+import { supabase } from '../../lib/supabase'
+import { StorageHelpers } from '../../lib/storage'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
 import { cn } from '../../lib/utils'
 import type { Patient } from '../../types'
 import type { PrescriptionItem } from '../../types/prontuario'
@@ -30,6 +35,10 @@ interface PrescriptionModalProps {
 }
 
 export function PrescriptionModal({ isOpen, onClose, patient, onSave }: PrescriptionModalProps) {
+  const { user } = useAuthStore()
+  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const { toast } = useToast()
+
   const [items, setItems] = useState<PrescriptionItem[]>([
     { id: '1', medicamento: '', dosagem: '', frequencia: '', duracao: '' }
   ])
@@ -51,14 +60,29 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item))
   }
 
-  const handleDownloadPDF = async () => {
-    if (!previewRef.current) return
+  const generatePDFBlob = async (): Promise<Blob | null> => {
+    if (!previewRef.current) return null
     const canvas = await html2canvas(previewRef.current, { scale: 2 })
     const imgData = canvas.toDataURL('image/png')
+    
+    // A4 dimensions in mm (210 x 297)
+    const pdf = new jsPDF({ format: 'a4', orientation: 'portrait' })
+    const pdfWidth = pdf.internal.pageSize.getWidth()
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+    return pdf.output('blob')
+  }
+
+  const handleDownloadPDF = async () => {
+    const blob = await generatePDFBlob()
+    if (!blob) return
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.href = imgData
-    link.download = `Prescrição_${patient.nome.replace(' ', '_')}.png`
+    link.href = url
+    link.download = `Prescricao_${patient.nome.replace(' ', '_')}.pdf`
     link.click()
+    URL.revokeObjectURL(url)
   }
 
   const handleSendWA = () => {
@@ -67,10 +91,41 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
   }
 
   const handleSave = async () => {
-    setIsSubmitting(true)
-    await onSave(items)
-    setIsSubmitting(false)
-    onClose()
+    if (!clinicaId) return
+    try {
+      setIsSubmitting(true)
+      
+      // Generate PDF
+      const pdfBlob = await generatePDFBlob()
+      if (!pdfBlob) throw new Error('Falha ao gerar o PDF da prescrição')
+      
+      const file = new File([pdfBlob], `prescricao_${Date.now()}.pdf`, { type: 'application/pdf' })
+      
+      // Upload to Storage
+      const stored = await StorageHelpers.uploadReceita(clinicaId, patient.id, file)
+
+      // Add to patient documents
+      await supabase.from('documentos_paciente').insert({
+        paciente_id: patient.id,
+        nome: `Prescrição - ${new Date().toLocaleDateString()}`,
+        tipo: 'receita',
+        arquivo_url: stored.url,
+        storage_path: stored.path,
+        tamanho_bytes: stored.tamanho_bytes,
+        mime_type: stored.mime_type,
+        uploaded_by: user?.id
+      })
+      
+      // Keep old side-effect
+      await onSave(items)
+      
+      toast({ title: 'Prescrição salva', description: 'PDF gerado e armazenado com sucesso.', type: 'success' })
+      onClose()
+    } catch(err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message, type: 'error' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!isOpen) return null

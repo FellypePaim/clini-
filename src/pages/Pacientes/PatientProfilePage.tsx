@@ -33,6 +33,7 @@ import { EvolutionModal } from '../../components/pacientes/EvolutionModal'
 import { PrescriptionModal } from '../../components/pacientes/PrescriptionModal'
 import { FacialHarmonization } from '../../components/pacientes/FacialHarmonization'
 import { PatientTerms } from '../../components/pacientes/PatientTerms'
+import { PatientDocumentsTab } from '../../components/pacientes/PatientDocumentsTab'
 import type { EvolutionRecord, PrescriptionItem } from '../../types/prontuario'
 
 export function PatientProfilePage() {
@@ -285,44 +286,7 @@ export function PatientProfilePage() {
         )}
 
         {activeTab === 'documentos' && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Documentos e Exames</h3>
-                <p className="text-sm text-gray-400">{docs.length} arquivos disponíveis</p>
-              </div>
-              <button className="btn-secondary">
-                <Plus className="w-4 h-4" /> Anexar Arquivo
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {docs.length > 0 ? (
-                docs.map(doc => (
-                  <div key={doc.id} className="group bg-gray-50/50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/5 transition-all flex flex-col gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center text-gray-400 group-hover:text-green-500 transition-colors shadow-sm">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-900 line-clamp-1">{doc.nome}</h4>
-                      <p className="text-[10px] text-gray-400 mt-0.5 capitalize">{doc.tipo} · {doc.tamanho}</p>
-                      <p className="text-[9px] text-gray-400 mt-1">{new Date(doc.dataUpload).toLocaleDateString()}</p>
-                    </div>
-                    <div className="flex gap-2 pt-2 border-t border-gray-200/50">
-                      <button className="p-1 px-2.5 bg-white border border-gray-100 rounded-lg text-[10px] font-bold text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5">
-                        <Download className="w-3 h-3" /> Baixar
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="col-span-full py-20 text-center flex flex-col items-center gap-3">
-                  <FileText className="w-12 h-12 text-gray-100" />
-                  <p className="text-gray-400 text-sm">Nenhum documento anexado ainda.</p>
-                </div>
-              )}
-            </div>
-          </div>
+          <PatientDocumentsTab pacienteId={patient.id} />
         )}
 
         {activeTab === 'financeiro' && (
@@ -387,7 +351,7 @@ export function PatientProfilePage() {
         )}
 
         {activeTab === 'termos' && (
-          <PatientTerms />
+          <PatientTerms pacienteId={patient.id} />
         )}
       </div>
 

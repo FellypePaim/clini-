@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import { usePermissions } from '../../store/authStore'
 import {
   LayoutDashboard,
   Calendar,
@@ -14,30 +15,41 @@ import {
   Settings,
   Stethoscope,
   ChevronRight,
+  Wrench,
+  Activity,
+  Database
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
-
-// ─── Definição da navegação ───────────────────────────
-const NAV_ITEMS = [
-  { path: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, group: 'principal' },
-  { path: '/agenda',       label: 'Agenda',       icon: Calendar,        group: 'principal' },
-  { path: '/pacientes',    label: 'Pacientes',    icon: Users,           group: 'principal' },
-  { path: '/prontuario',   label: 'Prontuário',   icon: FileText,        group: 'principal' },
-  { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal' },
-  { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao'   },
-  { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao'   },
-  { path: '/estoque',      label: 'Estoque',      icon: Package,         group: 'gestao'   },
-  { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao'   },
-  { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao'   },
-  { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema'  },
-] as const
 
 interface SidebarProps {
   collapsed?: boolean
 }
 
+interface NavItem {
+  path: string
+  label: string
+  icon: any
+  group: string
+  roles: string[]
+}
+
+const NAV_ITEMS: NavItem[] = [
+  { path: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/agenda',       label: 'Agenda',       icon: Calendar,        group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/pacientes',    label: 'Pacientes',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/prontuario',   label: 'Prontuário',   icon: FileText,        group: 'principal', roles: ['administrador', 'profissional'] },
+  { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'recepção'] },
+  { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'recepção'] },
+  { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador'] },
+  { path: '/estoque',      label: 'Estoque',      icon: Package,         group: 'gestao',    roles: ['administrador', 'profissional'] },
+  { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
+  { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao',    roles: ['administrador'] },
+  { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema',   roles: ['administrador'] },
+]
+
 export function Sidebar({ collapsed = false }: SidebarProps) {
   const location = useLocation()
+  const { role } = usePermissions()
 
   const groups = [
     { key: 'principal', label: 'Principal' },
@@ -71,7 +83,9 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
       {/* ── Navegação ───────────────────────────────── */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
         {groups.map(({ key, label }) => {
-          const items = NAV_ITEMS.filter((i) => i.group === key)
+          const items = NAV_ITEMS.filter((i) => i.group === key && (!role || i.roles.includes(role)))
+          if (items.length === 0) return null
+          
           return (
             <div key={key}>
               {!collapsed && (
@@ -116,10 +130,34 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
         })}
       </nav>
 
-      {/* ── Rodapé versão ───────────────────────────── */}
+      {/* ── Rodapé versão e Diagnóstico DEV ───────────── */}
       {!collapsed && (
-        <div className="px-5 py-3 border-t border-gray-100">
-          <p className="text-[10px] text-gray-300 text-center">
+        <div className="px-5 py-3 border-t border-gray-100 flex flex-col items-center gap-2">
+          {import.meta.env.DEV && (
+            <>
+              <NavLink 
+                to="/dev/diagnostico" 
+                className={({ isActive }) => cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold w-full justify-center transition-colors",
+                  isActive ? "bg-indigo-50 text-indigo-700" : "text-slate-500 hover:text-indigo-600 hover:bg-slate-50"
+                )}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                Diagnóstico DEV
+              </NavLink>
+              <NavLink 
+                to="/dev/storage-diagnostico" 
+                className={({ isActive }) => cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold w-full justify-center transition-colors",
+                  isActive ? "bg-blue-50 text-blue-700" : "text-slate-500 hover:text-blue-600 hover:bg-slate-50"
+                )}
+              >
+                <Database className="w-3.5 h-3.5" />
+                💾 Storage
+              </NavLink>
+            </>
+          )}
+          <p className="text-[10px] text-gray-300 text-center w-full">
             v1.0.0 · Prontuário Verde
           </p>
         </div>

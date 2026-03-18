@@ -112,11 +112,11 @@ export function OvyvaConfigPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <FormField label="Nome da Assistente" desc="O nome que a IA usará para se identificar">
-                        <input type="text" defaultValue={config.aiName} className="input-ovyva" />
+                        <input type="text" defaultValue={config?.aiName} className="input-ovyva" />
                      </FormField>
 
                      <FormField label="Tom de Voz" desc="Formalidade e cordialidade no atendimento">
-                        <select className="input-ovyva capitalize" defaultValue={config.toneOfVoice}>
+                        <select className="input-ovyva capitalize" defaultValue={config?.toneOfVoice}>
                            <option value="formal">👔 Formal</option>
                            <option value="cordial">🤝 Cordial</option>
                            <option value="informal">👋 Informal</option>
@@ -131,13 +131,13 @@ export function OvyvaConfigPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <FormField label="Início do Turno">
-                        <input type="time" defaultValue={config.workingHours.start} className="input-ovyva" />
+                        <input type="time" defaultValue={config?.workingHours.start} className="input-ovyva" />
                      </FormField>
                      <FormField label="Fim do Turno">
-                        <input type="time" defaultValue={config.workingHours.end} className="input-ovyva" />
+                        <input type="time" defaultValue={config?.workingHours.end} className="input-ovyva" />
                      </FormField>
                      <FormField label="Fora do Horário">
-                        <select className="input-ovyva" defaultValue={config.offHoursAction}>
+                        <select className="input-ovyva" defaultValue={config?.offHoursAction}>
                            <option value="padrao">Responder padrão</option>
                            <option value="notificar">Silenciar e Notificar</option>
                            <option value="ignorar">Não Responder</option>
@@ -153,7 +153,7 @@ export function OvyvaConfigPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <FormField label="Antecedência Mínima" desc="Tempo mínimo para agendar sem aprovação humana">
-                        <select className="input-ovyva" defaultValue={config.minLeadTimeHours}>
+                        <select className="input-ovyva" defaultValue={config?.minLeadTimeHours}>
                            <option value={1}>1 hora</option>
                            <option value={2}>2 horas</option>
                            <option value={4}>4 horas</option>
@@ -176,7 +176,7 @@ export function OvyvaConfigPage() {
                   <ConfigHeader title="Serviços Habilitados" desc="Quais consultas a IA pode agendar?" />
                   
                   <div className="space-y-4">
-                     {config.enabledAppointmentTypes.map(type => (
+                     {config?.enabledAppointmentTypes.map(type => (
                        <div key={type} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:scale-[1.01] transition-all">
                           <div className="flex items-center gap-4">
                              <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-green-500">
@@ -206,7 +206,7 @@ export function OvyvaConfigPage() {
                   <FormField label="Bio e Informações Gerais" desc="Use variáveis para endereço, valores base e política de cancelamento">
                      <textarea 
                         className="input-ovyva min-h-[160px] resize-none leading-relaxed" 
-                        defaultValue={config.clinicInfo}
+                        defaultValue={config?.clinicInfo}
                      />
                   </FormField>
 
@@ -218,7 +218,7 @@ export function OvyvaConfigPage() {
                   </div>
 
                   <div className="space-y-4">
-                     {config.faqs.map(faq => (
+                     {config?.faqs.map(faq => (
                        <div key={faq.id} className="p-6 bg-white border border-gray-100 rounded-[32px] shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all">
                           <div className="flex items-start justify-between gap-6">
                              <div className="flex-1 space-y-3">
@@ -241,7 +241,7 @@ export function OvyvaConfigPage() {
                   <ConfigHeader title="Templates e Variáveis" desc="Padronize as comunicações autônomas" />
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     {config.templates.map(tpl => (
+                     {config?.templates.map(tpl => (
                         <div key={tpl.id} className="flex flex-col gap-4 p-8 bg-gray-50/50 rounded-[40px] border border-gray-100 hover:bg-white hover:shadow-xl hover:shadow-gray-100/50 transition-all group">
                            <div className="flex items-center justify-between mb-2">
                               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600 bg-green-100/50 px-3 py-1.5 rounded-full">{tpl.trigger}</span>

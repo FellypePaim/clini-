@@ -15,6 +15,10 @@ import {
   ClipboardList
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { supabase } from '../../lib/supabase'
+import { StorageHelpers } from '../../lib/storage'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
 
 const TERMS_TEMPLATES = [
   { id: '1', titulo: 'Consentimento de Aplicação de Toxina Botulínica', desc: 'Autorização específica para procedimentos estéticos com botox.' },
@@ -27,15 +31,50 @@ const SIGNED_TERMS_MOCK = [
   { id: '102', titulo: 'Autorização Cirúrgica', data: '2026-01-15', status: 'pendente', profissional: 'Dra. Ana Lima' }
 ]
 
-export function PatientTerms() {
+export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [showSignModal, setShowSignModal] = useState(false)
   const [activeTemplate, setActiveTemplate] = useState<typeof TERMS_TEMPLATES[0] | null>(null)
   const sigPad = useRef<SignatureCanvas>(null)
+  const [isSaving, setIsSaving] = useState(false)
+  
+  const { user } = useAuthStore()
+  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const { toast } = useToast()
 
-  const handleSign = () => {
-    // Mock signing
-    console.log('Assinatura salva:', sigPad.current?.toDataURL())
-    setShowSignModal(false)
+  const handleSign = async () => {
+    if (sigPad.current?.isEmpty() || !clinicaId || !pacienteId) {
+      toast({ title: 'Aviso', description: 'Por favor, assine o documento.', type: 'warning' })
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      const dataURL = sigPad.current?.toDataURL('image/png')
+      // Convert canvas DataURL to Blob
+      const res = await fetch(dataURL!)
+      const blob = await res.blob()
+      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}.png`, { type: 'image/png' })
+
+      // Upload to storage
+      const stored = await StorageHelpers.uploadTermo(clinicaId, pacienteId, file)
+
+      // Save to DB
+      await supabase.from('termos_consentimento').insert({
+        clinica_id: clinicaId,
+        paciente_id: pacienteId,
+        tipo: 'consentimento',
+        titulo: activeTemplate?.titulo,
+        assinatura_url: stored.url,
+        assinado_em: new Date().toISOString()
+      })
+
+      toast({ title: 'Sucesso', description: 'Termo assinado e salvo com sucesso.', type: 'success' })
+      setShowSignModal(false)
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const clearSig = () => {
@@ -182,9 +221,10 @@ export function PatientTerms() {
                     </button>
                     <button 
                       onClick={handleSign}
-                      className="px-8 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl text-sm font-black shadow-xl shadow-gray-900/20 transition-all flex items-center gap-3 active:scale-95"
+                      disabled={isSaving}
+                      className="px-8 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl text-sm font-black shadow-xl shadow-gray-900/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
                     >
-                      Concluir e Salvar <CheckCircle className="w-5 h-5 text-green-400" />
+                      {isSaving ? 'Salvando...' : 'Concluir e Salvar'} <CheckCircle className="w-5 h-5 text-green-400" />
                     </button>
                  </div>
               </div>
