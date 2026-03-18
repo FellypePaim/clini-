@@ -1,0 +1,83 @@
+import { useState, useMemo } from 'react'
+import { ConversationList } from '../../components/ovyva/ConversationList'
+import { ChatWindow } from '../../components/ovyva/ChatWindow'
+import { ContactContext } from '../../components/ovyva/ContactContext'
+import { useOVYVA } from '../../hooks/useOVYVA'
+import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { cn } from '../../lib/utils'
+
+export function OvyvaPage() {
+  const { conversations, sendMessage, takeoverConversation, returnToAI } = useOVYVA()
+  const [selectedId, setSelectedId] = useState<string | null>(conversations[0]?.id || null)
+  const navigate = useNavigate()
+
+  const selectedConversation = useMemo(() => 
+    conversations.find(c => c.id === selectedId), 
+  [conversations, selectedId])
+
+  return (
+    <div className="h-[calc(100vh-140px)] flex flex-col gap-6 animate-fade-in">
+       {/* OVYVA Header */}
+       <div className="flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-2xl bg-green-500 flex items-center justify-center text-white shadow-xl shadow-green-500/20">
+                <Bot className="w-6 h-6" />
+             </div>
+             <div>
+                <h1 className="text-2xl font-black text-gray-900 border-none uppercase tracking-widest">OVYVA</h1>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                   <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Secretária Virtual IA 24/7 Ativa
+                </p>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+             <NavButton icon={<History className="w-4 h-4" />} label="Histórico" onClick={() => navigate('/ovyva/historico')} />
+             <NavButton icon={<Settings className="w-4 h-4" />} label="Configurações" onClick={() => navigate('/ovyva/configuracoes')} />
+          </div>
+       </div>
+
+       {/* Main Chat Panel */}
+       <div className="flex-1 flex bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-2xl shadow-gray-200/50">
+          <ConversationList 
+            conversations={conversations} 
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+          />
+          
+          {selectedConversation ? (
+            <>
+              <ChatWindow 
+                conversation={selectedConversation}
+                onSend={(text) => sendMessage(selectedConversation.id, text)}
+                onTakeover={() => takeoverConversation(selectedConversation.id)}
+                onReturnToAI={() => returnToAI(selectedConversation.id)}
+              />
+              <ContactContext 
+                conversation={selectedConversation}
+              />
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center bg-gray-50/30 gap-6 opacity-30 select-none">
+               <div className="w-32 h-32 rounded-[48px] border-4 border-dashed border-gray-300 flex items-center justify-center text-gray-300">
+                  <MessageSquare className="w-12 h-12" />
+               </div>
+               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Selecione uma conversa para iniciar</p>
+            </div>
+          )}
+       </div>
+    </div>
+  )
+}
+
+function NavButton({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) {
+  return (
+    <button 
+      onClick={onClick}
+      className="px-6 py-2.5 bg-white hover:bg-gray-900 hover:text-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm"
+    >
+       {icon} {label}
+    </button>
+  )
+}
