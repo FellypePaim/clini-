@@ -63,7 +63,7 @@ function ProcedimentoModal({
             <input type="text" value={form.nome} onChange={e => u('nome', e.target.value)}
               className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Categoria</label>
               <select value={form.categoria} onChange={e => u('categoria', e.target.value)}
@@ -77,7 +77,7 @@ function ProcedimentoModal({
                 className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Valor (R$)</label>
               <input type="number" value={form.valor} onChange={e => u('valor', Number(e.target.value))}

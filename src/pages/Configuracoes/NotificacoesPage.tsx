@@ -52,7 +52,7 @@ export function NotificacoesPage() {
           <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
              <Mail size={18} className="text-slate-500" /> Servidor de E-mail Interno (SMTP / SES)
           </h3>
-          <div className="grid grid-cols-2 gap-6 max-w-3xl bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-1 md: gap-6 max-w-3xl bg-slate-50 p-6 rounded-xl border border-slate-200">
              <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Host SMTP</label>
                 <input type="text" defaultValue="email-smtp.us-east-1.amazonaws.com" className="w-full p-2.5 text-sm font-mono border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500" />

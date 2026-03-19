@@ -79,36 +79,38 @@ export function SuperSaudePage() {
            </div>
 
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {coreServices.map(service => (
-                <div key={service.name} className="bg-slate-800/30 border border-slate-700/50 p-6 rounded-[32px] hover:bg-slate-800/50 transition-all group">
-                   <div className="flex items-start justify-between mb-6">
-                      <div className={cn("p-3 rounded-2xl bg-slate-900/50", service.color)}>
-                         <service.icon size={24} />
-                      </div>
-                      <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[9px] font-black">{service.status}</Badge>
-                   </div>
-                   <h4 className="text-lg font-black text-white mb-4">{service.name}</h4>
-                   <div className="space-y-3">
-                      <div className="flex justify-between text-[11px] font-bold">
-                         <span className="text-slate-500 uppercase tracking-widest">Latência</span>
-                         <span className="text-slate-300">{service.latency}</span>
-                      </div>
-                      <div className="flex justify-between text-[11px] font-bold">
-                         <span className="text-slate-500 uppercase tracking-widest">Uptime (30d)</span>
-                         <span className="text-slate-300">{service.uptime}</span>
-                      </div>
-                      <div className="pt-2">
-                         <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase mb-1.5">
-                            <span>Resource Load</span>
-                            <span>{service.load}</span>
-                         </div>
-                         <div className="h-1.5 bg-slate-900 rounded-full overflow-hidden">
-                            <div className="h-full bg-indigo-500 rounded-full" style={{ width: service.load }} />
-                         </div>
-                      </div>
-                   </div>
-                </div>
-              ))}
+              {coreServices.map(service => {
+                const Icon = service.icon || Server;
+                return (
+                 <div key={service.name} className="bg-slate-800/30 border border-slate-700/50 p-6 rounded-[32px] hover:bg-slate-800/50 transition-all group">
+                    <div className="flex items-start justify-between mb-6">
+                       <div className={cn("p-3 rounded-2xl bg-slate-900/50", service.color)}>
+                          <Icon size={24} />
+                       </div>
+                       <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[9px] font-black">{service.status}</Badge>
+                    </div>
+                    <h4 className="text-lg font-black text-white mb-4">{service.name}</h4>
+                    <div className="space-y-3">
+                       <div className="flex justify-between text-[11px] font-bold">
+                          <span className="text-slate-500 uppercase tracking-widest">Latência</span>
+                          <span className="text-slate-300">{service.latency}</span>
+                       </div>
+                       <div className="flex justify-between text-[11px] font-bold">
+                          <span className="text-slate-500 uppercase tracking-widest">Uptime (30d)</span>
+                          <span className="text-slate-300">{service.uptime}</span>
+                       </div>
+                       <div className="pt-2">
+                          <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase mb-1.5">
+                             <span>Resource Load</span>
+                             <span>{service.load}</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                             <div className="h-full bg-indigo-500 rounded-full" style={{ width: service.load }} />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              )})}
            </div>
 
            {/* Gráfico de Performance (Placeholder Estético) */}
@@ -143,11 +145,13 @@ export function SuperSaudePage() {
                  <Activity size={16} className="text-indigo-400" /> External APIs
               </h3>
               <div className="space-y-6">
-                 {externalApis.map(api => (
+                 {externalApis.map(api => {
+                    const Icon = api.icon || Globe;
+                    return (
                     <div key={api.name} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50">
                        <div className="flex items-center gap-4">
                           <div className={cn("p-2 rounded-lg bg-slate-800/80", api.color)}>
-                             <api.icon size={18} />
+                             <Icon size={18} />
                           </div>
                           <div className="flex flex-col">
                              <span className="text-xs font-black text-white tracking-wide">{api.name}</span>
@@ -161,7 +165,7 @@ export function SuperSaudePage() {
                           <span className="text-[10px] font-bold text-slate-600">{api.latency}</span>
                        </div>
                     </div>
-                 ))}
+                 )})}
               </div>
            </div>
 

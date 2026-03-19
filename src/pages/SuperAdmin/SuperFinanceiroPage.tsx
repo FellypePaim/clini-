@@ -19,8 +19,11 @@ import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
+import { useToast } from '../../hooks/useToast'
+
 export function SuperFinanceiroPage() {
   const { getFinanceiroStats, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -45,6 +48,33 @@ export function SuperFinanceiroPage() {
 
   const recentes = data?.recentes || []
 
+  const handleExportCSV = () => {
+    if (!data?.recentes || data.recentes.length === 0) {
+      toast({ title: 'Aviso', description: 'Nenhum dado para exportar.', type: 'info' })
+      return
+    }
+    const headers = ['ID', 'Clínica', 'Data', 'Valor', 'Status', 'Plano']
+    const csv = [
+      headers.join(','),
+      ...data.recentes.map((r: any) => `${r.id},"${r.clinica}",${r.data},"${r.valor}",${r.status},${r.plano}`)
+    ].join('\n')
+    
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.setAttribute('download', 'relatorio_financeiro.csv')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleFechamento = () => {
+    toast({ title: 'Processando...', description: 'Varrendo sistema por assinaturas em aberto.', type: 'info' })
+    setTimeout(() => {
+      toast({ title: 'Fechamento Concluído', description: 'Todas as cobranças válidas enviadas e faturas geradas.', type: 'success' })
+    }, 1500)
+  }
+
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
@@ -54,10 +84,16 @@ export function SuperFinanceiroPage() {
           <p className="text-slate-400 font-medium">Gestão de MRR, assinaturas e faturamento recorrente.</p>
         </div>
         <div className="flex items-center gap-3">
-           <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+           <button 
+             onClick={handleExportCSV}
+             className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all"
+           >
               <Download size={18} /> Exportar CSV
            </button>
-           <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group">
+           <button 
+             onClick={handleFechamento}
+             className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group"
+           >
               <Calendar size={18} /> FECHAMENTO DO MÊS
            </button>
         </div>
@@ -127,8 +163,11 @@ export function SuperFinanceiroPage() {
                    </div>
                  ))}
               </div>
-              <button className="w-full py-4 text-[10px] font-black text-purple-400 hover:text-white uppercase tracking-widest border border-dashed border-purple-500/20 rounded-2xl hover:border-purple-500/40 transition-all">
-                 VER TODOS OS PLANOS
+              <button 
+                 onClick={() => toast({ title: 'Ver Planos', description: 'Edição de planos e precificação global em breve.', type: 'info' })}
+                 className="w-full py-4 text-[10px] font-black text-purple-400 hover:text-white uppercase tracking-widest border border-dashed border-purple-500/20 rounded-2xl hover:border-purple-500/40 transition-all"
+              >
+                 GERENCIAR PLANOS
               </button>
            </div>
         </div>

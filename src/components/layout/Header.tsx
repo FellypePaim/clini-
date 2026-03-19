@@ -17,6 +17,7 @@ import {
   Package,
   ClipboardList,
   BarChart3,
+  Menu,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { cn } from '../../lib/utils'
@@ -44,10 +45,11 @@ const ROLE_LABELS = {
 }
 
 interface HeaderProps {
-  sidebarWidth: number
+  sidebarWidth?: number
+  onMenuClick?: () => void
 }
 
-export function Header({ sidebarWidth }: HeaderProps) {
+export function Header({ sidebarWidth, onMenuClick }: HeaderProps) {
   const location = useLocation()
   const { user, logout } = useAuthStore()
   const [showUserMenu, setShowUserMenu] = React.useState(false)
@@ -64,17 +66,23 @@ export function Header({ sidebarWidth }: HeaderProps) {
 
   return (
     <header
-      className="fixed top-0 right-0 h-16 bg-white border-b border-gray-100 flex items-center px-6 z-20 transition-all duration-200"
-      style={{ left: sidebarWidth }}
+      className="fixed top-0 right-0 left-0 md:left-[240px] h-16 bg-white border-b border-gray-100 flex items-center px-4 md:px-6 z-20 transition-all duration-200"
     >
-      {/* ── Breadcrumb ────────────────────────────── */}
       <div className="flex items-center gap-2 text-sm flex-1">
-        <span className="text-gray-400">Clínica Verde</span>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
+        {onMenuClick && (
+          <button 
+            onClick={onMenuClick}
+            className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+        )}
+        <span className="text-gray-400 hidden sm:inline">Clínica Verde</span>
+        <ChevronRight className="w-3.5 h-3.5 text-gray-300 hidden sm:block" />
         {routeInfo && (
           <div className="flex items-center gap-1.5 text-gray-700 font-medium">
             <routeInfo.icon className="w-4 h-4 text-green-600" />
-            {routeInfo.label}
+            <span className="truncate max-w-[120px] sm:max-w-none">{routeInfo.label}</span>
           </div>
         )}
       </div>

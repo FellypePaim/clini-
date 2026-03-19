@@ -13,7 +13,9 @@ import {
   MessageSquare,
   Sparkles,
   Command,
-  ArrowRight
+  ArrowRight,
+  DollarSign,
+  Activity
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
@@ -32,10 +34,10 @@ export function SuperIAPage() {
   }, [getIaStats])
 
   const kpis = [
-    { label: 'Tokens Totais (Mês)', value: `${(data?.calls || 0 * 10).toLocaleString()}`, trend: '+0%', icon: BrainCircuit, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Custo Est. (BRL)', value: `R$ ${(data?.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, trend: '+0%', icon: Coins, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { label: 'Tempo Médio Resp.', value: '1.2s', trend: '-0%', icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'Taxa de Sucesso', value: '100%', trend: 'Estável', icon: Sparkles, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: 'Tokens Totais (Mês)', value: `${((data?.calls || 0) * 10).toLocaleString()}`, trend: '+0%', icon: BrainCircuit || Bot, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Custo Est. (BRL)', value: `R$ ${(data?.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, trend: '+0%', icon: Coins || DollarSign, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { label: 'Tempo Médio Resp.', value: '1.2s', trend: '-0%', icon: Zap || Sparkles, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'Taxa de Sucesso', value: '100%', trend: 'Estável', icon: Sparkles || Activity, color: 'text-blue-400', bg: 'bg-blue-400/10' },
   ]
 
   const actions = data?.models || []
@@ -61,23 +63,26 @@ export function SuperIAPage() {
 
       {/* KPIs da IA */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpis.map((kpi) => (
-          <div key={kpi.label} className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-[32px] group relative overflow-hidden transition-all hover:bg-slate-800/50 shadow-xl">
-             <div className="relative z-10">
-                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", kpi.bg, kpi.color)}>
-                  <kpi.icon size={24} />
-                </div>
-                <div>
-                   <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{kpi.label}</p>
-                   <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-white">{kpi.value}</span>
-                      <span className={cn("text-[10px] font-black", kpi.trend.startsWith('+') ? 'text-purple-400' : 'text-emerald-400')}>{kpi.trend}</span>
-                   </div>
-                </div>
-             </div>
-             <kpi.icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
-          </div>
-        ))}
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon || Bot;
+          return (
+            <div key={kpi.label} className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-[32px] group relative overflow-hidden transition-all hover:bg-slate-800/50 shadow-xl">
+               <div className="relative z-10">
+                  <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", kpi.bg, kpi.color)}>
+                    <Icon size={24} />
+                  </div>
+                  <div>
+                     <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{kpi.label}</p>
+                     <div className="flex items-baseline gap-2">
+                        <span className="text-2xl font-black text-white">{kpi.value}</span>
+                        <span className={cn("text-[10px] font-black", kpi.trend.startsWith('+') ? 'text-purple-400' : 'text-emerald-400')}>{kpi.trend}</span>
+                     </div>
+                  </div>
+               </div>
+               <Icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
+            </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -103,9 +108,9 @@ export function SuperIAPage() {
                           <td className="px-8 py-5">
                              <div className="flex items-center gap-4">
                                 <div className="p-3 bg-slate-900/50 rounded-xl text-slate-500 group-hover:text-purple-400 transition-colors">
-                                   <item.icon size={18} />
+                                   {(() => { const Icon = item.icon || Bot || Cpu; return <Icon size={18} />; })()}
                                 </div>
-                                <span className="text-sm font-black text-slate-200 uppercase tracking-widest">{item.action}</span>
+                                <span className="text-sm font-black text-slate-200 uppercase tracking-widest">{item.action || item.nome}</span>
                              </div>
                           </td>
                           <td className="px-8 py-5 font-bold text-slate-400">{item.calls}</td>

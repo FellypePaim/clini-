@@ -60,11 +60,13 @@ export function SuperWhatsAppPage() {
 
       {/* Métricas Rapidamente */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
+        {stats.map((stat) => {
+          const Icon = stat.icon || Smartphone;
+          return (
           <div key={stat.label} className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-[32px] group relative overflow-hidden transition-all hover:bg-slate-800/50 shadow-xl">
              <div className="relative z-10 flex flex-col justify-between h-full">
                 <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", stat.bg, stat.color)}>
-                  <stat.icon size={24} />
+                  <Icon size={24} />
                 </div>
                 <div>
                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{stat.label}</p>
@@ -74,9 +76,9 @@ export function SuperWhatsAppPage() {
                    </div>
                 </div>
              </div>
-             <stat.icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
+             <Icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
           </div>
-        ))}
+        )})}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

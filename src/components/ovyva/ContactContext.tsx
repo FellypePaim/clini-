@@ -124,7 +124,7 @@ export function ContactContext({ conversation }: ContactContextProps) {
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
             <Zap className="w-3.5 h-3.5" /> Ações Rápidas
           </h4>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
              <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" />
              <ActionButton icon={<CreditCard className="w-5 h-5" />} label="Cobrança" color="blue" />
              <ActionButton icon={<Stethoscope className="w-5 h-5" />} label="Receita" color="purple" />

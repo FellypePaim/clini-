@@ -23,6 +23,7 @@ export function SuperUsuariosPage() {
   const { getUsers, isLoading } = useSuperAdmin()
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [roleFilter, setRoleFilter] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -32,10 +33,12 @@ export function SuperUsuariosPage() {
     load()
   }, [getUsers])
 
-  const filteredUsuarios = usuarios.filter(u => 
-    u.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredUsuarios = usuarios.filter(u => {
+    const matchSearch = u.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        u.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchRole = roleFilter ? u.role === roleFilter : true
+    return matchSearch && matchRole
+  })
 
   const getRoleBadge = (role: string) => {
     switch (role) {
@@ -68,11 +71,20 @@ export function SuperUsuariosPage() {
             />
          </div>
          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+            <button 
+              onClick={() => setRoleFilter(prev => prev === 'superadmin' ? null : 'superadmin')}
+              className={cn(
+                "flex items-center gap-2 px-5 py-3 border border-slate-700/50 font-bold rounded-2xl transition-all",
+                roleFilter === 'superadmin' ? "bg-purple-600 text-white" : "bg-slate-800/40 text-slate-300 hover:bg-slate-800/60"
+              )}
+            >
                 <Filter size={20} />
-                Filtrar Role
+                Filtrar SuperAdmins
             </button>
-            <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl transition-all">
+            <button 
+               onClick={() => alert("A criação de conta SuperAdmin exige execução de script direto de banco por segurança. Utilize o terminal SQL.")}
+               className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl transition-all"
+            >
                 CRIAR SUPERADMIN
             </button>
          </div>

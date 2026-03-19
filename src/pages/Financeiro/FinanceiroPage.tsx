@@ -23,6 +23,7 @@ import {
 import { useFinanceiro } from '../../hooks/useFinanceiro'
 import type { TransacaoTipo, TransacaoStatus, Transacao } from '../../hooks/useFinanceiro'
 import { Badge } from '../../components/ui/Badge'
+import { NovaTransacaoModal } from '../../components/financeiro/NovaTransacaoModal'
 import { 
   BarChart, 
   Bar, 
@@ -44,6 +45,7 @@ export function FinanceiroPage() {
   const [activeTab, setActiveTab] = useState<'geral' | 'transacoes' | 'categorias'>('geral')
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | 'receita' | 'despesa'>('all')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // ── Dados para os Gráficos ─────────────────────────────
   const chartData = useMemo(() => {
@@ -96,7 +98,10 @@ export function FinanceiroPage() {
           <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
             <Calendar size={18} /> Últimos 30 dias
           </button>
-          <button className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 ring-2 ring-indigo-50 active:scale-95">
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 ring-2 ring-indigo-50 active:scale-95"
+          >
             <Plus size={18} /> Nova Transação
           </button>
         </div>
@@ -388,6 +393,11 @@ export function FinanceiroPage() {
            </div>
         </div>
       ) : null}
+
+      <NovaTransacaoModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   )
 }

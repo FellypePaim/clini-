@@ -13,7 +13,9 @@ import {
   LifeBuoy, 
   Rocket,
   ShieldCheck,
-  LogOut
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { ToastProvider } from '../ui/ToastProvider'
@@ -24,6 +26,7 @@ const SIDEBAR_WIDTH = 260
 export function SuperAdminLayout() {
   const { user, logout } = useAuthStore()
   const location = useLocation()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin' },
@@ -40,11 +43,21 @@ export function SuperAdminLayout() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans">
+    <div className="min-h-screen bg-[#0F172A] text-slate-200 font-sans flex">
+      {/* Overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 md:hidden backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside 
-        className="fixed inset-y-0 left-0 bg-[#1E293B] border-r border-slate-800 z-50 transition-all duration-300 shadow-2xl"
-        style={{ width: SIDEBAR_WIDTH }}
+        className={cn(
+          "fixed inset-y-0 left-0 bg-[#1E293B] border-r border-slate-800 z-50 transition-transform duration-300 shadow-2xl w-[260px] md:translate-x-0",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
@@ -68,6 +81,7 @@ export function SuperAdminLayout() {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
                     isActive 
@@ -107,12 +121,17 @@ export function SuperAdminLayout() {
 
       {/* Header */}
       <header 
-        className="fixed top-0 right-0 bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-800 z-40 transition-all duration-300"
-        style={{ left: SIDEBAR_WIDTH, height: 64 }}
+        className="fixed top-0 right-0 left-0 md:left-[260px] h-16 bg-[#0F172A]/80 backdrop-blur-md border-b border-slate-800 z-30 transition-all duration-300"
       >
-        <div className="h-full px-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+        <div className="h-full px-4 md:px-8 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-4">
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
+            >
+              <Menu size={24} />
+            </button>
+            <div className="hidden sm:flex items-center gap-2">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ambiente:</span>
               <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[10px] font-black border border-amber-500/20 animate-pulse">DEV / SANDBOX</span>
             </div>
@@ -133,11 +152,8 @@ export function SuperAdminLayout() {
       </header>
 
       {/* Main Content */}
-      <main
-        className="min-h-screen transition-all duration-300"
-        style={{ paddingLeft: SIDEBAR_WIDTH, paddingTop: 64 }}
-      >
-        <div className="p-8 animate-fade-in max-w-[1600px] mx-auto">
+      <main className="flex-1 min-h-screen pt-16 md:pl-[260px] w-full max-w-full overflow-hidden">
+        <div className="p-4 md:p-8 animate-fade-in max-w-[1600px] mx-auto overflow-x-auto">
           <Outlet />
         </div>
         <ToastProvider />

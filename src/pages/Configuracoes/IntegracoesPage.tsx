@@ -102,7 +102,7 @@ export function IntegracoesPage() {
           </div>
           <p className="text-sm text-slate-500 font-medium mb-6">Motor utilizado pela OVYVA e para geração de resumos de prescrições.</p>
           
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md: gap-6">
              <div>
                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Provedor Homologado</label>
                <select className="w-full p-2.5 text-sm font-bold border border-slate-200 rounded-lg bg-white text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">

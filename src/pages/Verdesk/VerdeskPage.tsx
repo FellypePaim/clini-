@@ -27,6 +27,7 @@ import type { LeadStage, Lead } from '../../types/verdesk'
 import { KanbanColumn } from '../../components/verdesk/KanbanColumn'
 import { LeadCard } from '../../components/verdesk/LeadCard'
 import { LeadDrawer } from '../../components/verdesk/LeadDrawer'
+import { NovoLeadModal } from '../../components/verdesk/NovoLeadModal'
 import { Badge } from '../../components/ui/Badge'
 
 const STAGES: LeadStage[] = [
@@ -41,6 +42,7 @@ export function VerdeskPage() {
   const { leads, moveLead } = useVerdesk()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   
   // Sensors for drag and drop
   const sensors = useSensors(
@@ -135,7 +137,10 @@ export function VerdeskPage() {
               <Megaphone size={18} />
               Campanhas
             </Link>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+            >
               <Plus size={18} />
               Novo Lead
             </button>
@@ -211,6 +216,12 @@ export function VerdeskPage() {
           onClose={() => setSelectedLeadId(null)}
         />
       )}
+
+      {/* New Lead Modal */}
+      <NovoLeadModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   )
 }

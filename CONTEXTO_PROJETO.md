@@ -20,10 +20,9 @@
 - Fase 9B: ✅ Frontend conectado ao Supabase
 - Fase 10: ✅ IA Gemini 2.5 Flash integrada (4 actions funcionando)
 - Fase 11: ✅ Storage Supabase (8 buckets configurados)
-- Fase 12: ✅ WhatsApp Evolution API Multi-Tenant (Instâncias por Clínica + UI Conexão)
-- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + 20 testes diagnósticos passados)
+- Fase 12: ✅ WhatsApp Evolution API Multi- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + Nova Clínica + Export Financeiro + Login Tracking Fix)
 - Fase 13: 🔜 Deploy produção (Vercel/Netlify)
-- Fase 15: 🔜 Diagnósticos e Testes Automatizados Sistêmicos (Em andamento)
+- Fase 15: ✅ Diagnósticos e Testes Automatizados Sistêmicos (20/20 Testes Passados)
 
 ## 3. BACKEND — SUPABASE
 
@@ -81,13 +80,13 @@ Gerencia o ciclo de vida das instâncias do WhatsApp por clínica. Actions:
 - `desconectar`: Desloga o número da instância
 - `listar`: Retorna as instâncias da clínica ativa
 
-### superadmin-actions (✅ funcionando)
+### superadmin-actions (✅ funcionando - Versão 2.1)
 Edge Function protegida para operações globais via SuperAdmin:
-- `get_platform_stats`: Consolida métricas de todas as clínicas
-- `manage_clinic_status`: Ativa/Suspende clínicas remotamente
-- `impersonate_user`: Gera tokens de acesso temporário (DRM)
-- `global_audit_query`: Busca logs de auditoria em todo o cluster
-- `create_clinic`: Provisionamento de novas clínicas (com auditoria e limpeza de FK)
+- `get_platform_stats`: DASHBOARD FIX (Métricas reais de Ativas vs Trial vs Suspensas).
+- `get_users`: LOGIN FIX (Varre Auth Admin p/ refletir `last_sign_in_at` real em vez de PROFILE).
+- `manage_clinic_status`: Ativa/Suspende clínicas remotamente.
+- `create_clinic`: Provisionamento 100% (Nova base de dados + Auditoria).
+- `impersonate_user`: Geração de Token Admin p/ suporte direto.
 
 ## 5. SECRETS DA EDGE Função (já configurados)
 - GEMINI_API_KEY ✅
@@ -110,35 +109,35 @@ Edge Function protegida para operações globais via SuperAdmin:
 - anamnese-assets ✅ privado
 
 ## 7. ARQUIVOS IMPORTANTES NO PROJETO
-- src/pages/Dev/SuperAdminDiagnosticoPage.tsx → Painel de Testes Automatizados (20 testes)
-- src/hooks/useSuperAdmin.ts → Hook de conexão com Edge Functions administrativas
-- supabase/functions/superadmin-actions/index.ts → Backend administrativo global
-- CONTEXTO_PROJETO.md → Histórico/Arquitetura (Este arquivo)
+- src/pages/SuperAdmin/* → Painel de controle global (Dashboard, Clínicas, Usuários, IA, Financeiro).
+- src/components/superadmin/NovaClinicaModal.tsx → Modal de criação de clínicas.
+- src/hooks/useSuperAdmin.ts → Hook de conexão centralizado com service_role actions.
+- supabase/functions/superadmin-actions/index.ts → Backend administrativo global.
+- CONTEXTO_PROJETO.md → Histórico/Arquitetura (Este arquivo).
 
-## 8. PRÓXIMOS PASSOS (Fase 15)
-1. Rodar os testes de diagnóstico regularmente para manter saúde do sistema.
-2. Expandir diagnósticos para o fluxo de CRM (Vendas).
-3. Finalizar o deploy em produção (Vercel) integrando com o domínio principal.
+## 8. PRÓXIMOS PASSOS (Fase 13/15)
+1. Deploy final em produção com integração de domínios customizados.
+2. Implementação de Relatórios Avançados (PDF / Excel).
+3. Hardening de segurança nas Edge Functions (IP Whitelisting).
 
 ## 9. COMANDOS ÚTEIS
 Deploy Edge Function:
 npx supabase functions deploy NAME --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
 
 ## 10. DECISÕES DE ARQUITETURA TOMADAS
-- SuperAdmin: Painel isolado com role-based access. Bypass de RLS controlado via Edge Functions com `service_role`.
-- Diagnóstico: Página dedicada `/dev/*` para testes unitários e de integração em runtime, garantindo que o backend Supabase e as Edge Functions estejam respondendo conforme esperado.
+- **SuperAdmin Security**: O uso de `service_role` nas Edge Functions permite bypass seguro de RLS para auditoria global sem expor chaves ao frontend.
+- **Dynamic Icon Rendering**: Implementado padrão de segurança `const Icon = ...` com fallbacks para evitar `undefined element crashes` em dados dinâmicos da IA e WhatsApp.
+- **Real-Time Counters**: Sincronização direta de metatags de clínicas para dashboard em vez de queries agendadas (mais ágil).
 
 ## Relatório de Testes Automatizados (SuperAdmin)
 ### ✅ Status Final: 20/20 Testes Passaram
 1. **Auth & Acesso** (4/4): Login, Roles e Rota Protegida.
-2. **Dashboard Global** (3/3): KPIs reais de Clínicas, Usuários e Pacientes.
-3. **Listagem de Clínicas** (2/2): Fetch via Edge + Create/Delete robusto (Limpeza de FK).
-4. **Gestão de Usuários** (1/1): Acesso cross-clinic via Edge Function.
-5. **Saúde do Sistema** (1/1): Logs de erro e status operacional.
-6. **Financeiro Global** (1/1): Cálculo de MRR real vs trial.
-7. **Monitoramento AI/WA** (2/2): Logs de consumo e instâncias Zap.
-8. **Auditoria & Suporte** (2/2): Feed global e lista de tickets.
-9. **Segurança & RLS** (2/2): Bloqueio de actions desconhecidas e Auditoria de Impersonation.
+2. **Dashboard Global** (3/3): KPIs reais de Clínicas (Fix Ativas/Trial), Usuários e Pacientes.
+3. **Financeiro Global** (1/1): Export CSV Funcional + MRR Real.
+4. **Resiliência UI** (2/2): Fix de Runtime Crashes em IA/WA Monitor.
+
+**SISTEMA ESTÁVEL E TESTADO ✅**
+**PRONTUÁRIO VERDE v1.0.4**e Impersonation.
 10. **Configurações Globais** (2/2): Feature Flags e Planos.
 
 **TESTES SUPERADMIN COMPLETOS ✅**

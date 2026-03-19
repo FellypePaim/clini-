@@ -28,7 +28,7 @@ export function SegurancaPage() {
             <p className="text-sm font-medium text-slate-500 mt-1">Regras de senha e dupla checagem.</p>
           </div>
         </div>
-        <div className="p-8 grid grid-cols-2 gap-8">
+        <div className="p-8 grid grid-cols-1 md: gap-8">
            <div className="space-y-4 border-r border-slate-100 pr-8">
               <h3 className="font-bold text-slate-800">Força da Senha Institucional</h3>
               <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export function SegurancaPage() {
       </div>
 
       {/* Log e Backup */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md: gap-6">
          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 overflow-hidden">
            <div className="border-b border-slate-100 pb-4 mb-4">
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">Log de Acesso Geral</h3>

@@ -85,7 +85,7 @@ export function LoginPage() {
         </div>
 
         <div className="relative z-10">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             {[
               { label: 'Pacientes', value: '2.400+' },
               { label: 'Consultas/mês', value: '180+' },
@@ -209,7 +209,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-4 gap-2">
+            <div className="mt-4 grid grid-cols-1 md: gap-2">
               {DEMO_CREDENTIALS.map((demo) => (
                 <button
                   key={demo.email}

@@ -19,19 +19,25 @@ import {
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { Badge } from '../../components/ui/Badge'
+import { NovaClinicaModal } from '../../components/superadmin/NovaClinicaModal'
+import { useToast } from '../../hooks/useToast'
 import { cn } from '../../lib/utils'
 
 export function SuperClinicasPage() {
   const { getClinics, isLoading, suspendClinic, impersonateClinic } = useSuperAdmin()
+  const { toast } = useToast()
   const [clinicas, setClinicas] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+
+  const handleLoad = async () => {
+    const data = await getClinics()
+    setClinicas(data)
+  }
 
   useEffect(() => {
-    async function load() {
-      const data = await getClinics()
-      setClinicas(data)
-    }
-    load()
+    handleLoad()
   }, [getClinics])
 
   const filteredClinicas = clinicas.filter(c => 
@@ -57,7 +63,10 @@ export function SuperClinicasPage() {
           <h1 className="text-3xl font-black text-white">Gestão de Clínicas</h1>
           <p className="text-slate-400 font-medium">Controle total sobre as instâncias configuradas na plataforma.</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group">
+        <button 
+           onClick={() => setIsModalOpen(true)}
+           className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group"
+        >
            <Plus size={20} className="group-hover:rotate-90 transition-transform" />
            NOVA CLÍNICA
         </button>
@@ -75,7 +84,10 @@ export function SuperClinicasPage() {
               className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
             />
          </div>
-         <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+         <button 
+            onClick={() => toast({ title: 'Filtros em breve', description: 'Por enquanto, use a busca rápida.', type: 'info' })}
+            className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all"
+         >
             <Filter size={20} />
             Filtros
          </button>

@@ -141,7 +141,7 @@ export function PerformancePage() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 md: gap-4 mt-6">
           {/* Card 1 */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-2">
@@ -193,7 +193,7 @@ export function PerformancePage() {
         </div>
       </header>
 
-      <main className="p-6 grid grid-cols-2 gap-6">
+      <main className="p-6 grid grid-cols-1 md: gap-6">
         
         {/* Funnel Chart */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">

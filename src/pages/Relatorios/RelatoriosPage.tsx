@@ -95,7 +95,7 @@ export function RelatoriosPage() {
            return (
              <section key={category} className="mb-10 last:mb-0">
                <h2 className="text-lg font-bold text-slate-800 mb-4 px-1">{category}</h2>
-               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+               <div className="grid grid-cols-1 md: lg:grid-cols-3 xl:grid-cols-4 gap-4">
                  {catReports.map((report) => (
                    <Link 
                      key={report.id}

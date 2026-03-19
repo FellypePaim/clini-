@@ -163,7 +163,7 @@ export function ProdutosPage() {
                <p className="text-sm text-slate-400 font-mono uppercase">{selectedProduct.code}</p>
             </header>
             
-            <div className="grid grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 md: gap-4 mb-8">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atual</span>
                 <p className="text-2xl font-black text-slate-800">{selectedProduct.currentStock} {selectedProduct.unit}</p>
@@ -212,7 +212,7 @@ export function ProdutosPage() {
               <h3 className="text-lg font-bold text-slate-800">Novo Produto</h3>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
             </header>
-            <form onSubmit={handleSaveProduct} className="p-6 grid grid-cols-2 gap-4">
+            <form onSubmit={handleSaveProduct} className="p-6 grid grid-cols-1 md: gap-4">
               <div className="col-span-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome do Produto</label>
                 <input required value={formData.name} onChange={e => setFormData({...formData, name:e.target.value})} className="w-full px-4 py-2 mt-1 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" />

@@ -118,7 +118,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/50">
           
           {/* Quick Actions & Status */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="grid grid-cols-1 md: gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 block">Estágio Atual</span>
               <select
@@ -167,7 +167,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
                 <User size={16} className="text-slate-400" /> Detalhes do Lead
               </h3>
             </div>
-            <div className="p-4 grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+            <div className="p-4 grid grid-cols-1 md: gap-y-4 gap-x-6 text-sm">
               <div>
                 <span className="block text-xs font-medium text-slate-500 mb-1">Valor Estimado</span>
                 <span className="font-bold text-slate-800">

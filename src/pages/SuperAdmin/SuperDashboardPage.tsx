@@ -45,8 +45,8 @@ export function SuperDashboardPage() {
 
   const kpis = [
     { label: 'Clínicas Ativas', value: stats?.clinics?.active || '0', total: stats?.clinics?.total || '0', icon: Hospital, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'Clínicas Trial', value: stats?.clinics?.trial || '0', icon: Hospital, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { label: 'Usuários Totais', value: stats?.users?.total || '0', icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'Pacientes Base', value: (stats?.patientBase || 0).toLocaleString(), icon: Users2, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { label: 'Consultas Hoje', value: stats?.appointmentsToday || '0', icon: Stethoscope, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   ]
 
