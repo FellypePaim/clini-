@@ -19,6 +19,39 @@ export function DiagnosticoPage() {
   const { toast } = useToast()
   const [isRunning, setIsRunning] = useState(false)
   const [report, setReport] = useState<any>(null)
+  const [isResetting, setIsResetting] = useState(false)
+
+  const handleResetChat = async () => {
+    if (!confirm("Tem certeza que deseja apagar TODO o histórico de conversas do OVYVA?")) return
+    
+    setIsResetting(true)
+    try {
+      // Deleta mensagens e depois conversas
+      const { error: errM } = await supabase.from('ovyva_mensagens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (errM) throw errM
+      
+      const { error: errC } = await supabase.from('ovyva_conversas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      if (errC) throw errC
+
+      // Limpar metadados de leads se houver vínculo
+      await supabase.from('leads').update({ conversa_id: null }).filter('conversa_id', 'not.is', null)
+
+      toast({
+        title: "Sucesso!",
+        description: "Histórico de conversas resetado com sucesso.",
+        type: "success"
+      })
+    } catch (error: any) {
+      console.error("Erro ao resetar:", error)
+      toast({
+        title: "Erro ao resetar",
+        description: error.message,
+        type: "error"
+      })
+    } finally {
+      setIsResetting(false)
+    }
+  }
 
   // ─── INITIALIZE TESTS ──────────────────────────────────────────────────
   const [tests, setTests] = useState<TestCase[]>([
@@ -31,14 +64,14 @@ export function DiagnosticoPage() {
        const { error } = await supabase.auth.getSession()
        if (error) throw error
     }},
-    { id: 'auth-3', module: 'Autenticação', name: 'Profile do usuário logado é encontrado', status: 'idle', fn: async () => {
-       const { data: sessionData } = await supabase.auth.getSession()
-       if (!sessionData?.session?.user?.id) return // Permite passar se não logado, ou throw? Vamos dar throw para forçar login previo
-       
-       const { data, error } = await supabase.from('profiles').select('*').eq('id', sessionData.session.user.id).single()
-       if (error) throw error
-       if (!data) throw new Error("Profile não encontrado")
-    }},
+     { id: 'auth-3', module: 'Autenticação', name: 'Profile do usuário logado é encontrado', status: 'idle', fn: async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user?.id) throw new Error("Nenhuma sessão ativa encontrada. Faça login.")
+        
+        const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
+        if (error) throw error
+        if (!data) throw new Error("Profile não encontrado para o ID: " + session.user.id)
+     }},
     { id: 'auth-4', module: 'Autenticação', name: 'clinica_id não é null', status: 'idle', fn: async () => {
        const { data: sessionData } = await supabase.auth.getSession()
        const userId = sessionData?.session?.user?.id
@@ -248,10 +281,11 @@ export function DiagnosticoPage() {
               
               const duration = Date.now() - startTime
               setTests(prev => prev.map(x => x.id === t.id ? { ...x, status: 'success', duration } : x))
-           } catch (error: any) {
-              const duration = Date.now() - startTime
-              setTests(prev => prev.map(x => x.id === t.id ? { ...x, status: 'failed', duration, error: error.message || String(error) } : x))
-           }
+            } catch (error: any) {
+               console.error(`Falha no teste ${t.id} (${t.name}):`, error)
+               const duration = Date.now() - startTime
+               setTests(prev => prev.map(x => x.id === t.id ? { ...x, status: 'failed', duration, error: error.message || String(error) } : x))
+            }
         }
       })
     )
@@ -316,6 +350,15 @@ export function DiagnosticoPage() {
           <p className="text-slate-500 text-sm mt-1">Bateria de testes de integração com Supabase.</p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={handleResetChat}
+            disabled={isResetting}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 shadow-sm disabled:opacity-50"
+          >
+            {isResetting ? <Clock className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+            Resetar Chat
+          </button>
+
           {report && (
             <button
                onClick={exportReport}

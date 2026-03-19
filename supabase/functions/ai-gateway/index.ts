@@ -30,19 +30,24 @@ Deno.serve(async (req) => {
 
     const serviceKey = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim()
     const anonKey = (Deno.env.get("SUPABASE_ANON_KEY") ?? "").trim()
-    const isValidKey = token === serviceKey || token === anonKey || token.length > 100
+    const isValidKey = 
+      token === serviceKey || 
+      token === anonKey || 
+      token.length > 100 ||
+      token === (Deno.env.get("EVOLUTION_API_KEY") ?? "").trim()
 
-    // Cliente para verificar JWT de usuário logado
-    const supabaseAuth = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    )
-    const { data: authData } = await supabaseAuth.auth.getUser()
-    const user = authData?.user ?? null
-
-    if (!isValidKey && !user) {
-      return errorResponse("Não autorizado", 401)
+    let user = null
+    // 2. Só tenta buscar usuário se não for uma chave mestre/API
+    if (!isValidKey) {
+      const supabaseAuth = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      )
+      const { data: authData } = await supabaseAuth.auth.getUser()
+      user = authData?.user ?? null
+      
+      if (!user) return errorResponse("Não autorizado", 401)
     }
 
     // Cliente admin para operações no banco
@@ -363,6 +368,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     - Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
     - Em emergências médicas, oriente: ligue para SAMU (192)
     - Seja objetiva — máximo 3 perguntas por mensagem
+    - PRIORIDADE MÁXIMA: Se o nome do paciente for "paciente" (ou seja, desconhecido), sua PRIMEIRA AÇÃO absoluta é perguntar educadamente qual o nome completo da pessoa. NÃO inicie nenhum procedimento de agendamento, não forneça detalhes complexos, e não confirme horários até que você saiba com quem está falando.
 
     Responda APENAS com JSON válido:
     {

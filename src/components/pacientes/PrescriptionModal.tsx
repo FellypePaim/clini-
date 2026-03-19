@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
+import jsPDF from 'jspdf'
 import { supabase } from '../../lib/supabase'
 import { StorageHelpers } from '../../lib/storage'
 import { useAuthStore } from '../../store/authStore'

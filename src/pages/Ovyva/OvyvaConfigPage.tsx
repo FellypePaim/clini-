@@ -1,38 +1,130 @@
-import { useState } from 'react'
-import { 
-  Bot, 
-  Calendar, 
-  BookOpen, 
-  MessageSquare, 
-  Save, 
-  ChevronRight, 
-  ArrowLeft,
-  Clock,
-  Sparkles,
-  Zap,
-  ShieldCheck,
-  Plus,
-  Trash2,
-  HelpCircle,
-  FileText,
-  Settings
+import { useState, useEffect } from 'react'
+import {
+  Bot, Calendar, BookOpen, MessageSquare, Save, ArrowLeft,
+  Clock, Sparkles, Zap, HelpCircle, Smartphone
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '../../lib/utils'
-import { useOVYVA } from '../../hooks/useOVYVA'
+import { useAuthStore } from '../../store/authStore'
+import { supabase } from '../../lib/supabase'
+import { useToast } from '../../hooks/useToast'
+import { WhatsAppConexaoPage } from './WhatsAppConexaoPage'
 
-type ConfigSection = 'personality' | 'scheduling' | 'knowledge' | 'messages';
+type ConfigSection = 'personality' | 'scheduling' | 'knowledge' | 'whatsapp'
+
+// Tipos locais para o formulário
+interface OvyvaConfigForm {
+  nome_assistente: string
+  tom_voz: string
+  horario_inicio: string
+  horario_fim: string
+  acao_fora_horario: string
+  base_conhecimento: string
+  antecedencia_minima: number
+}
 
 export function OvyvaConfigPage() {
   const navigate = useNavigate()
-  const { config, updateAIConfig } = useOVYVA()
+  const { toast } = useToast()
+  const { user } = useAuthStore()
+  const clinicaId = (user as any)?.user_metadata?.clinica_id
+
   const [activeTab, setActiveTab] = useState<ConfigSection>('personality')
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const [form, setForm] = useState<OvyvaConfigForm>({
+    nome_assistente: 'Sofia',
+    tom_voz: 'cordial',
+    horario_inicio: '08:00',
+    horario_fim: '18:00',
+    acao_fora_horario: 'padrao',
+    base_conhecimento: '',
+    antecedencia_minima: 24,
+  })
+
+  // Carregar config atual do banco
+  useEffect(() => {
+    if (!clinicaId) return
+    supabase
+      .from('clinicas')
+      .select('configuracoes')
+      .eq('id', clinicaId)
+      .single()
+      .then(({ data }) => {
+        const ovyva = (data?.configuracoes as any)?.ovyva
+        if (ovyva) {
+          setForm({
+            nome_assistente: ovyva.nome_assistente ?? 'Sofia',
+            tom_voz: ovyva.tom_voz ?? 'cordial',
+            horario_inicio: ovyva.horario_inicio ?? '08:00',
+            horario_fim: ovyva.horario_fim ?? '18:00',
+            acao_fora_horario: ovyva.acao_fora_horario ?? 'padrao',
+            base_conhecimento: ovyva.base_conhecimento ?? '',
+            antecedencia_minima: ovyva.antecedencia_minima ?? 24,
+          })
+        }
+        setIsLoading(false)
+      })
+  }, [clinicaId])
 
   const handleSave = async () => {
+    if (!clinicaId) {
+      toast({ title: 'Erro', description: 'Clínica não identificada. Faça login novamente.', type: 'error' })
+      return
+    }
     setIsSaving(true)
-    await new Promise(r => setTimeout(r, 1200))
-    setIsSaving(false)
+    try {
+      // Buscar configuracoes atuais para não sobrescrever outros campos
+      const { data: clinica } = await supabase
+        .from('clinicas')
+        .select('configuracoes')
+        .eq('id', clinicaId)
+        .single()
+
+      const configAtual = (clinica?.configuracoes as any) ?? {}
+
+      const { error } = await supabase
+        .from('clinicas')
+        .update({
+          configuracoes: {
+            ...configAtual,
+            ovyva: {
+              ...(configAtual.ovyva ?? {}),
+              nome_assistente: form.nome_assistente,
+              tom_voz: form.tom_voz,
+              horario_inicio: form.horario_inicio,
+              horario_fim: form.horario_fim,
+              acao_fora_horario: form.acao_fora_horario,
+              base_conhecimento: form.base_conhecimento,
+              antecedencia_minima: form.antecedencia_minima,
+            }
+          }
+        })
+        .eq('id', clinicaId)
+
+      if (error) throw error
+
+      toast({ title: 'Configurações salvas!', description: 'A IA já está usando as novas configurações.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro ao salvar', description: err.message, type: 'error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const update = (field: keyof OvyvaConfigForm, value: any) =>
+    setForm(prev => ({ ...prev, [field]: value }))
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4 text-gray-400">
+          <Clock className="w-8 h-8 animate-spin text-green-500" />
+          <p className="text-xs font-bold uppercase tracking-widest">Carregando configurações...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -56,7 +148,7 @@ export function OvyvaConfigPage() {
 
           <button 
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || !clinicaId}
             className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-green-500/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
           >
              {isSaving ? <Clock className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
@@ -82,15 +174,15 @@ export function OvyvaConfigPage() {
              />
              <SectionTab 
               icon={<BookOpen className="w-5 h-5" />} 
-              label="Base de Dados" 
+              label="Base de Conhecimento" 
               active={activeTab === 'knowledge'} 
               onClick={() => setActiveTab('knowledge')} 
              />
              <SectionTab 
-              icon={<MessageSquare className="w-5 h-5" />} 
-              label="Templates" 
-              active={activeTab === 'messages'} 
-              onClick={() => setActiveTab('messages')} 
+              icon={<Smartphone className="w-5 h-5" />} 
+              label="Conexão WhatsApp" 
+              active={activeTab === 'whatsapp'} 
+              onClick={() => setActiveTab('whatsapp')} 
              />
 
              <div className="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-[32px] text-white relative overflow-hidden group">
@@ -101,22 +193,34 @@ export function OvyvaConfigPage() {
                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ativa (24h)</span>
                 </div>
+                <p className="text-[10px] text-gray-500 mt-3">Assistente: <span className="text-green-400 font-bold">{form.nome_assistente}</span></p>
              </div>
           </div>
 
           {/* Form Content Area */}
           <div className="flex-1 bg-white rounded-[40px] border border-gray-100 p-10 shadow-sm shadow-gray-200/50 min-h-[600px] animate-slide-in">
+             
+             {/* ── PERSONALIDADE ── */}
              {activeTab === 'personality' && (
                <div className="space-y-10">
-                  <ConfigHeader title="Voz e Tom" desc="Como a Sofia deve falar com seus pacientes?" />
+                  <ConfigHeader title="Voz e Tom" desc="Como a IA deve falar com seus pacientes?" />
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <FormField label="Nome da Assistente" desc="O nome que a IA usará para se identificar">
-                        <input type="text" defaultValue={config?.aiName} className="input-ovyva" />
+                        <input
+                          type="text"
+                          value={form.nome_assistente}
+                          onChange={e => update('nome_assistente', e.target.value)}
+                          className="input-ovyva"
+                        />
                      </FormField>
 
                      <FormField label="Tom de Voz" desc="Formalidade e cordialidade no atendimento">
-                        <select className="input-ovyva capitalize" defaultValue={config?.toneOfVoice}>
+                        <select
+                          className="input-ovyva capitalize"
+                          value={form.tom_voz}
+                          onChange={e => update('tom_voz', e.target.value)}
+                        >
                            <option value="formal">👔 Formal</option>
                            <option value="cordial">🤝 Cordial</option>
                            <option value="informal">👋 Informal</option>
@@ -131,13 +235,27 @@ export function OvyvaConfigPage() {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                      <FormField label="Início do Turno">
-                        <input type="time" defaultValue={config?.workingHours.start} className="input-ovyva" />
+                        <input
+                          type="time"
+                          value={form.horario_inicio}
+                          onChange={e => update('horario_inicio', e.target.value)}
+                          className="input-ovyva"
+                        />
                      </FormField>
                      <FormField label="Fim do Turno">
-                        <input type="time" defaultValue={config?.workingHours.end} className="input-ovyva" />
+                        <input
+                          type="time"
+                          value={form.horario_fim}
+                          onChange={e => update('horario_fim', e.target.value)}
+                          className="input-ovyva"
+                        />
                      </FormField>
                      <FormField label="Fora do Horário">
-                        <select className="input-ovyva" defaultValue={config?.offHoursAction}>
+                        <select
+                          className="input-ovyva"
+                          value={form.acao_fora_horario}
+                          onChange={e => update('acao_fora_horario', e.target.value)}
+                        >
                            <option value="padrao">Responder padrão</option>
                            <option value="notificar">Silenciar e Notificar</option>
                            <option value="ignorar">Não Responder</option>
@@ -147,124 +265,67 @@ export function OvyvaConfigPage() {
                </div>
              )}
 
+             {/* ── AGENDAMENTO ── */}
              {activeTab === 'scheduling' && (
                <div className="space-y-10">
                   <ConfigHeader title="Restrições" desc="Controles de segurança para agendamentos" />
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <FormField label="Antecedência Mínima" desc="Tempo mínimo para agendar sem aprovação humana">
-                        <select className="input-ovyva" defaultValue={config?.minLeadTimeHours}>
+                        <select
+                          className="input-ovyva"
+                          value={form.antecedencia_minima}
+                          onChange={e => update('antecedencia_minima', Number(e.target.value))}
+                        >
                            <option value={1}>1 hora</option>
                            <option value={2}>2 horas</option>
                            <option value={4}>4 horas</option>
                            <option value={24}>24 horas (Recomendado)</option>
                         </select>
                      </FormField>
-
-                     <FormField label="Fluxo de Confirmação">
-                        <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 h-[48px]">
-                           <div className="w-10 h-6 bg-green-500 rounded-full p-1 flex justify-end">
-                              <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
-                           </div>
-                           <span className="text-[10px] font-black uppercase tracking-widest text-gray-600">Confirmação Instantânea</span>
-                        </div>
-                     </FormField>
                   </div>
 
-                  <div className="h-px bg-gray-100" />
-
-                  <ConfigHeader title="Serviços Habilitados" desc="Quais consultas a IA pode agendar?" />
-                  
-                  <div className="space-y-4">
-                     {config?.enabledAppointmentTypes.map(type => (
-                       <div key={type} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:scale-[1.01] transition-all">
-                          <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-xl bg-white border border-gray-100 flex items-center justify-center text-green-500">
-                                <Zap className="w-5 h-5" />
-                             </div>
-                             <span className="text-xs font-black uppercase text-gray-700">{type}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                             <span className="text-[10px] text-gray-400 font-bold">Duração: 45 min</span>
-                             <button className="p-2 hover:bg-red-50 text-red-300 hover:text-red-500 rounded-xl transition-all">
-                                <Trash2 className="w-4 h-4" />
-                             </button>
-                          </div>
-                       </div>
-                     ))}
-                     <button className="w-full py-4 border-2 border-dashed border-gray-100 rounded-[32px] text-[10px] font-black uppercase text-gray-400 hover:border-green-200 hover:text-green-600 transition-all flex items-center justify-center gap-3">
-                        <Plus className="w-4 h-4" /> Adicionar Tipo de Serviço
-                     </button>
+                  <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100">
+                    <p className="text-xs font-bold text-amber-700">💡 Tipos de serviços</p>
+                    <p className="text-[11px] text-amber-600 mt-1">Configure os tipos de procedimentos na aba <strong>Configurações → Procedimentos</strong> e eles aparecerão aqui automaticamente para a IA utilizar.</p>
                   </div>
                </div>
              )}
 
+             {/* ── BASE DE CONHECIMENTO ── */}
              {activeTab === 'knowledge' && (
                <div className="space-y-10">
-                  <ConfigHeader title="Base de Conhecimento" desc="Dê contexto sobre sua clínica para a IA" />
+                  <ConfigHeader title="Base de Conhecimento" desc="Dê contexto sobre sua clínica para a IA responder com precisão" />
                   
-                  <FormField label="Bio e Informações Gerais" desc="Use variáveis para endereço, valores base e política de cancelamento">
-                     <textarea 
-                        className="input-ovyva min-h-[160px] resize-none leading-relaxed" 
-                        defaultValue={config?.clinicInfo}
+                  <FormField
+                    label="Bio e Informações Gerais"
+                    desc="Endereço, horários, valores, política de cancelamento, etc."
+                  >
+                     <textarea
+                        className="input-ovyva min-h-[240px] resize-none leading-relaxed"
+                        placeholder={`Exemplos:\n- Atendemos segunda a sexta das 8h às 18h e sábados das 8h às 12h\n- Estamos na Rua das Flores, 123, Centro\n- Valor da consulta: R$ 150,00\n- Cancelamento com 24h de antecedência`}
+                        value={form.base_conhecimento}
+                        onChange={e => update('base_conhecimento', e.target.value)}
                      />
                   </FormField>
 
-                  <div className="h-px bg-gray-100" />
-
-                  <div className="flex items-center justify-between mb-2">
-                     <ConfigHeader title="Perguntas Frequentes (FAQ)" desc="Respostas rápidas para dúvidas comuns" />
-                     <button className="btn-secondary py-2 border-none">Gerar por IA</button>
-                  </div>
-
-                  <div className="space-y-4">
-                     {config?.faqs.map(faq => (
-                       <div key={faq.id} className="p-6 bg-white border border-gray-100 rounded-[32px] shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all">
-                          <div className="flex items-start justify-between gap-6">
-                             <div className="flex-1 space-y-3">
-                                <p className="text-xs font-black uppercase tracking-widest text-gray-900 border-l-4 border-green-500 pl-4">{faq.pergunta}</p>
-                                <p className="text-[11px] text-gray-400 font-medium pl-5">{faq.resposta}</p>
-                             </div>
-                             <div className="flex items-center gap-2">
-                                <button className="p-2.5 bg-gray-50 text-gray-400 hover:text-green-600 rounded-xl transition-all"><Settings className="w-4 h-4" /></button>
-                                <button className="p-2.5 bg-gray-50 text-gray-400 hover:text-red-500 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
-                             </div>
-                          </div>
-                       </div>
-                     ))}
+                  <div className="p-5 bg-green-50 rounded-2xl border border-green-100">
+                    <div className="flex items-start gap-3">
+                      <Sparkles className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-black text-green-800 uppercase tracking-widest">Dica de Prompt</p>
+                        <p className="text-[11px] text-green-700 mt-1 leading-relaxed">
+                          Quanto mais detalhado for este texto, mais precisa será a IA. Inclua valores dos procedimentos, convênios aceitos, nome dos profissionais e especialidades.
+                        </p>
+                      </div>
+                    </div>
                   </div>
                </div>
              )}
 
-             {activeTab === 'messages' && (
-               <div className="space-y-10">
-                  <ConfigHeader title="Templates e Variáveis" desc="Padronize as comunicações autônomas" />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     {config?.templates.map(tpl => (
-                        <div key={tpl.id} className="flex flex-col gap-4 p-8 bg-gray-50/50 rounded-[40px] border border-gray-100 hover:bg-white hover:shadow-xl hover:shadow-gray-100/50 transition-all group">
-                           <div className="flex items-center justify-between mb-2">
-                              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-green-600 bg-green-100/50 px-3 py-1.5 rounded-full">{tpl.trigger}</span>
-                              <div className="flex gap-2">
-                                 <Plus className="w-3.5 h-3.5 text-gray-300 group-hover:text-green-500 transition-colors" />
-                              </div>
-                           </div>
-                           <textarea 
-                              className="w-full bg-transparent resize-none border-none outline-none text-xs text-gray-500 font-medium leading-relaxed h-24"
-                              defaultValue={tpl.content}
-                           />
-                           <div className="h-px bg-gray-200/50 my-2" />
-                           <div className="flex flex-wrap gap-2">
-                              {['nome_paciente', 'data', 'clinica'].map(v => (
-                                 <span key={v} className="text-[8px] font-black uppercase bg-white border border-gray-100 text-gray-400 px-2 py-1 rounded-lg">
-                                    {`{{${v}}}`}
-                                 </span>
-                              ))}
-                           </div>
-                        </div>
-                     ))}
-                  </div>
-               </div>
+             {/* ── WHATSAPP ── */}
+             {activeTab === 'whatsapp' && (
+               <WhatsAppConexaoPage />
              )}
           </div>
        </div>

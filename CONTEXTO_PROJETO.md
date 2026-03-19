@@ -15,12 +15,12 @@
 - Fase 5: ✅ Verdesk CRM Kanban
 - Fase 6: ✅ Financeiro
 - Fase 7: ✅ Estoque
-- Fase 8: ✅ Relatórios + Configurações
-- Fase 9A: ✅ Schema SQL Supabase (15 tabelas + RLS + triggers)
+- Fase 8: ✅ Relatórios + Configurações (Integrados com dados reais do Supabase)
+- Fase 9A: ✅ Schema SQL Supabase (15+ tabelas + RLS + triggers)
 - Fase 9B: ✅ Frontend conectado ao Supabase
 - Fase 10: ✅ IA Gemini 2.5 Flash integrada (4 actions funcionando)
 - Fase 11: ✅ Storage Supabase (8 buckets configurados)
-- Fase 12: 🔜 WhatsApp Evolution API (próxima)
+- Fase 12: ✅ WhatsApp Evolution API Multi-Tenant (Instâncias por Clínica + UI Conexão)
 - Fase 13: 🔜 Deploy produção (Vercel/Netlify)
 
 ## 3. BACKEND — SUPABASE
@@ -30,7 +30,7 @@ clinicas, profiles, pacientes, anamneses, documentos_paciente,
 procedimentos, consultas, evolucoes, prescricoes, termos_consentimento,
 harmonizacoes, ovyva_conversas, ovyva_mensagens, leads, leads_historico,
 campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
-estoque_movimentacoes, procedimento_insumos, ai_usage_logs
+estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias
 
 ### Colunas adicionadas após schema inicial:
 - ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
@@ -40,14 +40,15 @@ estoque_movimentacoes, procedimento_insumos, ai_usage_logs
 
 ### Constraints adicionadas:
 - ovyva_conversas: UNIQUE (clinica_id, contato_telefone)
+- whatsapp_instancias: UNIQUE (nome_instancia)
 
 ### Views criadas:
 - ovyva_conversas_com_preview
 
 ### RLS:
 - Ativo em todas as tabelas
-- Policies service_role criadas para: clinicas, leads, ovyva_conversas,
-  ovyva_mensagens, pacientes
+- Policies service_role criadas para: clinicas, leads, ovyva_conversas, ovyva_mensagens, pacientes
+- Policy clinicas_ve_suas_instancias na `whatsapp_instancias`
 
 ### Dados de teste no banco:
 - clinicas: id = 00000000-0000-0000-0000-000000000001 (Clínica Teste)
@@ -62,21 +63,30 @@ Actions disponíveis:
 - generate_summary → gemini-2.5-flash ✅ testado
 - ovyva_respond → gemini-2.5-flash ✅ testado
 
-Lógica de auth: aceita JWT de usuário OU qualquer token com length > 100
-Lógica OVYVA: conversa permanente por número, pede nome no 1º contato
+### whatsapp-webhook (✅ funcionando - atualizada multi-tenant)
+Lógica:
+1. Recebe webhook da Evolution API (`MESSAGES_UPSERT`, `CONNECTION_UPDATE`)
+2. Identifica o `instanceName` no payload
+3. Busca `clinica_id` referente àquela instância na tabela `whatsapp_instancias` (com fallbacks p/ dev)
+4. Encaminha para o `ai-gateway` gerar e enviar a resposta.
 
-### whatsapp-webhook (🔜 criado mas não deployado)
-### whatsapp-send (🔜 criado mas não deployado)
+### whatsapp-manager (✅ funcionando)
+Gerencia o ciclo de vida das instâncias do WhatsApp por clínica. Actions:
+- `criar_instancia`: Cria na Evolution, vincula clínica e auto-insere o webhook
+- `obter_qrcode`: Busca QR base64
+- `verificar_status`: Sincroniza estado de conexão
+- `desconectar`: Desloga o número da instância
+- `listar`: Retorna as instâncias da clínica ativa
 
-## 5. SECRETS DA EDGE FUNCTION (já configurados)
+## 5. SECRETS DA EDGE Função (já configurados)
 - GEMINI_API_KEY ✅
 - SUPABASE_URL ✅
 - SUPABASE_ANON_KEY ✅
 - SUPABASE_SERVICE_ROLE_KEY ✅
 - SUPABASE_DB_URL ✅
-- EVOLUTION_API_URL 🔜 adicionar
-- EVOLUTION_API_KEY 🔜 adicionar
-- EVOLUTION_INSTANCE 🔜 adicionar
+- EVOLUTION_API_URL ✅
+- EVOLUTION_API_KEY ✅
+- CLINICA_ID (Fallback em dev) ✅
 
 ## 6. STORAGE — BUCKETS CONFIGURADOS
 - clinica-assets ✅ público
@@ -88,49 +98,31 @@ Lógica OVYVA: conversa permanente por número, pede nome no 1º contato
 - harmonizacao-mapas ✅ privado
 - anamnese-assets ✅ privado
 
-Políticas: RLS ativo + service_role com acesso total
-
 ## 7. ARQUIVOS IMPORTANTES NO PROJETO
-- src/lib/supabase.ts → cliente Supabase
-- src/lib/database.types.ts → tipos gerados do banco
-- src/lib/storage.ts → helpers de Storage
-- src/components/ui/FileUpload.tsx → componente de upload
-- src/components/ui/FileViewer.tsx → componente de visualização
-- supabase/functions/ai-gateway/index.ts → Edge Function IA
-- supabase/functions/whatsapp-webhook/index.ts → Edge Function WhatsApp entrada
-- supabase/functions/whatsapp-send/index.ts → Edge Function WhatsApp saída
-- CONTEXTO_PROJETO.md → este arquivo
+- src/pages/Ovyva/WhatsAppConexaoPage.tsx → Interface de conexão/gestão de QR Code WhatsApp multi-tenant
+- supabase/functions/whatsapp-manager/index.ts → Edge Function de gestão de instâncias Evolution
+- supabase/functions/whatsapp-webhook/index.ts → Webhook Universal que roteia mensagens baseado no "instanceName"
+- supabase/functions/ai-gateway/index.ts → IA de atendimento
+- CONTEXTO_PROJETO.md → Histórico/Arquitetura
 
 ## 8. PRÓXIMOS PASSOS (em ordem)
 1. Rodar testes automatizados do Storage (/dev/storage-diagnostico)
-2. Configurar Evolution API (Railway recomendado para começar)
-3. Deploy whatsapp-webhook e whatsapp-send
-4. Configurar webhook na Evolution API apontando para o Supabase
-5. Testar fluxo completo: paciente manda WhatsApp → Sofia responde
-6. Deploy em produção na Vercel/Netlify
-7. Criar primeiro usuário e clínica reais no banco
-8. QA completo com clínica piloto
+2. Criar a tabela `whatsapp_instancias` no banco via SQL (código fornecido no chat)
+3. Criar primeiro usuário e clínica reais no banco
+4. Testar fluxo final de Conexão WhatsApp via UI → Scan QR Code → Mandar Mensagem p/ Sofia
+5. Deploy em produção do Vite Frontend (Vercel/Netlify)
 
 ## 9. COMANDOS ÚTEIS
 
 Deploy Edge Function:
-npx supabase functions deploy NOME_DA_FUNCTION --project-ref mddbbwbwmwcvecbnfmqg
+npx supabase functions deploy NOME_DA_FUNCTION --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
 
 Gerar tipos TypeScript do banco:
 npx supabase gen types typescript --project-id mddbbwbwmwcvecbnfmqg > src/lib/database.types.ts
 
-Testar Edge Function (PowerShell):
-Usar service role key como Bearer token
-
 ## 10. DECISÕES DE ARQUITETURA TOMADAS
-- IA: Google Gemini 2.5 Flash (não OpenAI) — melhor custo-benefício
-- WhatsApp: Evolution API v2 (não Meta oficial) — mais flexível
-- Storage: Supabase Storage (não S3) — integrado ao projeto
-- Autenticação Edge Functions: token.length > 100 para aceitar service_role
-- OVYVA: 1 conversa permanente por número de WhatsApp por clínica
-- Identificação de paciente: pede apenas o nome (não CPF) no 1º contato
-- Modelos por tarefa:
-  - detect_intent → gemini-2.5-flash-lite (barato, tarefa simples)
-  - transcribe_audio → gemini-2.5-flash (processa áudio nativo)
-  - generate_summary → gemini-2.5-flash (raciocínio estruturado)
-  - ovyva_respond → gemini-2.5-flash (qualidade nas respostas)
+- IA: Google Gemini 2.5 Flash (custo-benefício ótimo)
+- WhatsApp Multi-Tenant: Evolution API v2. Cada clínica ganha uma `instanceName` única no momento da criação via aba "Conexão WhatsApp". O webhook é universal.
+- Integração Real: Todos os componentes de Dashboard, Configurações de Clínica, Profissionais e Relatórios puxam dados reais e salvam no Supabase via Row Level Security vinculando com `clinica_id`.
+- Storage: Supabase Storage.
+- Autenticação Edge Functions: `whatsapp-manager` valida JWT via `supabaseAuth.auth.getUser()`, enquanto `whatsapp-webhook` usa API Key evolution/Supabase Service Role.

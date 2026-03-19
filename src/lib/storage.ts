@@ -43,7 +43,11 @@ export async function uploadFile(
 ): Promise<StorageFile> {
   const limit = STORAGE_LIMITS[bucket]
   if (file.size > limit.maxMB * 1024 * 1024) {
-    throw new Error(`O arquivo excede o limite de ${limit.maxMB}MB.`)
+    throw new Error(`O arquivo excede o tamanho máximo permitido de ${limit.maxMB}MB.`)
+  }
+
+  if ((limit.tipos as readonly string[]) && !(limit.tipos as readonly string[]).includes(file.type)) {
+    throw new Error(`Tipo de arquivo não permitido (${file.type}). Use: ${limit.tipos.join(', ')}`)
   }
 
   const timestamp = Date.now()

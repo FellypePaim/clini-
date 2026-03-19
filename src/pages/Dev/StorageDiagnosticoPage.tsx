@@ -80,36 +80,44 @@ export function StorageDiagnosticoPage() {
        const result = await StorageHelpers.uploadFoto(cid, pid, file)
        await deleteFile('pacientes-fotos', result.path)
     }},
-    { id: 'up-4', module: 'Upload', name: "Arquivo maior que o limite é rejeitado", status: 'idle', fn: async () => {
-       const file = new File([new ArrayBuffer(6 * 1024 * 1024)], 'TESTE_BIG.pdf', { type: 'application/pdf' })
-       try {
-          await StorageHelpers.uploadExame('cid', 'pid', file)
-          throw new Error("Deveria ter rejeitado o arquivo grande")
-       } catch (err: any) {
-          if (!err.message.includes('tamanho máximo permitido')) throw new Error("Erro incorreto: " + err.message)
-       }
-    }},
-    { id: 'up-5', module: 'Upload', name: "Tipo de arquivo inválido é rejeitado", status: 'idle', fn: async () => {
-       const file = new File(['exe'], 'TESTE.exe', { type: 'application/x-msdownload' })
-       try {
-          await StorageHelpers.uploadExame('cid', 'pid', file)
-          throw new Error("Deveria ter rejeitado tipo inválido")
-       } catch (err: any) {
-          if (!err.message.includes('Tipo de arquivo não permitido')) throw new Error("Erro incorreto: " + err.message)
-       }
-    }},
+     { id: 'up-4', module: 'Upload', name: "Arquivo maior que o limite é rejeitado", status: 'idle', fn: async () => {
+        // clinica-assets has 2MB limit
+        const file = new File([new ArrayBuffer(3 * 1024 * 1024)], 'TESTE_BIG.pdf', { type: 'application/pdf' })
+        try {
+           await StorageHelpers.uploadLogo('cid', file)
+           throw new Error("Deveria ter rejeitado o arquivo grande")
+        } catch (err: any) {
+           if (!err.message.includes('tamanho máximo permitido')) throw new Error("Erro incorreto: " + err.message)
+        }
+     }},
+     { id: 'up-5', module: 'Upload', name: "Tipo de arquivo inválido é rejeitado", status: 'idle', fn: async () => {
+        const file = new File(['exe'], 'TESTE.exe', { type: 'application/x-msdownload' })
+        try {
+           await StorageHelpers.uploadExame('cid', 'pid', file)
+           throw new Error("Deveria ter rejeitado tipo inválido")
+        } catch (err: any) {
+           if (!err.message.includes('Tipo de arquivo não permitido')) throw new Error("Erro incorreto: " + err.message)
+        }
+     }},
 
     // 🔗 URLs
     { id: 'url-1', module: 'URLs', name: "URL pública de 'clinica-assets' é gerada", status: 'idle', fn: async () => {
        const { data } = supabase.storage.from('clinica-assets').getPublicUrl('test/TESTE.png')
        if (!data.publicUrl) throw new Error("Sem URL pública")
     }},
-    { id: 'url-2', module: 'URLs', name: "URL assinada de bucket privado é gerada com sucesso", status: 'idle', fn: async () => {
-       // we might need a real file to not get a 404 from supabase backend depending on config, but createSignedUrl generates it instantly
-       const { data, error } = await supabase.storage.from('pacientes-documentos').createSignedUrl('test/TESTE.pdf', 60)
-       if (error) throw error
-       if (!data?.signedUrl) throw new Error("URL não vazia esperada")
-    }},
+     { id: 'url-2', module: 'URLs', name: "URL assinada de bucket privado é gerada com sucesso", status: 'idle', fn: async () => {
+        // we need to upload a real temp file first
+        const file = new File(['temp'], 'TEMP_SIGN.pdf', { type: 'application/pdf' })
+        const stored = await StorageHelpers.uploadDocumento('diag', 'sign', file)
+        
+        const { data, error } = await supabase.storage.from('pacientes-documentos').createSignedUrl(stored.path, 60)
+        
+        // cleanup
+        await deleteFile('pacientes-documentos', stored.path)
+
+        if (error) throw error
+        if (!data?.signedUrl) throw new Error("URL não vazia esperada")
+     }},
 
     // 📋 Listagem
     { id: 'lst-1', module: 'Listagem', name: "listPatientFiles() retorna array", status: 'idle', fn: async () => {
