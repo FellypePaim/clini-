@@ -17,9 +17,8 @@ const TERMS_TEMPLATES = [
 
 export function PublicAnamnesisPage() {
   const { token } = useParams<{ token: string }>()
-  const [searchParams] = useSearchParams()
-  const patientId = searchParams.get('pid')
-  const termoId = searchParams.get('termo_id')
+  const [patientId, setPatientId] = useState<string | null>(null)
+  const [termoId, setTermoId] = useState<string | null>(null)
   
   const { getPatientById } = usePatients()
   const sigPad = useRef<SignatureCanvas>(null)
@@ -27,17 +26,32 @@ export function PublicAnamnesisPage() {
   const [patient, setPatient] = useState<(Patient & { clinica_id?: string, clinicaId?: string }) | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     async function load() {
-      if (patientId) {
-        const p = await getPatientById(patientId)
-        setPatient(p)
+      if (!token) {
+        setIsLoading(false)
+        return
       }
-      setIsLoading(false)
+
+      try {
+        const decoded = JSON.parse(atob(token))
+        setPatientId(decoded.pid || null)
+        setTermoId(decoded.tid || null)
+
+        if (decoded.pid) {
+          const p = await getPatientById(decoded.pid)
+          setPatient(p)
+        }
+      } catch (err) {
+        console.error('Falha ao decodificar token de anamnese:', err)
+      } finally {
+        setIsLoading(false)
+      }
     }
     load()
-  }, [patientId, getPatientById])
+  }, [token, getPatientById])
 
   const handleSignTerm = async () => {
     const clinica = patient?.clinicaId || patient?.clinica_id;
@@ -191,7 +205,30 @@ export function PublicAnamnesisPage() {
 
       <div className="w-full max-w-md px-6 -mt-6 relative z-10 space-y-6">
         <form 
-          onSubmit={(e) => { e.preventDefault(); setIsSubmitted(true); }}
+          onSubmit={async (e) => { 
+            e.preventDefault(); 
+            if (!patientId) return;
+            
+            setIsSubmitting(true);
+            try {
+              const formData = new FormData(e.currentTarget);
+              const queixa = formData.get('queixa') as string;
+              const medicamentos = formData.get('medicamentos') as string;
+
+              // Atualiza o perfil do paciente com os dados da anamnese
+              await supabase.from('pacientes').update({
+                historico_medico: queixa,
+                medicamentos_em_uso: medicamentos,
+                updated_at: new Date().toISOString()
+              }).eq('id', patientId);
+
+              setIsSubmitted(true);
+            } catch (err) {
+              alert('Erro ao enviar anamnese. Tente novamente.');
+            } finally {
+              setIsSubmitting(false);
+            }
+          }}
           className="space-y-6"
         >
           {/* Seção 1: Motivo */}
@@ -199,11 +236,12 @@ export function PublicAnamnesisPage() {
              <div className="space-y-4">
                <div>
                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">O que você está sentindo hoje?</label>
-                 <textarea 
-                   rows={3}
-                   placeholder="Aperte aqui para escrever..."
-                   className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none resize-none shadow-sm"
-                 />
+                  <textarea 
+                    name="queixa"
+                    rows={3}
+                    placeholder="Aperte aqui para escrever..."
+                    className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none resize-none shadow-sm"
+                  />
                </div>
              </div>
           </Section>
@@ -216,7 +254,11 @@ export function PublicAnamnesisPage() {
                <RadioToggle label="Diabetes ou Hipertensão?" />
                <div>
                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Medicamentos em uso?</label>
-                  <input className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none shadow-sm" placeholder="Ex: AAS, Glifage..." />
+                   <input 
+                     name="medicamentos"
+                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none shadow-sm" 
+                     placeholder="Ex: AAS, Glifage..." 
+                   />
                </div>
              </div>
           </Section>
@@ -243,9 +285,10 @@ export function PublicAnamnesisPage() {
 
           <button 
             type="submit"
-            className="w-full py-5 bg-gray-900 border-b-4 border-gray-700 text-white rounded-2xl text-base font-black flex items-center justify-center gap-3 shadow-xl transition-all active:translate-y-1 active:border-b-0"
+            disabled={isSubmitting}
+            className="w-full py-5 bg-gray-900 border-b-4 border-gray-700 text-white rounded-2xl text-base font-black flex items-center justify-center gap-3 shadow-xl transition-all active:translate-y-1 active:border-b-0 disabled:opacity-50"
           >
-            Enviar Minha Resposta <Send className="w-4 h-4" />
+            {isSubmitting ? 'Enviando...' : 'Enviar Minha Resposta'} <Send className="w-4 h-4" />
           </button>
         </form>
       </div>

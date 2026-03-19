@@ -16,7 +16,7 @@ export function useSuperAdmin() {
       if (error) throw error
       return data
     } catch (err: any) {
-      toast({ title: 'Erro', description: 'Erro ao buscar estatísticas globais.', type: 'error' })
+      console.error('SuperAdmin Stats Error:', err)
       return null
     } finally {
       setIsLoading(false)
@@ -25,16 +25,19 @@ export function useSuperAdmin() {
 
   // 2. Clínicas
   const getClinics = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('clinicas' as any)
-      .select('*, planos(nome)')
-      .order('nome', { ascending: true })
-    
-    if (error) {
-      toast({ title: 'Erro', description: 'Erro ao listar clínicas.', type: 'error' })
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_clinics' }
+      })
+      if (error) throw error
+      return data || []
+    } catch (err: any) {
+      console.error('SuperAdmin Clinics Error:', err)
       return []
+    } finally {
+      setIsLoading(false)
     }
-    return data || []
   }, [toast])
 
   const createClinic = useCallback(async (formData: any) => {
@@ -69,13 +72,19 @@ export function useSuperAdmin() {
 
   // 3. Usuários Globais
   const getUsers = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('profiles' as any)
-      .select('*, clinicas(nome)')
-      .order('created_at', { ascending: false })
-    
-    if (error) return []
-    return data || []
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_users' }
+      })
+      if (error) throw error
+      return data?.users || []
+    } catch (err) {
+      console.error(err)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   // 4. Impersonation (Geração de Token)
@@ -87,11 +96,9 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       
-      // Armazena o token original antes de trocar
       const currentToken = localStorage.getItem('prontuario-verde-auth-token')
       localStorage.setItem('impersonation-back-token', currentToken || '')
       
-      // Simula a troca abrindo em nova aba com o token
       window.open(`/dashboard?impersonate_token=${data.token}&clinic=${clinicId}`, '_blank')
     } catch (err: any) {
       toast({ title: 'Erro', description: 'Não foi possível impersonar.', type: 'error' })
@@ -102,13 +109,99 @@ export function useSuperAdmin() {
 
   // 5. Audit Logs
   const getAuditLogs = useCallback(async (filters?: any) => {
-    let query = supabase.from('auditoria_global' as any).select('*, clinicas(nome), profiles(nome_completo)').order('created_at', { ascending: false }).limit(100)
-    
-    if (filters?.clinicaId) query = query.eq('clinica_id', filters.clinicaId)
-    if (filters?.usuarioId) query = query.eq('usuario_id', filters.usuarioId)
-    
-    const { data, error } = await query
-    return data || []
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_audit_logs', filters }
+      })
+      if (error) throw error
+      return data?.logs || []
+    } catch (err) {
+      console.error(err)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 6. Financeiro Stats
+  const getFinanceiroStats = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_financeiro_stats' }
+      })
+      if (error) throw error
+      return data || null
+    } catch (err) {
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 7. IA Stats
+  const getIaStats = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_ia_stats' }
+      })
+      if (error) throw error
+      return data || null
+    } catch (err) {
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 8. WhatsApp Stats
+  const getWhatsAppStats = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_whatsapp_stats' }
+      })
+      if (error) throw error
+      return data || null
+    } catch (err) {
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 9. Suporte Tickets
+  const getSuporteTickets = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_suporte_tickets' }
+      })
+      if (error) throw error
+      return data?.tickets || []
+    } catch (err) {
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // 10. Saude Stats
+  const getSaudeStats = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'get_saude_stats' }
+      })
+      if (error) throw error
+      return data || null
+    } catch (err) {
+      return null
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   return {
@@ -119,6 +212,11 @@ export function useSuperAdmin() {
     suspendClinic,
     getUsers,
     impersonateClinic,
-    getAuditLogs
+    getAuditLogs,
+    getFinanceiroStats,
+    getIaStats,
+    getWhatsAppStats,
+    getSuporteTickets,
+    getSaudeStats
   }
 }

@@ -16,14 +16,21 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperSuportePage() {
-  const tickets = [
-    { id: '#TK-482', clinica: 'OdontoPlus Central', user: 'Ana Paula', msg: 'Erro ao gerar relatório financeiro de exportação', priority: 'high', status: 'open', time: 'Há 12 min' },
-    { id: '#TK-481', clinica: 'Clínica Sorriso', user: 'Dr. Rafael', msg: 'Solicitação de novo template de prontuário', priority: 'medium', status: 'pending', time: 'Há 45 min' },
-    { id: '#TK-480', clinica: 'Inovare Estetica', user: 'Bruna Mendes', msg: 'Problema na conexão do WhatsApp (Evolution)', priority: 'critical', status: 'open', time: 'Há 1h' },
-    { id: '#TK-479', clinica: 'DermoCenter', user: 'Carlos Silva', msg: 'Feedback sobre nova interface do dashboard', priority: 'low', status: 'closed', time: 'Há 3h' },
-  ]
+  const { getSuporteTickets, isLoading } = useSuperAdmin()
+  const [data, setData] = React.useState<any[]>([])
+
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await getSuporteTickets()
+      if (res) setData(res)
+    }
+    fetch()
+  }, [getSuporteTickets])
+
+  const tickets = data?.length ? data : []
 
   const releases = [
     { version: 'v2.5.0-beta', date: '21/03/2026', title: 'Infraestrutura SuperAdmin Core', type: 'major', status: 'staging' },

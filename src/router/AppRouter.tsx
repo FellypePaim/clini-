@@ -46,6 +46,7 @@ import { SuperWhatsAppPage } from '../pages/SuperAdmin/SuperWhatsAppPage'
 import { SuperLogsPage } from '../pages/SuperAdmin/SuperLogsPage'
 import { SuperConfiguracoesPage } from '../pages/SuperAdmin/SuperConfiguracoesPage'
 import { SuperSuportePage } from '../pages/SuperAdmin/SuperSuportePage'
+import { SuperAdminDiagnosticoPage } from '../pages/Dev/SuperAdminDiagnosticoPage'
 
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -164,6 +165,7 @@ export function AppRouter() {
           <>
             <Route path="/dev/diagnostico" element={<DiagnosticoPage />} />
             <Route path="/dev/storage-diagnostico" element={<StorageDiagnosticoPage />} />
+            <Route path="/dev/superadmin-diagnostico" element={<SuperAdminDiagnosticoPage />} />
           </>
         )}
       </Route>

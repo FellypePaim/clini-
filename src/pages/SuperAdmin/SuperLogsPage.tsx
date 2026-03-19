@@ -137,31 +137,12 @@ export function SuperLogsPage() {
                         </td>
                      </tr>
                   )) : (
-                     // Mock Logs if empty for UI demo
-                     [1,2,3,4,5,6].map(i => (
-                        <tr key={i} className="hover:bg-slate-800/40 transition-all group cursor-pointer">
-                           <td className="px-8 py-5">
-                              <div className="flex items-center gap-3">
-                                 <Clock className="text-slate-600" size={14} />
-                                 <div className="flex flex-col text-slate-500 font-bold text-xs opacity-50">
-                                    <span>Hoje, 11:20:0{i}</span>
-                                 </div>
-                              </div>
-                           </td>
-                           <td className="px-8 py-5 opacity-50 font-bold text-xs text-slate-500">
-                              {i % 2 === 0 ? 'OdontoPlus Central' : 'Clínica Sorriso'}
-                           </td>
-                           <td className="px-8 py-5 opacity-50 text-xs font-bold text-slate-500">
-                              {i % 3 === 0 ? 'Dr. Rafael Mendes' : 'Ana Clara Ribeiro'}
-                           </td>
-                           <td className="px-8 py-5">
-                              {getActionBadge(i % 3 === 0 ? 'UPDATE_STOCK' : i % 2 === 0 ? 'CREATE_APPOINTMENT' : 'LOGIN_SUCCESS')}
-                           </td>
-                           <td className="px-8 py-5 text-right opacity-50">
-                              <CheckCircle size={16} className="text-emerald-500 ml-auto" />
-                           </td>
-                        </tr>
-                     ))
+                     <tr>
+                        <td colSpan={5} className="px-8 py-10 text-center">
+                           <ShieldAlert size={48} className="text-slate-800 mx-auto mb-4" />
+                           <p className="text-slate-500 font-bold">Nenhum registro de auditoria encontrado.</p>
+                        </td>
+                     </tr>
                   )}
                </tbody>
             </table>

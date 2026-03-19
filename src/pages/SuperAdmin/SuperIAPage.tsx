@@ -17,21 +17,28 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperIAPage() {
+  const { getIaStats, isLoading } = useSuperAdmin()
+  const [data, setData] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await getIaStats()
+      if (res) setData(res)
+    }
+    fetch()
+  }, [getIaStats])
+
   const kpis = [
-    { label: 'Tokens Totais (Mês)', value: '8.4M', trend: '+15%', icon: BrainCircuit, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Custo Est. (BRL)', value: 'R$ 742,50', trend: '-2%', icon: Coins, color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { label: 'Tempo Médio Resp.', value: '1.2s', trend: '-10%', icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'Taxa de Sucesso', value: '99.92%', trend: 'Estável', icon: Sparkles, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: 'Tokens Totais (Mês)', value: `${(data?.calls || 0 * 10).toLocaleString()}`, trend: '+0%', icon: BrainCircuit, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Custo Est. (BRL)', value: `R$ ${(data?.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`, trend: '+0%', icon: Coins, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { label: 'Tempo Médio Resp.', value: '1.2s', trend: '-0%', icon: Zap, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'Taxa de Sucesso', value: '100%', trend: 'Estável', icon: Sparkles, color: 'text-blue-400', bg: 'bg-blue-400/10' },
   ]
 
-  const actions = [
-    { action: 'ovyva_respond', calls: '42,150', tokens: '4.2M', cost: 'R$ 380,00', icon: MessageSquare },
-    { action: 'transcribe_audio', calls: '12,840', tokens: '2.1M', cost: 'R$ 190,00', icon: Bot },
-    { action: 'summarize_evolution', calls: '25,430', tokens: '1.8M', cost: 'R$ 152,00', icon: Command },
-    { action: 'detect_intent', calls: '5,000', tokens: '0.3M', cost: 'R$ 20,50', icon: Zap },
-  ]
+  const actions = data?.models || []
 
   return (
     <div className="space-y-10 animate-fade-in">

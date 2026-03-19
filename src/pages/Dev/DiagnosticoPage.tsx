@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { Activity, CheckCircle, XCircle, Clock, Download } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useToast } from '../../hooks/useToast'
@@ -341,6 +342,13 @@ export function DiagnosticoPage() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50/50 p-6 overflow-y-auto">
+      {/* Dev Tabs / Navegação Horizontal Simples */}
+      <div className="flex gap-4 mb-4 pb-4 border-b border-slate-200 text-sm font-semibold text-slate-500">
+         <Link to="/dev/diagnostico" className="text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md">🔥 Diagnóstico Geral</Link>
+         <Link to="/dev/storage-diagnostico" className="hover:text-blue-600 transition-colors">📦 Storage</Link>
+         <Link to="/dev/superadmin-diagnostico" className="hover:text-purple-600 transition-colors">👑 SuperAdmin</Link>
+      </div>
+
       <header className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">

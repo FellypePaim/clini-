@@ -16,10 +16,22 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperSaudePage() {
+  const { getSaudeStats, isLoading } = useSuperAdmin()
+  const [data, setData] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await getSaudeStats()
+      if (res) setData(res)
+    }
+    fetch()
+  }, [getSaudeStats])
+
   const coreServices = [
-    { name: 'Supabase Database', status: 'Operacional', latency: '24ms', uptime: '99.99%', load: '12%', icon: Database, color: 'text-emerald-500' },
+    { name: 'Supabase Database', status: data?.dbStatus || 'Carregando...', latency: '24ms', uptime: '99.99%', load: '12%', icon: Database, color: data?.dbStatus === 'Operacional' ? 'text-emerald-500' : 'text-amber-500' },
     { name: 'Auth Service', status: 'Operacional', latency: '38ms', uptime: '99.98%', load: '5%', icon: ShieldCheck, color: 'text-emerald-500' },
     { name: 'Edge Functions', status: 'Operacional', latency: '120ms', uptime: '99.95%', load: '28%', icon: Zap, color: 'text-emerald-500' },
     { name: 'Storage Buckets', status: 'Operacional', latency: '142ms', uptime: '100%', load: '45%', icon: Server, color: 'text-emerald-500' },
@@ -27,15 +39,17 @@ export function SuperSaudePage() {
 
   const externalApis = [
     { name: 'Google Gemini Pro', status: 'Operacional', latency: '1.2s', quota: '12/60 RPM', icon: Cpu, color: 'text-emerald-500' },
-    { name: 'Evolution API (WA)', status: 'Degradado', latency: '5.4s', quota: 'N/A', icon: MessageSquare, color: 'text-amber-500' },
+    { name: 'Evolution API (WA)', status: 'Operacional', latency: '0.4s', quota: 'N/A', icon: MessageSquare, color: 'text-emerald-500' },
     { name: 'Cloudflare CDN', status: 'Operacional', latency: '12ms', quota: 'N/A', icon: Globe, color: 'text-emerald-500' },
   ]
 
-  const errorLogs = [
-    { id: 1, service: 'ai-gateway', msg: 'Timeout upstream on detect_intent', count: 12, lastOccur: 'Há 2 min' },
-    { id: 2, service: 'whatsapp-webhook', msg: 'Invalid WID format from Evolution', count: 4, lastOccur: 'Há 15 min' },
-    { id: 3, service: 'auth', msg: 'Rate limit exceeded on legacy endpoint', count: 1, lastOccur: 'Há 1h' },
-  ]
+  const errorLogs = data?.errors?.map((err: any, i: number) => ({
+    id: err.id || i,
+    service: err.recurso || 'global',
+    msg: err.dados_depois?.error || 'Erro desconhecido na requisição',
+    count: 1, 
+    lastOccur: new Date(err.created_at).toLocaleDateString()
+  })) || []
 
   return (
     <div className="space-y-10 animate-fade-in">

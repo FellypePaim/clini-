@@ -230,6 +230,7 @@ export function useEstoque() {
   }, [registerMovement])
 
   const registerExit = useCallback((productId: string, quantity: number, reason: string, responsible: string, linkedTo?: string) => {
+    // linkedTo pode vir como ID de consulta ou paciente-ID
     registerMovement(productId, quantity, 'saida', reason, linkedTo)
   }, [registerMovement])
 
@@ -286,18 +287,23 @@ export function useEstoque() {
 export const useEstoqueAutomation = () => {
   const { registerExit, consumptionRules } = useEstoque();
 
-  const processProcedure = (procedureName: string, responsible: string, patientId: string) => {
-    const rulesToApply = consumptionRules.filter(r => r.isActive && r.procedureName === procedureName);
+  const processProcedure = async (procedureName: string, responsible: string, patientId: string, appointmentId?: string) => {
+    if (!procedureName) return;
     
-    rulesToApply.forEach(rule => {
-      registerExit(
+    // Busca regras ativas para este procedimento
+    const rulesToApply = consumptionRules.filter(r => r.isActive && r.procedureName.toLowerCase() === procedureName.toLowerCase());
+    
+    if (rulesToApply.length === 0) return;
+
+    for (const rule of rulesToApply) {
+      await registerExit(
         rule.productId, 
         rule.quantity, 
         `Baixa Automática - ${procedureName}`, 
         responsible, 
-        `PAC-${patientId}`
+        appointmentId || `PAC-${patientId}`
       );
-    });
+    }
   };
 
   return { processProcedure };

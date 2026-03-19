@@ -83,7 +83,12 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
 
     // Automação de estoque: Processa o procedimento para baixar materiais
     if (appointment.procedimento) {
-      processProcedure(appointment.procedimento, appointment.profissionalNome, appointment.pacienteId)
+      await processProcedure(
+        appointment.procedimento, 
+        appointment.profissionalNome, 
+        appointment.pacienteId,
+        appointment.id
+      )
     }
 
     setIsSubmitting(false)

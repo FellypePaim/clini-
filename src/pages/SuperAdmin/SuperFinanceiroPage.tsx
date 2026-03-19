@@ -17,27 +17,33 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperFinanceiroPage() {
+  const { getFinanceiroStats, isLoading } = useSuperAdmin()
+  const [data, setData] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await getFinanceiroStats()
+      if (res) setData(res)
+    }
+    fetch()
+  }, [getFinanceiroStats])
+
   const stats = [
-    { label: 'MRR Atual', value: 'R$ 38.420', trend: '+12.5%', icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'ARR Estimado', value: 'R$ 461.040', trend: '+8.2%', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'LTV Médio', value: 'R$ 4.200', trend: '+4.1%', icon: UserCheck, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Churn Rate', value: '0.8%', trend: '-0.2%', icon: PieChart, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { label: 'MRR Atual', value: `R$ ${(data?.mrr || 0).toLocaleString()}`, trend: '+0.0%', icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'ARR Estimado', value: `R$ ${(data?.arr || 0).toLocaleString()}`, trend: '+0.0%', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: 'LTV Médio', value: `R$ ${(data?.ltv || 0).toLocaleString()}`, trend: '+0.0%', icon: UserCheck, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Churn Rate', value: `${data?.churn || 0}%`, trend: '-0.0%', icon: PieChart, color: 'text-red-400', bg: 'bg-red-400/10' },
   ]
 
-  const planos = [
-    { nome: 'Básico', valor: '197', clinicas: 8, cor: 'bg-slate-500' },
-    { nome: 'Pro', valor: '397', clinicas: 28, cor: 'bg-purple-500' },
-    { nome: 'Enterprise', valor: '797', clinicas: 6, cor: 'bg-indigo-500' },
+  const planos = data?.planos || [
+    { nome: 'Básico', valor: '0', clinicas: 0, cor: 'bg-slate-500' },
+    { nome: 'Trial', valor: '0', clinicas: 0, cor: 'bg-purple-500' }
   ]
 
-  const recentes = [
-    { id: 1, clinica: 'OdontoPlus Central', data: 'Há 2h', valor: '197,00', status: 'pago', plano: 'Básico' },
-    { id: 2, clinica: 'Clínica Sorriso', data: 'Há 5h', valor: '397,00', status: 'vencido', plano: 'Pro' },
-    { id: 3, clinica: 'Inovare Estética', data: 'Ontem', valor: '797,00', status: 'pago', plano: 'Enterprise' },
-    { id: 4, clinica: 'DermoCenter', data: 'Ontem', valor: '397,00', status: 'pendente', plano: 'Pro' },
-  ]
+  const recentes = data?.recentes || []
 
   return (
     <div className="space-y-10 animate-fade-in">

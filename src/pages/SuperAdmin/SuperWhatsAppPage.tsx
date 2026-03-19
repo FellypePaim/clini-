@@ -17,21 +17,28 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperWhatsAppPage() {
+  const { getWhatsAppStats, isLoading } = useSuperAdmin()
+  const [data, setData] = React.useState<any>(null)
+
+  React.useEffect(() => {
+    async function fetch() {
+      const res = await getWhatsAppStats()
+      if (res) setData(res)
+    }
+    fetch()
+  }, [getWhatsAppStats])
+
   const stats = [
-    { label: 'Msgs Recebidas (Hoje)', value: '1,420', trend: '+12%', icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'Respostas IA (Sofia)', value: '1,284', trend: '90.2%', icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Instâncias Ativas', value: '38/42', trend: '90% Uptime', icon: Smartphone, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'Humano Solicitado', value: '45', trend: '3.1%', icon: Users, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { label: 'Msgs Recebidas (Hoje)', value: '0', trend: '+0%', icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'Respostas IA (Sofia)', value: '0', trend: '0%', icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Instâncias Ativas', value: `${data?.conected || 0}/${data?.total || 0}`, trend: 'Online', icon: Smartphone, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: 'Humano Solicitado', value: '0', trend: '0%', icon: Users, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   ]
 
-  const instances = [
-    { clinica: 'OdontoPlus Central', instance: 'cl-001', phone: '+55 11 99887-7665', status: 'open', lastSeen: 'Agora', msgs: 420 },
-    { clinica: 'Clínica Sorriso', instance: 'cl-002', phone: '+55 11 98765-4321', status: 'close', lastSeen: 'Há 5 min', msgs: 12 },
-    { clinica: 'Estética VIP', instance: 'cl-003', phone: '+55 11 91234-5678', status: 'open', lastSeen: 'Agora', msgs: 245 },
-    { clinica: 'DermoCenter', instance: 'cl-004', phone: '+55 21 95555-4444', status: 'connecting', lastSeen: 'Há 1 min', msgs: 0 },
-  ]
+  const instances = data?.instancias || []
 
   return (
     <div className="space-y-10 animate-fade-in">

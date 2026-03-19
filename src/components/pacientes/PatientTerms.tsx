@@ -56,10 +56,11 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
         return
       }
 
-      // Generate a token for public anamnese access
-      const token = Math.random().toString(36).substring(2, 15)
+      // Encodes identifying details as a base64 obfuscated token
+      const tokenPayload = { pid: pacienteId, cid: clinicaId, tid: tpl.id }
+      const token = btoa(JSON.stringify(tokenPayload))
       const baseUrl = window.location.origin
-      const link = `${baseUrl}/anamnese/${token}?pid=${pacienteId}&termo_id=${tpl.id}`
+      const link = `${baseUrl}/anamnese/${token}`
 
       // Call whatsapp-send Edge Function
       const { error } = await supabase.functions.invoke('whatsapp-send', {
