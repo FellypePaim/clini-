@@ -1,5 +1,4 @@
-import { useState, useCallback } from 'react'
-import { PATIENTS_MOCK, PATIENT_APPOINTMENTS_MOCK, PATIENT_DOCUMENTS_MOCK, PATIENT_FINANCIAL_MOCK } from '../data/patientMockData'
+import { useState, useCallback, useEffect } from 'react'
 import type { Patient, Appointment, PatientDocument, PatientFinancial } from '../types'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
@@ -7,38 +6,36 @@ import { useToast } from './useToast'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
-// ─────────────────────────────────────────────────────────────────────────────
-// usePatients — Hook principal para gestão de pacientes
-// ─────────────────────────────────────────────────────────────────────────────
-
 export function usePatients() {
-  const [patients, setPatients] = useState<Patient[]>(PATIENTS_MOCK)
+  const [patients, setPatients] = useState<Patient[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const { toast } = useToast()
 
+  // ── INIT FETCH ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (USE_MOCK || !clinicaId) return
+    getPatients()
+  }, [clinicaId])
+
   // ── Buscar lista de pacientes ────────────────────────────────────────
   const getPatients = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      if (USE_MOCK || !clinicaId) {
-        await new Promise((r) => setTimeout(r, 400))
-        setPatients(PATIENTS_MOCK)
-        return PATIENTS_MOCK
-      }
+      if (USE_MOCK || !clinicaId) return []
 
       const { data, error: pbErr } = await supabase
         .from('pacientes')
-        .select('*')
+        .select('*, consultas(count)')
         .eq('clinica_id', clinicaId)
         .order('nome_completo', { ascending: true })
 
       if (pbErr) throw pbErr
 
-      const mapped: Patient[] = (data || []).map(r => ({
+      const mapped: Patient[] = (data || []).map((r: any) => ({
         id: r.id,
         nome: r.nome_completo,
         dataNascimento: r.data_nascimento || '',
@@ -53,7 +50,8 @@ export function usePatients() {
         },
         ativo: r.ativo ?? true,
         criadoEm: r.created_at || '',
-        totalConsultas: 0 // Mock de calculo extra
+        totalConsultas: r.consultas?.[0]?.count || 0,
+        ultimaConsulta: r.updated_at?.split('T')[0]
       }))
 
       setPatients(mapped)
@@ -71,14 +69,11 @@ export function usePatients() {
   const getPatientById = useCallback(async (id: string) => {
     setIsLoading(true)
     try {
-      if (USE_MOCK || !clinicaId) {
-        await new Promise((r) => setTimeout(r, 400))
-        return PATIENTS_MOCK.find(p => p.id === id) || null
-      }
+      if (!clinicaId || USE_MOCK) return null
 
       const { data, error: pbErr } = await supabase
         .from('pacientes')
-        .select('*')
+        .select('*, consultas(count)')
         .eq('clinica_id', clinicaId)
         .eq('id', id)
         .single()
@@ -100,7 +95,7 @@ export function usePatients() {
         },
         ativo: data.ativo ?? true,
         criadoEm: data.created_at || '',
-        totalConsultas: 0
+        totalConsultas: data.consultas?.[0]?.count || 0
       } as Patient
     } catch (err: any) {
       toast({ title: 'Erro', description: 'Erro ao buscar dados do paciente.', type: 'error' })
@@ -110,48 +105,88 @@ export function usePatients() {
     }
   }, [clinicaId, toast])
 
-  // ── STUB: Buscar histórico de consultas ───────────────────────────────────
+  // ── Buscar histórico de consultas ───────────────────────────────────────────
   const getPatientHistory = useCallback(async (id: string): Promise<Appointment[]> => {
+    if (!clinicaId || USE_MOCK) return []
     setIsLoading(true)
-    await new Promise((r) => setTimeout(r, 300))
-    setIsLoading(false)
-    return PATIENT_APPOINTMENTS_MOCK[id] || []
-  }, [])
+    try {
+      const { data, error } = await supabase
+        .from('consultas')
+        .select(`
+          *,
+          profissional:profiles!consultas_profissional_id_fkey (nome_completo),
+          paciente:pacientes (nome_completo),
+          procedimento:procedimentos (nome)
+        `)
+        .eq('paciente_id', id)
+        .order('data_hora_inicio', { ascending: false })
 
-  // ── STUB: Buscar documentos do paciente ──────────────────────────────────
+      if (error) throw error
+
+      return (data || []).map((row: any) => ({
+        id: row.id,
+        pacienteId: row.paciente_id,
+        pacienteNome: row.paciente?.nome_completo || 'Sem Nome',
+        profissionalId: row.profissional_id,
+        profissionalNome: row.profissional?.nome_completo || 'Sem Nome',
+        data: row.data_hora_inicio.split('T')[0],
+        horaInicio: row.data_hora_inicio.split('T')[1].substring(0, 5),
+        horaFim: row.data_hora_fim.split('T')[1].substring(0, 5),
+        procedimento: row.procedimento?.nome || 'Consulta',
+        status: row.status,
+        observacoes: row.observacoes,
+        valor: row.valor,
+        criadoEm: row.created_at,
+        atualizadoEm: row.updated_at
+      })) as Appointment[]
+    } catch (err: any) {
+      console.error(err)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
+
+  // ── Buscar documentos do paciente ──────────────────────────────────────────
   const getPatientDocuments = useCallback(async (id: string): Promise<PatientDocument[]> => {
+    if (!clinicaId || USE_MOCK) return []
     setIsLoading(true)
-    await new Promise((r) => setTimeout(r, 300))
-    setIsLoading(false)
-    return PATIENT_DOCUMENTS_MOCK[id] || []
-  }, [])
+    try {
+      const { data, error } = await supabase
+        .from('documentos_paciente')
+        .select('*')
+        .eq('paciente_id', id)
+        .order('created_at', { ascending: false })
 
-  // ── STUB: Buscar financeiro do paciente ──────────────────────────────────
+      if (error) throw error
+
+      return (data || []).map(row => ({
+        id: row.id,
+        pacienteId: row.paciente_id,
+        nome: row.nome || 'Sem Nome',
+        tipo: row.mime_type?.includes('image') ? 'imagem' : 'pdf',
+        url: row.arquivo_url || '',
+        dataUpload: row.created_at || '',
+        tamanho: row.tamanho_bytes ? `${(row.tamanho_bytes / 1024).toFixed(1)} KB` : '0 KB'
+      })) as PatientDocument[]
+    } catch (err: any) {
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
+
+  // ── Buscar financeiro do paciente (PENDENTE: Módulo em construção) ──────────
   const getPatientFinancial = useCallback(async (id: string): Promise<PatientFinancial[]> => {
-    setIsLoading(true)
-    await new Promise((r) => setTimeout(r, 300))
-    setIsLoading(false)
-    return PATIENT_FINANCIAL_MOCK[id] || []
+    return [] // Simplesmente retorna vazio até a construção do módulo financeiro
   }, [])
 
   // ── Criar novo paciente ─────────────────────────────────────────────
   const createPatient = useCallback(async (data: Partial<Patient>) => {
+    if (!clinicaId || USE_MOCK) return null
     setIsLoading(true)
     try {
-      if (USE_MOCK || !clinicaId) {
-        await new Promise((r) => setTimeout(r, 600))
-        const novo: Patient = {
-          ...(data as Patient),
-          id: `pac-${Date.now()}`,
-          ativo: true,
-          criadoEm: new Date().toISOString().split('T')[0],
-          totalConsultas: 0
-        }
-        setPatients(prev => [novo, ...prev])
-        return novo
-      }
-
-      const insertData = {
+      const insertData: any = {
         clinica_id: clinicaId,
         nome_completo: data.nome || '',
         email: data.contato?.email || null,
@@ -205,15 +240,9 @@ export function usePatients() {
 
   // ── Atualizar paciente ──────────────────────────────────────────────
   const updatePatient = useCallback(async (id: string, data: Partial<Patient>) => {
+    if (!clinicaId || USE_MOCK) return
     setIsLoading(true)
     try {
-      if (USE_MOCK || !clinicaId) {
-        await new Promise((r) => setTimeout(r, 500))
-        setPatients(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
-        toast({ title: 'Sucesso', description: 'Paciente atualizado.', type: 'success' })
-        return
-      }
-
       const updateData: any = {}
       if (data.nome) updateData.nome_completo = data.nome
       if (data.contato?.email !== undefined) updateData.email = data.contato.email
@@ -249,7 +278,9 @@ export function usePatients() {
     await new Promise((r) => setTimeout(r, 400))
     const token = Math.random().toString(36).substring(2, 15)
     setIsLoading(false)
-    return `http://localhost:5173/anamnese/${token}?pid=${patientId}`
+    // URL real simulada com o domínio base do app
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/anamnese/${token}?pid=${patientId}`
   }, [])
 
   return {

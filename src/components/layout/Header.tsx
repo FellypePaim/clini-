@@ -40,6 +40,7 @@ const ROLE_LABELS = {
   administrador: 'Administrador',
   profissional:  'Profissional',
   recepção:      'Recepção',
+  superadmin:    'SuperAdmin',
 }
 
 interface HeaderProps {
@@ -58,11 +59,8 @@ export function Header({ sidebarWidth }: HeaderProps) {
   const routeInfo = currentRoute?.[1]
 
   const initials = user?.nome
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
+    ? user.nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
+    : 'U'
 
   return (
     <header

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
+import { ShoppingBag } from 'lucide-react'
 import type { Product } from '../../types/estoque'
 
 export function EstoquePage() {
@@ -50,16 +51,23 @@ export function EstoquePage() {
           <div className="flex items-center gap-3">
             <Link 
               to="/estoque/movimentacoes" 
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm"
             >
               Movimentações
+            </Link>
+            <Link 
+              to="/estoque/regras" 
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+            >
+              <ShoppingBag size={18} className="text-indigo-500" />
+              Regras
             </Link>
             <Link 
               to="/estoque/produtos" 
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
             >
               <Package size={18} />
-              Catálogo de Produtos
+              Catálogo
             </Link>
           </div>
         </div>

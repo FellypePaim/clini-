@@ -34,7 +34,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
 
 export function ProcedimentosPieChart() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [procedimentos, setProcedimentos] = useState<ProcData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -44,22 +44,22 @@ export function ProcedimentosPieChart() {
   }, [clinicaId])
 
   async function loadDados() {
+    if (!clinicaId) return
     setLoading(true)
     const mesAtual = new Date()
     const inicioMes = new Date(mesAtual.getFullYear(), mesAtual.getMonth() - 1, 1).toISOString()
 
     const { data } = await supabase
       .from('consultas')
-      .select('procedimento')
+      .select('procedimento:procedimentos(nome)')
       .eq('clinica_id', clinicaId)
-      .gte('data_hora', inicioMes)
-      .not('procedimento', 'is', null)
+      .gte('data_hora_inicio', inicioMes)
 
     if (data && data.length > 0) {
       // Contar ocorrências por procedimento
       const contagem: Record<string, number> = {}
       data.forEach((c: any) => {
-        const proc = c.procedimento ?? 'Outros'
+        const proc = c.procedimento?.nome ?? 'Outros'
         contagem[proc] = (contagem[proc] ?? 0) + 1
       })
 

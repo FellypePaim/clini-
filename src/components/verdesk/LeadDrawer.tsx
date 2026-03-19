@@ -11,9 +11,12 @@ import {
   User,
   History,
   FileText,
-  Edit2
+  Edit2,
+  UserPlus,
+  Loader2
 } from 'lucide-react'
 import { useVerdesk } from '../../hooks/useVerdesk'
+import { usePatients } from '../../hooks/usePatients'
 import { Avatar } from '../ui/Avatar'
 import { Badge } from '../ui/Badge'
 import type { LeadStage } from '../../types/verdesk'
@@ -41,10 +44,30 @@ const INTERACTION_ICONS = {
 
 export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
   const { leads, moveLead, addLeadInteraction, updateLead } = useVerdesk()
+  const { createPatient, isLoading: isCreatingPatient } = usePatients()
   const lead = leads.find((l) => l.id === leadId)
   const [note, setNote] = useState('')
 
   if (!lead) return null
+
+  const handleConvertToPatient = async () => {
+     if (!lead) return
+     const patient = await createPatient({
+        nome: lead.name,
+        contato: {
+           telefone: lead.phone,
+           email: lead.email || ''
+        }
+     })
+     if (patient) {
+        moveLead(lead.id, 'Agendado')
+        addLeadInteraction(lead.id, {
+           type: 'appointment',
+           content: `Lead convertido em Paciente: ${patient.id}`,
+           author: 'CRM'
+        })
+     }
+  }
 
   const handleAddNote = () => {
     if (!note.trim()) return
@@ -123,6 +146,15 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
                   title="Agendar Consulta"
                 >
                   <Calendar size={14} /> Agendar
+                </button>
+                <button 
+                  onClick={handleConvertToPatient}
+                  disabled={isCreatingPatient}
+                  className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-slate-900 text-white font-semibold text-xs rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50"
+                  title="Converter para Paciente"
+                >
+                  {isCreatingPatient ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />} 
+                  Ficha
                 </button>
               </div>
             </div>

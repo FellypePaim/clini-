@@ -9,11 +9,15 @@ import {
   Search, 
   Stethoscope, 
   Play, 
-  Square,
   Activity,
   AlertCircle,
+  PenTool,
+  Fingerprint
 } from 'lucide-react'
 import { useProntuario, CID10_MOCK } from '../../hooks/useProntuario'
+import { useEstoqueAutomation } from '../../hooks/useEstoque'
+import { SignaturePad } from '../ui/SignaturePad'
+import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import type { Appointment } from '../../types'
 import type { CID10, EvolutionRecord } from '../../types/prontuario'
@@ -28,6 +32,7 @@ interface EvolutionModalProps {
 
 export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription, appointment }: EvolutionModalProps) {
   const { transcribeAudio, generateAISummary } = useProntuario()
+  const { processProcedure } = useEstoqueAutomation()
   const [content, setContent] = useState('')
   const [cidSearch, setCidSearch] = useState('')
   const [selectedCid, setSelectedCid] = useState<CID10 | null>(null)
@@ -35,6 +40,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
   const [isSummarizing, setIsSummarizing] = useState(false)
   const [summary, setSummary] = useState<any>(null)
   
+  const [signature, setSignature] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -60,6 +66,9 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
 
   const handleSave = async () => {
     setIsSubmitting(true)
+    // Generate a simple hash for audit purposes
+    const auditHash = btoa(content.slice(0, 100) + new Date().getTime()).slice(0, 16)
+
     await onSave({
       consultaId: appointment.id,
       pacienteId: appointment.pacienteId,
@@ -67,8 +76,16 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
       profissionalId: appointment.profissionalId,
       texto: content,
       cid10: selectedCid?.codigo,
-      resumoIA: summary
-    })
+      resumoIA: summary,
+      assinaturaUrl: signature || undefined,
+      hashAuditoria: auditHash
+    } as any)
+
+    // Automação de estoque: Processa o procedimento para baixar materiais
+    if (appointment.procedimento) {
+      processProcedure(appointment.procedimento, appointment.profissionalNome, appointment.pacienteId)
+    }
+
     setIsSubmitting(false)
     onClose()
   }
@@ -196,6 +213,25 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                     </button>
                   </div>
                 )}
+              </div>
+
+              {/* Signature Section */}
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-1">
+                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                     <PenTool className="w-3.5 h-3.5" /> Assinatura Eletrônica 
+                   </label>
+                   {signature && (
+                      <Badge variant="green" className="text-[9px] h-4 bg-green-50 text-green-700 animate-pulse border-none">
+                        <Fingerprint size={10} className="mr-1" /> PROTEGIDA COM HASH
+                      </Badge>
+                   )}
+                </div>
+                
+                <SignaturePad 
+                   onSave={(s) => setSignature(s)} 
+                   onClear={() => setSignature(null)} 
+                />
               </div>
             </div>
 

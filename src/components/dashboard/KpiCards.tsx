@@ -34,7 +34,7 @@ function KpiSkeleton() {
 
 export function KpiCards() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [kpis, setKpis] = useState<KpiData[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -44,6 +44,7 @@ export function KpiCards() {
   }, [clinicaId])
 
   async function loadKpis() {
+    if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
@@ -58,8 +59,8 @@ export function KpiCards() {
       .from('consultas')
       .select('*', { count: 'exact', head: true })
       .eq('clinica_id', clinicaId)
-      .gte('data_hora', inicioHoje)
-      .lt('data_hora', fimHoje)
+      .gte('data_hora_inicio', inicioHoje)
+      .lt('data_hora_inicio', fimHoje)
 
     // Novos pacientes este mês
     const { count: pacientesMes } = await supabase
@@ -76,29 +77,30 @@ export function KpiCards() {
       .gte('created_at', mesAnterior)
       .lt('created_at', fimMesAnterior)
 
-    // Faturamento do mês (lançamentos do tipo receita)
-    const { data: lancamentos } = await supabase
-      .from('lancamentos')
+    // Faturamento do mês (transações do tipo receita e status pago)
+    const { data: lancamentosData } = await supabase
+      .from('transacoes' as any)
       .select('valor')
       .eq('clinica_id', clinicaId)
       .eq('tipo', 'receita')
-      .gte('data_competencia', mesAtual.split('T')[0])
+      .eq('status', 'pago')
+      .gte('data_consolidacao', mesAtual.split('T')[0])
 
-    const faturamento = lancamentos?.reduce((sum, l) => sum + (l.valor ?? 0), 0) ?? 0
+    const faturamento = (lancamentosData as any[])?.reduce((sum, l) => sum + (l.valor ?? 0), 0) ?? 0
 
     // Taxa de comparecimento (consultas concluídas / total agendadas este mês)
     const { count: agendadasMes } = await supabase
       .from('consultas')
       .select('*', { count: 'exact', head: true })
       .eq('clinica_id', clinicaId)
-      .gte('data_hora', mesAtual)
+      .gte('data_hora_inicio', mesAtual)
 
     const { count: concluidasMes } = await supabase
       .from('consultas')
       .select('*', { count: 'exact', head: true })
       .eq('clinica_id', clinicaId)
-      .eq('status', 'concluido')
-      .gte('data_hora', mesAtual)
+      .eq('status', 'finalizado')
+      .gte('data_hora_inicio', mesAtual)
 
     const taxaComparecimento = agendadasMes && agendadasMes > 0
       ? Math.round(((concluidasMes ?? 0) / agendadasMes) * 100)

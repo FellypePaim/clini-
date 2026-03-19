@@ -40,6 +40,16 @@ const MOCK_USERS: (User & { senha: string })[] = [
     ativo: true,
     criadoEm: '2024-03-01T08:00:00Z',
   },
+  {
+    id: 'usr-super',
+    nome: 'Super Usuário',
+    email: 'superadmin@cliniplus.com',
+    senha: 'superpassword',
+    role: 'superadmin',
+    clinicaId: '', // Superadmin não tem clínica vinculada
+    ativo: true,
+    criadoEm: new Date().toISOString(),
+  },
 ]
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
@@ -100,10 +110,18 @@ export const useAuthStore = create<AuthState>()(
               .single()
 
             // Mapeia role do banco para role do frontend
-            const dbRole = profileData?.role || 'recepcao'
-            const mappedRole: Role = dbRole === 'admin' ? 'administrador' 
-                                   : dbRole === 'recepcao' ? 'recepção' 
-                                   : 'profissional'
+            const dbRole = (profileData as any)?.role
+            let mappedRole: Role = 'recepção'
+
+            if (dbRole === 'superadmin') {
+              mappedRole = 'superadmin'
+            } else if (dbRole === 'admin' || dbRole === 'administrador') {
+              mappedRole = 'administrador'
+            } else if (dbRole === 'profissional') {
+              mappedRole = 'profissional'
+            } else if (dbRole === 'recepcao' || dbRole === 'recepção') {
+              mappedRole = 'recepção'
+            }
 
             const userParsed: User = {
                 id: data.user.id,
@@ -153,6 +171,7 @@ export const usePermissions = () => {
     isAdmin: role === 'administrador',
     isProfissional: role === 'profissional',
     isRecepcao: role === 'recepção',
+    isSuperAdmin: role === 'superadmin',
     role,
   }
 }

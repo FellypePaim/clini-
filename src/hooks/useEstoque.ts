@@ -1,172 +1,288 @@
-import { create } from 'zustand'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import type { Product, Movement, PurchaseOrder, ProcedureConsumptionRule, ProductCategory } from '../types/estoque'
+import { supabase } from '../lib/supabase'
+import { useAuthStore } from '../store/authStore'
+import { useToast } from './useToast'
 
-interface EstoqueState {
-  products: Product[];
-  movements: Movement[];
-  purchaseOrders: PurchaseOrder[];
-  consumptionRules: ProcedureConsumptionRule[];
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+
+export function useEstoque() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [movements, setMovements] = useState<Movement[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
-  getProducts: () => Product[];
-  createProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateProduct: (id: string, data: Partial<Product>) => void;
-  registerEntry: (productId: string, quantity: number, reason: string, responsible: string, cost?: number) => void;
-  registerExit: (productId: string, quantity: number, reason: string, responsible: string, linkedTo?: string) => void;
-  getMovimentacoes: () => Movement[];
-  getAlerts: () => Product[];
-  generatePurchaseOrder: (order: Omit<PurchaseOrder, 'id' | 'status' | 'createdAt'>) => void;
-  toggleConsumptionRule: (ruleId: string) => void;
-}
+  const user = useAuthStore(state => state.user)
+  const clinicaId = user?.clinicaId
+  const { toast } = useToast()
 
-const INITIAL_PRODUCTS: Product[] = [
-  { id: '1', code: 'INJ-001', name: 'Toxina Botulínica 100UI', category: 'Injetáveis', unit: 'Frasco', currentStock: 2, minimumStock: 5, expirationDate: '2026-10-15', unitCost: 850, provider: 'Botox Corp', location: 'Geladeira 1', createdAt: '2026-01-10T00:00:00Z', updatedAt: '2026-03-01T00:00:00Z' },
-  { id: '2', code: 'INJ-002', name: 'Ácido Hialurônico 1ml', category: 'Injetáveis', unit: 'Seringa', currentStock: 0, minimumStock: 10, expirationDate: '2027-02-20', unitCost: 400, provider: 'Restylane BR', location: 'Geladeira 1', createdAt: '2026-01-15T00:00:00Z', updatedAt: '2026-03-05T00:00:00Z' },
-  { id: '3', code: 'DESC-001', name: 'Luvas Descartáveis P', category: 'Descartáveis', unit: 'Caixa 100un', currentStock: 15, minimumStock: 20, unitCost: 45, provider: 'Médico Supplies', location: 'Almoxarifado B', createdAt: '2026-02-01T00:00:00Z', updatedAt: '2026-03-10T00:00:00Z' },
-  { id: '4', code: 'DESC-002', name: 'Luvas Descartáveis M', category: 'Descartáveis', unit: 'Caixa 100un', currentStock: 8, minimumStock: 30, unitCost: 45, provider: 'Médico Supplies', location: 'Almoxarifado B', createdAt: '2026-02-01T00:00:00Z', updatedAt: '2026-03-10T00:00:00Z' },
-  { id: '5', code: 'INJ-003', name: 'Agulhas 30G', category: 'Descartáveis', unit: 'Caixa 100un', currentStock: 50, minimumStock: 10, unitCost: 120, provider: 'Agulhas Cia', location: 'Sala 2', createdAt: '2026-01-20T00:00:00Z', updatedAt: '2026-02-20T00:00:00Z' },
-  { id: '6', code: 'MED-001', name: 'Anestésico Lidocaína', category: 'Medicamentos', unit: 'Tubo 30g', currentStock: 12, minimumStock: 5, expirationDate: '2026-08-30', unitCost: 40, provider: 'FarmaDental', location: 'Gaveta A', createdAt: '2026-02-15T00:00:00Z', updatedAt: '2026-03-02T00:00:00Z' },
-  { id: '7', code: 'DESC-003', name: 'Fio de Sutura Nylon', category: 'Descartáveis', unit: 'Caixa 24un', currentStock: 3, minimumStock: 10, expirationDate: '2028-05-15', unitCost: 80, provider: 'Suturas BR', location: 'Almoxarifado A', createdAt: '2026-01-05T00:00:00Z', updatedAt: '2026-03-12T00:00:00Z' },
-  { id: '8', code: 'DESC-004', name: 'Seringa 1ml BD', category: 'Descartáveis', unit: 'Caixa 100un', currentStock: 5, minimumStock: 15, unitCost: 65, provider: 'MedMateriais', location: 'Gaveta C', createdAt: '2026-02-10T00:00:00Z', updatedAt: '2026-03-15T00:00:00Z' },
-  { id: '9', code: 'MAT-001', name: 'Resina Composta A2', category: 'Materiais Dentários', unit: 'Seringa 4g', currentStock: 0, minimumStock: 5, expirationDate: '2025-12-01', unitCost: 90, provider: 'Dental Cremer', location: 'Gaveta D', createdAt: '2025-10-01T00:00:00Z', updatedAt: '2026-03-10T00:00:00Z' },
-  { id: '10', code: 'LIMP-001', name: 'Álcool 70%', category: 'Limpeza', unit: 'Litro', currentStock: 4, minimumStock: 10, unitCost: 15, provider: 'CleanMix', location: 'Área de Limpeza', createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-03-18T00:00:00Z' },
-  // Adding more mock products directly below
-  ...Array.from({ length: 20 }).map((_, i) => ({
-    id: `mock-${i + 11}`,
-    code: `PROD-${String(i + 11).padStart(3, '0')}`,
-    name: `Produto Variado ${i + 11}`,
-    category: ['Descartáveis', 'Materiais Dentários', 'Equipamentos', 'Outros'][Math.floor(Math.random() * 4)] as ProductCategory,
-    unit: 'Unidade',
-    currentStock: Math.floor(Math.random() * 100) + 10,
-    minimumStock: 5,
-    unitCost: Math.floor(Math.random() * 200) + 10,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }))
-];
+  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
+  useEffect(() => {
+    if (USE_MOCK || !clinicaId) return
 
-const INITIAL_MOVEMENTS: Movement[] = [
-  ...Array.from({ length: 50 }).map((_, i) => {
-    const isSaida = Math.random() > 0.4;
-    return {
-      id: `mov-${i}`,
-      productId: INITIAL_PRODUCTS[Math.floor(Math.random() * INITIAL_PRODUCTS.length)].id,
-      productName: INITIAL_PRODUCTS[Math.floor(Math.random() * INITIAL_PRODUCTS.length)].name,
-      type: isSaida ? 'Saída' : (Math.random() > 0.8 ? 'Ajuste' : 'Entrada') as const,
-      quantity: Math.floor(Math.random() * 5) + 1,
-      date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toISOString(),
-      reason: isSaida ? 'Consumo em Procedimento' : 'Reposição de Estoque',
-      responsible: ['Dra. Ana', 'Recepcionista Maria', 'Dr. Carlos'][Math.floor(Math.random() * 3)],
-      linkedTo: isSaida ? `PRONT-${Math.floor(Math.random() * 1000)}` : undefined,
+    const loadData = async () => {
+      await Promise.all([
+        fetchProducts(),
+        fetchMovements()
+      ])
     }
-  })
-];
+    
+    loadData()
 
-const INITIAL_RULES: ProcedureConsumptionRule[] = [
-  { id: 'r1', procedureName: 'Aplicação de Botox', productId: '1', quantity: 1, isActive: true },
-  { id: 'r2', procedureName: 'Preenchimento Labial', productId: '2', quantity: 1, isActive: true },
-  { id: 'r3', procedureName: 'Cirurgia Oral', productId: '7', quantity: 2, isActive: false },
-];
+    // Subscreve a mudanças no estoque
+    const productsChannel = supabase.channel('estoque_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'produtos_estoque', filter: `clinica_id=eq.${clinicaId}` },
+        () => fetchProducts()
+      )
+      .subscribe()
 
-export const useEstoque = create<EstoqueState>((set, get) => ({
-  products: INITIAL_PRODUCTS,
-  movements: INITIAL_MOVEMENTS.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-  purchaseOrders: [],
-  consumptionRules: INITIAL_RULES,
+    const movementsChannel = supabase.channel('movimentacoes_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'estoque_movimentacoes', filter: `clinica_id=eq.${clinicaId}` },
+        () => fetchMovements()
+      )
+      .subscribe()
 
-  getProducts: () => get().products.map(p => ({
+    return () => {
+      supabase.removeChannel(productsChannel)
+      supabase.removeChannel(movementsChannel)
+    }
+  }, [clinicaId])
+
+  // ── Buscar Produtos ────────────────────────────────────────────────────────
+  const fetchProducts = useCallback(async () => {
+    if (!clinicaId) return
+    setIsLoading(true)
+    try {
+      const { data, error: pbErr } = await supabase
+        .from('produtos_estoque')
+        .select('*')
+        .eq('clinica_id', clinicaId)
+        .eq('ativo', true)
+        .order('nome', { ascending: true })
+
+      if (pbErr) throw pbErr
+
+      const mapped: Product[] = (data || []).map(row => ({
+        id: row.id,
+        code: row.codigo || '',
+        name: row.nome,
+        category: row.categoria as ProductCategory,
+        unit: row.unidade || 'Unidade',
+        currentStock: row.estoque_atual || 0,
+        minimumStock: row.estoque_minimo || 0,
+        expirationDate: row.validade || undefined,
+        unitCost: row.custo_unitario || 0,
+        provider: row.fornecedor_preferencial || undefined,
+        location: row.localizacao || undefined,
+        createdAt: row.created_at || '',
+        updatedAt: row.updated_at || ''
+      }))
+
+      setProducts(mapped)
+    } catch (err: any) {
+      setError(err.message)
+      toast({ title: 'Erro', description: 'Erro ao buscar produtos.', type: 'error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId, toast])
+
+  // ── Buscar Movimentações ────────────────────────────────────────────────────
+  const fetchMovements = useCallback(async () => {
+    if (!clinicaId) return
+    try {
+      const { data, error: pbErr } = await supabase
+        .from('estoque_movimentacoes')
+        .select(`
+          *,
+          produto:produtos_estoque (nome),
+          usuario:profiles (nome_completo)
+        `)
+        .eq('clinica_id', clinicaId)
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (pbErr) throw pbErr
+
+      const mapped: Movement[] = (data || []).map((row: any) => ({
+        id: row.id,
+        productId: row.produto_id,
+        productName: row.produto?.nome || 'Produto Removido',
+        type: row.tipo === 'entrada' ? 'Entrada' : row.tipo === 'saida' ? 'Saída' : 'Ajuste',
+        quantity: row.quantidade,
+        date: row.created_at || '',
+        reason: row.motivo || '',
+        responsible: row.usuario?.nome_completo || 'Sistema',
+        linkedTo: row.consulta_id || row.procedimento_id || undefined
+      }))
+
+      setMovements(mapped)
+    } catch (err: any) {
+      console.error('Erro ao buscar movimentações:', err)
+    }
+  }, [clinicaId])
+
+  // ── Compatibilidade com Componentes legados (getters) ──────────────────────
+  const getProducts = useCallback(() => products.map(p => ({
     ...p,
     status: p.currentStock === 0 ? 'Zerado' : (p.currentStock < p.minimumStock ? 'Crítico' : 'Normal')
-  })),
+  }) as Product & { status: string }), [products])
 
-  createProduct: (product) => {
-    const newProduct: Product = {
-      ...product,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    set((state) => ({ products: [newProduct, ...state.products] }));
-  },
+  const getMovimentacoes = useCallback(() => movements, [movements])
+  const getAlerts = useCallback(() => products.filter(p => p.currentStock < p.minimumStock), [products])
 
-  updateProduct: (id, data) => {
-    set((state) => ({
-      products: state.products.map(p => p.id === id ? { ...p, ...data, updatedAt: new Date().toISOString() } : p)
-    }));
-  },
+  // ── Criar Produto ───────────────────────────────────────────────────────────
+  const createProduct = useCallback(async (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (USE_MOCK || !clinicaId) return
+    setIsLoading(true)
+    try {
+      const { error: pbErr } = await supabase
+        .from('produtos_estoque')
+        .insert({
+          clinica_id: clinicaId,
+          codigo: product.code,
+          nome: product.name,
+          categoria: product.category,
+          unidade: product.unit,
+          estoque_atual: product.currentStock,
+          estoque_minimo: product.minimumStock,
+          custo_unitario: product.unitCost,
+          validade: product.expirationDate,
+          fornecedor_preferencial: product.provider,
+          localizacao: product.location,
+          ativo: true
+        })
 
-  registerEntry: (productId, quantity, reason, responsible, cost) => {
-    const product = get().products.find(p => p.id === productId);
-    if (!product) return;
+      if (pbErr) throw pbErr
+      toast({ title: 'Sucesso', description: 'Produto cadastrado.', type: 'success' })
+      await fetchProducts()
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId, fetchProducts, toast])
 
-    const newMovement: Movement = {
-      id: Math.random().toString(36).substr(2, 9),
-      productId,
-      productName: product.name,
-      type: 'Entrada',
-      quantity,
-      date: new Date().toISOString(),
-      reason,
-      responsible
-    };
+  // ── Registrar Entrada / Saída ──────────────────────────────────────────────
+  const registerMovement = useCallback(async (
+    productId: string, 
+    quantity: number, 
+    type: 'entrada' | 'saida' | 'ajuste', 
+    reason: string, 
+    linkedTo?: string, 
+    newCost?: number
+  ) => {
+    if (USE_MOCK || !clinicaId) return
+    setIsLoading(true)
+    try {
+      const product = products.find(p => p.id === productId)
+      if (!product) throw new Error('Produto não encontrado')
 
-    set((state) => ({
-      products: state.products.map(p => 
-        p.id === productId 
-          ? { ...p, currentStock: p.currentStock + quantity, unitCost: cost ?? p.unitCost, updatedAt: new Date().toISOString() } 
-          : p
-      ),
-      movements: [newMovement, ...state.movements]
-    }));
-  },
+      const currentStock = product.currentStock
+      const newStock = type === 'entrada' ? currentStock + quantity : currentStock - quantity
 
-  registerExit: (productId, quantity, reason, responsible, linkedTo) => {
-    const product = get().products.find(p => p.id === productId);
-    if (!product) return;
+      // Registra a movimentação
+      const { error: movErr } = await supabase
+        .from('estoque_movimentacoes')
+        .insert({
+          clinica_id: clinicaId,
+          produto_id: productId,
+          tipo: type,
+          quantidade: quantity,
+          motivo: reason,
+          estoque_anterior: currentStock,
+          estoque_posterior: newStock,
+          usuario_id: user?.id,
+          consulta_id: linkedTo?.startsWith('CONS-') ? linkedTo.replace('CONS-', '') : undefined
+        })
 
-    const newMovement: Movement = {
-      id: Math.random().toString(36).substr(2, 9),
-      productId,
-      productName: product.name,
-      type: 'Saída',
-      quantity,
-      date: new Date().toISOString(),
-      reason,
-      responsible,
-      linkedTo
-    };
+      if (movErr) throw movErr
 
-    set((state) => ({
-      products: state.products.map(p => 
-        p.id === productId 
-          ? { ...p, currentStock: Math.max(0, p.currentStock - quantity), updatedAt: new Date().toISOString() } 
-          : p
-      ),
-      movements: [newMovement, ...state.movements]
-    }));
-  },
+      // Atualiza o estoque do produto
+      const updateData: any = { 
+        estoque_atual: newStock,
+        updated_at: new Date().toISOString()
+      }
+      if (newCost !== undefined) updateData.custo_unitario = newCost
 
-  getMovimentacoes: () => get().movements,
+      const { error: prodErr } = await supabase
+        .from('produtos_estoque')
+        .update(updateData)
+        .eq('id', productId)
 
-  getAlerts: () => get().products.filter(p => p.currentStock < p.minimumStock),
+      if (prodErr) throw prodErr
 
-  generatePurchaseOrder: (orderData) => {
-    const newOrder: PurchaseOrder = {
-      ...orderData,
-      id: Math.random().toString(36).substr(2, 9),
-      status: 'Pendente',
-      createdAt: new Date().toISOString()
-    };
-    set((state) => ({ purchaseOrders: [newOrder, ...state.purchaseOrders] }));
-  },
+      toast({ title: 'Sucesso', description: 'Estoque atualizado.', type: 'success' })
+      await Promise.all([fetchProducts(), fetchMovements()])
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId, products, user, fetchProducts, fetchMovements, toast])
 
-  toggleConsumptionRule: (ruleId) => {
-    set((state) => ({
-      consumptionRules: state.consumptionRules.map(r => r.id === ruleId ? { ...r, isActive: !r.isActive } : r)
-    }));
+  const registerEntry = useCallback((productId: string, quantity: number, reason: string, responsible: string, cost?: number) => {
+    registerMovement(productId, quantity, 'entrada', reason, undefined, cost)
+  }, [registerMovement])
+
+  const registerExit = useCallback((productId: string, quantity: number, reason: string, responsible: string, linkedTo?: string) => {
+    registerMovement(productId, quantity, 'saida', reason, linkedTo)
+  }, [registerMovement])
+
+  // ── Outros (Purchase Orders, Consumption Rules) ──────────
+  const [consumptionRules, setConsumptionRules] = useState<ProcedureConsumptionRule[]>([])
+
+  const fetchConsumptionRules = useCallback(async () => {
+    if (!clinicaId) return
+    const { data, error: err } = await supabase
+      .from('estoque_regras_consumo' as any)
+      .select('*')
+      .eq('clinica_id', clinicaId)
+      .eq('ativo', true)
+    
+    if (!err) {
+      setConsumptionRules(data.map((r: any) => ({
+        id: r.id,
+        procedureName: r.procedimento_nome,
+        productId: r.produto_id,
+        quantity: r.quantidade,
+        isActive: r.ativo
+      })))
+    }
+  }, [clinicaId])
+
+  useEffect(() => {
+    if (clinicaId) fetchConsumptionRules()
+  }, [clinicaId, fetchConsumptionRules])
+
+  const toggleConsumptionRule = useCallback((ruleId: string) => {
+    // Implementar update no DB se necessário
+    setConsumptionRules(prev => prev.map((r: ProcedureConsumptionRule) => r.id === ruleId ? { ...r, isActive: !r.isActive } : r))
+  }, [])
+
+  return {
+    products,
+    movements,
+    isLoading,
+    error,
+    getProducts,
+    getMovimentacoes,
+    getAlerts,
+    createProduct,
+    registerEntry,
+    registerExit,
+    consumptionRules,
+    toggleConsumptionRule,
+    purchaseOrders: [] as PurchaseOrder[],
+    generatePurchaseOrder: (p: any) => { console.log('Mock PO', p) }
   }
-}));
+}
 
-// Stub for automation hook
+// Hook de automação para o PEP
 export const useEstoqueAutomation = () => {
   const { registerExit, consumptionRules } = useEstoque();
 

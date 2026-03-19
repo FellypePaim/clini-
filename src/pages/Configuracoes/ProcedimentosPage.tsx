@@ -131,7 +131,12 @@ export function ProcedimentosPage() {
       console.warn('Tabela procedimentos não encontrada:', error.message)
       setProcedimentos([])
     } else {
-      setProcedimentos(data ?? [])
+      const mapped = (data || []).map((p: any) => ({
+        ...p,
+        duracao: p.duracao_minutos || 0,
+        valor: p.valor_particular || 0
+      })) as Procedimento[]
+      setProcedimentos(mapped)
     }
     setIsLoading(false)
   }, [clinicaId])
@@ -149,7 +154,14 @@ export function ProcedimentosPage() {
       // Insert
       const { data, error } = await supabase.from('procedimentos').insert({ ...formData, clinica_id: clinicaId, ativo: true }).select().single()
       if (error) { toast({ title: 'Erro', description: error.message, type: 'error' }); return }
-      if (data) setProcedimentos(prev => [...prev, data])
+      if (data) {
+        const mapped = {
+          ...(data as any),
+          duracao: (data as any).duracao_minutos || 0,
+          valor: (data as any).valor_particular || 0
+        } as Procedimento
+        setProcedimentos(prev => [...prev, mapped])
+      }
     }
     toast({ title: 'Salvo!', description: 'Procedimento salvo com sucesso.', type: 'success' })
     setModal({ open: false })

@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────
 // ROLES E PERMISSÕES
 // ─────────────────────────────────────────────
-export type Role = 'administrador' | 'profissional' | 'recepção'
+export type Role = 'administrador' | 'profissional' | 'recepção' | 'superadmin'
 
 export interface Permission {
   canViewAllSchedules: boolean
@@ -40,6 +40,15 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
     canManageUsers: false,
     canViewReports: false,
     canWritePrescriptions: false,
+  },
+  superadmin: {
+    canViewAllSchedules: true,
+    canManagePatients: true,
+    canViewFinancial: true,
+    canManageStock: true,
+    canManageUsers: true,
+    canViewReports: true,
+    canWritePrescriptions: true,
   },
 }
 

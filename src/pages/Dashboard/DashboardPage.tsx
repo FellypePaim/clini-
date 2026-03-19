@@ -5,6 +5,7 @@ import { ConsultasChart } from '../../components/dashboard/ConsultasChart'
 import { ProcedimentosPieChart } from '../../components/dashboard/ProcedimentosPieChart'
 import { AgendamentosList } from '../../components/dashboard/AgendamentosList'
 import { PacientesRecentes } from '../../components/dashboard/PacientesRecentes'
+import { LeadsRecentes } from '../../components/dashboard/LeadsRecentes'
 import { Sparkles } from 'lucide-react'
 
 function getGreeting() {
@@ -56,13 +57,14 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Listas ──────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      {/* ── CRM & Listas ─────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
         <div className="lg:col-span-3">
           <AgendamentosList />
         </div>
-        <div className="lg:col-span-2">
-          <PacientesRecentes />
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
+           <LeadsRecentes />
+           <PacientesRecentes />
         </div>
       </div>
     </div>

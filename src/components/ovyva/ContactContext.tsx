@@ -43,7 +43,7 @@ export function ContactContext({ conversation }: ContactContextProps) {
           <p className="text-[10px] text-gray-400 font-bold tracking-[0.2em] mt-2 bg-gray-50 px-3 py-1 rounded-full">{conversation.contato_telefone}</p>
        </div>
 
-       {/* AI Intent Detection // TODO real intents from metadata */}
+       {/* AI Intent Detection */}
        <div className="mb-10">
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
             <Target className="w-3.5 h-3.5" /> IA & Intenção
@@ -51,10 +51,10 @@ export function ContactContext({ conversation }: ContactContextProps) {
           <div className="bg-green-50/50 p-6 rounded-[32px] border border-green-100 relative group overflow-hidden">
              <div className="absolute top-0 left-0 w-1 h-full bg-green-500" />
              <p className="text-xs font-black text-green-700 uppercase tracking-widest leading-relaxed">
-               {conversation.metadata?.intent || 'Aguardando identificação da intenção'}
+               {conversation.metadata?.intent || 'Aguardando classificação da IA'}
              </p>
              <p className="text-[10px] text-green-600/60 font-medium mt-2">
-                Confiabilidade: 95%
+                Precisão baseada no histórico de chat
              </p>
           </div>
        </div>
@@ -109,11 +109,14 @@ export function ContactContext({ conversation }: ContactContextProps) {
                    className="flex items-center justify-between group"
                  >
                     <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1 group-hover:underline">Estágio Verdesk</span>
-                    <span className="text-[9px] font-black text-gray-900 uppercase">Perguntou Valor &rarr;</span>
+                    <span className="text-[9px] font-black text-gray-900 uppercase">
+                      {conversation.metadata?.lead_stage || 'Novo Lead Remoto'} &rarr;
+                    </span>
                  </button>
               </div>
             </div>
           )}
+
        </div>
 
        {/* Quick Actions */}

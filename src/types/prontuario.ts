@@ -36,6 +36,8 @@ export interface EvolutionRecord {
     conduta: string
     retorno: string
   }
+  assinaturaUrl?: string
+  hashAuditoria?: string
 }
 
 export interface PrescriptionItem {
