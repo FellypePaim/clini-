@@ -1,27 +1,39 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { ToastProvider } from '../ui/ToastProvider'
 
-const SIDEBAR_WIDTH = 240 // 60 * 4 = 240px (w-60)
+const SIDEBAR_WIDTH = 240
 
 export function MainLayout() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Sidebar />
-      <Header sidebarWidth={SIDEBAR_WIDTH} />
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
-      {/* ── Área de conteúdo ───────────────────── */}
-      <main
-        className="min-h-screen transition-all duration-200"
-        style={{ paddingLeft: SIDEBAR_WIDTH, paddingTop: 64 }}
-      >
-        <div className="p-6 animate-fade-in">
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Overlay for mobile sidebar */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-20 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <Sidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen w-full md:pl-[240px]">
+        {/* Header */}
+        <Header onMenuClick={() => setIsMobileMenuOpen(true)} />
+
+        {/* Content */}
+        <main className="flex-1 mt-16 p-4 md:p-6 animate-fade-in w-full overflow-x-hidden">
           <Outlet />
-        </div>
-        <ToastProvider />
-      </main>
+        </main>
+      </div>
+
+      <ToastProvider />
     </div>
   )
 }

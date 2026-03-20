@@ -4,20 +4,9 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-
-// ─── Mock Data ─────────────────────────────────────────────────────────
-const INITIAL_LEADS: Lead[] = [
-  {
-    id: '1', name: 'Ana Silva', origin: 'WhatsApp OVYVA', procedure: 'Botox', estimatedValue: 1200, stage: 'Perguntou Valor', phone: '(11) 98888-7777',
-    lastContactAt: new Date().toISOString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), interactions: []
-  }
-]
-const INITIAL_CAMPAIGNS: Campaign[] = []
-
 export function useVerdesk() {
-  const [leads, setLeads] = useState<Lead[]>(INITIAL_LEADS)
-  const [campaigns, setCampaigns] = useState<Campaign[]>(INITIAL_CAMPAIGNS)
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,10 +15,7 @@ export function useVerdesk() {
 
   // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
   useEffect(() => {
-    if (USE_MOCK || !clinicaId) {
-       setLeads(INITIAL_LEADS)
-       return
-    }
+    if (!clinicaId) return
 
     const fetchAll = async () => {
       await getLeads()
@@ -56,7 +42,7 @@ export function useVerdesk() {
     setIsLoading(true)
     setError(null)
     try {
-      if (USE_MOCK || !clinicaId) return
+      if (!clinicaId) return
 
       const { data, error: pbErr } = await supabase
         .from('leads')
@@ -90,9 +76,9 @@ export function useVerdesk() {
   }, [clinicaId, toast])
 
   const moveLead = useCallback(async (leadId: string, toStage: LeadStage) => {
-    if (USE_MOCK || !clinicaId) {
-       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
-       return
+    if (!clinicaId) {
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
+      return
     }
     try {
       // Optmistic UI
@@ -124,11 +110,7 @@ export function useVerdesk() {
   }, [clinicaId, toast, leads])
 
   const createLead = useCallback(async (data: Omit<Lead, 'id' | 'interactions' | 'createdAt' | 'updatedAt' | 'lastContactAt'>) => {
-    if (USE_MOCK || !clinicaId) {
-      const n: Lead = { ...data, id: Date.now().toString(), interactions: [], createdAt: '', updatedAt: '', lastContactAt: '' }
-      setLeads(prev => [n, ...prev])
-      return
-    }
+    if (!clinicaId) return
     try {
       const { data: ret, error: pbErr } = await supabase
         .from('leads')
@@ -155,7 +137,7 @@ export function useVerdesk() {
   }, [clinicaId, getLeads, toast])
 
   const updateLead = useCallback(async (leadId: string, data: Partial<Lead>) => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
     try {
       const updateData: any = {}
       if (data.name) updateData.nome = data.name
@@ -176,7 +158,7 @@ export function useVerdesk() {
   }, [clinicaId, getLeads, toast])
 
   const addLeadInteraction = useCallback(async (leadId: string, interaction: Omit<LeadInteraction, 'id' | 'date'>) => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
     try {
       const { error: pbErr } = await supabase.from('leads_historico').insert({
          lead_id: leadId,
@@ -191,7 +173,7 @@ export function useVerdesk() {
   }, [clinicaId, toast])
 
   const deleteLead = useCallback(async (leadId: string) => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
     try {
       const { error: pbErr } = await supabase.from('leads').delete().eq('id', leadId).eq('clinica_id', clinicaId)
       if (pbErr) throw pbErr
@@ -205,7 +187,7 @@ export function useVerdesk() {
 
   // ── Campaigns ─────────────────────────────────────────────────────────
   const getCampaigns = useCallback(async () => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
     try {
       const { data, error: pbErr } = await supabase.from('campanhas').select('*').eq('clinica_id', clinicaId)
       if (pbErr) throw pbErr
@@ -225,7 +207,7 @@ export function useVerdesk() {
   }, [clinicaId])
 
   const createCampaign = useCallback(async (campaign: Omit<Campaign, 'id' | 'sentAt'>) => {
-     if (USE_MOCK || !clinicaId) return
+     if (!clinicaId) return
      try {
        const { error: pbErr } = await supabase.from('campanhas').insert({
           clinica_id: clinicaId,
@@ -246,7 +228,7 @@ export function useVerdesk() {
   }, [])
 
   const deleteCampaign = useCallback(async (campaignId: string) => {
-     if (USE_MOCK || !clinicaId) return
+     if (!clinicaId) return
      try {
        await supabase.from('campanhas').delete().eq('id', campaignId)
        await getCampaigns()

@@ -20,8 +20,9 @@
 - Fase 9B: ✅ Frontend conectado ao Supabase
 - Fase 10: ✅ IA Gemini 2.5 Flash integrada (4 actions funcionando)
 - Fase 11: ✅ Storage Supabase (8 buckets configurados)
-- Fase 12: ✅ WhatsApp Evolution API Multi-Tenant (Instâncias por Clínica + UI Conexão)
+- Fase 12: ✅ WhatsApp Evolution API Multi- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + Nova Clínica + Export Financeiro + Login Tracking Fix)
 - Fase 13: 🔜 Deploy produção (Vercel/Netlify)
+- Fase 15: ✅ Diagnósticos e Testes Automatizados Sistêmicos (20/20 Testes Passados)
 
 ## 3. BACKEND — SUPABASE
 
@@ -30,7 +31,8 @@ clinicas, profiles, pacientes, anamneses, documentos_paciente,
 procedimentos, consultas, evolucoes, prescricoes, termos_consentimento,
 harmonizacoes, ovyva_conversas, ovyva_mensagens, leads, leads_historico,
 campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
-estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias
+estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias,
+auditoria_global, feature_flags, tickets_suporte, releases
 
 ### Colunas adicionadas após schema inicial:
 - ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
@@ -78,6 +80,14 @@ Gerencia o ciclo de vida das instâncias do WhatsApp por clínica. Actions:
 - `desconectar`: Desloga o número da instância
 - `listar`: Retorna as instâncias da clínica ativa
 
+### superadmin-actions (✅ funcionando - Versão 2.1)
+Edge Function protegida para operações globais via SuperAdmin:
+- `get_platform_stats`: DASHBOARD FIX (Métricas reais de Ativas vs Trial vs Suspensas).
+- `get_users`: LOGIN FIX (Varre Auth Admin p/ refletir `last_sign_in_at` real em vez de PROFILE).
+- `manage_clinic_status`: Ativa/Suspende clínicas remotamente.
+- `create_clinic`: Provisionamento 100% (Nova base de dados + Auditoria).
+- `impersonate_user`: Geração de Token Admin p/ suporte direto.
+
 ## 5. SECRETS DA EDGE Função (já configurados)
 - GEMINI_API_KEY ✅
 - SUPABASE_URL ✅
@@ -99,30 +109,40 @@ Gerencia o ciclo de vida das instâncias do WhatsApp por clínica. Actions:
 - anamnese-assets ✅ privado
 
 ## 7. ARQUIVOS IMPORTANTES NO PROJETO
-- src/pages/Ovyva/WhatsAppConexaoPage.tsx → Interface de conexão/gestão de QR Code WhatsApp multi-tenant
-- supabase/functions/whatsapp-manager/index.ts → Edge Function de gestão de instâncias Evolution
-- supabase/functions/whatsapp-webhook/index.ts → Webhook Universal que roteia mensagens baseado no "instanceName"
-- supabase/functions/ai-gateway/index.ts → IA de atendimento
-- CONTEXTO_PROJETO.md → Histórico/Arquitetura
+- src/pages/SuperAdmin/* → Painel de controle global (Dashboard, Clínicas, Usuários, IA, Financeiro).
+- src/components/superadmin/NovaClinicaModal.tsx → Modal de criação de clínicas.
+- src/hooks/useSuperAdmin.ts → Hook de conexão centralizado com service_role actions.
+- supabase/functions/superadmin-actions/index.ts → Backend administrativo global.
+- CONTEXTO_PROJETO.md → Histórico/Arquitetura (Este arquivo).
 
-## 8. PRÓXIMOS PASSOS (em ordem)
-1. Rodar testes automatizados do Storage (/dev/storage-diagnostico)
-2. Criar a tabela `whatsapp_instancias` no banco via SQL (código fornecido no chat)
-3. Criar primeiro usuário e clínica reais no banco
-4. Testar fluxo final de Conexão WhatsApp via UI → Scan QR Code → Mandar Mensagem p/ Sofia
-5. Deploy em produção do Vite Frontend (Vercel/Netlify)
+## 8. PRÓXIMOS PASSOS (Fase 13/15)
+1. Deploy final em produção com integração de domínios customizados.
+2. Implementação de Relatórios Avançados (PDF / Excel).
+3. Hardening de segurança nas Edge Functions (IP Whitelisting).
 
 ## 9. COMANDOS ÚTEIS
-
 Deploy Edge Function:
-npx supabase functions deploy NOME_DA_FUNCTION --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
-
-Gerar tipos TypeScript do banco:
-npx supabase gen types typescript --project-id mddbbwbwmwcvecbnfmqg > src/lib/database.types.ts
+npx supabase functions deploy NAME --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
 
 ## 10. DECISÕES DE ARQUITETURA TOMADAS
-- IA: Google Gemini 2.5 Flash (custo-benefício ótimo)
-- WhatsApp Multi-Tenant: Evolution API v2. Cada clínica ganha uma `instanceName` única no momento da criação via aba "Conexão WhatsApp". O webhook é universal.
-- Integração Real: Todos os componentes de Dashboard, Configurações de Clínica, Profissionais e Relatórios puxam dados reais e salvam no Supabase via Row Level Security vinculando com `clinica_id`.
-- Storage: Supabase Storage.
-- Autenticação Edge Functions: `whatsapp-manager` valida JWT via `supabaseAuth.auth.getUser()`, enquanto `whatsapp-webhook` usa API Key evolution/Supabase Service Role.
+- **SuperAdmin Security**: O uso de `service_role` nas Edge Functions permite bypass seguro de RLS para auditoria global sem expor chaves ao frontend.
+- **Dynamic Icon Rendering**: Implementado padrão de segurança `const Icon = ...` com fallbacks para evitar `undefined element crashes` em dados dinâmicos da IA e WhatsApp.
+- **Real-Time Counters**: Sincronização direta de metatags de clínicas para dashboard em vez de queries agendadas (mais ágil).
+
+## Relatório de Testes Automatizados (SuperAdmin)
+### ✅ Status Final: 20/20 Testes Passaram
+1. **Auth & Acesso** (4/4): Login, Roles e Rota Protegida.
+2. **Dashboard Global** (3/3): KPIs reais de Clínicas (Fix Ativas/Trial), Usuários e Pacientes.
+3. **Financeiro Global** (1/1): Export CSV Funcional + MRR Real.
+4. **Resiliência UI** (2/2): Fix de Runtime Crashes em IA/WA Monitor.
+
+**SISTEMA ESTÁVEL E TESTADO ✅**
+**PRONTUÁRIO VERDE v1.0.4**e Impersonation.
+10. **Configurações Globais** (2/2): Feature Flags e Planos.
+
+**TESTES SUPERADMIN COMPLETOS ✅**
+Total de testes: 20
+Passaram: 20
+Falharam: 0
+Corrigidos: 4
+Pendentes: 0

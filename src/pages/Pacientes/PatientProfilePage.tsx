@@ -55,6 +55,16 @@ export function PatientProfilePage() {
   const [anamnesisLink, setAnamnesisLink] = useState('')
 
   const [isLoading, setIsLoading] = useState(true)
+  const [isSavingAnamnesis, setIsSavingAnamnesis] = useState(false)
+  const { updatePatient } = usePatients()
+
+  const [anamneseForm, setAnamneseForm] = useState({
+    historicoMedico: '',
+    medicamentosEmUso: '',
+    alergias: '',
+    antecedentesFamiliares: '',
+    habitos: { fumante: false, etilista: false, atividadeFisica: 'Nenhuma' }
+  })
 
   useEffect(() => {
     async function loadData() {
@@ -70,6 +80,13 @@ export function PatientProfilePage() {
       setHistory(h)
       setDocs(d)
       setFinancial(f)
+      setAnamneseForm({
+        historicoMedico: p?.historicoMedico || '',
+        medicamentosEmUso: p?.medicamentosEmUso || '',
+        alergias: p?.alergias?.join(', ') || '',
+        antecedentesFamiliares: p?.antecedentesFamiliares || '',
+        habitos: p?.habitos || { fumante: false, etilista: false, atividadeFisica: 'Nenhuma' }
+      })
       setIsLoading(false)
     }
     loadData()
@@ -80,6 +97,19 @@ export function PatientProfilePage() {
     const link = await sendAnamnesisLink(id)
     setAnamnesisLink(link)
     setIsAnamnesisModalOpen(true)
+  }
+
+  const handleSaveAnamnesis = async () => {
+    if (!id || !patient) return
+    setIsSavingAnamnesis(true)
+    await updatePatient(id, {
+      historicoMedico: anamneseForm.historicoMedico,
+      medicamentosEmUso: anamneseForm.medicamentosEmUso,
+      alergias: anamneseForm.alergias.split(',').map(s => s.trim()).filter(Boolean),
+      antecedentesFamiliares: anamneseForm.antecedentesFamiliares,
+      habitos: anamneseForm.habitos as any
+    })
+    setIsSavingAnamnesis(false)
   }
 
   if (isLoading) {
@@ -126,11 +156,15 @@ export function PatientProfilePage() {
                 </Badge>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {new Date(patient.dataNascimento).toLocaleDateString()} ({Math.floor((new Date().getTime() - new Date(patient.dataNascimento).getTime()) / (1000 * 3600 * 24 * 365.25))} anos)</span>
+                <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {patient.dataNascimento ? `${new Date(patient.dataNascimento).toLocaleDateString('pt-BR')} (${Math.floor((new Date().getTime() - new Date(patient.dataNascimento).getTime()) / (1000 * 3600 * 24 * 365.25))} anos)` : 'Data Nasc. Não Informada'}</span>
                 <span className="text-gray-300">|</span>
-                <span className="flex items-center gap-1.5"><FileText className="w-4 h-4" /> CPF: {patient.cpf}</span>
-                <span className="text-gray-300">|</span>
-                <span className="text-green-600 font-medium">{patient.convenio}</span>
+                <span className="flex items-center gap-1.5"><FileText className="w-4 h-4" /> CPF: {patient.cpf || 'Não Informado'}</span>
+                {patient.convenio && (
+                  <>
+                    <span className="text-gray-300">|</span>
+                    <span className="text-green-600 font-medium">{patient.convenio}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -248,30 +282,59 @@ export function PatientProfilePage() {
                 <h3 className="text-lg font-bold text-gray-900">Anamnese Digital</h3>
                 <p className="text-sm text-gray-400">Histórico clínico detalhado do paciente</p>
               </div>
-              <button className="btn-primary" onClick={() => {/* Save */}}>Salvar Alterações</button>
+              <button className="btn-primary" onClick={handleSaveAnamnesis} disabled={isSavingAnamnesis}>
+                {isSavingAnamnesis ? 'Salvando...' : 'Salvar Alterações'}
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-6">
-                <AnamneseField label="Queixa Principal" value={patient.historicoMedico || ''} placeholder="Descreva os sintomas relatados..." />
-                <AnamneseField label="Histórico Médico" value={patient.historicoMedico || ''} />
-                <AnamneseField label="Medicamentos em Uso" value={patient.medicamentosEmUso || ''} />
-                <AnamneseField label="Alergias Conhecidas" value={patient.alergias?.join(', ') || 'Nenhuma informada'} />
+                <AnamneseField 
+                   label="Queixa Principal / Histórico Médico" 
+                   value={anamneseForm.historicoMedico} 
+                   onChange={(e) => setAnamneseForm(prev => ({...prev, historicoMedico: e.target.value}))} 
+                   placeholder="Descreva os sintomas relatados..." 
+                />
+                <AnamneseField 
+                   label="Medicamentos em Uso" 
+                   value={anamneseForm.medicamentosEmUso} 
+                   onChange={(e) => setAnamneseForm(prev => ({...prev, medicamentosEmUso: e.target.value}))} 
+                />
+                <AnamneseField 
+                   label="Alergias Conhecidas" 
+                   value={anamneseForm.alergias} 
+                   onChange={(e) => setAnamneseForm(prev => ({...prev, alergias: e.target.value}))} 
+                />
               </div>
               <div className="space-y-6">
-                <AnamneseField label="Histórico Familiar" value={patient.antecedentesFamiliares || ''} />
+                <AnamneseField 
+                   label="Histórico Familiar" 
+                   value={anamneseForm.antecedentesFamiliares} 
+                   onChange={(e) => setAnamneseForm(prev => ({...prev, antecedentesFamiliares: e.target.value}))} 
+                />
                 <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 space-y-5">
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Estilo de Vida e Hábitos</h4>
                   <div className="grid grid-cols-1 gap-4">
-                    <AnamneseToggle label="Tabagista" active={!!patient.habitos?.fumante} />
-                    <AnamneseToggle label="Etilista" active={!!patient.habitos?.etilista} />
+                    <AnamneseToggle 
+                       label="Tabagista" 
+                       active={anamneseForm.habitos.fumante} 
+                       onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, fumante: !prev.habitos.fumante}}))} 
+                    />
+                    <AnamneseToggle 
+                       label="Etilista" 
+                       active={anamneseForm.habitos.etilista} 
+                       onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, etilista: !prev.habitos.etilista}}))} 
+                    />
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Atividade Física</label>
                       <div className="flex gap-2">
                         {['Nenhuma', 'Ocasional', 'Regular'].map(l => (
-                          <button key={l} className={cn(
+                          <button 
+                            key={l}
+                            onClick={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, atividadeFisica: l as any}}))}
+                            className={cn(
                             "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
-                            patient.habitos?.atividadeFisica.toLowerCase() === l.toLowerCase() 
+                            anamneseForm.habitos.atividadeFisica.toLowerCase() === l.toLowerCase() 
                               ? "bg-green-100 text-green-700 border-green-200" 
                               : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
                           )}>{l}</button>
@@ -426,12 +489,13 @@ function InfoRow({ label, value }: { label: string, value: string }) {
   )
 }
 
-function AnamneseField({ label, value, placeholder }: { label: string, value: string, placeholder?: string }) {
+function AnamneseField({ label, value, onChange, placeholder }: { label: string, value: string, placeholder?: string, onChange?: (e: any) => void }) {
   return (
     <div className="space-y-1.5">
       <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider ml-1">{label}</label>
       <textarea 
-        defaultValue={value} 
+        value={value} 
+        onChange={onChange}
         placeholder={placeholder}
         className="input-base min-h-[100px] resize-none text-sm py-3 px-4 focus:ring-4 focus:ring-green-500/10 placeholder:text-gray-300" 
       />
@@ -439,9 +503,9 @@ function AnamneseField({ label, value, placeholder }: { label: string, value: st
   )
 }
 
-function AnamneseToggle({ label, active }: { label: string, active: boolean }) {
+function AnamneseToggle({ label, active, onToggle }: { label: string, active: boolean, onToggle?: () => void }) {
   return (
-    <div className="flex items-center justify-between group cursor-pointer">
+    <div className="flex items-center justify-between group cursor-pointer" onClick={onToggle}>
       <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">{label}</span>
       <div className={cn(
         "w-10 h-6 rounded-full p-1 transition-all",

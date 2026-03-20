@@ -23,6 +23,8 @@ import { cn } from '../../lib/utils'
 
 interface SidebarProps {
   collapsed?: boolean
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 interface NavItem {
@@ -36,8 +38,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/agenda',       label: 'Agenda',       icon: Calendar,        group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/pacientes',    label: 'Pacientes',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/prontuario',   label: 'Prontuário',   icon: FileText,        group: 'principal', roles: ['administrador', 'profissional'] },
+  { path: '/pacientes',    label: 'Pacientes / PEP',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'recepção'] },
   { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'recepção'] },
   { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador'] },
@@ -47,7 +48,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema',   roles: ['administrador'] },
 ]
 
-export function Sidebar({ collapsed = false }: SidebarProps) {
+export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarProps) {
   const location = useLocation()
   const { role } = usePermissions()
 
@@ -60,8 +61,9 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 h-screen bg-white border-r border-gray-100 flex flex-col z-30 transition-all duration-200',
-        collapsed ? 'w-16' : 'w-60'
+        'fixed left-0 top-0 h-screen bg-white border-r border-gray-100 flex flex-col z-30 transition-transform duration-300 md:translate-x-0 w-60',
+        isOpen ? 'translate-x-0' : '-translate-x-full',
+        collapsed && 'md:w-16 w-60' // If we ever use collapsed again
       )}
     >
       {/* ── Logo ────────────────────────────────────── */}
@@ -101,6 +103,7 @@ export function Sidebar({ collapsed = false }: SidebarProps) {
                       <NavLink
                         to={path}
                         title={collapsed ? itemLabel : undefined}
+                        onClick={onClose}
                         className={cn(
                           'sidebar-item',
                           collapsed && 'justify-center px-0 py-2.5',

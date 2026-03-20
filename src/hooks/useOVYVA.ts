@@ -5,7 +5,7 @@ import type { OvyvaConversation, OvyvaConfig, OvyvaMessage } from '../types/ovyv
 
 export function useOVYVA() {
   const { user } = useAuthStore()
-  const clinica_id = (user as any)?.user_metadata?.clinica_id
+  const clinica_id = user?.clinicaId  // corrigido: usar clinicaId do store, não user_metadata
 
   const [conversations, setConversations] = useState<OvyvaConversation[]>([])
   const [activeConversation, setActiveConversation] = useState<OvyvaConversation | null>(null)
@@ -23,11 +23,10 @@ export function useOVYVA() {
       .order('ultimo_contato', { ascending: false })
 
     if (!error && data) {
-      // Map to frontend expected shape
       const mapped = data.map((c: any) => ({
         ...c,
         status: c.status || 'ia_ativa',
-        mensagens: [] // Preenchido lazy
+        mensagens: []
       }))
       setConversations(mapped)
     }
@@ -65,7 +64,7 @@ export function useOVYVA() {
     fetchConfig()
   }, [fetchConversations, fetchConfig])
 
-  // Realtime subscription (Simplificado)
+  // Realtime subscription
   useEffect(() => {
     if (!clinica_id) return
     const sub = supabase
@@ -83,8 +82,20 @@ export function useOVYVA() {
     return () => { supabase.removeChannel(sub) }
   }, [clinica_id, activeConversation, fetchConversations])
 
-  // Buscar mensagens detalhadas
+  // Buscar mensagens — corrigido: filtra por clinica_id via JOIN com ovyva_conversas
   const loadMessages = useCallback(async (conversa_id: string) => {
+    if (!clinica_id) return
+
+    // Verifica que a conversa pertence à clínica antes de buscar mensagens
+    const { data: conv } = await supabase
+      .from('ovyva_conversas')
+      .select('id')
+      .eq('id', conversa_id)
+      .eq('clinica_id', clinica_id)
+      .single()
+
+    if (!conv) return // conversa não pertence a esta clínica
+
     const { data } = await supabase
       .from('ovyva_mensagens')
       .select('*')
@@ -94,13 +105,12 @@ export function useOVYVA() {
     if (data) {
       const mappedData = data.map((m: any) => ({ ...m, conteudo: m.conteudo || '' }))
       setConversations(prev => prev.map(c => c.id === conversa_id ? { ...c, mensagens: mappedData as OvyvaMessage[] } : c))
-      // Mark as read se houver
       const unreadIds = data.filter(m => !m.lida && m.remetente === 'paciente').map(m => m.id)
       if (unreadIds.length > 0) {
         supabase.from('ovyva_mensagens').update({ lida: true }).in('id', unreadIds).then()
       }
     }
-  }, [])
+  }, [clinica_id])
 
   // Selecionar conversa
   const selectConversation = useCallback((conv: OvyvaConversation) => {
@@ -121,7 +131,6 @@ export function useOVYVA() {
     loadMessages(conversationId)
   }, [conversations, loadMessages])
 
-  // Controles
   const takeoverConversation = useCallback(async (conversationId: string) => {
     await supabase.from('ovyva_conversas').update({ status: 'atendido_humano' }).eq('id', conversationId)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'atendido_humano' } : c))

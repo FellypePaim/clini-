@@ -67,7 +67,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
       </div>
 
       {/* Cabeçalho dias da semana */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-1 md: mb-1">
         {DIAS_SEMANA.map(d => (
           <div key={d} className="text-[11px] font-semibold text-gray-400 text-center py-1">
             {d}
@@ -76,7 +76,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+      <div className="grid grid-cols-1 md: gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
         {days.map((day, idx) => {
           if (!day) return (
             <div key={`empty-${idx}`} className="bg-gray-50 min-h-24" />

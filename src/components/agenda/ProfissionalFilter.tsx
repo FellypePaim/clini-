@@ -1,12 +1,19 @@
-import { PROFISSIONAIS } from '../../data/agendaMockData'
 import { cn } from '../../lib/utils'
+
+interface Profissional {
+  id: string
+  nome: string
+  especialidade: string
+  cor: string
+}
 
 interface ProfissionalFilterProps {
   selected: string
   onChange: (id: string) => void
+  profissionais: Profissional[]
 }
 
-export function ProfissionalFilter({ selected, onChange }: ProfissionalFilterProps) {
+export function ProfissionalFilter({ selected, onChange, profissionais }: ProfissionalFilterProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <button
@@ -22,7 +29,7 @@ export function ProfissionalFilter({ selected, onChange }: ProfissionalFilterPro
         Todos
       </button>
 
-      {PROFISSIONAIS.map((prof) => (
+      {profissionais.map((prof) => (
         <button
           key={prof.id}
           onClick={() => onChange(prof.id)}

@@ -44,7 +44,7 @@ const ZONES_CONFIG = [
 
 export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: FacialHarmonizationProps) {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const { toast } = useToast()
 
   const [selectedZones, setSelectedZones] = useState<HarmonizationZone[]>(initialZones)
@@ -92,11 +92,12 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
     try {
       // SVG -> Canvas -> Blob using html2canvas
       const canvas = await html2canvas(mapRef.current, { backgroundColor: null, scale: 2 })
-      const dataURL = canvas.toDataURL('image/png')
+      // Usa WebP para melhor compressão e performance
+      const dataURL = canvas.toDataURL('image/webp', 0.8)
       const res = await fetch(dataURL)
       const blob = await res.blob()
       
-      const file = new File([blob], `mapa_harmonizacao_${Date.now()}.png`, { type: 'image/png' })
+      const file = new File([blob], `harmonizacao_${pacienteId}_${Date.now()}.webp`, { type: 'image/webp' })
       const stored = await StorageHelpers.uploadMapaHarmonizacao(clinicaId, pacienteId, file)
 
       // Assuming table "harmonizacoes" or similar exists, injecting into DB:

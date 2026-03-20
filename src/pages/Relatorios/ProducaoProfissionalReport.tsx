@@ -1,14 +1,14 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ArrowLeft,
-  Calendar as CalendarIcon,
   Download,
-  Filter,
   Stethoscope,
   TrendingUp,
   Award,
-  DollarSign
+  DollarSign,
+  Loader2,
+  RefreshCw
 } from 'lucide-react'
 import {
   BarChart,
@@ -18,41 +18,158 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Line
 } from 'recharts'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+
+interface ProfissionalStat {
+  id: string
+  profissional: string
+  especialidade: string
+  atendimentos: number
+  receita: number
+}
+
+function getPeriodoDates(periodo: string): { inicio: string; fim: string } {
+  const now = new Date()
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  if (periodo === 'Hoje') {
+    return { inicio: fmt(now), fim: fmt(now) }
+  }
+  if (periodo === 'Esta semana') {
+    const start = new Date(now)
+    start.setDate(now.getDate() - now.getDay())
+    return { inicio: fmt(start), fim: fmt(now) }
+  }
+  if (periodo === 'Este mês') {
+    return { inicio: fmt(new Date(now.getFullYear(), now.getMonth(), 1)), fim: fmt(now) }
+  }
+  if (periodo === 'Mês passado') {
+    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const end = new Date(now.getFullYear(), now.getMonth(), 0)
+    return { inicio: fmt(start), fim: fmt(end) }
+  }
+  // Últimos 30 dias (default)
+  const start = new Date(now)
+  start.setDate(now.getDate() - 30)
+  return { inicio: fmt(start), fim: fmt(now) }
+}
 
 export function ProducaoProfissionalReport() {
-  const [periodo, setPeriodo] = useState('Ultimos 30 dias')
+  const { user } = useAuthStore()
+  const { toast } = useToast()
+  const clinicaId = user?.clinicaId
 
-  // Mock KPIs
-  const kpis = {
-    totalAtendimentos: 482,
-    receitaBruta: 85400,
-    ticketMedio: 177.10,
-    taxaRetorno: 64,
+  const [periodo, setPeriodo] = useState('Últimos 30 dias')
+  const [filterProfId, setFilterProfId] = useState('')
+  const [stats, setStats] = useState<ProfissionalStat[]>([])
+  const [profissionais, setProfissionais] = useState<{ id: string; nome: string }[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  const loadProfissionais = useCallback(async () => {
+    if (!clinicaId) return
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, nome_completo')
+      .eq('clinica_id', clinicaId)
+      .eq('role', 'profissional')
+      .eq('ativo', true)
+    setProfissionais((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo })))
+  }, [clinicaId])
+
+  const loadStats = useCallback(async () => {
+    if (!clinicaId) return
+    setIsLoading(true)
+    try {
+      const { inicio, fim } = getPeriodoDates(periodo)
+
+      // Busca consultas no período, filtradas por profissional se selecionado
+      let query = supabase
+        .from('consultas')
+        .select('id, profissional_id, valor, profiles!consultas_profissional_id_fkey(nome_completo, especialidade)')
+        .eq('clinica_id', clinicaId)
+        .gte('data_consulta', inicio)
+        .lte('data_consulta', fim)
+
+      if (filterProfId) {
+        query = query.eq('profissional_id', filterProfId)
+      }
+
+      const { data, error } = await query
+      if (error) throw error
+
+      // Agrupa por profissional
+      const map = new Map<string, ProfissionalStat>()
+      for (const c of data || []) {
+        const prof = (c as any).profiles
+        const pid = c.profissional_id as string
+        if (!map.has(pid)) {
+          map.set(pid, {
+            id: pid,
+            profissional: prof?.nome_completo || 'Desconhecido',
+            especialidade: prof?.especialidade || '—',
+            atendimentos: 0,
+            receita: 0,
+          })
+        }
+        const s = map.get(pid)!
+        s.atendimentos += 1
+        s.receita += Number(c.valor) || 0
+      }
+
+      setStats(Array.from(map.values()).sort((a, b) => b.receita - a.receita))
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId, periodo, filterProfId, toast])
+
+  useEffect(() => { loadProfissionais() }, [loadProfissionais])
+
+  const totals = {
+    atendimentos: stats.reduce((s, r) => s + r.atendimentos, 0),
+    receita: stats.reduce((s, r) => s + r.receita, 0),
+    ticketMedio: stats.length > 0
+      ? stats.reduce((s, r) => s + r.receita, 0) / stats.reduce((s, r) => s + r.atendimentos, 0) || 0
+      : 0,
   }
 
-  // Mock Chart
-  const chartData = [
-    { nome: 'Dra. Ana (Geral)', atendimentos: 140, meta: 120 },
-    { nome: 'Dr. Carlos (Orto)', atendimentos: 105, meta: 100 },
-    { nome: 'Dra. Luiza (Pedo)', atendimentos: 85, meta: 90 },
-    { nome: 'Dr. Marcos (Endo)', atendimentos: 62, meta: 60 },
-    { nome: 'Dra. Sofia (Harm)', atendimentos: 90, meta: 80 },
-  ]
+  const exportPDF = () => {
+    const doc = new jsPDF() as any
+    doc.setFontSize(16)
+    doc.text('Relatório: Produção por Profissional', 14, 20)
+    doc.setFontSize(10)
+    doc.text(`Período: ${periodo}`, 14, 28)
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 34)
 
-  // Mock Table Data
-  const tableData = [
-    { profissional: 'Dra. Ana Silva', especialidade: 'Clínica Geral', atendimentos: 140, procedimentos: 180, receita: 25000, taxaRetorno: '70%' },
-    { profissional: 'Dr. Carlos Souza', especialidade: 'Ortodontia', atendimentos: 105, procedimentos: 110, receita: 32000, taxaRetorno: '85%' },
-    { profissional: 'Dra. Luiza Ramos', especialidade: 'Odontopediatria', atendimentos: 85, procedimentos: 100, receita: 12400, taxaRetorno: '60%' },
-    { profissional: 'Dra. Sofia Mendes', especialidade: 'Harmonização', atendimentos: 90, procedimentos: 145, receita: 45000, taxaRetorno: '40%' },
-    { profissional: 'Dr. Marcos Lima', especialidade: 'Endodontia', atendimentos: 62, procedimentos: 62, receita: 18000, taxaRetorno: '55%' },
-  ].sort((a, b) => b.receita - a.receita)
+    doc.autoTable({
+      startY: 42,
+      head: [['Profissional', 'Especialidade', 'Atendimentos', 'Receita Gerada']],
+      body: [
+        ...stats.map(r => [
+          r.profissional,
+          r.especialidade,
+          r.atendimentos,
+          r.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+        ]),
+        ['TOTAL', '', totals.atendimentos, totals.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })],
+      ],
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [99, 102, 241] },
+      footStyles: { fillColor: [241, 245, 249], fontStyle: 'bold' },
+    })
+
+    doc.save(`producao-profissional-${periodo.replace(/\s/g, '-').toLowerCase()}.pdf`)
+  }
+
+  const chartData = stats.map(s => ({ nome: s.profissional.split(' ').slice(0, 2).join(' '), atendimentos: s.atendimentos }))
 
   return (
     <div className="flex flex-col h-full bg-slate-50/50">
-      {/* Header Padronizado de Relatórios */}
       <header className="px-6 py-6 bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
@@ -61,163 +178,158 @@ export function ProducaoProfissionalReport() {
             </Link>
             <div>
               <div className="flex gap-2 items-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
-                Relatórios <ArrowLeft size={10} className="rotate-180" /> Clínico
+                Relatórios › Clínico
               </div>
-              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-                Produção por Profissional
-              </h1>
+              <h1 className="text-2xl font-bold text-slate-900">Produção por Profissional</h1>
             </div>
           </div>
-          
+
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all">
+            <button
+              onClick={exportPDF}
+              disabled={isLoading || stats.length === 0}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all disabled:opacity-50"
+            >
               <Download size={18} /> Exportar PDF
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 shadow-sm transition-all">
-              <Download size={18} /> Exportar Excel
             </button>
           </div>
         </div>
 
-        {/* Filtros */}
         <div className="flex flex-wrap gap-4 items-end">
-           <div className="flex flex-col gap-1">
-             <label className="text-xs font-bold text-slate-500 uppercase">Período</label>
-             <select 
-               value={periodo} 
-               onChange={(e) => setPeriodo(e.target.value)}
-               className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
-             >
-               <option>Hoje</option>
-               <option>Esta semana</option>
-               <option>Este mês</option>
-               <option>Últimos 30 dias</option>
-               <option>Mês passado</option>
-               <option>Personalizado...</option>
-             </select>
-           </div>
-           
-           <div className="flex flex-col gap-1">
-             <label className="text-xs font-bold text-slate-500 uppercase">Profissional</label>
-             <select className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500">
-               <option>Todos os profissionais</option>
-               <option>Dra. Ana Silva</option>
-               <option>Dr. Carlos Souza</option>
-             </select>
-           </div>
-           
-           <button className="flex items-center gap-2 p-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-md shadow-indigo-100 px-6 h-[46px]">
-             Gerar Relatório
-           </button>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Período</label>
+            <select
+              value={periodo}
+              onChange={e => setPeriodo(e.target.value)}
+              className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option>Hoje</option>
+              <option>Esta semana</option>
+              <option>Este mês</option>
+              <option>Últimos 30 dias</option>
+              <option>Mês passado</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-bold text-slate-500 uppercase">Profissional</label>
+            <select
+              value={filterProfId}
+              onChange={e => setFilterProfId(e.target.value)}
+              className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="">Todos os profissionais</option>
+              {profissionais.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
+            </select>
+          </div>
+
+          <button
+            onClick={loadStats}
+            disabled={isLoading}
+            className="flex items-center gap-2 p-2.5 text-sm font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 shadow-md px-6 h-[46px] disabled:opacity-50"
+          >
+            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+            Gerar Relatório
+          </button>
         </div>
       </header>
 
       <main className="p-6 max-w-7xl mx-auto w-full space-y-6">
-        
-        {/* KPIs Resumo */}
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3 text-indigo-600">
-              <Stethoscope size={20} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+          </div>
+        ) : stats.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+            <Stethoscope className="w-16 h-16 mb-4 text-slate-200" />
+            <p className="font-bold text-lg">Nenhum dado no período</p>
+            <p className="text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
+          </div>
+        ) : (
+          <>
+            {/* KPIs */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <Stethoscope size={20} className="text-indigo-600 mb-3" />
+                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Atendimentos</span>
+                <span className="text-3xl font-black text-slate-900">{totals.atendimentos}</span>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <DollarSign size={20} className="text-emerald-600 mb-3" />
+                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Receita Gerada</span>
+                <span className="text-3xl font-black text-slate-900">
+                  {totals.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
+                </span>
+              </div>
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <Award size={20} className="text-amber-600 mb-3" />
+                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Ticket Médio</span>
+                <span className="text-3xl font-black text-slate-900">
+                  {totals.ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                </span>
+              </div>
             </div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Atendimentos</span>
-            <span className="text-3xl font-black text-slate-900">{kpis.totalAtendimentos}</span>
-          </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3 text-emerald-600">
-              <DollarSign size={20} />
+            {/* Gráfico */}
+            {chartData.length > 0 && (
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-base font-bold text-slate-800 mb-6">Atendimentos por Profissional</h3>
+                <div className="h-[260px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis dataKey="nome" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 11, fontWeight: 600 }} dy={8} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 11 }} />
+                      <Tooltip
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                      />
+                      <Bar dataKey="atendimentos" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* Tabela */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-slate-200 bg-slate-50">
+                <h3 className="text-base font-bold text-slate-800">Detalhamento Analítico</h3>
+              </div>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-white border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th className="px-6 py-4">Profissional</th>
+                    <th className="px-6 py-4">Especialidade</th>
+                    <th className="px-6 py-4 text-center">Atendimentos</th>
+                    <th className="px-6 py-4 text-right">Receita Gerada</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm font-medium">
+                  {stats.map((row) => (
+                    <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 font-bold text-slate-800">{row.profissional}</td>
+                      <td className="px-6 py-4 text-slate-500">{row.especialidade}</td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="bg-slate-100 px-2.5 py-1 rounded text-slate-700 font-bold">{row.atendimentos}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right font-black text-emerald-600">
+                        {row.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="bg-slate-50 border-t-2 border-slate-200 font-black text-slate-900">
+                    <td className="px-6 py-4 uppercase text-xs tracking-widest" colSpan={2}>Total Geral</td>
+                    <td className="px-6 py-4 text-center">{totals.atendimentos}</td>
+                    <td className="px-6 py-4 text-right text-emerald-700">
+                      {totals.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Receita Gerada</span>
-            <span className="text-3xl font-black text-slate-900">{kpis.receitaBruta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}</span>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3 text-amber-600">
-              <Award size={20} />
-            </div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Ticket Médio</span>
-            <span className="text-3xl font-black text-slate-900">{kpis.ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-          </div>
-
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3 text-blue-600">
-              <TrendingUp size={20} />
-            </div>
-            <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Taxa de Retorno</span>
-            <span className="text-3xl font-black text-slate-900">{kpis.taxaRetorno}%</span>
-          </div>
-        </div>
-
-        {/* Gráfico Principal */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <div className="mb-6 flex justify-between items-center">
-             <h3 className="text-base font-bold text-slate-800">Volume de Atendimentos vs Meta</h3>
-             <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-               <span className="flex items-center gap-1.5"><div className="w-3 h-3 bg-indigo-500 rounded-sm"/> Atendimentos Realizados</span>
-               <span className="flex items-center gap-1.5"><div className="w-4 h-0.5 bg-rose-500 rounded-sm"/> Meta Mensal</span>
-             </div>
-          </div>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="nome" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} />
-                <Tooltip 
-                  cursor={{ fill: '#f8fafc' }}
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                />
-                <Bar dataKey="atendimentos" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
-                {/* Simulated Meta Line inside BarChart by using another Bar with minimal width, or just mapping. Using simple Bar with red color for simplicity in mixed charts */}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Tabela Detalhada */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-           <div className="p-5 border-b border-slate-200 bg-slate-50">
-             <h3 className="text-base font-bold text-slate-800">Detalhamento Analítico</h3>
-           </div>
-           
-           <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="px-6 py-4">Profissional</th>
-                <th className="px-6 py-4">Especialidade</th>
-                <th className="px-6 py-4 text-center">Atendimentos</th>
-                <th className="px-6 py-4 text-center">Procedimentos</th>
-                <th className="px-6 py-4 text-center">T. Retorno</th>
-                <th className="px-6 py-4 text-right">Receita Gerada</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm font-medium">
-              {tableData.map((row, idx) => (
-                <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 font-bold text-slate-800">{row.profissional}</td>
-                  <td className="px-6 py-4 text-slate-500">{row.especialidade}</td>
-                  <td className="px-6 py-4 text-center"><span className="bg-slate-100 px-2.5 py-1 rounded text-slate-700 font-bold">{row.atendimentos}</span></td>
-                  <td className="px-6 py-4 text-center text-slate-600">{row.procedimentos}</td>
-                  <td className="px-6 py-4 text-center text-blue-600 font-bold">{row.taxaRetorno}</td>
-                  <td className="px-6 py-4 text-right font-black text-emerald-600">
-                    {row.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                  </td>
-                </tr>
-              ))}
-              <tr className="bg-slate-50 border-t-2 border-slate-200 font-black text-slate-900">
-                <td className="px-6 py-4 uppercase text-xs tracking-widest" colSpan={2}>Total Geral</td>
-                <td className="px-6 py-4 text-center">{kpis.totalAtendimentos}</td>
-                <td className="px-6 py-4 text-center">597</td>
-                <td className="px-6 py-4 text-center text-blue-700">{kpis.taxaRetorno}%</td>
-                <td className="px-6 py-4 text-right text-emerald-700">
-                   {kpis.receitaBruta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </td>
-              </tr>
-            </tbody>
-           </table>
-        </div>
-
+          </>
+        )}
       </main>
     </div>
   )

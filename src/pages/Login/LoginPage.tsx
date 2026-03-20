@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2 } from 'lucide-react'
@@ -25,11 +26,14 @@ const DEMO_CREDENTIALS = [
   { label: 'Administrador', email: 'admin@clinicaverde.com.br', senha: 'admin123' },
   { label: 'Profissional',  email: 'profissional@clinicaverde.com.br', senha: 'prof123' },
   { label: 'Recepção',      email: 'recepcao@clinicaverde.com.br', senha: 'rec123' },
+  { label: 'SuperAdmin',     email: 'superadmin@cliniplus.com',      senha: 'superpassword' },
 ]
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const { login, isLoading, error } = useAuthStore()
+  const { login, isLoading, error: authError } = useAuthStore()
+  const location = useLocation()
+  const error = authError || (location.state as any)?.error
 
   const {
     register,
@@ -81,7 +85,7 @@ export function LoginPage() {
         </div>
 
         <div className="relative z-10">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             {[
               { label: 'Pacientes', value: '2.400+' },
               { label: 'Consultas/mês', value: '180+' },
@@ -205,7 +209,7 @@ export function LoginPage() {
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2">
+            <div className="mt-4 grid grid-cols-1 md: gap-2">
               {DEMO_CREDENTIALS.map((demo) => (
                 <button
                   key={demo.email}

@@ -63,7 +63,7 @@ function ProcedimentoModal({
             <input type="text" value={form.nome} onChange={e => u('nome', e.target.value)}
               className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Categoria</label>
               <select value={form.categoria} onChange={e => u('categoria', e.target.value)}
@@ -77,7 +77,7 @@ function ProcedimentoModal({
                 className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md: gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Valor (R$)</label>
               <input type="number" value={form.valor} onChange={e => u('valor', Number(e.target.value))}
@@ -107,7 +107,7 @@ function ProcedimentoModal({
 export function ProcedimentosPage() {
   const { toast } = useToast()
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
 
   const [procedimentos, setProcedimentos] = useState<Procedimento[]>([])
   const [filtroCategoria, setFiltroCategoria] = useState<string>('Todos')
@@ -131,7 +131,12 @@ export function ProcedimentosPage() {
       console.warn('Tabela procedimentos não encontrada:', error.message)
       setProcedimentos([])
     } else {
-      setProcedimentos(data ?? [])
+      const mapped = (data || []).map((p: any) => ({
+        ...p,
+        duracao: p.duracao_minutos || 0,
+        valor: p.valor_particular || 0
+      })) as Procedimento[]
+      setProcedimentos(mapped)
     }
     setIsLoading(false)
   }, [clinicaId])
@@ -149,7 +154,14 @@ export function ProcedimentosPage() {
       // Insert
       const { data, error } = await supabase.from('procedimentos').insert({ ...formData, clinica_id: clinicaId, ativo: true }).select().single()
       if (error) { toast({ title: 'Erro', description: error.message, type: 'error' }); return }
-      if (data) setProcedimentos(prev => [...prev, data])
+      if (data) {
+        const mapped = {
+          ...(data as any),
+          duracao: (data as any).duracao_minutos || 0,
+          valor: (data as any).valor_particular || 0
+        } as Procedimento
+        setProcedimentos(prev => [...prev, mapped])
+      }
     }
     toast({ title: 'Salvo!', description: 'Procedimento salvo com sucesso.', type: 'success' })
     setModal({ open: false })

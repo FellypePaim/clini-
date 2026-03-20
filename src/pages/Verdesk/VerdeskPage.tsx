@@ -9,25 +9,23 @@ import {
   useSensors,
   defaultDropAnimationSideEffects
 } from '@dnd-kit/core'
-import type { DragStartEvent, DragOverEvent, DragEndEvent, DropAnimation } from '@dnd-kit/core'
-import { arrayMove, sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  BarChart2, 
-  Megaphone, 
-  TrendingUp, 
-  Wallet, 
-  Users 
+import type { DragStartEvent, DragEndEvent, DropAnimation } from '@dnd-kit/core'
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import {
+  Plus,
+  Search,
+  Filter,
+  BarChart2,
+  Megaphone,
+  X,
+  Loader2
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useVerdesk } from '../../hooks/useVerdesk'
-import type { LeadStage, Lead } from '../../types/verdesk'
+import type { LeadStage, LeadOrigin } from '../../types/verdesk'
 import { KanbanColumn } from '../../components/verdesk/KanbanColumn'
 import { LeadCard } from '../../components/verdesk/LeadCard'
 import { LeadDrawer } from '../../components/verdesk/LeadDrawer'
-import { Badge } from '../../components/ui/Badge'
 
 const STAGES: LeadStage[] = [
   'Perguntou Valor',
@@ -37,11 +35,64 @@ const STAGES: LeadStage[] = [
   'Perdido',
 ]
 
+interface NovoLeadForm {
+  name: string
+  phone: string
+  email: string
+  procedure: string
+  estimatedValue: number
+  origin: LeadOrigin
+  stage: LeadStage
+}
+
+const formVazio: NovoLeadForm = {
+  name: '',
+  phone: '',
+  email: '',
+  procedure: '',
+  estimatedValue: 0,
+  origin: 'Manual',
+  stage: 'Perguntou Valor',
+}
+
 export function VerdeskPage() {
-  const { leads, moveLead } = useVerdesk()
+  const { leads, moveLead, createLead } = useVerdesk()
   const [activeId, setActiveId] = useState<string | null>(null)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
-  
+  const [search, setSearch] = useState('')
+  const [filterStage, setFilterStage] = useState<LeadStage | ''>('')
+  const [showFilter, setShowFilter] = useState(false)
+  const [showNovoLead, setShowNovoLead] = useState(false)
+  const [form, setForm] = useState<NovoLeadForm>(formVazio)
+  const [saving, setSaving] = useState(false)
+
+  const handleCriarLead = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    await createLead({
+      name: form.name,
+      phone: form.phone,
+      email: form.email || undefined,
+      procedure: form.procedure,
+      estimatedValue: form.estimatedValue,
+      origin: form.origin,
+      stage: form.stage,
+    })
+    setSaving(false)
+    setShowNovoLead(false)
+    setForm(formVazio)
+  }
+
+  // Filtered leads per stage (applies search + stage filter)
+  const filteredLeads = useMemo(() => {
+    const q = search.toLowerCase()
+    return leads.filter(l => {
+      const matchSearch = !q || l.name.toLowerCase().includes(q) || l.phone.includes(q) || l.procedure.toLowerCase().includes(q)
+      const matchStage = !filterStage || l.stage === filterStage
+      return matchSearch && matchStage
+    })
+  }, [leads, search, filterStage])
+
   // Sensors for drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -135,7 +186,10 @@ export function VerdeskPage() {
               <Megaphone size={18} />
               Campanhas
             </Link>
-            <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
+            <button
+              onClick={() => setShowNovoLead(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+            >
               <Plus size={18} />
               Novo Lead
             </button>
@@ -161,15 +215,36 @@ export function VerdeskPage() {
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Buscar leads..." 
+              <input
+                type="text"
+                placeholder="Buscar leads..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
                 className="pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64"
               />
             </div>
-            <button className="p-2 text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50">
-              <Filter size={18} />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowFilter(v => !v)}
+                className={`p-2 border rounded-lg transition-colors ${filterStage ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-slate-600 bg-white border-slate-200 hover:bg-slate-50'}`}
+              >
+                <Filter size={18} />
+              </button>
+              {showFilter && (
+                <div className="absolute right-0 top-10 z-20 bg-white border border-slate-200 rounded-xl shadow-lg p-3 min-w-[200px]">
+                  <p className="text-xs font-bold text-slate-400 uppercase mb-2">Filtrar por etapa</p>
+                  {(['', ...STAGES] as (LeadStage | '')[]).map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { setFilterStage(s); setShowFilter(false) }}
+                      className={`w-full text-left px-3 py-1.5 text-sm rounded-lg transition-colors ${filterStage === s ? 'bg-indigo-50 text-indigo-700 font-bold' : 'hover:bg-slate-50 text-slate-700'}`}
+                    >
+                      {s || 'Todas as etapas'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -184,11 +259,11 @@ export function VerdeskPage() {
         >
           <div className="flex gap-6 h-full min-w-max">
             {STAGES.map((stage) => (
-              <KanbanColumn 
-                key={stage} 
-                id={stage} 
+              <KanbanColumn
+                key={stage}
+                id={stage}
                 title={stage}
-                leads={leads.filter((l) => l.stage === stage)}
+                leads={filteredLeads.filter((l) => l.stage === stage)}
                 onLeadClick={(leadId) => setSelectedLeadId(leadId)}
               />
             ))}
@@ -206,10 +281,90 @@ export function VerdeskPage() {
 
       {/* Lead Detail Drawer/Modal */}
       {selectedLeadId && (
-        <LeadDrawer 
-          leadId={selectedLeadId} 
+        <LeadDrawer
+          leadId={selectedLeadId}
           onClose={() => setSelectedLeadId(null)}
         />
+      )}
+
+      {/* Modal Novo Lead */}
+      {showNovoLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-indigo-600" /> Novo Lead
+              </h2>
+              <button onClick={() => { setShowNovoLead(false); setForm(formVazio) }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <form onSubmit={handleCriarLead} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                <input type="text" required className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Nome do paciente/lead"
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                  <input type="tel" required className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="(11) 99999-9999"
+                    value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                  <input type="email" className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="opcional"
+                    value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Procedimento de Interesse *</label>
+                <input type="text" required className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Ex: Botox, Harmonização, Consulta"
+                  value={form.procedure} onChange={e => setForm(f => ({ ...f, procedure: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Valor Estimado (R$)</label>
+                  <input type="number" min={0} className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="0"
+                    value={form.estimatedValue} onChange={e => setForm(f => ({ ...f, estimatedValue: Number(e.target.value) }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Origem</label>
+                  <select className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                    value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value as LeadOrigin }))}>
+                    <option value="Manual">Manual</option>
+                    <option value="WhatsApp OVYVA">WhatsApp OVYVA</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="Indicação">Indicação</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Etapa Inicial</label>
+                <select className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={form.stage} onChange={e => setForm(f => ({ ...f, stage: e.target.value as LeadStage }))}>
+                  {STAGES.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setShowNovoLead(false); setForm(formVazio) }}
+                  className="flex-1 px-4 py-2.5 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={saving}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                  {saving ? 'Criando...' : 'Criar Lead'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )

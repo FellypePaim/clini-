@@ -45,6 +45,22 @@ export function AgendaPage() {
 
   const { appointments, createAppointment, updateAppointment, getAppointmentsByDate, getAppointmentsByRange } = useAgenda()
 
+  // ── Lista de profissionais únicos (derivada dos agendamentos) ──
+  const profissionaisUnicos = useMemo(() => {
+    const seen = new Map<string, { id: string; nome: string; especialidade: string; cor: string }>()
+    appointments.forEach(a => {
+      if (!seen.has(a.profissionalId)) {
+        seen.set(a.profissionalId, {
+          id: a.profissionalId,
+          nome: a.profissionalNome,
+          especialidade: a.profissionalEspecialidade,
+          cor: a.profissionalCor,
+        })
+      }
+    })
+    return Array.from(seen.values())
+  }, [appointments])
+
   // ── Filtrados por profissional ──────────────────────
   const filteredAppointments = useMemo(() =>
     appointments.filter(a =>
@@ -191,7 +207,7 @@ export function AgendaPage() {
           </div>
 
           {/* Linha 2: filtro por profissional */}
-          <ProfissionalFilter selected={profFiltro} onChange={setProfFiltro} />
+          <ProfissionalFilter selected={profFiltro} onChange={setProfFiltro} profissionais={profissionaisUnicos} />
         </div>
       </div>
 
