@@ -22,7 +22,7 @@ interface Conversa {
 export function OvyvaHistoryPage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'resolvido' | 'transferido'>('all')
   const [search, setSearch] = useState('')

@@ -3,57 +3,6 @@ import { persist } from 'zustand/middleware'
 import type { User, Role } from '../types'
 import { supabase } from '../lib/supabase'
 
-// ─── Mock de usuários para autenticação ───────────────
-const MOCK_USERS: (User & { senha: string })[] = [
-  {
-    id: 'usr-001',
-    nome: 'Dr. Rafael Mendes',
-    email: 'admin@clinicaverde.com.br',
-    senha: 'admin123',
-    role: 'administrador',
-    especialidade: 'Clínica Geral',
-    crm: 'CRM-SP 98765',
-    clinicaId: 'clinica-001',
-    ativo: true,
-    criadoEm: '2024-01-15T08:00:00Z',
-    avatar: undefined,
-  },
-  {
-    id: 'usr-002',
-    nome: 'Dra. Camila Souza',
-    email: 'profissional@clinicaverde.com.br',
-    senha: 'prof123',
-    role: 'profissional',
-    especialidade: 'Dermatologia',
-    crm: 'CRM-SP 54321',
-    clinicaId: 'clinica-001',
-    ativo: true,
-    criadoEm: '2024-02-01T08:00:00Z',
-  },
-  {
-    id: 'usr-003',
-    nome: 'Ana Clara Ribeiro',
-    email: 'recepcao@clinicaverde.com.br',
-    senha: 'rec123',
-    role: 'recepção',
-    clinicaId: 'clinica-001',
-    ativo: true,
-    criadoEm: '2024-03-01T08:00:00Z',
-  },
-  {
-    id: 'usr-super',
-    nome: 'Super Usuário',
-    email: 'superadmin@cliniplus.com',
-    senha: 'superpassword',
-    role: 'superadmin',
-    clinicaId: '', // Superadmin não tem clínica vinculada
-    ativo: true,
-    criadoEm: new Date().toISOString(),
-  },
-]
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-
 // ─── Interface do Store ────────────────────────────────
 interface AuthState {
   user: User | null
@@ -77,60 +26,34 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, senha: string) => {
         set({ isLoading: true, error: null })
 
-        if (USE_MOCK) {
-          // Simula latência de rede
-          await new Promise((resolve) => setTimeout(resolve, 800))
-
-          const found = MOCK_USERS.find(
-            (u) => u.email === email && u.senha === senha && u.ativo
-          )
-
-          if (found) {
-            const { senha: _senha, ...user } = found
-            set({ user, isAuthenticated: true, isLoading: false, error: null })
-            return true
-          }
-
-          set({ isLoading: false, error: 'E-mail ou senha incorretos (Mock).', isAuthenticated: false, user: null })
-          return false
-        }
-
-        // Supabase Real
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha })
-          
+
           if (error) throw error
-          
+
           if (data.user) {
-            // Busca o role/profile do usuario na tablea `profiles` (exemplo)
             const { data: profileData } = await supabase
               .from('profiles')
               .select('*')
               .eq('id', data.user.id)
               .single()
 
-            // Mapeia role do banco para role do frontend
-            const dbRole = (profileData as any)?.role
-            let mappedRole: Role = 'recepção'
-
-            if (dbRole === 'superadmin') {
-              mappedRole = 'superadmin'
-            } else if (dbRole === 'admin' || dbRole === 'administrador') {
-              mappedRole = 'administrador'
-            } else if (dbRole === 'profissional') {
-              mappedRole = 'profissional'
-            } else if (dbRole === 'recepcao' || dbRole === 'recepção') {
-              mappedRole = 'recepção'
-            }
+            const dbRole = profileData?.role || 'recepcao'
+            const mappedRole: Role = dbRole === 'admin' ? 'administrador'
+                                   : dbRole === 'recepcao' ? 'recepção'
+                                   : 'profissional'
 
             const userParsed: User = {
-                id: data.user.id,
-                nome: profileData?.nome_completo || data.user.email?.split('@')[0] || 'Usuário',
-                email: data.user.email || '',
-                role: mappedRole,
-                clinicaId: profileData?.clinica_id || 'clinica-001',
-                ativo: true,
-                criadoEm: data.user.created_at || new Date().toISOString()
+              id: data.user.id,
+              nome: profileData?.nome_completo || data.user.email?.split('@')[0] || 'Usuário',
+              email: data.user.email || '',
+              role: mappedRole,
+              especialidade: profileData?.especialidade || undefined,
+              crm: profileData?.crm || undefined,
+              clinicaId: profileData?.clinica_id || '',
+              ativo: true,
+              criadoEm: data.user.created_at || new Date().toISOString(),
+              avatar: profileData?.avatar_url || undefined,
             }
             set({ user: userParsed, isAuthenticated: true, isLoading: false, error: null })
             return true
@@ -139,14 +62,12 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: false, error: e.message || 'Erro ao realizar login.', isAuthenticated: false, user: null })
           return false
         }
-        
+
         return false
       },
 
       logout: async () => {
-        if (!USE_MOCK) {
-          await supabase.auth.signOut()
-        }
+        await supabase.auth.signOut()
         set({ user: null, isAuthenticated: false, error: null })
       },
 
@@ -171,16 +92,13 @@ export const usePermissions = () => {
     isAdmin: role === 'administrador',
     isProfissional: role === 'profissional',
     isRecepcao: role === 'recepção',
-    isSuperAdmin: role === 'superadmin',
     role,
   }
 }
 
 // ─── Setup Auth Listener ────────────────────────────────
 export function initAuth() {
-  if (USE_MOCK) return
-
-  supabase.auth.onAuthStateChange(async (event, session) => {
+  supabase.auth.onAuthStateChange(async (event) => {
     if (event === 'SIGNED_OUT') {
       useAuthStore.getState().logout()
     }

@@ -1,135 +1,119 @@
-import { useState, useCallback, useEffect } from 'react'
-import type { 
-  EvolutionRecord, 
-  Prescription, 
+import { useState, useCallback } from 'react'
+import type {
+  EvolutionRecord,
+  Prescription,
   PrescriptionItem,
-  CID10, 
-  HarmonizationSession, 
-  HarmonizationZone
+  CID10,
+  HarmonizationSession,
+  HarmonizationZone,
 } from '../types/prontuario'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
-import { useToast } from './useToast'
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-
-// ── CID-10 MOCK ─────────────────────────────────────────────────────────────
-export const CID10_MOCK: CID10[] = [
+// Lista de CID-10 comuns (dados de referência, não são dados de clínica)
+export const CID10_LISTA: CID10[] = [
   { codigo: 'Z00.0', nome: 'Exame médico geral' },
-  { codigo: 'I10',    nome: 'Hipertensão essencial' },
-  { codigo: 'E11',    nome: 'Diabetes mellitus tipo 2' },
-  { codigo: 'R51',    nome: 'Cefaléia' },
-  { codigo: 'M54.5',  nome: 'Dor lombar baixa' },
-  { codigo: 'J01',    nome: 'Sinusite aguda' },
-  { codigo: 'G43',    nome: 'Enxaqueca' },
-  { codigo: 'K21',    nome: 'Doença do refluxo gastroesofágico' },
-  { codigo: 'F41.1',  nome: 'Ansiedade generalizada' },
-  { codigo: 'N39.0',  nome: 'Infecção do trato urinário' },
+  { codigo: 'I10',   nome: 'Hipertensão essencial' },
+  { codigo: 'E11',   nome: 'Diabetes mellitus tipo 2' },
+  { codigo: 'R51',   nome: 'Cefaléia' },
+  { codigo: 'M54.5', nome: 'Dor lombar baixa' },
+  { codigo: 'J01',   nome: 'Sinusite aguda' },
+  { codigo: 'G43',   nome: 'Enxaqueca' },
+  { codigo: 'K21',   nome: 'Doença do refluxo gastroesofágico' },
+  { codigo: 'F41.1', nome: 'Ansiedade generalizada' },
+  { codigo: 'N39.0', nome: 'Infecção do trato urinário' },
 ]
 
 export function useProntuario(pacienteId?: string) {
+  const { user } = useAuthStore()
+  const clinicaId = user?.clinicaId
+  const profissionalId = user?.id
+
   const [evolutions, setEvolutions] = useState<EvolutionRecord[]>([])
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([])
   const [sessions, setSessions] = useState<HarmonizationSession[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isAiProcessing, setIsAiProcessing] = useState(false)
 
-  const clinicaId = useAuthStore(state => state.user?.clinicaId)
-  const profesionalId = useAuthStore(state => state.user?.id)
-  const { toast } = useToast()
-
-  // ── CARREGAMENTO INICIAL ───────────────────────────────────────────────────
-  const fetchProntuario = useCallback(async () => {
-    if (!pacienteId || !clinicaId || USE_MOCK) return
+  // ── Carregar dados do prontuário ─────────────────────────────────────────────
+  const loadProntuario = useCallback(async (pid?: string) => {
+    const id = pid || pacienteId
+    if (!id || !clinicaId) return
     setIsLoading(true)
     try {
-      // Evoluções
-      const { data: evos, error: evoErr } = await supabase
-        .from('evolucoes')
-        .select('*')
-        .eq('paciente_id', pacienteId)
-        .order('created_at', { ascending: false })
+      const [evolvRes, prescRes, harmRes] = await Promise.all([
+        supabase
+          .from('evolucoes')
+          .select('*')
+          .eq('paciente_id', id)
+          .eq('clinica_id', clinicaId)
+          .order('data', { ascending: false }),
+        supabase
+          .from('prescricoes')
+          .select('*')
+          .eq('paciente_id', id)
+          .eq('clinica_id', clinicaId)
+          .order('data', { ascending: false }),
+        supabase
+          .from('harmonizacoes')
+          .select('*')
+          .eq('paciente_id', id)
+          .eq('clinica_id', clinicaId)
+          .order('data', { ascending: false }),
+      ])
 
-      if (evoErr) throw evoErr
-      setEvolutions((evos || []).map(row => ({
-        id: row.id,
-        pacienteId: row.paciente_id,
-        consultaId: row.consulta_id || '',
-        data: (row.created_at || '').split('T')[0],
-        profissionalId: row.profissional_id,
-        texto: row.texto_clinico || '',
-        cid10: row.cid10_codigo || undefined,
-        resumoIA: typeof row.resumo_ia === 'string' ? JSON.parse(row.resumo_ia) : row.resumo_ia as any,
-        assinaturaUrl: (row as any).assinatura_url || undefined,
-        hashAuditoria: (row as any).hash_auditoria || undefined
-      })))
+      if (evolvRes.data) {
+        setEvolutions(evolvRes.data.map((r: any) => ({
+          id: r.id,
+          pacienteId: r.paciente_id,
+          consultaId: r.consulta_id || '',
+          data: r.data,
+          profissionalId: r.profissional_id,
+          texto: r.texto || '',
+          cid10: r.cid10 || undefined,
+          resumoIA: r.resumo_ia || undefined,
+        })))
+      }
 
-      // Prescrições
-      const { data: rxs, error: rxErr } = await supabase
-        .from('prescricoes')
-        .select('*')
-        .eq('paciente_id', pacienteId)
-        .order('created_at', { ascending: false })
+      if (prescRes.data) {
+        setPrescriptions(prescRes.data.map((r: any) => ({
+          id: r.id,
+          pacienteId: r.paciente_id,
+          profissionalId: r.profissional_id,
+          data: r.data,
+          itens: r.itens || [],
+          assinada: r.assinada ?? false,
+          qrCode: r.qr_code || '',
+        })))
+      }
 
-      if (rxErr) throw rxErr
-      setPrescriptions((rxs || []).map(row => ({
-        id: row.id,
-        pacienteId: row.paciente_id,
-        profissionalId: row.profissional_id,
-        data: (row.created_at || '').split('T')[0],
-        itens: row.itens as any,
-        assinada: !!row.assinado_em,
-        qrCode: row.qr_code_token || ''
-      })))
-
-      // Harmonizações
-      const { data: hss, error: hsErr } = await supabase
-        .from('harmonizacoes')
-        .select('*')
-        .eq('paciente_id', pacienteId)
-        .order('created_at', { ascending: false })
-
-      if (hsErr) throw hsErr
-      setSessions((hss || []).map(row => ({
-        id: row.id,
-        pacienteId: row.paciente_id,
-        data: (row.created_at || '').split('T')[0],
-        profissionalId: row.profissional_id || '',
-        zones: row.mapeamento as any
-      })))
-
-    } catch (err: any) {
-      toast({ title: 'Erro', description: 'Erro ao carregar prontuário.', type: 'error' })
+      if (harmRes.data) {
+        setSessions(harmRes.data.map((r: any) => ({
+          id: r.id,
+          pacienteId: r.paciente_id,
+          data: r.data,
+          profissionalId: r.profissional_id,
+          zones: r.zonas || [],
+        })))
+      }
     } finally {
       setIsLoading(false)
     }
-  }, [pacienteId, clinicaId, toast])
-
-  useEffect(() => {
-    fetchProntuario()
-    // Realtime listener simplificado (refetch on change)
-    if (!pacienteId || !clinicaId || USE_MOCK) return
-    const channel = supabase.channel(`prontuario_${pacienteId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'evolucoes', filter: `paciente_id=eq.${pacienteId}` }, () => fetchProntuario())
-      .subscribe()
-    
-    return () => { supabase.removeChannel(channel) }
-  }, [pacienteId, clinicaId, fetchProntuario])
+  }, [pacienteId, clinicaId])
 
   // ── Salvar Evolução ──────────────────────────────────────────────────────────
   const saveEvolution = useCallback(async (data: Partial<EvolutionRecord>) => {
-    if (!pacienteId || !clinicaId || USE_MOCK) return null
+    if (!clinicaId || !profissionalId) return null
     setIsLoading(true)
     try {
-      const insertData: any = {
-        paciente_id: pacienteId,
-        consulta_id: data.consultaId || undefined,
-        profissional_id: profesionalId,
-        texto_clinico: data.texto || '',
-        cid10_codigo: data.cid10,
-        resumo_ia: data.resumoIA,
-        assinatura_url: data.assinaturaUrl,
-        hash_auditoria: data.hashAuditoria
+      const insertData = {
+        clinica_id: clinicaId,
+        paciente_id: data.pacienteId,
+        consulta_id: data.consultaId || null,
+        profissional_id: data.profissionalId || profissionalId,
+        data: data.data || new Date().toISOString().split('T')[0],
+        texto: data.texto || '',
+        cid10: data.cid10 || null,
+        resumo_ia: data.resumoIA || null,
       }
 
       const { data: ret, error } = await supabase
@@ -139,121 +123,150 @@ export function useProntuario(pacienteId?: string) {
         .single()
 
       if (error) throw error
-      toast({ title: 'Sucesso', description: 'Prontuário salvo.', type: 'success' })
-      await fetchProntuario()
-      return ret
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
+
+      const novo: EvolutionRecord = {
+        id: ret.id,
+        pacienteId: ret.paciente_id,
+        consultaId: ret.consulta_id || '',
+        data: ret.data,
+        profissionalId: ret.profissional_id,
+        texto: ret.texto,
+        cid10: ret.cid10 || undefined,
+        resumoIA: ret.resumo_ia || undefined,
+      }
+      setEvolutions(prev => [novo, ...prev])
+      return novo
+    } catch (e: any) {
+      console.error('Erro ao salvar evolução:', e.message)
       return null
     } finally {
       setIsLoading(false)
     }
-  }, [pacienteId, clinicaId, profesionalId, fetchProntuario, toast])
+  }, [clinicaId, profissionalId])
 
-  // ── Gerar Resumo Automático via IA REAL ────────────────────────────────────
-  const generateAISummary = useCallback(async (texto: string) => {
-    setIsAiProcessing(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-gateway', {
-        body: { 
-          action: 'generate-summary',
-          content: texto
-        }
-      })
-
-      if (error) throw error
-      return data // Espera { queixa, diagnostico, conduta, retorno }
-    } catch (err: any) {
-      console.error('Erro IA:', err)
-      toast({ title: 'IA Temporariamente Indisponível', description: 'Usando resumo padrão.', type: 'error' })
-      return {
-        queixa: 'Informação extraída do texto',
-        diagnostico: 'Pendente avaliação',
-        conduta: 'Pendente',
-        retorno: 'A desejar'
-      }
-    } finally {
-      setIsAiProcessing(false)
-    }
-  }, [toast])
-
-  // ── Transcrever Áudio (Mock por enquanto, aguardando integração total de stream)
-  const transcribeAudio = useCallback(async () => {
-    setIsAiProcessing(true)
-    await new Promise(r => setTimeout(r, 2000))
-    setIsAiProcessing(false)
-    return "Transcrição de áudio via Whisper/Gemini habilitada na Edge Function."
-  }, [])
-
-  // ── Salvar Mapeamento de Harmonização ──────────────────────────────────────────
-  const saveHarmonizationSession = useCallback(async (pid: string, zones: HarmonizationZone[]) => {
-    if (!clinicaId || USE_MOCK) return null
+  // ── Transcrever Áudio via Edge Function ──────────────────────────────────────
+  const transcribeAudio = useCallback(async (audioBase64: string) => {
     setIsLoading(true)
     try {
-      const insertData: any = {
-        paciente_id: pid,
-        profissional_id: profesionalId,
-        mapeamento: zones
-      }
+      const { data, error } = await supabase.functions.invoke('ai-gateway', {
+        body: { action: 'transcribe_audio', audio_base64: audioBase64, clinica_id: clinicaId },
+      })
+      if (error) throw error
+      return (data?.transcricao as string) || ''
+    } catch (e: any) {
+      console.error('Erro ao transcrever áudio:', e.message)
+      return ''
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
 
-      const { data, error } = await supabase
+  // ── Gerar Resumo IA via Edge Function ─────────────────────────────────────────
+  const generateAISummary = useCallback(async (texto: string) => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-gateway', {
+        body: { action: 'generate_summary', texto, clinica_id: clinicaId },
+      })
+      if (error) throw error
+      return data?.resumo || { queixa: '', diagnostico: '', conduta: '', retorno: '' }
+    } catch (e: any) {
+      console.error('Erro ao gerar resumo IA:', e.message)
+      return { queixa: '', diagnostico: '', conduta: '', retorno: '' }
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
+
+  // ── Salvar Sessão de Harmonização ──────────────────────────────────────────────
+  const saveHarmonizationSession = useCallback(async (pid: string, zones: HarmonizationZone[]) => {
+    if (!clinicaId || !profissionalId) return null
+    setIsLoading(true)
+    try {
+      const { data: ret, error } = await supabase
         .from('harmonizacoes')
-        .insert(insertData)
+        .insert({
+          clinica_id: clinicaId,
+          paciente_id: pid,
+          profissional_id: profissionalId,
+          data: new Date().toISOString().split('T')[0],
+          zonas: zones,
+        })
         .select()
         .single()
 
       if (error) throw error
-      await fetchProntuario()
-      return data
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
+
+      const nova: HarmonizationSession = {
+        id: ret.id,
+        pacienteId: ret.paciente_id,
+        data: ret.data,
+        profissionalId: ret.profissional_id,
+        zones: ret.zonas || [],
+      }
+      setSessions(prev => [nova, ...prev])
+      return nova
+    } catch (e: any) {
+      console.error('Erro ao salvar harmonização:', e.message)
       return null
     } finally {
       setIsLoading(false)
     }
-  }, [clinicaId, profesionalId, fetchProntuario, toast])
+  }, [clinicaId, profissionalId])
 
   // ── Gerar Prescrição ──────────────────────────────────────────────────────────
   const generatePrescription = useCallback(async (pid: string, items: PrescriptionItem[]) => {
-    if (!clinicaId || USE_MOCK) return null
+    if (!clinicaId || !profissionalId) return null
     setIsLoading(true)
     try {
-      const insertData: any = {
-        paciente_id: pid,
-        profissional_id: profesionalId,
-        itens: items,
-        assinado_em: new Date().toISOString(),
-        qr_code_token: `qr-${Date.now()}`
-      }
+      const qrCode = `${clinicaId}-${pid}-${Date.now()}`
 
-      const { data, error } = await supabase
+      const { data: ret, error } = await supabase
         .from('prescricoes')
-        .insert(insertData)
+        .insert({
+          clinica_id: clinicaId,
+          paciente_id: pid,
+          profissional_id: profissionalId,
+          data: new Date().toISOString().split('T')[0],
+          itens: items,
+          assinada: true,
+          qr_code: qrCode,
+        })
         .select()
         .single()
 
       if (error) throw error
-      await fetchProntuario()
-      return data
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
+
+      const nova: Prescription = {
+        id: ret.id,
+        pacienteId: ret.paciente_id,
+        profissionalId: ret.profissional_id,
+        data: ret.data,
+        itens: ret.itens || [],
+        assinada: ret.assinada,
+        qrCode: ret.qr_code,
+      }
+      setPrescriptions(prev => [nova, ...prev])
+      return nova
+    } catch (e: any) {
+      console.error('Erro ao gerar prescrição:', e.message)
       return null
     } finally {
       setIsLoading(false)
     }
-  }, [clinicaId, profesionalId, fetchProntuario, toast])
+  }, [clinicaId, profissionalId])
 
   return {
     evolutions,
     prescriptions,
     sessions,
     isLoading,
-    isAiProcessing,
+    loadProntuario,
     saveEvolution,
     transcribeAudio,
     generateAISummary,
     saveHarmonizationSession,
     generatePrescription,
-    CID10_MOCK
+    CID10_MOCK: CID10_LISTA, // mantém compatibilidade com componentes existentes
   }
 }

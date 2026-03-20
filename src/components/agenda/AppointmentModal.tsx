@@ -1,15 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  X, CalendarDays, Clock, User, Stethoscope,
+  X, CalendarDays, Clock, Stethoscope,
   Repeat, ChevronDown, AlertCircle, Loader2, Search
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { AppointmentFormData } from '../../types/agenda'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
+
+interface PacienteOption { id: string; nome: string; telefone: string }
+interface ProfissionalOption { id: string; nome: string; especialidade: string }
 
 // ─── Schema de validação ──────────────────────────────
 const schema = z.object({
@@ -59,47 +62,28 @@ interface AppointmentModalProps {
 }
 
 export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initialHour }: AppointmentModalProps) {
+  const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pacienteSearch, setPacienteSearch] = useState('')
   const [showPacienteDropdown, setShowPacienteDropdown] = useState(false)
-  const [pacientesReais, setPacientesReais] = useState<{ id: string; nome: string; telefone: string }[]>([])
-  const [profissionaisReais, setProfissionaisReais] = useState<{ id: string; nome: string; especialidade: string }[]>([])
+  const [pacientesFiltrados, setPacientesFiltrados] = useState<PacienteOption[]>([])
+  const [profissionais, setProfissionais] = useState<ProfissionalOption[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
-  const clinicaId = useAuthStore(state => state.user?.clinicaId)
 
-  // Load real patients from Supabase
+  // Carrega profissionais ao montar
   useEffect(() => {
     if (!clinicaId) return
-    supabase
-      .from('pacientes')
-      .select('id, nome_completo, whatsapp, telefone')
-      .eq('clinica_id', clinicaId)
-      .order('nome_completo', { ascending: true })
-      .then(({ data }) => {
-        if (data) {
-          setPacientesReais(data.map((p: any) => ({
-            id: p.id,
-            nome: p.nome_completo,
-            telefone: p.whatsapp || p.telefone || ''
-          })))
-        }
-      })
-      
-    supabase
-      .from('profiles')
-      .select('id, nome_completo, especialidade')
-      .eq('clinica_id', clinicaId)
-      .in('role', ['profissional', 'admin'])
-      .order('nome_completo', { ascending: true })
-      .then(({ data }) => {
-        if (data) {
-          setProfissionaisReais(data.map((p: any) => ({
-            id: p.id,
-            nome: p.nome_completo || 'Sem Nome',
-            especialidade: p.especialidade || 'Clínico Geral'
-          })))
-        }
-      })
+    supabase.from('profiles').select('id, nome_completo, especialidade')
+      .eq('clinica_id', clinicaId).eq('role', 'profissional').eq('ativo', true)
+      .then(({ data }) => setProfissionais((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, especialidade: p.especialidade || '' }))))
+  }, [clinicaId])
+
+  // Busca pacientes ao digitar
+  const searchPacientes = useCallback(async (q: string) => {
+    if (!clinicaId || q.length < 2) { setPacientesFiltrados([]); return }
+    const { data } = await supabase.from('pacientes').select('id, nome_completo, telefone')
+      .eq('clinica_id', clinicaId).ilike('nome_completo', `%${q}%`).limit(6)
+    setPacientesFiltrados((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, telefone: p.telefone || '' })))
   }, [clinicaId])
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormValues>({
@@ -147,11 +131,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const pacientesFiltrados = (pacientesReais.length > 0 ? pacientesReais : []).filter(p =>
-    p.nome.toLowerCase().includes(pacienteSearch.toLowerCase())
-  ).slice(0, 6)
-
-  const handleSelectPaciente = (pac: { id: string; nome: string; telefone: string }) => {
+  const handleSelectPaciente = (pac: PacienteOption) => {
     setValue('pacienteId', pac.id, { shouldValidate: true })
     setValue('pacienteNome', pac.nome, { shouldValidate: true })
     setPacienteSearch(pac.nome)
@@ -160,14 +140,9 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
 
   const handleFormSubmit = async (values: FormValues) => {
     setIsSubmitting(true)
-    try {
-      await onSubmit(values as unknown as AppointmentFormData)
-      onClose()
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setIsSubmitting(false)
-    }
+    await onSubmit(values as unknown as AppointmentFormData)
+    setIsSubmitting(false)
+    onClose()
   }
 
   if (!isOpen) return null
@@ -211,6 +186,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                       setValue('pacienteId', '')
                       setValue('pacienteNome', '')
                     }
+                    searchPacientes(e.target.value)
                   }}
                   onFocus={() => setShowPacienteDropdown(true)}
                   className={cn('input-base pl-9', errors.pacienteId && 'border-red-400')}
@@ -251,7 +227,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 className={cn('input-base pl-9 pr-8 appearance-none cursor-pointer', errors.profissionalId && 'border-red-400')}
               >
                 <option value="">Selecione o profissional</option>
-                {profissionaisReais.map(p => (
+                {profissionais.map(p => (
                   <option key={p.id} value={p.id}>
                     {p.nome} — {p.especialidade}
                   </option>
@@ -263,7 +239,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           </div>
 
           {/* ── Data + Horários ───────────────────────── */}
-          <div className="grid grid-cols-1 md: gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="modal-label">Data *</label>
               <div className="relative">
@@ -290,7 +266,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           </div>
 
           {/* ── Procedimento + Status ─────────────────── */}
-          <div className="grid grid-cols-1 md: gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="modal-label">Procedimento *</label>
               <div className="relative">
@@ -360,7 +336,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
             </label>
 
             {repetir && (
-              <div className="grid grid-cols-1 md: gap-3 animate-fade-in">
+              <div className="grid grid-cols-2 gap-3 animate-fade-in">
                 <div>
                   <label className="modal-label">Frequência</label>
                   <div className="relative">

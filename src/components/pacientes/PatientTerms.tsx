@@ -39,7 +39,7 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [isSaving, setIsSaving] = useState(false)
   
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const { toast } = useToast()
   const { getPatientById } = usePatients()
 

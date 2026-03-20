@@ -11,7 +11,6 @@ import { PublicAnamnesisPage } from '../pages/Public/PublicAnamnesisPage'
 import { OvyvaPage } from '../pages/Ovyva/OvyvaPage'
 import { OvyvaConfigPage } from '../pages/Ovyva/OvyvaConfigPage'
 import { OvyvaHistoryPage } from '../pages/Ovyva/OvyvaHistoryPage'
-import { FinanceiroPage } from '../pages/Financeiro/FinanceiroPage'
 import { EmConstrucao } from '../components/ui/EmConstrucao'
 import { VerdeskPage } from '../pages/Verdesk/VerdeskPage'
 import { PerformancePage } from '../pages/Verdesk/PerformancePage'
@@ -20,11 +19,9 @@ import { EstoquePage } from '../pages/Estoque/EstoquePage'
 import { ProdutosPage } from '../pages/Estoque/ProdutosPage'
 import { MovimentacoesPage } from '../pages/Estoque/MovimentacoesPage'
 import { AlertasPage } from '../pages/Estoque/AlertasPage'
-import { RegrasConsumoPage } from '../pages/Estoque/RegrasConsumoPage'
 import { RelatoriosPage } from '../pages/Relatorios/RelatoriosPage'
 import { ProducaoProfissionalReport } from '../pages/Relatorios/ProducaoProfissionalReport'
 import { FaturamentoReport } from '../pages/Relatorios/FaturamentoReport'
-import { FunilLeadsReport } from '../pages/Relatorios/FunilLeadsReport'
 import { ConfiguracoesLayout } from '../pages/Configuracoes/ConfiguracoesPage'
 import { ClinicaPage } from '../pages/Configuracoes/ClinicaPage'
 import { ProfissionaisPage } from '../pages/Configuracoes/ProfissionaisPage'
@@ -32,6 +29,8 @@ import { ProcedimentosPage } from '../pages/Configuracoes/ProcedimentosPage'
 import { IntegracoesPage } from '../pages/Configuracoes/IntegracoesPage'
 import { NotificacoesPage } from '../pages/Configuracoes/NotificacoesPage'
 import { SegurancaPage } from '../pages/Configuracoes/SegurancaPage'
+import { FinanceiroPage } from '../pages/Financeiro/FinanceiroPage'
+import { PrescricoesPage } from '../pages/Prescricoes/PrescricoesPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { DiagnosticoPage } from '../pages/Dev/DiagnosticoPage'
 import { StorageDiagnosticoPage } from '../pages/Dev/StorageDiagnosticoPage'
@@ -47,7 +46,8 @@ import { SuperLogsPage } from '../pages/SuperAdmin/SuperLogsPage'
 import { SuperConfiguracoesPage } from '../pages/SuperAdmin/SuperConfiguracoesPage'
 import { SuperSuportePage } from '../pages/SuperAdmin/SuperSuportePage'
 import { SuperAdminDiagnosticoPage } from '../pages/Dev/SuperAdminDiagnosticoPage'
-
+import { RegrasConsumoPage } from '../pages/Estoque/RegrasConsumoPage'
+import { FunilLeadsReport } from '../pages/Relatorios/FunilLeadsReport'
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -58,14 +58,14 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore()
   if (isAuthenticated) {
-    return user?.role === 'superadmin' 
-      ? <Navigate to="/superadmin" replace /> 
+    return user?.role === 'superadmin'
+      ? <Navigate to="/superadmin" replace />
       : <Navigate to="/dashboard" replace />
   }
   return <>{children}</>
 }
 
-// ─── Guard de SuperAdmin ─────────────────────────────
+// ─── Guard de SuperAdmin ──────────────────────────────
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore()
   if (!isAuthenticated || user?.role !== 'superadmin') {
@@ -75,13 +75,9 @@ function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Módulos "Em Construção" ──────────────────────────
-const modulos = [
-  { path: 'prescricoes',   name: 'Prescrições',   icon: 'ClipboardList', desc: 'Prescrições digitais com assinatura eletrônica.' },
-]
+const modulos: { path: string; name: string; icon: string; desc: string }[] = []
 
 export function AppRouter() {
-  const { user } = useAuthStore()
-
   return (
     <Routes>
       {/* Rota de login */}
@@ -102,20 +98,13 @@ export function AppRouter() {
           </RequireAuth>
         }
       >
-        <Route index element={
-          user?.role === 'superadmin' 
-            ? <Navigate to="/superadmin" replace /> 
-            : <Navigate to="/dashboard" replace />
-        } />
+        <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/agenda" element={<AgendaPage />} />
         
         {/* Módulo Pacientes / PEP */}
         <Route path="/pacientes" element={<PacientesPage />} />
         <Route path="/pacientes/:id" element={<PatientProfilePage />} />
-
-        {/* Módulo Financeiro */}
-        <Route path="/financeiro" element={<FinanceiroPage />} />
 
         {/* Módulo OVYVA */}
         <Route path="/ovyva" element={<OvyvaPage />} />
@@ -131,14 +120,20 @@ export function AppRouter() {
         <Route path="/estoque" element={<EstoquePage />} />
         <Route path="/estoque/produtos" element={<ProdutosPage />} />
         <Route path="/estoque/movimentacoes" element={<MovimentacoesPage />} />
-        <Route path="/estoque/regras" element={<RegrasConsumoPage />} />
         <Route path="/estoque/alertas" element={<AlertasPage />} />
+        <Route path="/estoque/regras" element={<RegrasConsumoPage />} />
 
         {/* Módulo Relatórios */}
         <Route path="/relatorios" element={<RelatoriosPage />} />
         <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
         <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
         <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
+
+        {/* Módulo Financeiro */}
+        <Route path="/financeiro" element={<FinanceiroPage />} />
+
+        {/* Módulo Prescrições */}
+        <Route path="/prescricoes" element={<PrescricoesPage />} />
 
         {/* Módulo Configurações */}
         <Route path="/configuracoes" element={<ConfiguracoesLayout />}>

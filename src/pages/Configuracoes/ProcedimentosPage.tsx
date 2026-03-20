@@ -107,7 +107,7 @@ function ProcedimentoModal({
 export function ProcedimentosPage() {
   const { toast } = useToast()
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
 
   const [procedimentos, setProcedimentos] = useState<Procedimento[]>([])
   const [filtroCategoria, setFiltroCategoria] = useState<string>('Todos')

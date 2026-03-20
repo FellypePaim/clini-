@@ -36,7 +36,7 @@ interface PrescriptionModalProps {
 
 export function PrescriptionModal({ isOpen, onClose, patient, onSave }: PrescriptionModalProps) {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const { toast } = useToast()
 
   const [items, setItems] = useState<PrescriptionItem[]>([

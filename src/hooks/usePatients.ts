@@ -1,41 +1,32 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import type { Patient, Appointment, PatientDocument, PatientFinancial } from '../types'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-
 export function usePatients() {
   const [patients, setPatients] = useState<Patient[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const { toast } = useToast()
 
-  // ── INIT FETCH ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (USE_MOCK || !clinicaId) return
-    getPatients()
-  }, [clinicaId])
-
   // ── Buscar lista de pacientes ────────────────────────────────────────
   const getPatients = useCallback(async () => {
+    if (!clinicaId) return []
     setIsLoading(true)
     setError(null)
     try {
-      if (USE_MOCK || !clinicaId) return []
-
       const { data, error: pbErr } = await supabase
         .from('pacientes')
-        .select('*, consultas(count)')
+        .select('*')
         .eq('clinica_id', clinicaId)
         .order('nome_completo', { ascending: true })
 
       if (pbErr) throw pbErr
 
-      const mapped: Patient[] = (data || []).map((r: any) => ({
+      const mapped: Patient[] = (data || []).map(r => ({
         id: r.id,
         nome: r.nome_completo,
         dataNascimento: r.data_nascimento || '',
@@ -45,13 +36,13 @@ export function usePatients() {
         numeroConvenio: r.numero_convenio || '',
         endereco: (r.endereco as any) || { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
         contato: {
-           telefone: r.whatsapp || r.telefone || '',
-           email: r.email || ''
+          telefone: r.whatsapp || r.telefone || '',
+          email: r.email || ''
         },
         ativo: r.ativo ?? true,
         criadoEm: r.created_at || '',
-        totalConsultas: r.consultas?.[0]?.count || 0,
-        ultimaConsulta: r.updated_at?.split('T')[0]
+        ultimaConsulta: r.ultima_consulta || undefined,
+        totalConsultas: r.total_consultas || 0,
       }))
 
       setPatients(mapped)
@@ -67,13 +58,12 @@ export function usePatients() {
 
   // ── Buscar paciente por ID ───────────────────────────────────────────
   const getPatientById = useCallback(async (id: string) => {
+    if (!clinicaId) return null
     setIsLoading(true)
     try {
-      if (!clinicaId || USE_MOCK) return null
-
       const { data, error: pbErr } = await supabase
         .from('pacientes')
-        .select('*, consultas(count)')
+        .select('*')
         .eq('clinica_id', clinicaId)
         .eq('id', id)
         .single()
@@ -90,12 +80,13 @@ export function usePatients() {
         numeroConvenio: data.numero_convenio || '',
         endereco: (data.endereco as any) || { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
         contato: {
-           telefone: data.whatsapp || data.telefone || '',
-           email: data.email || ''
+          telefone: data.whatsapp || data.telefone || '',
+          email: data.email || ''
         },
         ativo: data.ativo ?? true,
         criadoEm: data.created_at || '',
-        totalConsultas: data.consultas?.[0]?.count || 0
+        ultimaConsulta: data.ultima_consulta || undefined,
+        totalConsultas: data.total_consultas || 0,
       } as Patient
     } catch (err: any) {
       toast({ title: 'Erro', description: 'Erro ao buscar dados do paciente.', type: 'error' })
@@ -105,100 +96,126 @@ export function usePatients() {
     }
   }, [clinicaId, toast])
 
-  // ── Buscar histórico de consultas ───────────────────────────────────────────
+  // ── Buscar histórico de consultas ─────────────────────────────────────
   const getPatientHistory = useCallback(async (id: string): Promise<Appointment[]> => {
-    if (!clinicaId || USE_MOCK) return []
+    if (!clinicaId) return []
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
+      const { data, error: pbErr } = await supabase
         .from('consultas')
-        .select(`
-          *,
-          profissional:profiles!consultas_profissional_id_fkey (nome_completo),
-          paciente:pacientes (nome_completo),
-          procedimento:procedimentos (nome)
-        `)
+        .select('*, profiles(nome_completo)')
         .eq('paciente_id', id)
-        .order('data_hora_inicio', { ascending: false })
+        .eq('clinica_id', clinicaId)
+        .order('data_hora', { ascending: false })
 
-      if (error) throw error
+      if (pbErr) throw pbErr
 
-      return (data || []).map((row: any) => ({
-        id: row.id,
-        pacienteId: row.paciente_id,
-        pacienteNome: row.paciente?.nome_completo || 'Sem Nome',
-        profissionalId: row.profissional_id,
-        profissionalNome: row.profissional?.nome_completo || 'Sem Nome',
-        data: row.data_hora_inicio.split('T')[0],
-        horaInicio: row.data_hora_inicio.split('T')[1].substring(0, 5),
-        horaFim: row.data_hora_fim.split('T')[1].substring(0, 5),
-        procedimento: row.procedimento?.nome || 'Consulta',
-        status: row.status,
-        observacoes: row.observacoes,
-        valor: row.valor,
-        criadoEm: row.created_at,
-        atualizadoEm: row.updated_at
-      })) as Appointment[]
+      return (data || []).map((r: any) => ({
+        id: r.id,
+        pacienteId: r.paciente_id,
+        pacienteNome: '',
+        profissionalId: r.profissional_id,
+        profissionalNome: r.profiles?.nome_completo || '',
+        data: r.data_hora?.split('T')[0] || '',
+        horaInicio: r.data_hora ? new Date(r.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+        horaFim: '',
+        procedimento: r.procedimento || 'consulta',
+        status: r.status || 'concluido',
+        observacoes: r.observacoes || '',
+        valor: r.valor || 0,
+        criadoEm: r.created_at || '',
+        atualizadoEm: r.updated_at || '',
+      }))
     } catch (err: any) {
-      console.error(err)
+      console.error('Erro ao buscar histórico:', err.message)
       return []
     } finally {
       setIsLoading(false)
     }
   }, [clinicaId])
 
-  // ── Buscar documentos do paciente ──────────────────────────────────────────
+  // ── Buscar documentos do paciente ──────────────────────────────────────
   const getPatientDocuments = useCallback(async (id: string): Promise<PatientDocument[]> => {
-    if (!clinicaId || USE_MOCK) return []
+    if (!clinicaId) return []
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
+      const { data, error: pbErr } = await supabase
         .from('documentos_paciente')
         .select('*')
         .eq('paciente_id', id)
+        .eq('clinica_id', clinicaId)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (pbErr) throw pbErr
 
-      return (data || []).map(row => ({
-        id: row.id,
-        pacienteId: row.paciente_id,
-        nome: row.nome || 'Sem Nome',
-        tipo: row.mime_type?.includes('image') ? 'imagem' : 'pdf',
-        url: row.arquivo_url || '',
-        dataUpload: row.created_at || '',
-        tamanho: row.tamanho_bytes ? `${(row.tamanho_bytes / 1024).toFixed(1)} KB` : '0 KB'
-      })) as PatientDocument[]
+      return (data || []).map((r: any) => ({
+        id: r.id,
+        pacienteId: r.paciente_id,
+        nome: r.nome || '',
+        tipo: r.tipo || 'pdf',
+        url: r.url || '',
+        dataUpload: r.created_at?.split('T')[0] || '',
+        tamanho: r.tamanho || '',
+      }))
     } catch (err: any) {
+      console.error('Erro ao buscar documentos:', err.message)
       return []
     } finally {
       setIsLoading(false)
     }
   }, [clinicaId])
 
-  // ── Buscar financeiro do paciente (PENDENTE: Módulo em construção) ──────────
+  // ── Buscar financeiro do paciente ──────────────────────────────────────
   const getPatientFinancial = useCallback(async (id: string): Promise<PatientFinancial[]> => {
-    return [] // Simplesmente retorna vazio até a construção do módulo financeiro
-  }, [])
+    if (!clinicaId) return []
+    setIsLoading(true)
+    try {
+      const { data, error: pbErr } = await supabase
+        .from('orcamentos')
+        .select('*')
+        .eq('paciente_id', id)
+        .eq('clinica_id', clinicaId)
+        .order('created_at', { ascending: false })
+
+      if (pbErr) throw pbErr
+
+      return (data || []).map((r: any) => ({
+        id: r.id,
+        pacienteId: r.paciente_id,
+        tipo: r.tipo || 'orcamento',
+        valor: r.valor_total || 0,
+        data: r.created_at?.split('T')[0] || '',
+        descricao: r.descricao || 'Orçamento',
+        status: r.status || 'pendente',
+      }))
+    } catch (err: any) {
+      console.error('Erro ao buscar financeiro:', err.message)
+      return []
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
 
   // ── Criar novo paciente ─────────────────────────────────────────────
   const createPatient = useCallback(async (data: Partial<Patient>) => {
-    if (!clinicaId || USE_MOCK) return null
+    if (!clinicaId) return null
     setIsLoading(true)
     try {
-      const insertData: any = {
+      const insertData = {
         clinica_id: clinicaId,
         nome_completo: data.nome || '',
         email: data.contato?.email || null,
         telefone: data.contato?.telefone || null,
         whatsapp: data.contato?.telefone || null,
-        cpf: data.cpf,
-        data_nascimento: data.dataNascimento,
-        genero: data.sexo,
-        convenio: data.convenio,
-        numero_convenio: data.numeroConvenio,
-        endereco: data.endereco as any,
-        ativo: true
+        cpf: data.cpf || null,
+        data_nascimento: data.dataNascimento || null,
+        genero: data.sexo || null,
+        convenio: data.convenio || null,
+        numero_convenio: data.numeroConvenio || null,
+        endereco: data.endereco as any || null,
+        observacoes: data.observacoes || null,
+        alergias: data.alergias || null,
+        ativo: true,
       }
 
       const { data: ret, error: pbErr } = await supabase
@@ -219,12 +236,12 @@ export function usePatients() {
         numeroConvenio: ret.numero_convenio || '',
         endereco: (ret.endereco as any) || { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
         contato: {
-           telefone: ret.whatsapp || ret.telefone || '',
-           email: ret.email || ''
+          telefone: ret.whatsapp || ret.telefone || '',
+          email: ret.email || ''
         },
         ativo: ret.ativo ?? true,
         criadoEm: ret.created_at || '',
-        totalConsultas: 0
+        totalConsultas: 0,
       }
 
       setPatients(prev => [mapped, ...prev])
@@ -240,20 +257,22 @@ export function usePatients() {
 
   // ── Atualizar paciente ──────────────────────────────────────────────
   const updatePatient = useCallback(async (id: string, data: Partial<Patient>) => {
-    if (!clinicaId || USE_MOCK) return
+    if (!clinicaId) return
     setIsLoading(true)
     try {
       const updateData: any = {}
       if (data.nome) updateData.nome_completo = data.nome
       if (data.contato?.email !== undefined) updateData.email = data.contato.email
       if (data.contato?.telefone !== undefined) {
-         updateData.telefone = data.contato.telefone
-         updateData.whatsapp = data.contato.telefone
+        updateData.telefone = data.contato.telefone
+        updateData.whatsapp = data.contato.telefone
       }
       if (data.cpf !== undefined) updateData.cpf = data.cpf
       if (data.dataNascimento !== undefined) updateData.data_nascimento = data.dataNascimento
       if (data.sexo !== undefined) updateData.genero = data.sexo
       if (data.ativo !== undefined) updateData.ativo = data.ativo
+      if (data.convenio !== undefined) updateData.convenio = data.convenio
+      if (data.observacoes !== undefined) updateData.observacoes = data.observacoes
 
       const { error: pbErr } = await supabase
         .from('pacientes')
@@ -272,16 +291,28 @@ export function usePatients() {
     }
   }, [clinicaId, toast])
 
-  // ── STUB: Gerar link de anamnese ──────────────────────────────────────────
+  // ── Gerar link de anamnese ────────────────────────────────────────────
   const sendAnamnesisLink = useCallback(async (patientId: string) => {
+    if (!clinicaId) return ''
     setIsLoading(true)
-    await new Promise((r) => setTimeout(r, 400))
-    const token = Math.random().toString(36).substring(2, 15)
-    setIsLoading(false)
-    // URL real simulada com o domínio base do app
-    const baseUrl = window.location.origin;
-    return `${baseUrl}/anamnese/${token}?pid=${patientId}`
-  }, [])
+    try {
+      // Salva um token de anamnese no banco
+      const token = crypto.randomUUID()
+      await supabase.from('anamneses').insert({
+        clinica_id: clinicaId,
+        paciente_id: patientId,
+        token,
+        status: 'pendente',
+      })
+      const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
+      return `${baseUrl}/anamnese/${token}`
+    } catch (e: any) {
+      console.error('Erro ao gerar link de anamnese:', e.message)
+      return ''
+    } finally {
+      setIsLoading(false)
+    }
+  }, [clinicaId])
 
   return {
     patients,
@@ -294,6 +325,6 @@ export function usePatients() {
     getPatientFinancial,
     createPatient,
     updatePatient,
-    sendAnamnesisLink
+    sendAnamnesisLink,
   }
 }

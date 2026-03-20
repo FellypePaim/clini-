@@ -44,7 +44,7 @@ const ZONES_CONFIG = [
 
 export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: FacialHarmonizationProps) {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const { toast } = useToast()
 
   const [selectedZones, setSelectedZones] = useState<HarmonizationZone[]>(initialZones)

@@ -1,146 +1,133 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
-import type { Product, Movement, PurchaseOrder, ProcedureConsumptionRule, ProductCategory } from '../types/estoque'
+import { useState, useCallback, useEffect } from 'react'
+import type { Product, Movement, PurchaseOrder, ProcedureConsumptionRule } from '../types/estoque'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
-import { useToast } from './useToast'
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 export function useEstoque() {
+  const { user } = useAuthStore()
+  const clinicaId = user?.clinicaId
+
   const [products, setProducts] = useState<Product[]>([])
   const [movements, setMovements] = useState<Movement[]>([])
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
+  const [consumptionRules, setConsumptionRules] = useState<ProcedureConsumptionRule[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  const user = useAuthStore(state => state.user)
-  const clinicaId = user?.clinicaId
-  const { toast } = useToast()
 
-  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
-  useEffect(() => {
-    if (USE_MOCK || !clinicaId) return
-
-    const loadData = async () => {
-      await Promise.all([
-        fetchProducts(),
-        fetchMovements()
-      ])
+  // ── Mappers ─────────────────────────────────────────────────────────────────
+  function mapProduct(r: any): Product {
+    return {
+      id: r.id,
+      code: r.codigo || '',
+      name: r.nome,
+      category: r.categoria,
+      unit: r.unidade || 'Unidade',
+      currentStock: r.estoque_atual ?? 0,
+      minimumStock: r.estoque_minimo ?? 0,
+      expirationDate: r.validade || undefined,
+      unitCost: r.custo_unitario ?? 0,
+      provider: r.fornecedor || undefined,
+      location: r.localizacao || undefined,
+      createdAt: r.created_at || '',
+      updatedAt: r.updated_at || '',
     }
-    
-    loadData()
+  }
 
-    // Subscreve a mudanças no estoque
-    const productsChannel = supabase.channel('estoque_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'produtos_estoque', filter: `clinica_id=eq.${clinicaId}` },
-        () => fetchProducts()
-      )
-      .subscribe()
-
-    const movementsChannel = supabase.channel('movimentacoes_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'estoque_movimentacoes', filter: `clinica_id=eq.${clinicaId}` },
-        () => fetchMovements()
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(productsChannel)
-      supabase.removeChannel(movementsChannel)
+  function mapMovement(r: any): Movement {
+    return {
+      id: r.id,
+      productId: r.produto_id,
+      productName: r.produto_nome || '',
+      type: r.tipo as any,
+      quantity: r.quantidade,
+      date: r.created_at || '',
+      reason: r.motivo || '',
+      responsible: r.responsavel || '',
+      linkedTo: r.vinculado_a || undefined,
     }
-  }, [clinicaId])
+  }
 
-  // ── Buscar Produtos ────────────────────────────────────────────────────────
-  const fetchProducts = useCallback(async () => {
+  // ── Carregar produtos ────────────────────────────────────────────────────────
+  const loadProducts = useCallback(async () => {
     if (!clinicaId) return
     setIsLoading(true)
     try {
-      const { data, error: pbErr } = await supabase
+      const { data, error } = await supabase
         .from('produtos_estoque')
         .select('*')
         .eq('clinica_id', clinicaId)
-        .eq('ativo', true)
         .order('nome', { ascending: true })
-
-      if (pbErr) throw pbErr
-
-      const mapped: Product[] = (data || []).map(row => ({
-        id: row.id,
-        code: row.codigo || '',
-        name: row.nome,
-        category: row.categoria as ProductCategory,
-        unit: row.unidade || 'Unidade',
-        currentStock: row.estoque_atual || 0,
-        minimumStock: row.estoque_minimo || 0,
-        expirationDate: row.validade || undefined,
-        unitCost: row.custo_unitario || 0,
-        provider: row.fornecedor_preferencial || undefined,
-        location: row.localizacao || undefined,
-        createdAt: row.created_at || '',
-        updatedAt: row.updated_at || ''
-      }))
-
-      setProducts(mapped)
-    } catch (err: any) {
-      setError(err.message)
-      toast({ title: 'Erro', description: 'Erro ao buscar produtos.', type: 'error' })
+      if (error) throw error
+      setProducts((data || []).map(mapProduct))
+    } catch (e: any) {
+      console.error('Erro ao carregar produtos:', e.message)
     } finally {
       setIsLoading(false)
     }
-  }, [clinicaId, toast])
+  }, [clinicaId])
 
-  // ── Buscar Movimentações ────────────────────────────────────────────────────
-  const fetchMovements = useCallback(async () => {
+  // ── Carregar movimentações ────────────────────────────────────────────────────
+  const loadMovements = useCallback(async () => {
     if (!clinicaId) return
     try {
-      const { data, error: pbErr } = await supabase
+      const { data, error } = await supabase
         .from('estoque_movimentacoes')
-        .select(`
-          *,
-          produto:produtos_estoque (nome),
-          usuario:profiles (nome_completo)
-        `)
+        .select('*')
         .eq('clinica_id', clinicaId)
         .order('created_at', { ascending: false })
-        .limit(100)
-
-      if (pbErr) throw pbErr
-
-      const mapped: Movement[] = (data || []).map((row: any) => ({
-        id: row.id,
-        productId: row.produto_id,
-        productName: row.produto?.nome || 'Produto Removido',
-        type: row.tipo === 'entrada' ? 'Entrada' : row.tipo === 'saida' ? 'Saída' : 'Ajuste',
-        quantity: row.quantidade,
-        date: row.created_at || '',
-        reason: row.motivo || '',
-        responsible: row.usuario?.nome_completo || 'Sistema',
-        linkedTo: row.consulta_id || row.procedimento_id || undefined
-      }))
-
-      setMovements(mapped)
-    } catch (err: any) {
-      console.error('Erro ao buscar movimentações:', err)
+        .limit(200)
+      if (error) throw error
+      setMovements((data || []).map(mapMovement))
+    } catch (e: any) {
+      console.error('Erro ao carregar movimentações:', e.message)
     }
   }, [clinicaId])
 
-  // ── Compatibilidade com Componentes legados (getters) ──────────────────────
-  const getProducts = useCallback(() => products.map(p => ({
-    ...p,
-    status: p.currentStock === 0 ? 'Zerado' : (p.currentStock < p.minimumStock ? 'Crítico' : 'Normal')
-  }) as Product & { status: string }), [products])
+  // ── Carregar regras de consumo ────────────────────────────────────────────────
+  const loadRules = useCallback(async () => {
+    if (!clinicaId) return
+    try {
+      const { data, error } = await supabase
+        .from('procedimento_insumos')
+        .select('*')
+        .eq('clinica_id', clinicaId)
+      if (error) throw error
+      setConsumptionRules((data || []).map((r: any) => ({
+        id: r.id,
+        procedureName: r.procedimento_nome,
+        productId: r.produto_id,
+        quantity: r.quantidade,
+        isActive: r.ativo ?? true,
+      })))
+    } catch (e: any) {
+      console.error('Erro ao carregar regras:', e.message)
+    }
+  }, [clinicaId])
+
+  useEffect(() => {
+    loadProducts()
+    loadMovements()
+    loadRules()
+  }, [loadProducts, loadMovements, loadRules])
+
+  // ── Getters com status calculado ─────────────────────────────────────────────
+  const getProducts = useCallback(() =>
+    products.map(p => ({
+      ...p,
+      status: p.currentStock === 0 ? 'Zerado' : (p.currentStock < p.minimumStock ? 'Crítico' : 'Normal'),
+    })),
+  [products])
+
+  const getAlerts = useCallback(() =>
+    products.filter(p => p.currentStock < p.minimumStock),
+  [products])
 
   const getMovimentacoes = useCallback(() => movements, [movements])
-  const getAlerts = useCallback(() => products.filter(p => p.currentStock < p.minimumStock), [products])
 
-  // ── Criar Produto ───────────────────────────────────────────────────────────
+  // ── Criar produto ────────────────────────────────────────────────────────────
   const createProduct = useCallback(async (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (USE_MOCK || !clinicaId) return
-    setIsLoading(true)
+    if (!clinicaId) return
     try {
-      const { error: pbErr } = await supabase
+      const { data, error } = await supabase
         .from('produtos_estoque')
         .insert({
           clinica_id: clinicaId,
@@ -150,161 +137,228 @@ export function useEstoque() {
           unidade: product.unit,
           estoque_atual: product.currentStock,
           estoque_minimo: product.minimumStock,
+          validade: product.expirationDate || null,
           custo_unitario: product.unitCost,
-          validade: product.expirationDate,
-          fornecedor_preferencial: product.provider,
-          localizacao: product.location,
-          ativo: true
+          fornecedor: product.provider || null,
+          localizacao: product.location || null,
         })
-
-      if (pbErr) throw pbErr
-      toast({ title: 'Sucesso', description: 'Produto cadastrado.', type: 'success' })
-      await fetchProducts()
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [clinicaId, fetchProducts, toast])
-
-  // ── Registrar Entrada / Saída ──────────────────────────────────────────────
-  const registerMovement = useCallback(async (
-    productId: string, 
-    quantity: number, 
-    type: 'entrada' | 'saida' | 'ajuste', 
-    reason: string, 
-    linkedTo?: string, 
-    newCost?: number
-  ) => {
-    if (USE_MOCK || !clinicaId) return
-    setIsLoading(true)
-    try {
-      const product = products.find(p => p.id === productId)
-      if (!product) throw new Error('Produto não encontrado')
-
-      const currentStock = product.currentStock
-      const newStock = type === 'entrada' ? currentStock + quantity : currentStock - quantity
-
-      // Registra a movimentação
-      const { error: movErr } = await supabase
-        .from('estoque_movimentacoes')
-        .insert({
-          clinica_id: clinicaId,
-          produto_id: productId,
-          tipo: type,
-          quantidade: quantity,
-          motivo: reason,
-          estoque_anterior: currentStock,
-          estoque_posterior: newStock,
-          usuario_id: user?.id,
-          consulta_id: linkedTo?.startsWith('CONS-') ? linkedTo.replace('CONS-', '') : undefined
-        })
-
-      if (movErr) throw movErr
-
-      // Atualiza o estoque do produto
-      const updateData: any = { 
-        estoque_atual: newStock,
-        updated_at: new Date().toISOString()
-      }
-      if (newCost !== undefined) updateData.custo_unitario = newCost
-
-      const { error: prodErr } = await supabase
-        .from('produtos_estoque')
-        .update(updateData)
-        .eq('id', productId)
-
-      if (prodErr) throw prodErr
-
-      toast({ title: 'Sucesso', description: 'Estoque atualizado.', type: 'success' })
-      await Promise.all([fetchProducts(), fetchMovements()])
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [clinicaId, products, user, fetchProducts, fetchMovements, toast])
-
-  const registerEntry = useCallback((productId: string, quantity: number, reason: string, responsible: string, cost?: number) => {
-    registerMovement(productId, quantity, 'entrada', reason, undefined, cost)
-  }, [registerMovement])
-
-  const registerExit = useCallback((productId: string, quantity: number, reason: string, responsible: string, linkedTo?: string) => {
-    // linkedTo pode vir como ID de consulta ou paciente-ID
-    registerMovement(productId, quantity, 'saida', reason, linkedTo)
-  }, [registerMovement])
-
-  // ── Outros (Purchase Orders, Consumption Rules) ──────────
-  const [consumptionRules, setConsumptionRules] = useState<ProcedureConsumptionRule[]>([])
-
-  const fetchConsumptionRules = useCallback(async () => {
-    if (!clinicaId) return
-    const { data, error: err } = await supabase
-      .from('estoque_regras_consumo' as any)
-      .select('*')
-      .eq('clinica_id', clinicaId)
-      .eq('ativo', true)
-    
-    if (!err) {
-      setConsumptionRules(data.map((r: any) => ({
-        id: r.id,
-        procedureName: r.procedimento_nome,
-        productId: r.produto_id,
-        quantity: r.quantidade,
-        isActive: r.ativo
-      })))
+        .select()
+        .single()
+      if (error) throw error
+      setProducts(prev => [mapProduct(data), ...prev])
+    } catch (e: any) {
+      console.error('Erro ao criar produto:', e.message)
     }
   }, [clinicaId])
 
-  useEffect(() => {
-    if (clinicaId) fetchConsumptionRules()
-  }, [clinicaId, fetchConsumptionRules])
+  // ── Atualizar produto ────────────────────────────────────────────────────────
+  const updateProduct = useCallback(async (id: string, data: Partial<Product>) => {
+    if (!clinicaId) return
+    try {
+      const updateData: any = {}
+      if (data.name !== undefined) updateData.nome = data.name
+      if (data.code !== undefined) updateData.codigo = data.code
+      if (data.category !== undefined) updateData.categoria = data.category
+      if (data.unit !== undefined) updateData.unidade = data.unit
+      if (data.currentStock !== undefined) updateData.estoque_atual = data.currentStock
+      if (data.minimumStock !== undefined) updateData.estoque_minimo = data.minimumStock
+      if (data.expirationDate !== undefined) updateData.validade = data.expirationDate
+      if (data.unitCost !== undefined) updateData.custo_unitario = data.unitCost
+      if (data.provider !== undefined) updateData.fornecedor = data.provider
+      if (data.location !== undefined) updateData.localizacao = data.location
 
-  const toggleConsumptionRule = useCallback((ruleId: string) => {
-    // Implementar update no DB se necessário
-    setConsumptionRules(prev => prev.map((r: ProcedureConsumptionRule) => r.id === ruleId ? { ...r, isActive: !r.isActive } : r))
-  }, [])
+      const { error } = await supabase
+        .from('produtos_estoque')
+        .update(updateData)
+        .eq('id', id)
+        .eq('clinica_id', clinicaId)
+      if (error) throw error
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, ...data } : p))
+    } catch (e: any) {
+      console.error('Erro ao atualizar produto:', e.message)
+    }
+  }, [clinicaId])
+
+  // ── Registrar entrada ────────────────────────────────────────────────────────
+  const registerEntry = useCallback(async (
+    productId: string, quantity: number, reason: string, responsible: string, cost?: number
+  ) => {
+    if (!clinicaId) return
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+    try {
+      const { error: movErr } = await supabase.from('estoque_movimentacoes').insert({
+        clinica_id: clinicaId,
+        produto_id: productId,
+        produto_nome: product.name,
+        tipo: 'Entrada',
+        quantidade: quantity,
+        motivo: reason,
+        responsavel: responsible,
+      })
+      if (movErr) throw movErr
+
+      const novoEstoque = product.currentStock + quantity
+      await supabase
+        .from('produtos_estoque')
+        .update({ estoque_atual: novoEstoque, ...(cost ? { custo_unitario: cost } : {}) })
+        .eq('id', productId)
+        .eq('clinica_id', clinicaId)
+
+      setProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, currentStock: novoEstoque, ...(cost ? { unitCost: cost } : {}) } : p
+      ))
+      await loadMovements()
+    } catch (e: any) {
+      console.error('Erro ao registrar entrada:', e.message)
+    }
+  }, [clinicaId, products, loadMovements])
+
+  // ── Registrar saída ──────────────────────────────────────────────────────────
+  const registerExit = useCallback(async (
+    productId: string, quantity: number, reason: string, responsible: string, linkedTo?: string
+  ) => {
+    if (!clinicaId) return
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+    try {
+      const { error: movErr } = await supabase.from('estoque_movimentacoes').insert({
+        clinica_id: clinicaId,
+        produto_id: productId,
+        produto_nome: product.name,
+        tipo: 'Saída',
+        quantidade: quantity,
+        motivo: reason,
+        responsavel: responsible,
+        vinculado_a: linkedTo || null,
+      })
+      if (movErr) throw movErr
+
+      const novoEstoque = Math.max(0, product.currentStock - quantity)
+      await supabase
+        .from('produtos_estoque')
+        .update({ estoque_atual: novoEstoque })
+        .eq('id', productId)
+        .eq('clinica_id', clinicaId)
+
+      setProducts(prev => prev.map(p =>
+        p.id === productId ? { ...p, currentStock: novoEstoque } : p
+      ))
+      await loadMovements()
+    } catch (e: any) {
+      console.error('Erro ao registrar saída:', e.message)
+    }
+  }, [clinicaId, products, loadMovements])
+
+  // ── Gerar pedido de compra ────────────────────────────────────────────────────
+  const generatePurchaseOrder = useCallback(async (orderData: Omit<PurchaseOrder, 'id' | 'status' | 'createdAt'>) => {
+    if (!clinicaId) return
+    try {
+      const { data, error } = await supabase
+        .from('pedidos_compra')
+        .insert({
+          clinica_id: clinicaId,
+          produto_id: orderData.productId,
+          fornecedor: orderData.provider,
+          quantidade: orderData.quantity,
+          data_prevista: orderData.expectedDate,
+          status: 'Pendente',
+        })
+        .select()
+        .single()
+      if (error) throw error
+      const novo: PurchaseOrder = {
+        id: data.id,
+        productId: data.produto_id,
+        provider: data.fornecedor,
+        quantity: data.quantidade,
+        expectedDate: data.data_prevista,
+        status: data.status,
+        createdAt: data.created_at,
+      }
+      setPurchaseOrders(prev => [novo, ...prev])
+    } catch (e: any) {
+      console.error('Erro ao gerar pedido:', e.message)
+    }
+  }, [clinicaId])
+
+  // ── Alternar regra de consumo ─────────────────────────────────────────────────
+  const toggleConsumptionRule = useCallback(async (ruleId: string) => {
+    if (!clinicaId) return
+    const rule = consumptionRules.find(r => r.id === ruleId)
+    if (!rule) return
+    try {
+      const { error } = await supabase
+        .from('procedimento_insumos')
+        .update({ ativo: !rule.isActive })
+        .eq('id', ruleId)
+        .eq('clinica_id', clinicaId)
+      if (error) throw error
+      setConsumptionRules(prev => prev.map(r => r.id === ruleId ? { ...r, isActive: !r.isActive } : r))
+    } catch (e: any) {
+      console.error('Erro ao alternar regra:', e.message)
+    }
+  }, [clinicaId, consumptionRules])
+
+  // ── Criar regra de consumo ────────────────────────────────────────────────────
+  const createConsumptionRule = useCallback(async (rule: Omit<ProcedureConsumptionRule, 'id'>) => {
+    if (!clinicaId) return
+    try {
+      const { data, error } = await supabase
+        .from('procedimento_insumos')
+        .insert({
+          clinica_id: clinicaId,
+          procedimento_nome: rule.procedureName,
+          produto_id: rule.productId,
+          quantidade: rule.quantity,
+          ativo: rule.isActive,
+        })
+        .select()
+        .single()
+      if (error) throw error
+      setConsumptionRules(prev => [...prev, {
+        id: data.id,
+        procedureName: data.procedimento_nome,
+        productId: data.produto_id,
+        quantity: data.quantidade,
+        isActive: data.ativo,
+      }])
+    } catch (e: any) {
+      console.error('Erro ao criar regra:', e.message)
+    }
+  }, [clinicaId])
 
   return {
     products,
     movements,
+    purchaseOrders,
+    consumptionRules,
     isLoading,
-    error,
     getProducts,
-    getMovimentacoes,
-    getAlerts,
     createProduct,
+    updateProduct,
     registerEntry,
     registerExit,
-    consumptionRules,
+    getMovimentacoes,
+    getAlerts,
+    generatePurchaseOrder,
     toggleConsumptionRule,
-    purchaseOrders: [] as PurchaseOrder[],
-    generatePurchaseOrder: (p: any) => { console.log('Mock PO', p) }
+    createConsumptionRule,
+    loadProducts,
+    loadMovements,
   }
 }
 
-// Hook de automação para o PEP
+// Hook de automação de consumo (mantém compatibilidade)
 export const useEstoqueAutomation = () => {
-  const { registerExit, consumptionRules } = useEstoque();
+  const { registerExit, consumptionRules } = useEstoque()
 
-  const processProcedure = async (procedureName: string, responsible: string, patientId: string, appointmentId?: string) => {
-    if (!procedureName) return;
-    
-    // Busca regras ativas para este procedimento
-    const rulesToApply = consumptionRules.filter(r => r.isActive && r.procedureName.toLowerCase() === procedureName.toLowerCase());
-    
-    if (rulesToApply.length === 0) return;
+  const processProcedure = (procedureName: string, responsible: string, patientId: string) => {
+    const rulesToApply = consumptionRules.filter(r => r.isActive && r.procedureName === procedureName)
+    rulesToApply.forEach(rule => {
+      registerExit(rule.productId, rule.quantity, `Baixa Automática - ${procedureName}`, responsible, `PAC-${patientId}`)
+    })
+  }
 
-    for (const rule of rulesToApply) {
-      await registerExit(
-        rule.productId, 
-        rule.quantity, 
-        `Baixa Automática - ${procedureName}`, 
-        responsible, 
-        appointmentId || `PAC-${patientId}`
-      );
-    }
-  };
-
-  return { processProcedure };
-};
+  return { processProcedure }
+}

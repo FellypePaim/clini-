@@ -3,170 +3,136 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-export type TransacaoTipo = 'receita' | 'despesa'
-export type TransacaoStatus = 'pago' | 'pendente' | 'cancelado'
-
-export interface Transacao {
+export interface Lancamento {
   id: string
   descricao: string
   valor: number
-  dataConsolidacao: string
-  vencimento?: string
-  tipo: TransacaoTipo
-  status: TransacaoStatus
-  formaPagamento?: string
-  categoriaId?: string
-  pacienteId?: string
-  profissionalId?: string
-  consultaId?: string
-  observacoes?: string
-  categoriaNome?: string
-  categoriaCor?: string
+  tipo: 'receita' | 'despesa'
+  categoria: string
+  data_competencia: string
+  status: 'pendente' | 'pago' | 'cancelado'
+  paciente_nome?: string
+  profissional_nome?: string
+  convenio?: string
 }
 
-export interface CategoriaFinanceira {
-  id: string
-  nome: string
-  tipo: TransacaoTipo
-  cor?: string
-  icone?: string
+export interface NovoLancamento {
+  descricao: string
+  valor: number
+  tipo: 'receita' | 'despesa'
+  categoria: string
+  data_competencia: string
+  status: 'pendente' | 'pago' | 'cancelado'
+  paciente_id?: string
+  convenio?: string
 }
 
 export function useFinanceiro() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>([])
-  const [categorias, setCategorias] = useState<CategoriaFinanceira[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [summary, setSummary] = useState({ receita: 0, despesa: 0, saldo: 0 })
-
-  const clinicaId = useAuthStore(state => state.user?.clinicaId)
+  const { user } = useAuthStore()
   const { toast } = useToast()
+  const clinicaId = user?.clinicaId
 
-  // ── Buscar Categorias ───────────────────────────────────────────────────
-  const fetchCategorias = useCallback(async () => {
-    if (!clinicaId) return
-    try {
-      const { data, error } = await supabase
-        .from('financeiro_categorias' as any)
-        .select('*')
-        .eq('clinica_id', clinicaId)
-        .order('nome')
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
-      if (error) throw error
-      setCategorias(data as any[] || [])
-    } catch (err: any) {
-      console.error(err)
-    }
-  }, [clinicaId])
-
-  // ── Buscar Transações ────────────────────────────────────────────────────
-  const fetchTransacoes = useCallback(async (periodo?: { start: string, end: string }) => {
+  const loadLancamentos = useCallback(async (inicio?: string, fim?: string) => {
     if (!clinicaId) return
     setIsLoading(true)
     try {
       let query = supabase
-        .from('transacoes' as any)
-        .select('*, categoria:financeiro_categorias(nome, cor)')
+        .from('lancamentos')
+        .select(`
+          id, descricao, valor, tipo, categoria, data_competencia, status, convenio,
+          pacientes (nome_completo),
+          profiles (nome_completo)
+        `)
         .eq('clinica_id', clinicaId)
-        .order('data_consolidacao', { ascending: false })
+        .order('data_competencia', { ascending: false })
 
-      if (periodo) {
-        query = (query as any).gte('data_consolidacao', periodo.start).lte('data_consolidacao', periodo.end)
-      }
+      if (inicio) query = query.gte('data_competencia', inicio)
+      if (fim) query = query.lte('data_competencia', fim)
 
       const { data, error } = await query
-
       if (error) throw error
 
-      const mapped: Transacao[] = (data as any[] || []).map((row: any) => ({
-        id: row.id,
-        descricao: row.descricao,
-        valor: row.valor,
-        dataConsolidacao: row.data_consolidacao,
-        vencimento: row.vencimento,
-        tipo: row.tipo,
-        status: row.status,
-        formaPagamento: row.forma_pagamento,
-        categoriaId: row.categoria_id,
-        pacienteId: row.paciente_id,
-        profissionalId: row.profissional_id,
-        consultaId: row.consulta_id,
-        observacoes: row.observacoes,
-        categoriaNome: row.categoria?.nome,
-        categoriaCor: row.categoria?.cor
-      }))
-
-      setTransacoes(mapped)
-      
-      // Calcular Sumário
-      const rec = mapped.filter(t => t.tipo === 'receita' && t.status === 'pago').reduce((acc, t) => acc + t.valor, 0)
-      const des = mapped.filter(t => t.tipo === 'despesa' && t.status === 'pago').reduce((acc, t) => acc + t.valor, 0)
-      setSummary({ receita: rec, despesa: des, saldo: rec - des })
-
+      setLancamentos((data || []).map((l: any) => ({
+        id: l.id,
+        descricao: l.descricao || '—',
+        valor: l.valor || 0,
+        tipo: l.tipo,
+        categoria: l.categoria || 'Geral',
+        data_competencia: l.data_competencia,
+        status: l.status || 'pendente',
+        paciente_nome: l.pacientes?.nome_completo,
+        profissional_nome: l.profiles?.nome_completo,
+        convenio: l.convenio,
+      })))
     } catch (err: any) {
-      toast({ title: 'Erro', description: 'Falha ao buscar financeiro.', type: 'error' })
+      toast({ title: 'Erro', description: err.message, type: 'error' })
     } finally {
       setIsLoading(false)
     }
   }, [clinicaId, toast])
 
   useEffect(() => {
-    fetchCategorias()
-    fetchTransacoes()
-  }, [clinicaId, fetchCategorias, fetchTransacoes])
+    const now = new Date()
+    const inicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+    const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+    loadLancamentos(inicio, fim)
+  }, [loadLancamentos])
 
-  // ── Salvar Transação ──────────────────────────────────────────────────────
-  const addTransacao = useCallback(async (transacao: Omit<Transacao, 'id'>) => {
+  const createLancamento = useCallback(async (data: NovoLancamento) => {
     if (!clinicaId) return
-    setIsLoading(true)
     try {
-      const { error } = await supabase
-        .from('transacoes' as any)
-        .insert({
-          clinica_id: clinicaId,
-          descricao: transacao.descricao,
-          valor: transacao.valor,
-          data_consolidacao: transacao.dataConsolidacao,
-          vencimento: transacao.vencimento,
-          tipo: transacao.tipo,
-          status: transacao.status,
-          forma_pagamento: transacao.formaPagamento,
-          categoria_id: transacao.categoriaId,
-          paciente_id: transacao.pacienteId,
-          profissional_id: transacao.profissionalId,
-          consulta_id: transacao.consultaId,
-          observacoes: transacao.observacoes
-        })
-
+      const { error } = await supabase.from('lancamentos').insert({
+        clinica_id: clinicaId,
+        ...data,
+      })
       if (error) throw error
-      toast({ title: 'Sucesso', description: 'Transação registrada.', type: 'success' })
-      await fetchTransacoes()
+      toast({ title: 'Lançamento criado', description: `${data.tipo === 'receita' ? 'Receita' : 'Despesa'} registrada.`, type: 'success' })
+      await loadLancamentos()
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, type: 'error' })
-    } finally {
-      setIsLoading(false)
     }
-  }, [clinicaId, fetchTransacoes, toast])
+  }, [clinicaId, loadLancamentos, toast])
 
-  const deleteTransacao = useCallback(async (id: string) => {
+  const updateLancamentoStatus = useCallback(async (id: string, status: 'pago' | 'cancelado' | 'pendente') => {
     if (!clinicaId) return
     try {
-      const { error } = await supabase.from('transacoes' as any).delete().eq('id', id)
+      const { error } = await supabase.from('lancamentos').update({ status }).eq('id', id).eq('clinica_id', clinicaId)
       if (error) throw error
-      toast({ title: 'Sucesso', description: 'Transação removida.', type: 'success' })
-      await fetchTransacoes()
+      setLancamentos(prev => prev.map(l => l.id === id ? { ...l, status } : l))
+      toast({ title: 'Status atualizado', description: `Lançamento marcado como ${status}.`, type: 'success' })
     } catch (err: any) {
-      toast({ title: 'Erro', description: 'Erro ao deletar.', type: 'error' })
+      toast({ title: 'Erro', description: err.message, type: 'error' })
     }
-  }, [clinicaId, fetchTransacoes, toast])
+  }, [clinicaId, toast])
+
+  const deleteLancamento = useCallback(async (id: string) => {
+    if (!clinicaId) return
+    try {
+      const { error } = await supabase.from('lancamentos').delete().eq('id', id).eq('clinica_id', clinicaId)
+      if (error) throw error
+      setLancamentos(prev => prev.filter(l => l.id !== id))
+      toast({ title: 'Removido', description: 'Lançamento excluído.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }, [clinicaId, toast])
+
+  const totais = {
+    receita: lancamentos.filter(l => l.tipo === 'receita').reduce((s, l) => s + l.valor, 0),
+    despesa: lancamentos.filter(l => l.tipo === 'despesa').reduce((s, l) => s + l.valor, 0),
+    pendente: lancamentos.filter(l => l.status === 'pendente').reduce((s, l) => s + (l.tipo === 'receita' ? l.valor : -l.valor), 0),
+  }
 
   return {
-    transacoes,
-    categorias,
-    summary,
+    lancamentos,
     isLoading,
-    fetchTransacoes,
-    addTransacao,
-    deleteTransacao,
-    fetchCategorias
+    totais,
+    loadLancamentos,
+    createLancamento,
+    updateLancamentoStatus,
+    deleteLancamento,
   }
 }

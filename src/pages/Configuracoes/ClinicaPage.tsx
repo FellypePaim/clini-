@@ -30,7 +30,7 @@ const FORM_VAZIO: ClinicaForm = {
 export function ClinicaPage() {
   const { toast } = useToast()
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
 
   const [form, setForm] = useState<ClinicaForm>(FORM_VAZIO)
   const [logoUrl, setLogoUrl] = useState<string | null>(null)

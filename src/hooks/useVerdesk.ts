@@ -4,25 +4,6 @@ import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-const USE_MOCK = false
-
-// ─── Mapppers para Banco de Dados ───────────────────────────────────────────
-const STAGE_MAP: Record<LeadStage, any> = {
-  'Perguntou Valor': 'perguntou_valor',
-  'Demonstrou Interesse': 'demonstrou_interesse',
-  'Quase Fechando': 'quase_fechando',
-  'Agendado': 'agendado',
-  'Perdido': 'perdido'
-}
-
-const REVERSE_STAGE_MAP: Record<string, LeadStage> = {
-  'perguntou_valor': 'Perguntou Valor',
-  'demonstrou_interesse': 'Demonstrou Interesse',
-  'quase_fechando': 'Quase Fechando',
-  'agendado': 'Agendado',
-  'perdido': 'Perdido'
-}
-
 export function useVerdesk() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
@@ -34,7 +15,7 @@ export function useVerdesk() {
 
   // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
   useEffect(() => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
 
     const fetchAll = async () => {
       await getLeads()
@@ -61,7 +42,7 @@ export function useVerdesk() {
     setIsLoading(true)
     setError(null)
     try {
-      if (USE_MOCK || !clinicaId) return
+      if (!clinicaId) return
 
       const { data, error: pbErr } = await supabase
         .from('leads')
@@ -77,13 +58,13 @@ export function useVerdesk() {
         origin: (r.origem as LeadOrigin) || 'Manual',
         procedure: r.procedimento_interesse || 'Consulta',
         estimatedValue: r.valor_estimado || 0,
-        stage: REVERSE_STAGE_MAP[r.estagio] || 'Perguntou Valor',
+        stage: (r.estagio as LeadStage) || 'Perguntou Valor',
         phone: r.telefone || '',
         email: r.email || undefined,
         lastContactAt: r.ultimo_contato || r.updated_at,
         createdAt: r.created_at,
         updatedAt: r.updated_at,
-        interactions: []
+        interactions: [] // Idealmente buscar leads_historico, mas para simplificar
       }))
       setLeads(mapped)
     } catch (err: any) {
@@ -95,15 +76,18 @@ export function useVerdesk() {
   }, [clinicaId, toast])
 
   const moveLead = useCallback(async (leadId: string, toStage: LeadStage) => {
-    if (!clinicaId) return
+    if (!clinicaId) {
+      setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
+      return
+    }
     try {
-      // Optimistic UI
-      const previous = [...leads]
+      // Optmistic UI
+      const previous = leads
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
 
       const { error: pbErr } = await supabase
         .from('leads')
-        .update({ estagio: STAGE_MAP[toStage] })
+        .update({ estagio: toStage as any })
         .eq('id', leadId)
         .eq('clinica_id', clinicaId)
 
@@ -115,7 +99,7 @@ export function useVerdesk() {
       // Criar entrada no histórico
       await supabase.from('leads_historico').insert({
          lead_id: leadId,
-         estagio_novo: STAGE_MAP[toStage],
+         estagio_novo: toStage as any,
          anotacao: `Movido para ${toStage}`
       })
       
@@ -128,7 +112,7 @@ export function useVerdesk() {
   const createLead = useCallback(async (data: Omit<Lead, 'id' | 'interactions' | 'createdAt' | 'updatedAt' | 'lastContactAt'>) => {
     if (!clinicaId) return
     try {
-      const { error: pbErr } = await supabase
+      const { data: ret, error: pbErr } = await supabase
         .from('leads')
         .insert({
            clinica_id: clinicaId,
@@ -136,10 +120,12 @@ export function useVerdesk() {
            origem: data.origin,
            procedimento_interesse: data.procedure,
            valor_estimado: data.estimatedValue,
-           estagio: STAGE_MAP[data.stage],
+           estagio: data.stage,
            telefone: data.phone,
            email: data.email
         })
+        .select()
+        .single()
       
       if (pbErr) throw pbErr
 
@@ -155,7 +141,7 @@ export function useVerdesk() {
     try {
       const updateData: any = {}
       if (data.name) updateData.nome = data.name
-      if (data.stage) updateData.estagio = STAGE_MAP[data.stage]
+      if (data.stage) updateData.estagio = data.stage
       if (data.phone) updateData.telefone = data.phone
       if (data.email) updateData.email = data.email
       if (data.procedure) updateData.procedimento_interesse = data.procedure
@@ -238,7 +224,7 @@ export function useVerdesk() {
   }, [clinicaId, getCampaigns, toast])
 
   const sendCampaign = useCallback(async (campaignId: string) => {
-      // Logica de envio via API externa/Edge Function
+      // Mock logica de envio
   }, [])
 
   const deleteCampaign = useCallback(async (campaignId: string) => {
