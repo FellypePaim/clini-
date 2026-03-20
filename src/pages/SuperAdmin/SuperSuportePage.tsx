@@ -74,8 +74,8 @@ export function SuperSuportePage() {
                  <LifeBuoy size={16} /> TICKETS DE SUPORTE ABERTOS
               </h3>
               <div className="flex items-center gap-2">
-                 <button className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Search size={16} /></button>
-                 <button className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Filter size={16} /></button>
+                 <button onClick={() => toast({ title: 'Busca', description: 'Busca por tickets em breve.', type: 'info' })} className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Search size={16} /></button>
+                 <button onClick={() => toast({ title: 'Filtros', description: 'Filtro por prioridade e status em breve.', type: 'info' })} className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Filter size={16} /></button>
               </div>
            </div>
 
@@ -106,10 +106,12 @@ export function SuperSuportePage() {
                          </div>
                       </div>
                       <div className="flex items-center gap-2">
-                         <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-black text-[10px] uppercase rounded-xl hover:bg-purple-700 transition-all">
+                         <button
+                           onClick={() => toast({ title: 'Respondendo Ticket', description: `Abrindo conversa com ${tk.user} de ${tk.clinica}.`, type: 'info' })}
+                           className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-black text-[10px] uppercase rounded-xl hover:bg-purple-700 transition-all">
                             <Send size={12} /> RESPONDER
                          </button>
-                         <button className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-white"><MoreVertical size={16} /></button>
+                         <button onClick={() => toast({ title: 'Opções do Ticket', description: 'Atribuir, fechar ou escalar ticket em breve.', type: 'info' })} className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-white"><MoreVertical size={16} /></button>
                       </div>
                    </div>
                    
@@ -154,7 +156,9 @@ export function SuperSuportePage() {
                        </div>
                     ))}
                  </div>
-                 <button className="w-full py-4 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all font-mono">
+                 <button
+                   onClick={() => toast({ title: 'Logs de Commit', description: 'Execute git log --oneline no repositório para o histórico completo.', type: 'info' })}
+                   className="w-full py-4 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all font-mono">
                     VER LOGS DE COMMIT COMPLETO
                  </button>
               </div>

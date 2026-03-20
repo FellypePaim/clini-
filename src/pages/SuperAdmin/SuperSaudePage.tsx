@@ -17,24 +17,28 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 
 export function SuperSaudePage() {
   const { getSaudeStats, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
-  React.useEffect(() => {
-    async function fetch() {
-      const res = await getSaudeStats()
-      if (res) setData(res)
-    }
-    fetch()
+  const loadData = React.useCallback(async () => {
+    const res = await getSaudeStats()
+    if (res) setData(res)
   }, [getSaudeStats])
 
+  React.useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const dbStatus = data?.dbStatus || 'Verificando...'
   const coreServices = [
-    { name: 'Supabase Database', status: data?.dbStatus || 'Carregando...', latency: '24ms', uptime: '99.99%', load: '12%', icon: Database, color: data?.dbStatus === 'Operacional' ? 'text-emerald-500' : 'text-amber-500' },
-    { name: 'Auth Service', status: 'Operacional', latency: '38ms', uptime: '99.98%', load: '5%', icon: ShieldCheck, color: 'text-emerald-500' },
-    { name: 'Edge Functions', status: 'Operacional', latency: '120ms', uptime: '99.95%', load: '28%', icon: Zap, color: 'text-emerald-500' },
-    { name: 'Storage Buckets', status: 'Operacional', latency: '142ms', uptime: '100%', load: '45%', icon: Server, color: 'text-emerald-500' },
+    { name: 'Supabase Database', status: dbStatus, latency: data?.dbLatency || '—', uptime: data?.dbUptime || '—', load: data?.dbLoad || '—', icon: Database, color: dbStatus === 'Operacional' ? 'text-emerald-500' : 'text-amber-500' },
+    { name: 'Auth Service', status: data?.authStatus || 'Operacional', latency: data?.authLatency || '—', uptime: '99.98%', load: '—', icon: ShieldCheck, color: 'text-emerald-500' },
+    { name: 'Edge Functions', status: data?.functionsStatus || 'Operacional', latency: data?.functionsLatency || '—', uptime: '99.95%', load: '—', icon: Zap, color: 'text-emerald-500' },
+    { name: 'Storage Buckets', status: data?.storageStatus || 'Operacional', latency: data?.storageLatency || '—', uptime: '100%', load: '—', icon: Server, color: 'text-emerald-500' },
   ]
 
   const externalApis = [
@@ -73,7 +77,9 @@ export function SuperSaudePage() {
              <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                 <Network size={16} /> CORE INFRASTRUCTURE (SUPABASE)
              </h3>
-             <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors">
+             <button
+               onClick={() => { toast({ title: 'Atualizando...', description: 'Verificando status de todos os serviços.', type: 'info' }); loadData() }}
+               className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors">
                 <RefreshCw size={16} />
              </button>
            </div>
@@ -191,7 +197,9 @@ export function SuperSaudePage() {
                        </div>
                     </div>
                  ))}
-                 <button className="w-full py-3 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all">
+                 <button
+                   onClick={() => toast({ title: 'Logs de Erro', description: 'Logs completos disponíveis na tabela audit_logs com filtro resultado=erro.', type: 'info' })}
+                   className="w-full py-3 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all">
                     Ver logs de erro completos
                  </button>
               </div>

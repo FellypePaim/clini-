@@ -96,9 +96,11 @@ export function useSuperAdmin() {
       if (error) throw error
       
       const currentToken = localStorage.getItem('prontuario-verde-auth-token')
-      localStorage.setItem('impersonation-back-token', currentToken || '')
-      
-      window.open(`/dashboard?impersonate_token=${data.token}&clinic=${clinicId}`, '_blank')
+      sessionStorage.setItem('impersonation-back-token', currentToken || '')
+      sessionStorage.setItem('impersonation-token', data.token)
+      sessionStorage.setItem('impersonation-clinic', clinicId)
+
+      window.open(`/dashboard?impersonate=1&clinic=${clinicId}`, '_blank')
     } catch (err: any) {
       toast({ title: 'Erro', description: 'Não foi possível impersonar.', type: 'error' })
     } finally {

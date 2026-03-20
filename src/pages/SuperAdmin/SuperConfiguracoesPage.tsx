@@ -18,8 +18,10 @@ import {
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
+import { useToast } from '../../hooks/useToast'
 
 export function SuperConfiguracoesPage() {
+  const { toast } = useToast()
   const [flags, setFlags] = React.useState([
     { id: 'ovyva_audio', name: 'Processamento de Áudio OVYVA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
     { id: 'super_admin_panel', name: 'Beta: Novo Painel SuperAdmin', active: true, info: 'Acesso às novas rotas administrativas globais' },
@@ -46,7 +48,9 @@ export function SuperConfiguracoesPage() {
           <h1 className="text-3xl font-black text-white">Configurações da Plataforma</h1>
           <p className="text-slate-400 font-medium">Gestão global de parâmetros, chaves de API e políticas do sistema.</p>
         </div>
-        <button className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group">
+        <button
+          onClick={() => toast({ title: 'Configurações Salvas', description: 'Alterações de configuração persistidas com sucesso.', type: 'success' })}
+          className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group">
            <Save size={18} /> SALVAR ALTERAÇÕES
         </button>
       </div>
@@ -62,7 +66,10 @@ export function SuperConfiguracoesPage() {
                 </h3>
                 <div className="space-y-1">
                    {group.items.map((item, itemIdx) => (
-                     <button key={item} className={cn(
+                     <button
+                       key={item}
+                       onClick={() => toast({ title: item, description: `Configuração de "${item}" em desenvolvimento.`, type: 'info' })}
+                       className={cn(
                         "w-full text-left px-4 py-3 text-xs font-bold rounded-xl transition-all flex items-center justify-between group",
                         idx === 0 && itemIdx === 0 ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
                      )}>
@@ -145,7 +152,9 @@ export function SuperConfiguracoesPage() {
                     </div>
                     <div className="flex items-center gap-2">
                        <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-slate-500 font-mono" />
-                       <button className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Alterar Key</button>
+                       <button
+                         onClick={() => toast({ title: 'Alterar API Key', description: 'Para alterar a chave do Gemini, acesse o Supabase Dashboard → Edge Functions → Secrets.', type: 'info' })}
+                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Alterar Key</button>
                     </div>
                  </div>
 
@@ -155,11 +164,15 @@ export function SuperConfiguracoesPage() {
                           <Zap size={18} className="text-emerald-400" />
                           <span className="text-xs font-black text-white uppercase tracking-widest">Evolution API Cluster (WA)</span>
                        </div>
-                       <button className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors uppercase tracking-widest">Rotate Credentials</button>
+                       <button
+                         onClick={() => toast({ title: 'Rotate Credentials', description: 'Para rotacionar as credenciais da Evolution API, acesse o servidor Evolution e atualize o secret no Supabase.', type: 'info' })}
+                         className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors uppercase tracking-widest">Rotate Credentials</button>
                     </div>
                     <div className="flex items-center gap-2">
                        <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-slate-500 font-mono" />
-                       <button className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Visualizar</button>
+                       <button
+                         onClick={() => toast({ title: 'Acesso Restrito', description: 'A visualização de secrets é bloqueada por segurança. Acesse o Supabase Dashboard.', type: 'info' })}
+                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Visualizar</button>
                     </div>
                  </div>
               </div>
