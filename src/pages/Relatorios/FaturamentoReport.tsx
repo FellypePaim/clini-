@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft, Download, DollarSign, TrendingDown, TrendingUp, Receipt, Loader2, Calendar } from 'lucide-react'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Badge } from '../../components/ui/Badge'
 import { supabase } from '../../lib/supabase'
@@ -132,6 +134,38 @@ export function FaturamentoReport() {
     .filter(l => l.tipo === 'receita' && l.status === 'pendente')
     .reduce((s, l) => s + l.valor, 0)
 
+  const exportPDF = () => {
+    const doc = new jsPDF()
+    const periodoLabel = periodo === 'mes_atual' ? 'Mês Atual' : periodo === 'mes_anterior' ? 'Mês Anterior' : `Ano ${new Date().getFullYear()}`
+    doc.setFontSize(16)
+    doc.text('Relatório de Faturamento por Período', 14, 18)
+    doc.setFontSize(10)
+    doc.text(`Período: ${periodoLabel}   |   Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 26)
+
+    autoTable(doc, {
+      startY: 32,
+      head: [['Data', 'Descrição', 'Categoria', 'Paciente', 'Tipo', 'Status', 'Valor (R$)']],
+      body: lancamentos.map(l => [
+        new Date(l.data_consolidacao + 'T00:00').toLocaleDateString('pt-BR'),
+        l.descricao,
+        l.categoria || '—',
+        l.paciente_nome || '—',
+        l.tipo === 'receita' ? 'Receita' : 'Despesa',
+        l.status === 'pago' ? 'Pago' : 'Pendente',
+        l.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+      ]),
+      foot: [[
+        '', '', '', '', '', 'Receita Líquida',
+        receitaLiquida.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+      ]],
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [99, 102, 241] },
+      footStyles: { fillColor: [240, 253, 244], textColor: [22, 101, 52], fontStyle: 'bold' },
+    })
+
+    doc.save(`faturamento-${periodo}.pdf`)
+  }
+
   return (
     <div className="flex flex-col h-full bg-slate-50/50">
       <header className="px-6 py-6 bg-white border-b border-slate-200">
@@ -149,7 +183,7 @@ export function FaturamentoReport() {
           </div>
           
           <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-6 py-3 bg-slate-100 font-black text-[11px] uppercase tracking-widest text-slate-600 rounded-2xl hover:bg-slate-200 transition-all border border-slate-200">
+            <button onClick={exportPDF} disabled={isLoading || lancamentos.length === 0} className="flex items-center gap-2 px-6 py-3 bg-slate-100 font-black text-[11px] uppercase tracking-widest text-slate-600 rounded-2xl hover:bg-slate-200 transition-all border border-slate-200 disabled:opacity-50">
               <Download size={16} /> Exportar PDF
             </button>
           </div>
