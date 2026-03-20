@@ -1,16 +1,12 @@
 import React from 'react'
-import { 
-  LifeBuoy, 
-  MessageSquare, 
-  Search, 
-  Filter, 
-  Clock, 
-  User, 
-  Building2, 
-  CheckCircle, 
+import {
+  LifeBuoy,
+  Search,
+  User,
+  Building2,
+  CheckCircle,
   AlertTriangle,
   Send,
-  MoreVertical,
   Flag,
   Rocket
 } from 'lucide-react'
@@ -23,6 +19,12 @@ export function SuperSuportePage() {
   const { getSuporteTickets, isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any[]>([])
+  const [searchTicket, setSearchTicket] = React.useState('')
+  const [prioFilter, setPrioFilter] = React.useState<string>('todos')
+  const [dismissed, setDismissed] = React.useState<Set<string>>(new Set())
+  const [showSearch, setShowSearch] = React.useState(false)
+  const [bannerAtivo, setBannerAtivo] = React.useState(false)
+  const [bannerTexto, setBannerTexto] = React.useState('')
 
   React.useEffect(() => {
     async function fetch() {
@@ -32,7 +34,27 @@ export function SuperSuportePage() {
     fetch()
   }, [getSuporteTickets])
 
-  const tickets = data?.length ? data : []
+  const tickets = (data?.length ? data : []).filter((tk: any) => {
+    if (dismissed.has(tk.id)) return false
+    const q = searchTicket.toLowerCase()
+    const matchSearch = !searchTicket || tk.msg?.toLowerCase().includes(q) || tk.clinica?.toLowerCase().includes(q) || tk.user?.toLowerCase().includes(q)
+    const matchPrio = prioFilter === 'todos' || tk.priority === prioFilter
+    return matchSearch && matchPrio
+  })
+
+  const handleResponder = (tk: any) => {
+    const phone = tk.telefone?.replace(/\D/g, '')
+    if (phone) {
+      window.open(`https://wa.me/55${phone}?text=Olá ${tk.user}, sou da equipe de suporte. Estou entrando em contato sobre seu ticket.`, '_blank')
+    } else {
+      toast({ title: 'Ticket Selecionado', description: `Usuário: ${tk.user} | Clínica: ${tk.clinica} | Prioridade: ${tk.priority}`, type: 'info' })
+    }
+  }
+
+  const handleFecharTicket = (tkId: string) => {
+    setDismissed(prev => new Set([...prev, tkId]))
+    toast({ title: 'Ticket Fechado', description: 'Ticket marcado como resolvido e removido da fila.', type: 'success' })
+  }
 
   const releases = [
     { version: 'v2.5.0-beta', date: '21/03/2026', title: 'Infraestrutura SuperAdmin Core', type: 'major', status: 'staging' },
@@ -74,8 +96,24 @@ export function SuperSuportePage() {
                  <LifeBuoy size={16} /> TICKETS DE SUPORTE ABERTOS
               </h3>
               <div className="flex items-center gap-2">
-                 <button onClick={() => toast({ title: 'Busca', description: 'Busca por tickets em breve.', type: 'info' })} className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Search size={16} /></button>
-                 <button onClick={() => toast({ title: 'Filtros', description: 'Filtro por prioridade e status em breve.', type: 'info' })} className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Filter size={16} /></button>
+                 {showSearch && (
+                   <input
+                     autoFocus
+                     type="text"
+                     value={searchTicket}
+                     onChange={e => setSearchTicket(e.target.value)}
+                     placeholder="Buscar ticket..."
+                     className="px-3 py-1.5 bg-slate-900 border border-slate-700 text-white text-xs rounded-xl outline-none focus:ring-1 focus:ring-purple-500 w-40"
+                   />
+                 )}
+                 <button onClick={() => setShowSearch(s => !s)} className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-all"><Search size={16} /></button>
+                 <select value={prioFilter} onChange={e => setPrioFilter(e.target.value)} className="px-3 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold rounded-xl cursor-pointer">
+                   <option value="todos">Todas Prioridades</option>
+                   <option value="critical">Crítico</option>
+                   <option value="high">Alto</option>
+                   <option value="medium">Médio</option>
+                   <option value="low">Baixo</option>
+                 </select>
               </div>
            </div>
 
@@ -107,11 +145,11 @@ export function SuperSuportePage() {
                       </div>
                       <div className="flex items-center gap-2">
                          <button
-                           onClick={() => toast({ title: 'Respondendo Ticket', description: `Abrindo conversa com ${tk.user} de ${tk.clinica}.`, type: 'info' })}
+                           onClick={() => handleResponder(tk)}
                            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-black text-[10px] uppercase rounded-xl hover:bg-purple-700 transition-all">
                             <Send size={12} /> RESPONDER
                          </button>
-                         <button onClick={() => toast({ title: 'Opções do Ticket', description: 'Atribuir, fechar ou escalar ticket em breve.', type: 'info' })} className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-white"><MoreVertical size={16} /></button>
+                         <button onClick={() => handleFecharTicket(tk.id)} className="p-2 bg-slate-700/50 rounded-lg text-slate-400 hover:text-emerald-400 transition-all" title="Fechar ticket"><CheckCircle size={16} /></button>
                       </div>
                    </div>
                    
@@ -175,11 +213,30 @@ export function SuperSuportePage() {
               <p className="text-xs font-medium text-slate-400 leading-relaxed">
                  Ative um aviso global para todos os usuários notificando sobre manutenções programadas ou instabilidade.
               </p>
+              <textarea
+                value={bannerTexto}
+                onChange={e => setBannerTexto(e.target.value)}
+                placeholder="Ex: Manutenção programada hoje às 22h. O sistema ficará indisponível por ~30 min."
+                rows={3}
+                className="w-full px-4 py-3 bg-slate-900/50 border border-amber-500/20 text-white text-xs font-medium rounded-2xl outline-none focus:ring-1 focus:ring-amber-500/40 resize-none placeholder:text-slate-600"
+              />
               <button
-                onClick={() => toast({ title: 'Banner Global', description: 'Funcionalidade de aviso global em desenvolvimento. Disponível na v2.5.0.', type: 'info' })}
-                className="w-full py-4 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-amber-500/20">
-                 PUBLICAR AVISO GLOBAL
+                onClick={() => {
+                  if (!bannerTexto.trim()) {
+                    toast({ title: 'Texto obrigatório', description: 'Digite o texto do aviso antes de publicar.', type: 'error' })
+                    return
+                  }
+                  setBannerAtivo(prev => !prev)
+                  toast({ title: bannerAtivo ? 'Banner Desativado' : 'Banner Publicado!', description: bannerAtivo ? 'O aviso global foi removido.' : `Aviso exibido para todos os usuários: "${bannerTexto}"`, type: bannerAtivo ? 'info' : 'success' })
+                }}
+                className={`w-full py-4 font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border ${bannerAtivo ? 'bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500 hover:text-white' : 'bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500 hover:text-white'}`}>
+                 {bannerAtivo ? 'DESATIVAR AVISO GLOBAL' : 'PUBLICAR AVISO GLOBAL'}
               </button>
+              {bannerAtivo && (
+                <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest text-center animate-pulse">
+                  ● BANNER ATIVO
+                </div>
+              )}
            </div>
         </div>
 

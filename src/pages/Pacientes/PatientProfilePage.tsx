@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
 import { useProntuario } from '../../hooks/useProntuario'
+import { useToast } from '../../hooks/useToast'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
@@ -41,7 +42,8 @@ export function PatientProfilePage() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
   const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink } = usePatients()
-  const { saveEvolution, saveHarmonizationSession } = useProntuario()
+  const { saveEvolution, saveHarmonizationSession, generatePrescription } = useProntuario()
+  const { toast } = useToast()
   
   const [patient, setPatient] = useState<Patient | null>(null)
   const [history, setHistory] = useState<Appointment[]>([])
@@ -436,8 +438,8 @@ export function PatientProfilePage() {
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Link de Acesso</label>
                 <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-100 rounded-xl">
                   <input readOnly value={anamnesisLink} className="flex-1 bg-transparent text-xs text-gray-600 outline-none truncate" />
-                  <button 
-                    onClick={() => { navigator.clipboard.writeText(anamnesisLink); /* TODO: Toast */ }}
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(anamnesisLink); toast({ title: 'Link copiado!', description: 'Link de anamnese copiado para a área de transferência.', type: 'success' }) }}
                     className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -473,7 +475,7 @@ export function PatientProfilePage() {
           isOpen={isPrescriptionModalOpen}
           onClose={() => setIsPrescriptionModalOpen(false)}
           patient={patient}
-          onSave={async (items) => { console.log('Prescrição gerada:', items); }}
+          onSave={async (items) => { if (patient) await generatePrescription(patient.id, items) }}
         />
       )}
     </div>

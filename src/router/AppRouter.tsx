@@ -50,6 +50,13 @@ import { RegrasConsumoPage } from '../pages/Estoque/RegrasConsumoPage'
 import { FunilLeadsReport } from '../pages/Relatorios/FunilLeadsReport'
 import { ProcedimentosReport } from '../pages/Relatorios/ProcedimentosReport'
 import { PacientesReport } from '../pages/Relatorios/PacientesReport'
+import { RetornoReport } from '../pages/Relatorios/RetornoReport'
+import { ConvenioReport } from '../pages/Relatorios/ConvenioReport'
+import { InadimplenciaReport } from '../pages/Relatorios/InadimplenciaReport'
+import { DREReport } from '../pages/Relatorios/DREReport'
+import { CampanhasReport } from '../pages/Relatorios/CampanhasReport'
+import { OrigemReport } from '../pages/Relatorios/OrigemReport'
+import { OVYVAReport } from '../pages/Relatorios/OVYVAReport'
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -132,6 +139,13 @@ export function AppRouter() {
         <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
         <Route path="/relatorios/procedimentos" element={<ProcedimentosReport />} />
         <Route path="/relatorios/pacientes" element={<PacientesReport />} />
+        <Route path="/relatorios/retorno" element={<RetornoReport />} />
+        <Route path="/relatorios/convenios" element={<ConvenioReport />} />
+        <Route path="/relatorios/inadimplencia" element={<InadimplenciaReport />} />
+        <Route path="/relatorios/dre" element={<DREReport />} />
+        <Route path="/relatorios/campanhas" element={<CampanhasReport />} />
+        <Route path="/relatorios/origem" element={<OrigemReport />} />
+        <Route path="/relatorios/ovyva" element={<OVYVAReport />} />
 
         {/* Módulo Financeiro */}
         <Route path="/financeiro" element={<FinanceiroPage />} />
@@ -194,7 +208,7 @@ export function AppRouter() {
         <Route path="logs" element={<SuperLogsPage />} />
         <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
         <Route path="suporte" element={<SuperSuportePage />} />
-        <Route path="releases" element={<div>Controle de Releases</div>} />
+        <Route path="releases" element={<SuperSuportePage />} />
       </Route>
     </Routes>
   )
