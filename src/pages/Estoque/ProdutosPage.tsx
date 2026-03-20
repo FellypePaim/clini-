@@ -1,43 +1,87 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ArrowLeft,
-  Plus,
-  Search,
-  Filter,
-  MoreVertical,
-  Edit2,
-  TrendingDown,
-  TrendingUp,
-  AlertTriangle,
-  History,
-  Info
+  ArrowLeft, Plus, Search, MoreVertical, Edit2,
+  TrendingDown, AlertTriangle, Info, History, TrendingUp, X, Loader2
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
 import type { Product, ProductCategory } from '../../types/estoque'
 
 const CATEGORIAS: ProductCategory[] = [
-  'Injetáveis', 'Descartáveis', 'Medicamentos', 
+  'Injetáveis', 'Descartáveis', 'Medicamentos',
   'Materiais Dentários', 'Equipamentos', 'Limpeza', 'Outros'
 ]
 
+interface ProdutoForm {
+  code: string
+  name: string
+  category: ProductCategory
+  unit: string
+  currentStock: number
+  minimumStock: number
+  expirationDate: string
+  unitCost: number
+  provider: string
+  location: string
+}
+
+const formVazio: ProdutoForm = {
+  code: '', name: '', category: 'Descartáveis', unit: 'Unidade',
+  currentStock: 0, minimumStock: 5, expirationDate: '',
+  unitCost: 0, provider: '', location: '',
+}
+
 export function ProdutosPage() {
-  const { getProducts, createProduct } = useEstoque()
+  const { getProducts, createProduct, updateProduct, loadProducts, isLoading } = useEstoque()
   const products = getProducts()
-  
+
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
-  
-  // Filter logic
+  const [form, setForm] = useState<ProdutoForm>(formVazio)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    loadProducts()
+  }, [loadProducts])
+
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           p.code.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory
     return matchesSearch && matchesCategory
   })
+
+  const openNew = () => { setEditProduct(null); setForm(formVazio); setIsModalOpen(true) }
+  const openEdit = (p: Product, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditProduct(p)
+    setForm({
+      code: p.code, name: p.name, category: p.category, unit: p.unit,
+      currentStock: p.currentStock, minimumStock: p.minimumStock,
+      expirationDate: p.expirationDate || '', unitCost: p.unitCost,
+      provider: p.provider || '', location: p.location || '',
+    })
+    setIsModalOpen(true)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name.trim()) return
+    setSaving(true)
+    if (editProduct) {
+      await updateProduct(editProduct.id, { ...form })
+    } else {
+      await createProduct(form)
+    }
+    setSaving(false)
+    setIsModalOpen(false)
+    setForm(formVazio)
+    setEditProduct(null)
+  }
 
   return (
     <div className="flex flex-col h-full bg-slate-50/50 relative">
@@ -52,11 +96,8 @@ export function ProdutosPage() {
               <p className="text-slate-500">Gerencie todos os itens do estoque</p>
             </div>
           </div>
-          
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
-          >
+          <button onClick={openNew}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100">
             <Plus size={18} /> Novo Produto
           </button>
         </div>
@@ -64,31 +105,24 @@ export function ProdutosPage() {
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nome ou código..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50"
-            />
+            <input type="text" placeholder="Buscar por nome ou código..."
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50" />
           </div>
-          
-          <select 
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-          >
+          <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm">
             <option value="all">Todas as Categorias</option>
             {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          
-          <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm">
-            <Filter size={16} /> Mais Filtros
-          </button>
         </div>
       </header>
 
       <main className="flex-1 overflow-auto p-6">
+        {isLoading && products.length === 0 ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          </div>
+        ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -96,7 +130,7 @@ export function ProdutosPage() {
                 <th className="px-6 py-4">Produto</th>
                 <th className="px-6 py-4">Categoria</th>
                 <th className="px-6 py-4">Estoque Atual</th>
-                <th className="px-6 py-4 hidden md:table-cell">Mínimo / Ideal</th>
+                <th className="px-6 py-4 hidden md:table-cell">Mínimo</th>
                 <th className="px-6 py-4 hidden lg:table-cell">Custo Unitário</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-right">Ações</th>
@@ -104,11 +138,8 @@ export function ProdutosPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredProducts.map(product => (
-                <tr 
-                  key={product.id} 
-                  className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
-                  onClick={() => setSelectedProduct(product)}
-                >
+                <tr key={product.id} className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+                  onClick={() => setSelectedProduct(product)}>
                   <td className="px-6 py-4">
                     <div className="flex flex-col">
                       <span className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{product.name}</span>
@@ -116,18 +147,14 @@ export function ProdutosPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-                      {product.category}
-                    </span>
+                    <span className="text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">{product.category}</span>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <span className={`text-sm font-bold ${
-                        product.currentStock === 0 ? 'text-red-500' : 
+                        product.currentStock === 0 ? 'text-red-500' :
                         product.currentStock < product.minimumStock ? 'text-orange-500' : 'text-slate-700'
-                      }`}>
-                        {product.currentStock}
-                      </span>
+                      }`}>{product.currentStock}</span>
                       <span className="text-xs text-slate-400 font-medium">{product.unit}</span>
                     </div>
                   </td>
@@ -149,34 +176,33 @@ export function ProdutosPage() {
                         <TrendingDown size={12} className="mr-1" /> CRÍTICO
                       </Badge>
                     ) : (
-                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        NORMAL
-                      </Badge>
+                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200">NORMAL</Badge>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); console.log('Edit', product.id) }} 
-                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <MoreVertical size={18} />
+                    <button onClick={(e) => openEdit(product, e)}
+                      className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-colors">
+                      <Edit2 size={16} />
                     </button>
                   </td>
                 </tr>
               ))}
-              {filteredProducts.length === 0 && (
+              {filteredProducts.length === 0 && !isLoading && (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
-                    Nenhum produto encontrado com os filtros atuais.
+                    {products.length === 0
+                      ? 'Nenhum produto cadastrado ainda.'
+                      : 'Nenhum produto encontrado com os filtros atuais.'}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+        )}
       </main>
 
-      {/* Product Detail Drawer (Mock/Simplified) */}
+      {/* Product Detail Drawer */}
       {selectedProduct && (
         <>
           <div className="fixed inset-0 bg-slate-900/40 z-40" onClick={() => setSelectedProduct(null)} />
@@ -184,14 +210,15 @@ export function ProdutosPage() {
             <div className="p-6 border-b border-slate-200 bg-slate-50">
               <div className="flex justify-between items-start mb-4">
                 <span className="text-xs font-bold font-mono text-slate-400 uppercase">{selectedProduct.code}</span>
-                <button onClick={() => setSelectedProduct(null)} className="text-slate-400 hover:text-slate-600"><ArrowLeft size={20} className="rotate-180"/></button>
+                <button onClick={() => setSelectedProduct(null)} className="text-slate-400 hover:text-slate-600">
+                  <X size={20} />
+                </button>
               </div>
               <h2 className="text-2xl font-bold text-slate-900 mb-2 leading-tight">{selectedProduct.name}</h2>
               <div className="flex gap-2 mb-6">
                 <span className="text-xs font-semibold px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md border border-indigo-100">{selectedProduct.category}</span>
                 <span className="text-xs font-semibold px-2 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">{selectedProduct.location || 'Sem Local'}</span>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className={`p-4 rounded-xl border ${selectedProduct.currentStock <= selectedProduct.minimumStock ? 'bg-orange-50 border-orange-200' : 'bg-white border-slate-200 shadow-sm'}`}>
                   <span className="block text-xs font-bold text-slate-500 mb-1 uppercase tracking-tight">Estoque Atual</span>
@@ -209,7 +236,6 @@ export function ProdutosPage() {
                 </div>
               </div>
             </div>
-
             <div className="p-6">
               <div className="grid grid-cols-2 gap-3 mb-8">
                 <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors">
@@ -219,7 +245,6 @@ export function ProdutosPage() {
                   <TrendingDown size={16} /> Ajuste / Saída
                 </button>
               </div>
-
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <Info size={18} className="text-slate-400" /> Detalhes
               </h3>
@@ -233,23 +258,103 @@ export function ProdutosPage() {
                   <span className="font-semibold text-slate-900">{selectedProduct.unitCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Validade Mais Próxima:</span>
-                  <span className="font-semibold text-slate-900">{selectedProduct.expirationDate ? new Date(selectedProduct.expirationDate).toLocaleDateString() : 'N/A'}</span>
+                  <span className="text-slate-500 font-medium">Validade:</span>
+                  <span className="font-semibold text-slate-900">{selectedProduct.expirationDate ? new Date(selectedProduct.expirationDate + 'T00:00').toLocaleDateString() : 'N/A'}</span>
                 </div>
               </div>
-              
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <History size={18} className="text-slate-400" /> Últimas Movimentações
               </h3>
               <div className="text-center p-6 border-2 border-dashed border-slate-200 rounded-xl">
-                 <p className="text-sm text-slate-500 font-medium italic">Gráfico e histórico restrito ao módulo de Movimentações.</p>
-                 <Link to="/estoque/movimentacoes" className="text-sm font-bold text-indigo-600 mt-2 inline-block">Ver histórico completo</Link>
+                <Link to="/estoque/movimentacoes" className="text-sm font-bold text-indigo-600 mt-2 inline-block">Ver histórico completo</Link>
               </div>
             </div>
           </div>
         </>
       )}
 
+      {/* ── Modal Novo / Editar Produto ─────────────────────────────── */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900">{editProduct ? 'Editar Produto' : 'Novo Produto'}</h2>
+              <button onClick={() => { setIsModalOpen(false); setEditProduct(null); setForm(formVazio) }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                  <input type="text" required className="input-base" placeholder="Ex: Ácido Hialurônico 1ml"
+                    value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Código</label>
+                  <input type="text" className="input-base" placeholder="INJ-001"
+                    value={form.code} onChange={e => setForm(f => ({ ...f, code: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                  <select className="input-base" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value as ProductCategory }))}>
+                    {CATEGORIAS.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+                  <input type="text" className="input-base" placeholder="Frasco, Caixa, Unidade..."
+                    value={form.unit} onChange={e => setForm(f => ({ ...f, unit: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Estoque atual</label>
+                  <input type="number" min="0" className="input-base"
+                    value={form.currentStock} onChange={e => setForm(f => ({ ...f, currentStock: +e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mínimo</label>
+                  <input type="number" min="0" className="input-base"
+                    value={form.minimumStock} onChange={e => setForm(f => ({ ...f, minimumStock: +e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Custo (R$)</label>
+                  <input type="number" min="0" step="0.01" className="input-base"
+                    value={form.unitCost} onChange={e => setForm(f => ({ ...f, unitCost: +e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Validade</label>
+                  <input type="date" className="input-base"
+                    value={form.expirationDate} onChange={e => setForm(f => ({ ...f, expirationDate: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
+                  <input type="text" className="input-base" placeholder="Nome do fornecedor"
+                    value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Localização</label>
+                <input type="text" className="input-base" placeholder="Ex: Geladeira 1, Almoxarifado A"
+                  value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setIsModalOpen(false); setEditProduct(null); setForm(formVazio) }} className="btn-secondary flex-1">Cancelar</button>
+                <button type="submit" disabled={saving || !form.name.trim()}
+                  className="btn-primary flex-1 disabled:opacity-50 flex items-center justify-center gap-2">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : null}
+                  {saving ? 'Salvando...' : editProduct ? 'Salvar Alterações' : 'Cadastrar Produto'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

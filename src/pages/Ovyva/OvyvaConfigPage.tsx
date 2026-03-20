@@ -27,7 +27,7 @@ export function OvyvaConfigPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
 
   const [activeTab, setActiveTab] = useState<ConfigSection>('personality')
   const [isSaving, setIsSaving] = useState(false)

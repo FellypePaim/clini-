@@ -34,7 +34,7 @@ function CustomTooltip({ active, payload, label }: TooltipProps) {
 
 export function ConsultasChart() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [dados, setDados] = useState<SemanaData[]>([])
   const [loading, setLoading] = useState(true)
 

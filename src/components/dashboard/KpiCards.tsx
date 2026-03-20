@@ -34,7 +34,7 @@ function KpiSkeleton() {
 
 export function KpiCards() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [kpis, setKpis] = useState<KpiData[]>([])
   const [loading, setLoading] = useState(true)
 

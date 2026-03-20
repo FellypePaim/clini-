@@ -22,7 +22,7 @@ const BG_COLORS = [
 export function PacientesRecentes() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
 

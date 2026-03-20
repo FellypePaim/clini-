@@ -30,7 +30,7 @@ interface Agendamento {
 export function AgendamentosList() {
   const { user } = useAuthStore()
   const navigate = useNavigate()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([])
   const [loading, setLoading] = useState(true)
 

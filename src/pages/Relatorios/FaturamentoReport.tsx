@@ -45,7 +45,7 @@ function getPeriodoDates(periodo: string): { inicio: Date; fim: Date } {
 
 export function FaturamentoReport() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [periodo, setPeriodo] = useState('mes_atual')
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
   const [evolucao, setEvolucao] = useState<DiaFaturamento[]>([])

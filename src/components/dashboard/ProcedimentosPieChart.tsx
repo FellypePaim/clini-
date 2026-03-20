@@ -34,7 +34,7 @@ function CustomTooltip({ active, payload }: TooltipProps) {
 
 export function ProcedimentosPieChart() {
   const { user } = useAuthStore()
-  const clinicaId = (user as any)?.user_metadata?.clinica_id
+  const clinicaId = user?.clinicaId
   const [procedimentos, setProcedimentos] = useState<ProcData[]>([])
   const [loading, setLoading] = useState(true)
 
