@@ -34,8 +34,8 @@ interface ReportConfig {
 const REPORTS: ReportConfig[] = [
   // Clínico
   { id: 'prod-prof', title: 'Produção por Profissional', description: 'Volume de atendimentos, procedimentos e receita gerada por especialista.', category: 'Clínico', icon: <Stethoscope size={24} className="text-indigo-500" />, path: '/relatorios/producao-profissional', isImplemented: true },
-  { id: 'proc-real', title: 'Procedimentos Realizados', description: 'Ranking dos tratamentos mais executados e análise de consumo de tempo.', category: 'Clínico', icon: <Activity size={24} className="text-indigo-500" />, path: '/relatorios/procedimentos' },
-  { id: 'pac-atend', title: 'Pacientes Atendidos', description: 'Demografia, faixa etária e perfil do público-alvo da clínica.', category: 'Clínico', icon: <Users size={24} className="text-indigo-500" />, path: '/relatorios/pacientes' },
+  { id: 'proc-real', title: 'Procedimentos Realizados', description: 'Ranking dos tratamentos mais executados e análise de consumo de tempo.', category: 'Clínico', icon: <Activity size={24} className="text-indigo-500" />, path: '/relatorios/procedimentos', isImplemented: true },
+  { id: 'pac-atend', title: 'Pacientes Atendidos', description: 'Demografia, faixa etária e perfil do público-alvo da clínica.', category: 'Clínico', icon: <Users size={24} className="text-indigo-500" />, path: '/relatorios/pacientes', isImplemented: true },
   { id: 'taxa-ret', title: 'Taxa de Retorno de Pacientes', description: 'Métrica de fidelização: pacientes que voltaram após 6, 12 e 18 meses.', category: 'Clínico', icon: <TrendingUp size={24} className="text-indigo-500" />, path: '/relatorios/retorno' },
 
   // Financeiro
