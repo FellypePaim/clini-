@@ -39,7 +39,8 @@ export const useAuthStore = create<AuthState>()(
               .single()
 
             const dbRole = profileData?.role || 'recepcao'
-            const mappedRole: Role = dbRole === 'admin' ? 'administrador'
+            const mappedRole: Role = dbRole === 'superadmin' ? 'superadmin'
+                                   : dbRole === 'admin' ? 'administrador'
                                    : dbRole === 'recepcao' ? 'recepção'
                                    : 'profissional'
 
