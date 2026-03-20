@@ -22,6 +22,7 @@ import { useToast } from '../../hooks/useToast'
 
 export function SuperConfiguracoesPage() {
   const { toast } = useToast()
+  const [activeSettingItem, setActiveSettingItem] = React.useState<string>('Domínio Principal')
   const [flags, setFlags] = React.useState([
     { id: 'ovyva_audio', name: 'Processamento de Áudio OVYVA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
     { id: 'super_admin_panel', name: 'Beta: Novo Painel SuperAdmin', active: true, info: 'Acesso às novas rotas administrativas globais' },
@@ -68,15 +69,15 @@ export function SuperConfiguracoesPage() {
                    {group.items.map((item, itemIdx) => (
                      <button
                        key={item}
-                       onClick={() => toast({ title: item, description: `Configuração de "${item}" em desenvolvimento.`, type: 'info' })}
+                       onClick={() => setActiveSettingItem(item)}
                        className={cn(
                         "w-full text-left px-4 py-3 text-xs font-bold rounded-xl transition-all flex items-center justify-between group",
-                        idx === 0 && itemIdx === 0 ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
+                        activeSettingItem === item ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
                      )}>
                         {item}
                         <ChevronRight size={14} className={cn(
                           "transition-transform",
-                          idx === 0 && itemIdx === 0 ? "translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+                          activeSettingItem === item ? "translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
                         )} />
                      </button>
                    ))}

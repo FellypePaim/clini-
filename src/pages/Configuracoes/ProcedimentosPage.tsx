@@ -128,7 +128,6 @@ export function ProcedimentosPage() {
 
     if (error) {
       // Se a tabela não existir, mostrar estado vazio amigável
-      console.warn('Tabela procedimentos não encontrada:', error.message)
       setProcedimentos([])
     } else {
       const mapped = (data || []).map((p: any) => ({

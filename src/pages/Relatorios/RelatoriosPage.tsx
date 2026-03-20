@@ -36,19 +36,19 @@ const REPORTS: ReportConfig[] = [
   { id: 'prod-prof', title: 'Produção por Profissional', description: 'Volume de atendimentos, procedimentos e receita gerada por especialista.', category: 'Clínico', icon: <Stethoscope size={24} className="text-indigo-500" />, path: '/relatorios/producao-profissional', isImplemented: true },
   { id: 'proc-real', title: 'Procedimentos Realizados', description: 'Ranking dos tratamentos mais executados e análise de consumo de tempo.', category: 'Clínico', icon: <Activity size={24} className="text-indigo-500" />, path: '/relatorios/procedimentos', isImplemented: true },
   { id: 'pac-atend', title: 'Pacientes Atendidos', description: 'Demografia, faixa etária e perfil do público-alvo da clínica.', category: 'Clínico', icon: <Users size={24} className="text-indigo-500" />, path: '/relatorios/pacientes', isImplemented: true },
-  { id: 'taxa-ret', title: 'Taxa de Retorno de Pacientes', description: 'Métrica de fidelização: pacientes que voltaram após 6, 12 e 18 meses.', category: 'Clínico', icon: <TrendingUp size={24} className="text-indigo-500" />, path: '/relatorios/retorno' },
+  { id: 'taxa-ret', title: 'Taxa de Retorno de Pacientes', description: 'Métrica de fidelização: pacientes que voltaram após 6, 12 e 18 meses.', category: 'Clínico', icon: <TrendingUp size={24} className="text-indigo-500" />, path: '/relatorios/retorno', isImplemented: true },
 
   // Financeiro
   { id: 'fat-per', title: 'Faturamento por Período', description: 'Receita Bruta, Deduções e Receita Líquida com evolução analítica.', category: 'Financeiro', icon: <DollarSign size={24} className="text-emerald-500" />, path: '/relatorios/faturamento', isImplemented: true },
-  { id: 'rec-conv', title: 'Receita por Convênio', description: 'Distribuição financeira entre atendimentos Particulares e Convênios médicos.', category: 'Financeiro', icon: <Briefcase size={24} className="text-emerald-500" />, path: '/relatorios/convenios' },
-  { id: 'inadimp', title: 'Inadimplência', description: 'Boletos vencidos, glosas e contas a receber não liquidadas.', category: 'Financeiro', icon: <AlertCircle size={24} className="text-emerald-500" />, path: '/relatorios/inadimplencia' },
-  { id: 'dre-simp', title: 'DRE Simplificado', description: 'Demonstrativo de Resultado do Exercício adaptado para clínicas.', category: 'Financeiro', icon: <BarChart size={24} className="text-emerald-500" />, path: '/relatorios/dre' },
+  { id: 'rec-conv', title: 'Receita por Convênio', description: 'Distribuição financeira entre atendimentos Particulares e Convênios médicos.', category: 'Financeiro', icon: <Briefcase size={24} className="text-emerald-500" />, path: '/relatorios/convenios', isImplemented: true },
+  { id: 'inadimp', title: 'Inadimplência', description: 'Boletos vencidos, glosas e contas a receber não liquidadas.', category: 'Financeiro', icon: <AlertCircle size={24} className="text-emerald-500" />, path: '/relatorios/inadimplencia', isImplemented: true },
+  { id: 'dre-simp', title: 'DRE Simplificado', description: 'Demonstrativo de Resultado do Exercício adaptado para clínicas.', category: 'Financeiro', icon: <BarChart size={24} className="text-emerald-500" />, path: '/relatorios/dre', isImplemented: true },
 
   // Marketing / CRM
-  { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas' },
+  { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas', isImplemented: true },
   { id: 'fun-conv', title: 'Funil de Conversão (Verdesk)', description: 'Análise de perda de leads em cada estágio (Orçamento → Agendado).', category: 'Marketing / CRM', icon: <Target size={24} className="text-amber-500" />, path: '/relatorios/funil-leads', isImplemented: true },
-  { id: 'ori-pac', title: 'Origem de Pacientes', description: 'Distribuição dos canais de captação (Indicação, Instagram, Google, etc).', category: 'Marketing / CRM', icon: <PieChart size={24} className="text-amber-500" />, path: '/relatorios/origem' },
-  { id: 'des-ovyva', title: 'Desempenho da OVYVA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/ovyva' },
+  { id: 'ori-pac', title: 'Origem de Pacientes', description: 'Distribuição dos canais de captação (Indicação, Instagram, Google, etc).', category: 'Marketing / CRM', icon: <PieChart size={24} className="text-amber-500" />, path: '/relatorios/origem', isImplemented: true },
+  { id: 'des-ovyva', title: 'Desempenho da OVYVA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/ovyva', isImplemented: true },
 ]
 
 export function RelatoriosPage() {

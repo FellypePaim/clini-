@@ -162,9 +162,9 @@ export function SuperUsuariosPage() {
                                  <Unlock size={16} />
                               </button>
                               <button
-                                onClick={() => toast({ title: 'Opções', description: 'Gerenciamento avançado de usuário em breve.', type: 'info' })}
+                                onClick={() => { navigator.clipboard.writeText(user.id); toast({ title: 'ID Copiado', description: `UUID do usuário ${user.nome_completo || user.email} copiado.`, type: 'success' }) }}
                                 className="p-2 bg-slate-800/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-xl transition-all"
-                                title="Mais opções"
+                                title="Copiar ID do usuário"
                               >
                                  <MoreHorizontal size={16} />
                               </button>

@@ -28,8 +28,8 @@ export function SuperClinicasPage() {
   const { toast } = useToast()
   const [clinicas, setClinicas] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('todos')
   const [isModalOpen, setIsModalOpen] = useState(false)
-
 
   const handleLoad = async () => {
     const data = await getClinics()
@@ -40,10 +40,11 @@ export function SuperClinicasPage() {
     handleLoad()
   }, [getClinics])
 
-  const filteredClinicas = clinicas.filter(c => 
-    c.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.cnpj?.includes(searchTerm)
-  )
+  const filteredClinicas = clinicas.filter(c => {
+    const matchSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || c.cnpj?.includes(searchTerm)
+    const matchStatus = statusFilter === 'todos' || (c.status_plano || 'trial') === statusFilter
+    return matchSearch && matchStatus
+  })
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -84,13 +85,17 @@ export function SuperClinicasPage() {
               className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
             />
          </div>
-         <button 
-            onClick={() => toast({ title: 'Filtros em breve', description: 'Por enquanto, use a busca rápida.', type: 'info' })}
-            className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all"
+         <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all cursor-pointer"
          >
-            <Filter size={20} />
-            Filtros
-         </button>
+            <option value="todos">Todos os Status</option>
+            <option value="ativa">Ativas</option>
+            <option value="trial">Trial</option>
+            <option value="suspensa">Suspensas</option>
+            <option value="cancelada">Canceladas</option>
+         </select>
       </div>
 
       {/* Grid de Clínicas (Visualização em Cards) */}
@@ -154,8 +159,9 @@ export function SuperClinicasPage() {
                    <Eye size={16} /> ENTRAR
                  </button>
                  <button
-                   onClick={() => toast({ title: 'Configurações da Clínica', description: `Painel de configurações de "${clinica.nome}" em breve.`, type: 'info' })}
-                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
+                   onClick={() => { impersonateClinic(clinica.id) }}
+                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all"
+                   title="Abrir configurações desta clínica">
                    <Settings size={18} />
                  </button>
                </div>
@@ -169,8 +175,9 @@ export function SuperClinicasPage() {
                    <PauseCircle size={18} />
                  </button>
                  <button
-                   onClick={() => toast({ title: 'Opções', description: `Editar, exportar ou excluir "${clinica.nome}" em breve.`, type: 'info' })}
-                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
+                   onClick={() => { navigator.clipboard.writeText(clinica.id); toast({ title: 'ID Copiado', description: `ID da clínica "${clinica.nome}" copiado.`, type: 'success' }) }}
+                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all"
+                   title="Copiar ID da clínica">
                    <MoreVertical size={18} />
                  </button>
                </div>

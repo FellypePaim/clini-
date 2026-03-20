@@ -4,13 +4,12 @@ import {
   TrendingUp, 
   ArrowUpRight, 
   ArrowDownRight, 
-  CreditCard, 
-  Calendar, 
-  Users, 
-  BarChart3, 
-  PieChart, 
+  CreditCard,
+  Calendar,
+  Users,
+  BarChart3,
+  PieChart,
   Download,
-  Filter,
   ArrowRight,
   UserCheck,
   AlertCircle
@@ -25,6 +24,7 @@ export function SuperFinanceiroPage() {
   const { getFinanceiroStats, isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
+  const [statusFilter, setStatusFilter] = React.useState<string>('todos')
 
   React.useEffect(() => {
     async function fetch() {
@@ -46,7 +46,8 @@ export function SuperFinanceiroPage() {
     { nome: 'Trial', valor: '0', clinicas: 0, cor: 'bg-purple-500' }
   ]
 
-  const recentes = data?.recentes || []
+  const todosRecentes = data?.recentes || []
+  const recentes = statusFilter === 'todos' ? todosRecentes : todosRecentes.filter((r: any) => r.status === statusFilter)
 
   const handleExportCSV = () => {
     if (!data?.recentes || data.recentes.length === 0) {
@@ -163,12 +164,12 @@ export function SuperFinanceiroPage() {
                    </div>
                  ))}
               </div>
-              <button 
-                 onClick={() => toast({ title: 'Ver Planos', description: 'Edição de planos e precificação global em breve.', type: 'info' })}
-                 className="w-full py-4 text-[10px] font-black text-purple-400 hover:text-white uppercase tracking-widest border border-dashed border-purple-500/20 rounded-2xl hover:border-purple-500/40 transition-all"
+              <a
+                 href="/superadmin/configuracoes"
+                 className="block w-full py-4 text-center text-[10px] font-black text-purple-400 hover:text-white uppercase tracking-widest border border-dashed border-purple-500/20 rounded-2xl hover:border-purple-500/40 transition-all"
               >
                  GERENCIAR PLANOS
-              </button>
+              </a>
            </div>
         </div>
 
@@ -179,7 +180,12 @@ export function SuperFinanceiroPage() {
                  <CreditCard size={16} /> ÚLTIMAS TRANSAÇÕES
               </h3>
               <div className="flex items-center gap-2">
-                 <button onClick={() => toast({ title: 'Filtros', description: 'Filtro por período e status em breve.', type: 'info' })} className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors"><Filter size={16} /></button>
+                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold rounded-xl cursor-pointer">
+                   <option value="todos">Todos</option>
+                   <option value="pago">Pago</option>
+                   <option value="pendente">Pendente</option>
+                   <option value="vencido">Vencido</option>
+                 </select>
               </div>
            </div>
 
@@ -228,11 +234,9 @@ export function SuperFinanceiroPage() {
                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                    <AlertCircle size={14} className="text-amber-500" /> Cobranças com vencimento em 7 dias
                  </div>
-                 <button
-                   onClick={() => toast({ title: 'Cobranças', description: 'Listagem completa de cobranças disponível na integração com gateway de pagamento.', type: 'info' })}
-                   className="text-[11px] font-black text-purple-400 hover:text-white transition-colors uppercase tracking-widest">
-                   VER TODAS AS COBRANÇAS
-                 </button>
+                 <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
+                   {recentes.length} transação(ões) exibida(s)
+                 </span>
               </div>
            </div>
 

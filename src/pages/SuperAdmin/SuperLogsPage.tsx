@@ -1,18 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { 
-  FileSearch, 
-  Search, 
-  Filter, 
-  Download, 
-  Clock, 
-  User, 
-  Building2, 
+import {
+  FileSearch,
+  Search,
+  Download,
+  Clock,
+  Building2,
   ShieldAlert,
-  Info,
   CheckCircle,
   XCircle,
   Eye,
-  Calendar
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
@@ -24,16 +20,37 @@ export function SuperLogsPage() {
   const { toast } = useToast()
   const [logs, setLogs] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [periodoFilter, setPeriodoFilter] = useState<string>('todos')
+  const [tipoFilter, setTipoFilter] = useState<string>('todos')
 
   const filteredLogs = logs.filter(log => {
-    if (!searchTerm) return true
     const q = searchTerm.toLowerCase()
-    return (
+    const matchSearch = !searchTerm || (
       log.acao?.toLowerCase().includes(q) ||
       log.recurso?.toLowerCase().includes(q) ||
       log.clinicas?.nome?.toLowerCase().includes(q) ||
       log.profiles?.nome_completo?.toLowerCase().includes(q)
     )
+    const now = new Date()
+    let matchPeriodo = true
+    if (periodoFilter === 'hoje') {
+      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      matchPeriodo = new Date(log.created_at) >= start
+    } else if (periodoFilter === '7d') {
+      const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      matchPeriodo = new Date(log.created_at) >= start
+    } else if (periodoFilter === '30d') {
+      const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+      matchPeriodo = new Date(log.created_at) >= start
+    }
+    const matchTipo = tipoFilter === 'todos' || (() => {
+      const acao = log.acao?.toUpperCase() || ''
+      if (tipoFilter === 'create') return ['CREATE', 'ADD', 'INSERT'].some(kw => acao.includes(kw))
+      if (tipoFilter === 'delete') return ['DELETE', 'SUSPEND', 'REMOVE', 'BLOCK'].some(kw => acao.includes(kw))
+      if (tipoFilter === 'update') return ['UPDATE', 'EDIT', 'MODIFY'].some(kw => acao.includes(kw))
+      return true
+    })()
+    return matchSearch && matchPeriodo && matchTipo
   })
 
   const handleExportLogs = () => {
@@ -110,16 +127,24 @@ export function SuperLogsPage() {
             />
          </div>
          <div className="flex items-center gap-2">
-            <button
-              onClick={() => toast({ title: 'Filtro por Período', description: 'Selecione o intervalo de datas para filtrar os logs.', type: 'info' })}
-              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
-               <Calendar size={18} /> Período
-            </button>
-            <button
-              onClick={() => toast({ title: 'Filtro por Tipo', description: 'Filtro por CREATE, DELETE, UPDATE em breve.', type: 'info' })}
-              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
-               <Filter size={18} /> Tipo
-            </button>
+            <select
+              value={periodoFilter}
+              onChange={(e) => setPeriodoFilter(e.target.value)}
+              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all cursor-pointer">
+               <option value="todos">Todo Período</option>
+               <option value="hoje">Hoje</option>
+               <option value="7d">Últimos 7 dias</option>
+               <option value="30d">Últimos 30 dias</option>
+            </select>
+            <select
+              value={tipoFilter}
+              onChange={(e) => setTipoFilter(e.target.value)}
+              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all cursor-pointer">
+               <option value="todos">Todos os Tipos</option>
+               <option value="create">Criação (CREATE)</option>
+               <option value="update">Atualização (UPDATE)</option>
+               <option value="delete">Exclusão (DELETE)</option>
+            </select>
          </div>
       </div>
 

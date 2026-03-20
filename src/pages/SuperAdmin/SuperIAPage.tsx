@@ -20,11 +20,9 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
-import { useToast } from '../../hooks/useToast'
 
 export function SuperIAPage() {
   const { getIaStats, isLoading } = useSuperAdmin()
-  const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -57,11 +55,11 @@ export function SuperIAPage() {
               <Cpu className="text-purple-400" size={18} />
               <span className="text-[11px] font-black text-purple-400 uppercase tracking-widest">GEMINI-2.5-FLASH</span>
            </div>
-           <button
-             onClick={() => toast({ title: 'Configurações de IA', description: 'Painel de configurações de modelos e thresholds em breve.', type: 'info' })}
+           <a
+             href="/superadmin/configuracoes"
              className="p-3 bg-slate-800/40 border border-slate-700/50 text-slate-400 hover:text-white rounded-xl transition-all">
               <Settings2 size={20} />
-           </button>
+           </a>
         </div>
       </div>
 
@@ -219,11 +217,11 @@ export function SuperIAPage() {
               <p className="text-xs font-medium text-slate-400 leading-relaxed">
                  O sistema bloqueará automaticamente clínicas que excederem o limite orçamentário do plano para evitar custos inesperados de infraestrutura.
               </p>
-              <button
-                onClick={() => toast({ title: 'Thresholds Globais', description: 'Configure limites de custo por clínica no Supabase Dashboard → Edge Functions.', type: 'info' })}
-                className="w-full py-4 bg-slate-800 text-slate-300 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 hover:border-slate-500 outline-none">
+              <a
+                href="/superadmin/configuracoes"
+                className="block w-full py-4 bg-slate-800 text-slate-300 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 hover:border-slate-500 text-center">
                  CONFIGURAR THRESHOLDS GLOBAIS
-              </button>
+              </a>
            </div>
         </div>
 
