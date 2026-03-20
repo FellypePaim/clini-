@@ -23,6 +23,7 @@ export const CID10_LISTA: CID10[] = [
   { codigo: 'F41.1', nome: 'Ansiedade generalizada' },
   { codigo: 'N39.0', nome: 'Infecção do trato urinário' },
 ]
+export const CID10_MOCK = CID10_LISTA
 
 export function useProntuario(pacienteId?: string) {
   const { user } = useAuthStore()
