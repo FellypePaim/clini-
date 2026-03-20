@@ -1,14 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
-import { AGENDA_MOCK } from '../data/agendaMockData'
 import type { AgendaAppointment, AppointmentFormData, AgendaFiltros } from '../types/agenda'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-
 export function useAgenda() {
-  const [appointments, setAppointments] = useState<AgendaAppointment[]>(AGENDA_MOCK)
+  const [appointments, setAppointments] = useState<AgendaAppointment[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -17,7 +14,7 @@ export function useAgenda() {
 
   // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
   useEffect(() => {
-    if (USE_MOCK || !clinicaId) return
+    if (!clinicaId) return
 
     const getInitialAppointments = async () => {
       // Carrega inicial sem filtros fortes para ter algo na tela
@@ -55,19 +52,7 @@ export function useAgenda() {
     async (filtros?: Partial<AgendaFiltros>): Promise<AgendaAppointment[]> => {
       setIsLoading(true)
       try {
-        if (USE_MOCK || !clinicaId) {
-          await new Promise((r) => setTimeout(r, 200)) // simula latência
-          let result = [...AGENDA_MOCK]
-          
-          if (filtros?.profissionalId && filtros.profissionalId !== 'todos') {
-            result = result.filter((a) => a.profissionalId === filtros.profissionalId)
-          }
-          if (filtros?.status && filtros.status !== 'todos') {
-            result = result.filter((a) => a.status === filtros.status)
-          }
-          setAppointments(result)
-          return result
-        }
+        if (!clinicaId) return []
 
         let query = supabase
           .from('consultas')
@@ -144,29 +129,7 @@ export function useAgenda() {
     async (data: AppointmentFormData): Promise<AgendaAppointment> => {
       setIsLoading(true)
       try {
-        if (USE_MOCK || !clinicaId) {
-          await new Promise((r) => setTimeout(r, 400))
-          const novo: AgendaAppointment = {
-            id: `apt-${Date.now()}`,
-            pacienteId: data.pacienteId,
-            pacienteNome: data.pacienteNome,
-            profissionalId: data.profissionalId,
-            profissionalNome: 'Profissional',
-            profissionalEspecialidade: 'Especialidade',
-            profissionalCor: 'blue',
-            data: data.data,
-            horaInicio: data.horaInicio,
-            horaFim: data.horaFim,
-            procedimento: data.procedimento,
-            status: data.status,
-            observacoes: data.observacoes,
-            valor: data.valor,
-            criadoEm: new Date().toISOString(),
-            atualizadoEm: new Date().toISOString(),
-          }
-          setAppointments((prev) => [...prev, novo])
-          return novo
-        }
+        if (!clinicaId) throw new Error('Clínica não identificada')
 
         const dataHoraInicio = `${data.data}T${data.horaInicio}:00`
         const dataHoraFim = `${data.data}T${data.horaFim}:00`
@@ -229,20 +192,7 @@ export function useAgenda() {
     async (id: string, payload: Partial<AgendaAppointment>): Promise<AgendaAppointment | undefined> => {
       setIsLoading(true)
       try {
-        if (USE_MOCK || !clinicaId) {
-          await new Promise((r) => setTimeout(r, 300))
-          let updated: AgendaAppointment | undefined
-          setAppointments((prev) =>
-            prev.map((a) => {
-              if (a.id === id) {
-                updated = { ...a, ...payload, atualizadoEm: new Date().toISOString() }
-                return updated
-              }
-              return a
-            })
-          )
-          return updated
-        }
+        if (!clinicaId) return undefined
 
         const updateData: any = {}
         if (payload.data && payload.horaInicio) updateData.data_hora_inicio = `${payload.data}T${payload.horaInicio}:00`
@@ -278,11 +228,7 @@ export function useAgenda() {
   const deleteAppointment = useCallback(async (id: string): Promise<void> => {
     setIsLoading(true)
     try {
-      if (USE_MOCK || !clinicaId) {
-        await new Promise((r) => setTimeout(r, 300))
-        setAppointments((prev) => prev.filter((a) => a.id !== id))
-        return
-      }
+      if (!clinicaId) return
 
       const { error: pbErr } = await supabase
         .from('consultas')

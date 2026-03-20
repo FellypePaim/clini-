@@ -29,6 +29,8 @@ import { ProcedimentosPage } from '../pages/Configuracoes/ProcedimentosPage'
 import { IntegracoesPage } from '../pages/Configuracoes/IntegracoesPage'
 import { NotificacoesPage } from '../pages/Configuracoes/NotificacoesPage'
 import { SegurancaPage } from '../pages/Configuracoes/SegurancaPage'
+import { FinanceiroPage } from '../pages/Financeiro/FinanceiroPage'
+import { PrescricoesPage } from '../pages/Prescricoes/PrescricoesPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 import { DiagnosticoPage } from '../pages/Dev/DiagnosticoPage'
 import { StorageDiagnosticoPage } from '../pages/Dev/StorageDiagnosticoPage'
@@ -46,10 +48,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 // ─── Módulos "Em Construção" ──────────────────────────
-const modulos = [
-  { path: 'financeiro',    name: 'Financeiro',    icon: 'DollarSign',    desc: 'Fluxo de caixa, cobranças e relatórios.'         },
-  { path: 'prescricoes',   name: 'Prescrições',   icon: 'ClipboardList', desc: 'Prescrições digitais com assinatura eletrônica.' },
-]
+const modulos: { path: string; name: string; icon: string; desc: string }[] = []
 
 export function AppRouter() {
   return (
@@ -100,6 +99,12 @@ export function AppRouter() {
         <Route path="/relatorios" element={<RelatoriosPage />} />
         <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
         <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
+
+        {/* Módulo Financeiro */}
+        <Route path="/financeiro" element={<FinanceiroPage />} />
+
+        {/* Módulo Prescrições */}
+        <Route path="/prescricoes" element={<PrescricoesPage />} />
 
         {/* Módulo Configurações */}
         <Route path="/configuracoes" element={<ConfiguracoesLayout />}>

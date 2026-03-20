@@ -1,14 +1,18 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  X, CalendarDays, Clock, User, Stethoscope,
+  X, CalendarDays, Clock, Stethoscope,
   Repeat, ChevronDown, AlertCircle, Loader2, Search
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { AppointmentFormData } from '../../types/agenda'
-import { PROFISSIONAIS, PACIENTES_MOCK } from '../../data/agendaMockData'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/authStore'
+
+interface PacienteOption { id: string; nome: string; telefone: string }
+interface ProfissionalOption { id: string; nome: string; especialidade: string }
 
 // ─── Schema de validação ──────────────────────────────
 const schema = z.object({
@@ -58,10 +62,29 @@ interface AppointmentModalProps {
 }
 
 export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initialHour }: AppointmentModalProps) {
+  const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [pacienteSearch, setPacienteSearch] = useState('')
   const [showPacienteDropdown, setShowPacienteDropdown] = useState(false)
+  const [pacientesFiltrados, setPacientesFiltrados] = useState<PacienteOption[]>([])
+  const [profissionais, setProfissionais] = useState<ProfissionalOption[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
+
+  // Carrega profissionais ao montar
+  useEffect(() => {
+    if (!clinicaId) return
+    supabase.from('profiles').select('id, nome_completo, especialidade')
+      .eq('clinica_id', clinicaId).eq('role', 'profissional').eq('ativo', true)
+      .then(({ data }) => setProfissionais((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, especialidade: p.especialidade || '' }))))
+  }, [clinicaId])
+
+  // Busca pacientes ao digitar
+  const searchPacientes = useCallback(async (q: string) => {
+    if (!clinicaId || q.length < 2) { setPacientesFiltrados([]); return }
+    const { data } = await supabase.from('pacientes').select('id, nome_completo, telefone')
+      .eq('clinica_id', clinicaId).ilike('nome_completo', `%${q}%`).limit(6)
+    setPacientesFiltrados((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, telefone: p.telefone || '' })))
+  }, [clinicaId])
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema) as any,
@@ -108,11 +131,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const pacientesFiltrados = PACIENTES_MOCK.filter(p =>
-    p.nome.toLowerCase().includes(pacienteSearch.toLowerCase())
-  ).slice(0, 6)
-
-  const handleSelectPaciente = (pac: typeof PACIENTES_MOCK[0]) => {
+  const handleSelectPaciente = (pac: PacienteOption) => {
     setValue('pacienteId', pac.id, { shouldValidate: true })
     setValue('pacienteNome', pac.nome, { shouldValidate: true })
     setPacienteSearch(pac.nome)
@@ -167,6 +186,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                       setValue('pacienteId', '')
                       setValue('pacienteNome', '')
                     }
+                    searchPacientes(e.target.value)
                   }}
                   onFocus={() => setShowPacienteDropdown(true)}
                   className={cn('input-base pl-9', errors.pacienteId && 'border-red-400')}
@@ -207,7 +227,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 className={cn('input-base pl-9 pr-8 appearance-none cursor-pointer', errors.profissionalId && 'border-red-400')}
               >
                 <option value="">Selecione o profissional</option>
-                {PROFISSIONAIS.map(p => (
+                {profissionais.map(p => (
                   <option key={p.id} value={p.id}>
                     {p.nome} — {p.especialidade}
                   </option>
