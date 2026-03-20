@@ -81,6 +81,9 @@ Deno.serve(async (req) => {
       case "ovyva_respond":
         result = await handleOVYVA(payload, clinica_id, supabaseAdmin)
         break
+      case "dashboard_insights":
+        result = await handleDashboardInsights(clinica_id, supabaseAdmin)
+        break
       default:
         return errorResponse(`Action desconhecida: ${action}`)
     }
@@ -517,6 +520,69 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   return {
     data: resposta,
     modelo: MODELS.flash,
+    usage: {
+      inputTokens: usage?.promptTokenCount ?? 0,
+      outputTokens: usage?.candidatesTokenCount ?? 0,
+    },
+  }
+}
+
+// ─────────────────────────────────────────
+// HANDLER: DASHBOARD INSIGHTS
+// ─────────────────────────────────────────
+async function handleDashboardInsights(clinica_id: string, supabase: any) {
+  if (!clinica_id) throw new Error("clinica_id é obrigatório para dashboard_insights")
+
+  const hoje = new Date().toISOString().split("T")[0]
+  const inicioMes = hoje.substring(0, 7) + "-01"
+
+  const [consultasHoje, receitaMes, pacientesNovos, leadsAtivos, clinicaRes] = await Promise.all([
+    supabase.from("consultas").select("id, status", { count: "exact" })
+      .eq("clinica_id", clinica_id).eq("data_consulta", hoje),
+    supabase.from("lancamentos_financeiros").select("valor")
+      .eq("clinica_id", clinica_id).eq("tipo", "receita")
+      .gte("data", inicioMes).eq("status", "pago"),
+    supabase.from("pacientes").select("id", { count: "exact" })
+      .eq("clinica_id", clinica_id).gte("created_at", inicioMes),
+    supabase.from("leads").select("id", { count: "exact" })
+      .eq("clinica_id", clinica_id).neq("estagio", "fechado"),
+    supabase.from("clinicas").select("nome").eq("id", clinica_id).single(),
+  ])
+
+  const totalConsultasHoje = consultasHoje.count ?? 0
+  const confirmadas = (consultasHoje.data ?? []).filter((c: any) => c.status === "confirmado").length
+  const receitaTotal = (receitaMes.data ?? []).reduce((s: number, l: any) => s + (l.valor ?? 0), 0)
+  const totalPacientesNovos = pacientesNovos.count ?? 0
+  const totalLeads = leadsAtivos.count ?? 0
+  const nomeClinica = clinicaRes.data?.nome ?? "Clínica"
+
+  const model = genAI.getGenerativeModel({ model: MODELS.lite })
+
+  const result = await model.generateContent(`
+    Você é um consultor de gestão para clínicas médicas e estéticas brasileiras.
+    Analise os dados abaixo da clínica "${nomeClinica}" e gere 3-4 insights práticos e acionáveis.
+
+    DADOS DE HOJE (${hoje}):
+    - Consultas agendadas: ${totalConsultasHoje}
+    - Consultas confirmadas: ${confirmadas}
+    - Taxa de confirmação: ${totalConsultasHoje > 0 ? Math.round((confirmadas / totalConsultasHoje) * 100) : 0}%
+
+    DADOS DO MÊS ATUAL:
+    - Receita realizada: R$ ${receitaTotal.toFixed(2)}
+    - Novos pacientes: ${totalPacientesNovos}
+    - Leads ativos no funil: ${totalLeads}
+
+    Gere insights concisos, em português, com sugestões práticas baseadas nesses números.
+    Formato: bullet points (•), máximo 4 pontos, linguagem direta e objetiva.
+    Não use markdown, apenas texto simples.
+  `)
+
+  const usage = result.response.usageMetadata
+  const insights = result.response.text().trim()
+
+  return {
+    data: { insights },
+    modelo: MODELS.lite,
     usage: {
       inputTokens: usage?.promptTokenCount ?? 0,
       outputTokens: usage?.candidatesTokenCount ?? 0,
