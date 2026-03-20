@@ -49,6 +49,7 @@ export function ClinicaPage() {
       .then(({ data, error }) => {
         if (error) {
           toast({ title: 'Erro ao carregar dados', description: error.message, type: 'error' })
+          setIsLoading(false)
           return
         }
         if (data) {
