@@ -48,6 +48,8 @@ import { SuperSuportePage } from '../pages/SuperAdmin/SuperSuportePage'
 import { SuperAdminDiagnosticoPage } from '../pages/Dev/SuperAdminDiagnosticoPage'
 import { RegrasConsumoPage } from '../pages/Estoque/RegrasConsumoPage'
 import { FunilLeadsReport } from '../pages/Relatorios/FunilLeadsReport'
+import { ProcedimentosReport } from '../pages/Relatorios/ProcedimentosReport'
+import { PacientesReport } from '../pages/Relatorios/PacientesReport'
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -128,6 +130,8 @@ export function AppRouter() {
         <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
         <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
         <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
+        <Route path="/relatorios/procedimentos" element={<ProcedimentosReport />} />
+        <Route path="/relatorios/pacientes" element={<PacientesReport />} />
 
         {/* Módulo Financeiro */}
         <Route path="/financeiro" element={<FinanceiroPage />} />
