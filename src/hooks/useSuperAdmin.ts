@@ -58,15 +58,14 @@ export function useSuperAdmin() {
   }, [toast])
 
   const suspendClinic = useCallback(async (id: string, reason: string) => {
-    const { error } = await supabase
-      .from('clinicas' as any)
-      .update({ status_plano: 'suspensa', observacoes_superadmin: reason } as any)
-      .eq('id', id)
-    
-    if (error) {
-       toast({ title: 'Erro', description: 'Erro ao suspender clínica.', type: 'error' })
-    } else {
-       toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado com sucesso.', type: 'success' })
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'suspend_clinic', clinicId: id, payload: { suspender: true, motivo: reason } }
+      })
+      if (error) throw error
+      toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado com sucesso.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: 'Erro ao suspender clínica.', type: 'error' })
     }
   }, [toast])
 

@@ -23,6 +23,40 @@ export function SuperLogsPage() {
   const [logs, setLogs] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
 
+  const filteredLogs = logs.filter(log => {
+    if (!searchTerm) return true
+    const q = searchTerm.toLowerCase()
+    return (
+      log.acao?.toLowerCase().includes(q) ||
+      log.recurso?.toLowerCase().includes(q) ||
+      log.clinicas?.nome?.toLowerCase().includes(q) ||
+      log.profiles?.nome_completo?.toLowerCase().includes(q)
+    )
+  })
+
+  const handleExportLogs = () => {
+    if (logs.length === 0) return
+    const headers = ['Timestamp', 'Clínica', 'Usuário', 'Ação', 'Recurso', 'Resultado']
+    const csv = [
+      headers.join(','),
+      ...logs.map(l => [
+        new Date(l.created_at).toISOString(),
+        `"${l.clinicas?.nome || 'Platform Global'}"`,
+        `"${l.profiles?.nome_completo || 'Sistema'}"`,
+        l.acao || '',
+        l.recurso || '',
+        l.resultado || ''
+      ].join(','))
+    ].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.setAttribute('download', `auditoria-${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   useEffect(() => {
     async function load() {
       const data = await getAuditLogs()
@@ -53,8 +87,11 @@ export function SuperLogsPage() {
           <h1 className="text-3xl font-black text-white">Auditoria Global</h1>
           <p className="text-slate-400 font-medium">Timeline completa de todas as ações importantes realizadas em toda a plataforma.</p>
         </div>
-        <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
-           <Download size={18} /> Exportar Logs (JSON/CSV)
+        <button
+          onClick={handleExportLogs}
+          disabled={logs.length === 0}
+          className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+           <Download size={18} /> Exportar Logs (CSV)
         </button>
       </div>
 
@@ -62,9 +99,11 @@ export function SuperLogsPage() {
       <div className="flex flex-col md:flex-row gap-4">
          <div className="flex-1 relative group">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors" size={20} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Buscar por usuário, clínica ou ação..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all font-medium"
             />
          </div>
@@ -92,7 +131,7 @@ export function SuperLogsPage() {
                   </tr>
                </thead>
                <tbody className="divide-y divide-slate-800/30">
-                  {logs.length > 0 ? logs.map((log) => (
+                  {filteredLogs.length > 0 ? filteredLogs.map((log) => (
                      <tr key={log.id} className="hover:bg-slate-800/40 transition-all group cursor-pointer">
                         <td className="px-8 py-5">
                            <div className="flex items-center gap-3">

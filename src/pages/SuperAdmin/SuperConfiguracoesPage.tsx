@@ -20,6 +20,16 @@ import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 
 export function SuperConfiguracoesPage() {
+  const [flags, setFlags] = React.useState([
+    { id: 'ovyva_audio', name: 'Processamento de Áudio OVYVA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
+    { id: 'super_admin_panel', name: 'Beta: Novo Painel SuperAdmin', active: true, info: 'Acesso às novas rotas administrativas globais' },
+    { id: 'telemed_v3', name: 'Telemedicina v3 (WebRTC)', active: false, info: 'Nova stack de vídeo em ambiente de testes' },
+  ])
+
+  const toggleFlag = (id: string) => {
+    setFlags(prev => prev.map(f => f.id === id ? { ...f, active: !f.active } : f))
+  }
+
   const settingsGroups = [
     { title: 'Plataforma Core', icon: Globe, items: ['Domínio Principal', 'Certificados SSL', 'CDN Cloudflare'] },
     { title: 'Database & Storage', icon: Database, items: ['Retenção de Arquivos', 'Backup Automático', 'Limites de Quota'] },
@@ -168,11 +178,7 @@ export function SuperConfiguracoesPage() {
               </div>
 
               <div className="space-y-4 relative z-10">
-                 {[
-                   { id: 'ovyva_audio', name: 'Processamento de Áudio OVYVA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
-                   { id: 'super_admin_panel', name: 'Beta: Novo Painel SuperAdmin', active: true, info: 'Acesso às novas rotas administratives globais' },
-                   { id: 'telemed_v3', name: 'Telemedicina v3 (WebRTC)', active: false, info: 'Nova stack de vídeo em ambiente de testes' },
-                 ].map(flag => (
+                 {flags.map(flag => (
                    <div key={flag.id} className={cn(
                      "flex items-center justify-between p-5 rounded-3xl border transition-all",
                      flag.active ? "bg-slate-900/50 border-slate-800 shadow-lg" : "bg-slate-900/20 border-slate-800/50 grayscale opacity-70"
@@ -185,12 +191,14 @@ export function SuperConfiguracoesPage() {
                          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", flag.active ? 'text-emerald-500' : 'text-red-500')}>
                             {flag.active ? 'ATIVADO' : 'DESATIVADO'}
                          </span>
-                         <div className={cn(
-                           "w-12 h-6 rounded-full p-1 relative transition-all cursor-pointer",
-                           flag.active ? "bg-emerald-600" : "bg-slate-700"
-                         )}>
+                         <button
+                           onClick={() => toggleFlag(flag.id)}
+                           className={cn(
+                             "w-12 h-6 rounded-full p-1 relative transition-all cursor-pointer",
+                             flag.active ? "bg-emerald-600" : "bg-slate-700"
+                           )}>
                             <div className={cn("w-4 h-4 bg-white rounded-full transition-all", flag.active ? "translate-x-6" : "translate-x-0")} />
-                         </div>
+                         </button>
                       </div>
                    </div>
                  ))}
