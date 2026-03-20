@@ -151,7 +151,7 @@ export function SuperClinicasPage() {
                    className="flex items-center gap-2 px-4 py-2.5 bg-purple-600/10 hover:bg-purple-600 text-purple-400 hover:text-white font-bold text-xs rounded-xl transition-all"
                    title="Entrar como esta clínica"
                  >
-                   <Eye size={16} /> ENTTRAR
+                   <Eye size={16} /> ENTRAR
                  </button>
                  <button className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
                    <Settings size={18} />
@@ -194,6 +194,12 @@ export function SuperClinicasPage() {
             <p className="text-slate-500">Tente ajustar seus filtros ou busca.</p>
          </div>
       )}
+
+      <NovaClinicaModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleLoad}
+      />
     </div>
   )
 }

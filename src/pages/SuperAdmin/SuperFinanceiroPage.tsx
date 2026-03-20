@@ -140,7 +140,7 @@ export function SuperFinanceiroPage() {
                     <div className="absolute inset-0 rounded-full border-[24px] border-purple-500 border-t-transparent border-l-transparent rotate-45" />
                     <div className="absolute inset-0 rounded-full border-[24px] border-indigo-500 border-b-transparent border-l-transparent border-r-transparent -rotate-12" />
                     <div className="flex flex-col items-center">
-                       <span className="text-2xl font-black text-white">42</span>
+                       <span className="text-2xl font-black text-white">{planos.reduce((s: number, p: any) => s + (p.clinicas || 0), 0)}</span>
                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">CLÍNICAS</span>
                     </div>
                  </div>
@@ -158,7 +158,7 @@ export function SuperFinanceiroPage() {
                       </div>
                       <div className="text-right">
                          <span className="text-sm font-black text-slate-200">{p.clinicas}</span>
-                         <span className="text-[10px] font-bold text-slate-500 block">{(p.clinicas/42*100).toFixed(0)}%</span>
+                         <span className="text-[10px] font-bold text-slate-500 block">{planos.reduce((s: number, x: any) => s + (x.clinicas || 0), 0) > 0 ? (p.clinicas / planos.reduce((s: number, x: any) => s + (x.clinicas || 0), 0) * 100).toFixed(0) : 0}%</span>
                       </div>
                    </div>
                  ))}

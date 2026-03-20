@@ -17,9 +17,11 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 
 export function SuperSuportePage() {
   const { getSuporteTickets, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [data, setData] = React.useState<any[]>([])
 
   React.useEffect(() => {
@@ -55,7 +57,9 @@ export function SuperSuportePage() {
           <p className="text-slate-400 font-medium">Atendimento a clínicas, feature flags e controle de versões.</p>
         </div>
         <div className="flex items-center gap-3">
-           <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-xl transition-all">
+           <button
+             onClick={() => toast({ title: 'Deploy via CI/CD', description: 'Para fazer deploy, faça push para a branch main e acione o pipeline de CI/CD no GitHub Actions.', type: 'info' })}
+             className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl shadow-xl transition-all">
               <Rocket size={18} /> DEPLOY NOVA VERSÃO
            </button>
         </div>
@@ -167,7 +171,9 @@ export function SuperSuportePage() {
               <p className="text-xs font-medium text-slate-400 leading-relaxed">
                  Ative um aviso global para todos os usuários notificando sobre manutenções programadas ou instabilidade.
               </p>
-              <button className="w-full py-4 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-amber-500/20">
+              <button
+                onClick={() => toast({ title: 'Banner Global', description: 'Funcionalidade de aviso global em desenvolvimento. Disponível na v2.5.0.', type: 'info' })}
+                className="w-full py-4 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-amber-500/20">
                  PUBLICAR AVISO GLOBAL
               </button>
            </div>

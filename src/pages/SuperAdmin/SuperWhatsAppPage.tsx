@@ -18,9 +18,11 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 
 export function SuperWhatsAppPage() {
   const { getWhatsAppStats, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -49,10 +51,14 @@ export function SuperWhatsAppPage() {
           <p className="text-slate-400 font-medium">Controle de instâncias Evolution API e métricas de conversação OVYVA.</p>
         </div>
         <div className="flex items-center gap-3">
-           <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+           <button
+             onClick={() => { toast({ title: 'Sincronizando...', description: 'Verificando status de todas as instâncias Evolution.', type: 'info' }); fetch('/superadmin/whatsapp').then(() => getWhatsAppStats().then(r => r && setData(r))) }}
+             className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
               <RefreshCw size={18} /> Sync All
            </button>
-           <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-600/20 transition-all">
+           <button
+             onClick={() => toast({ title: 'Ação Restrita', description: 'O restart do cluster requer acesso SSH ao servidor Evolution API. Execute via terminal.', type: 'info' })}
+             className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-600/20 transition-all">
               RESTART CLUSTER
            </button>
         </div>
