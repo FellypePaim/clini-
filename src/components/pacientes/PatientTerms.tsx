@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabase'
 import { StorageHelpers } from '../../lib/storage'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../hooks/useToast'
+import { usePatients } from '../../hooks/usePatients'
 
 const TERMS_TEMPLATES = [
   { id: '1', titulo: 'Consentimento de Aplicação de Toxina Botulínica', desc: 'Autorização específica para procedimentos estéticos com botox.' },
@@ -40,6 +41,46 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const { toast } = useToast()
+  const { getPatientById } = usePatients()
+
+  const handleSendWhatsApp = async (e: React.MouseEvent, tpl: any) => {
+    e.stopPropagation()
+    try {
+      if (!pacienteId || !clinicaId) return
+      setIsSaving(true)
+
+      const paciente = await getPatientById(pacienteId)
+      if (!paciente?.contato?.telefone) {
+        toast({ title: 'Aviso', description: 'Paciente não possui telefone cadastrado.', type: 'warning' })
+        setIsSaving(false)
+        return
+      }
+
+      // Encodes identifying details as a base64 obfuscated token
+      const tokenPayload = { pid: pacienteId, cid: clinicaId, tid: tpl.id }
+      const token = btoa(JSON.stringify(tokenPayload))
+      const baseUrl = window.location.origin
+      const link = `${baseUrl}/anamnese/${token}`
+
+      // Call whatsapp-send Edge Function
+      const { error } = await supabase.functions.invoke('whatsapp-send', {
+        body: {
+          numero: paciente.contato.telefone,
+          texto: `Olá ${paciente.nome.split(' ')[0]},\n\nPor favor, assine o termo *${tpl.titulo}* acessando o link seguro abaixo:\n\n${link}\n\nAtenciosamente,\nClínica Clini+`,
+          tipo: 'texto',
+          clinica_id: clinicaId
+        }
+      })
+
+      if (error) throw error
+
+      toast({ title: 'Sucesso', description: 'Link enviado com sucesso pelo WhatsApp.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao enviar.', type: 'error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const handleSign = async () => {
     if (sigPad.current?.isEmpty() || !clinicaId || !pacienteId) {
@@ -49,11 +90,11 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
 
     try {
       setIsSaving(true)
-      const dataURL = sigPad.current?.toDataURL('image/png')
+      const dataURL = sigPad.current?.getTrimmedCanvas().toDataURL('image/webp', 0.6)
       // Convert canvas DataURL to Blob
       const res = await fetch(dataURL!)
       const blob = await res.blob()
-      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}.png`, { type: 'image/png' })
+      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}.webp`, { type: 'image/webp' })
 
       // Upload to storage
       const stored = await StorageHelpers.uploadTermo(clinicaId, pacienteId, file)
@@ -98,18 +139,33 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
 
             <div className="space-y-4">
                {TERMS_TEMPLATES.map(tpl => (
-                 <button 
+                 <div 
                   key={tpl.id} 
-                  onClick={() => { setActiveTemplate(tpl); setShowSignModal(true); }}
                   className="w-full text-left p-6 bg-gray-50/50 hover:bg-white border border-gray-100 hover:border-blue-100 rounded-3xl transition-all group flex flex-col gap-3"
                  >
                     <p className="text-xs font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors uppercase tracking-widest">{tpl.titulo}</p>
                     <p className="text-[10px] text-gray-400 font-medium leading-relaxed">{tpl.desc}</p>
-                    <div className="flex items-center gap-2 mt-2 opacity-10 group-hover:opacity-100 transition-opacity">
-                       <Plus className="w-3.5 h-3.5 text-blue-500" />
-                       <span className="text-[9px] font-black uppercase text-blue-500 tracking-widest">Utilizar Modelo</span>
+                    <div className="flex items-center gap-3 mt-2 opacity-10 group-hover:opacity-100 transition-opacity">
+                       <button 
+                         onClick={() => { setActiveTemplate(tpl); setShowSignModal(true); }}
+                         className="flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition-colors active:scale-95"
+                       >
+                         <Plus className="w-3.5 h-3.5 text-blue-500" />
+                         <span className="text-[9px] font-black uppercase text-blue-500 tracking-widest">Apenas Assinar</span>
+                       </button>
+
+                       <button 
+                         onClick={(e) => handleSendWhatsApp(e, tpl)}
+                         disabled={isSaving}
+                         className="flex items-center gap-2 hover:bg-green-50 px-3 py-1.5 rounded-xl transition-colors active:scale-95 ml-auto"
+                       >
+                         <Send className="w-3.5 h-3.5 text-green-500" />
+                         <span className="text-[9px] font-black uppercase text-green-500 tracking-widest">
+                           {isSaving ? 'Enviando...' : 'Enviar Termo WhatsApp'}
+                         </span>
+                       </button>
                     </div>
-                 </button>
+                 </div>
                ))}
             </div>
          </div>

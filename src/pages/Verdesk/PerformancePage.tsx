@@ -18,64 +18,114 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line
 } from 'recharts'
-import { useVerdesk } from '../../hooks/useVerdesk'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/authStore'
 
 export function PerformancePage() {
-  const { leads } = useVerdesk()
+  const clinicaId = useAuthStore(state => state.user?.clinicaId)
+  
+  const [stats, setStats] = React.useState({
+    totalLeads: 0,
+    conversionRate: '0.0',
+    avgTicket: 0,
+    ovyvaPercentage: 0
+  })
+  
+  const [funnelData, setFunnelData] = React.useState<any[]>([])
+  const [originData, setOriginData] = React.useState<any[]>([])
+  const [procedureData, setProcedureData] = React.useState<any[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
 
-  // KPI Calculations
-  const stats = useMemo(() => {
-    const totalLeads = leads.length
-    const agendados = leads.filter(l => l.stage === 'Agendado').length
-    const conversionRate = totalLeads ? (agendados / totalLeads) * 100 : 0
-    
-    const totalValue = leads.reduce((acc, l) => acc + l.estimatedValue, 0)
-    const avgTicket = totalLeads ? totalValue / totalLeads : 0
+  React.useEffect(() => {
+    async function loadStats() {
+      if (!clinicaId) return
+      setIsLoading(true)
+      setError(null)
 
-    const ovyvaLeads = leads.filter(l => l.origin === 'WhatsApp OVYVA').length
-    
-    return {
-      totalLeads,
-      conversionRate: conversionRate.toFixed(1),
-      avgTicket,
-      ovyvaPercentage: totalLeads ? (ovyvaLeads / totalLeads) * 100 : 0
+      try {
+        // Query de todos leads minimal para evitar timeout no BD (para agregar)
+        const { data, error } = await supabase
+          .from('leads')
+          .select('estagio, origem, procedimento_interesse, valor_estimado')
+          .eq('clinica_id', clinicaId)
+
+        if (error) throw error
+
+        const leads = data || []
+        const total = leads.length
+        
+        // Stats
+        const agendados = leads.filter(l => l.estagio === 'agendado').length
+        const conversionRate = total ? (agendados / total) * 100 : 0
+        const totalValue = leads.reduce((acc, l) => acc + (l.valor_estimado || 0), 0)
+        const avgTicket = total ? totalValue / total : 0
+        const ovyvaLeads = leads.filter(l => l.origem === 'WhatsApp OVYVA').length
+        
+        setStats({
+          totalLeads: total,
+          conversionRate: conversionRate.toFixed(1),
+          avgTicket,
+          ovyvaPercentage: total ? (ovyvaLeads / total) * 100 : 0
+        })
+
+        // Funil
+        const stageMap: Record<string, string> = {
+          'perguntou_valor': 'Perguntou Valor',
+          'demonstrou_interesse': 'Demonstrou Interesse',
+          'quase_fechando': 'Quase Fechando',
+          'agendado': 'Agendado',
+          'perdido': 'Perdido'
+        }
+        
+        const fData = Object.entries(stageMap).map(([k, name]) => ({
+          name,
+          count: leads.filter(l => l.estagio === k).length
+        }))
+        setFunnelData(fData)
+
+        // Origem
+        const origins = leads.reduce((acc, l) => {
+          const o = l.origem || 'Manual'
+          acc[o] = (acc[o] || 0) + 1
+          return acc
+        }, {} as Record<string, number>)
+        setOriginData(Object.entries(origins).map(([name, value]) => ({ name, value })))
+
+        // Procedures
+        const proc = leads.reduce((acc, l) => {
+          const p = l.procedimento_interesse || 'Consulta'
+          acc[p] = (acc[p] || 0) + 1
+          return acc
+        }, {} as Record<string, number>)
+        
+        const top5 = Object.entries(proc)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([name, count]) => ({ name, count }))
+        
+        setProcedureData(top5)
+        
+      } catch (err: any) {
+         setError(err.message)
+      } finally {
+         setIsLoading(false)
+      }
     }
-  }, [leads])
-
-  // Chart Data
-  const funnelData = useMemo(() => {
-    const stages = ['Perguntou Valor', 'Demonstrou Interesse', 'Quase Fechando', 'Agendado', 'Perdido']
-    return stages.map(stage => ({
-      name: stage,
-      count: leads.filter(l => l.stage === stage).length
-    }))
-  }, [leads])
-
-  const originData = useMemo(() => {
-    const origins = leads.reduce((acc, l) => {
-      acc[l.origin] = (acc[l.origin] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
     
-    return Object.entries(origins).map(([name, value]) => ({ name, value }))
-  }, [leads])
-
-  const procedureData = useMemo(() => {
-    const proc = leads.reduce((acc, l) => {
-      acc[l.procedure] = (acc[l.procedure] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-    
-    return Object.entries(proc)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([name, count]) => ({ name, count }))
-  }, [leads])
+    loadStats()
+  }, [clinicaId])
 
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
+
+  if (isLoading) {
+    return <div className="p-8 text-center text-slate-500">Carregando métricas de performance do Verdesk...</div>
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Erro ao carregar dados: {error}</div>
+  }
 
   return (
     <div className="flex flex-col h-full bg-slate-50/50 overflow-y-auto">
@@ -91,7 +141,7 @@ export function PerformancePage() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 md: gap-4 mt-6">
           {/* Card 1 */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between mb-2">
@@ -143,7 +193,7 @@ export function PerformancePage() {
         </div>
       </header>
 
-      <main className="p-6 grid grid-cols-2 gap-6">
+      <main className="p-6 grid grid-cols-1 md: gap-6">
         
         {/* Funnel Chart */}
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">

@@ -32,10 +32,11 @@ export function PacientesRecentes() {
   }, [clinicaId])
 
   async function loadPacientes() {
+    if (!clinicaId) return
     setLoading(true)
     const { data, error } = await supabase
       .from('pacientes')
-      .select('id, nome_completo, contato, total_consultas, ultima_consulta')
+      .select('id, nome_completo, whatsapp, created_at, updated_at')
       .eq('clinica_id', clinicaId)
       .order('updated_at', { ascending: false })
       .limit(5)
@@ -44,9 +45,9 @@ export function PacientesRecentes() {
       setPacientes(data.map((p: any) => ({
         id: p.id,
         nome_completo: p.nome_completo,
-        contato: p.contato ?? null,
-        totalConsultas: p.total_consultas ?? 0,
-        ultimaConsulta: p.ultima_consulta ?? null,
+        contato: { telefone: p.whatsapp },
+        totalConsultas: 1, // Placeholder
+        ultimaConsulta: p.updated_at ? p.updated_at.split('T')[0] : null,
       })))
     }
     setLoading(false)
@@ -88,8 +89,9 @@ export function PacientesRecentes() {
           {pacientes.map((pac, idx) => {
             const initials = pac.nome_completo
               .split(' ')
-              .slice(0, 2)
               .map((n) => n[0])
+              .filter(Boolean)
+              .slice(0, 2)
               .join('')
               .toUpperCase()
 
@@ -106,14 +108,12 @@ export function PacientesRecentes() {
                   <p className="text-sm font-medium text-gray-800 truncate">{pac.nome_completo}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <Phone className="w-3 h-3 text-gray-300" />
-                    <p className="text-xs text-gray-400">{(pac.contato as any)?.telefone ?? '—'}</p>
+                    <p className="text-xs text-gray-400">{pac.contato?.telefone ?? '—'}</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-xs font-medium text-gray-700">
-                    {pac.totalConsultas} consulta{pac.totalConsultas !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
+                  <p className="text-[10px] text-gray-400">Desde</p>
+                  <p className="text-xs font-medium text-gray-700 mt-0.5">
                     {pac.ultimaConsulta
                       ? new Date(pac.ultimaConsulta + 'T00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
                       : '—'}

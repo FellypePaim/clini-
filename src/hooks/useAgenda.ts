@@ -156,7 +156,7 @@ export function useAgenda() {
           profissional_id: data.profissionalId,
           data_hora_inicio: dataHoraInicio,
           data_hora_fim: dataHoraFim,
-          status: data.status,
+          status: data.status as any,
           observacoes: data.observacoes,
           valor: data.valor,
           recorrente: !!data.repetir

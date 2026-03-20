@@ -40,6 +40,7 @@ export function AgendamentosList() {
   }, [clinicaId])
 
   async function loadAgendamentos() {
+    if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
@@ -49,28 +50,28 @@ export function AgendamentosList() {
       .from('consultas')
       .select(`
         id,
-        data_hora,
-        procedimento,
+        data_hora_inicio,
         status,
         valor,
-        pacientes (nome_completo),
-        profiles (nome_completo)
+        paciente:pacientes (nome_completo),
+        profissional:profiles!consultas_profissional_id_fkey (nome_completo),
+        procedimento_rel:procedimentos (nome)
       `)
       .eq('clinica_id', clinicaId)
-      .gte('data_hora', inicioHoje)
-      .lt('data_hora', fimHoje)
-      .order('data_hora', { ascending: true })
+      .gte('data_hora_inicio', inicioHoje)
+      .lt('data_hora_inicio', fimHoje)
+      .order('data_hora_inicio', { ascending: true })
       .limit(8)
 
     if (!error && data) {
       setAgendamentos(data.map((c: any) => ({
         id: c.id,
-        horaInicio: new Date(c.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        pacienteNome: c.pacientes?.nome_completo ?? 'Paciente',
-        procedimento: c.procedimento ?? 'Consulta',
-        profissionalNome: c.profiles?.nome_completo ?? 'Profissional',
+        horaInicio: new Date(c.data_hora_inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        pacienteNome: c.paciente?.nome_completo ?? 'Paciente',
+        procedimento: c.procedimento_rel?.nome ?? 'Consulta',
+        profissionalNome: c.profissional?.nome_completo ?? 'Profissional',
         valor: c.valor ?? null,
-        status: c.status as AppointmentStatus,
+        status: (c.status as any) || 'agendado',
       })))
     }
     setLoading(false)

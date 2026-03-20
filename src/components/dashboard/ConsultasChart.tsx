@@ -44,6 +44,7 @@ export function ConsultasChart() {
   }, [clinicaId])
 
   async function loadDados() {
+    if (!clinicaId) return
     setLoading(true)
     // Últimas 4 semanas
     const semanas: SemanaData[] = []
@@ -59,8 +60,8 @@ export function ConsultasChart() {
         .from('consultas')
         .select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId)
-        .gte('data_hora', inicioSemana.toISOString())
-        .lt('data_hora', fimSemana.toISOString())
+        .gte('data_hora_inicio', inicioSemana.toISOString())
+        .lt('data_hora_inicio', fimSemana.toISOString())
 
       semanas.push({
         semana: inicioSemana.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),

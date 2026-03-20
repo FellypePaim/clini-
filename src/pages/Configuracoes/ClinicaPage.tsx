@@ -171,7 +171,7 @@ export function ClinicaPage() {
             </label>
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Circular (JPG/PNG)</span>
           </div>
-          <div className="flex-1 grid grid-cols-2 gap-6">
+          <div className="flex-1 grid grid-cols-1 md: gap-6">
             <div className="col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-2">Razão Social / Nome da Clínica</label>
               <input type="text" value={form.nome} onChange={e => update('nome', e.target.value)}
@@ -191,7 +191,7 @@ export function ClinicaPage() {
         </div>
 
         {/* Endereço */}
-        <div className="grid grid-cols-4 gap-6 border-b border-slate-100 pb-8">
+        <div className="grid grid-cols-1 md: gap-6 border-b border-slate-100 pb-8">
            <h3 className="col-span-4 text-base font-bold text-slate-800 flex items-center gap-2"><MapPin size={18} className="text-indigo-500"/> Localização</h3>
            <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">CEP</label>
@@ -226,7 +226,7 @@ export function ClinicaPage() {
         </div>
 
         {/* Contato */}
-        <div className="grid grid-cols-2 gap-6 border-b border-slate-100 pb-8">
+        <div className="grid grid-cols-1 md: gap-6 border-b border-slate-100 pb-8">
            <h3 className="col-span-2 text-base font-bold text-slate-800 flex items-center gap-2"><Phone size={18} className="text-indigo-500"/> Contato Oficial</h3>
            <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">Telefone Principal</label>
