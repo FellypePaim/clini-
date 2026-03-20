@@ -99,7 +99,9 @@ export function SuperDashboardPage() {
                <h3 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                  <Activity className="text-purple-400" size={18} /> Atividade Recente das Clínicas
                </h3>
-               <button className="text-[10px] font-black text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+               <button
+                 onClick={() => window.location.hash = '#clinicas'}
+                 className="text-[10px] font-black text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
                  VER TODAS <ChevronRight size={14} />
                </button>
             </div>
@@ -128,16 +130,16 @@ export function SuperDashboardPage() {
                               <span className="font-bold text-slate-300 group-hover:text-purple-400 transition-colors">{row.nome}</span>
                            </div>
                         </td>
-                        <td className="px-6 py-4 font-bold text-slate-500">Novo Cliente</td>
+                        <td className="px-6 py-4 font-bold text-slate-500">—</td>
                         <td className="px-6 py-4">
-                           <Badge className="text-[9px] font-black border-none bg-emerald-500/10 text-emerald-500">
-                             Ativo
+                           <Badge className={cn("text-[9px] font-black border-none", row.status_plano === 'suspensa' ? 'bg-red-500/10 text-red-500' : row.status_plano === 'trial' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500')}>
+                             {(row.status_plano || 'ativo').toUpperCase()}
                            </Badge>
                         </td>
                         <td className="px-6 py-4 font-medium text-slate-400">{new Date(row.created_at).toLocaleDateString()}</td>
                         <td className="px-6 py-4 text-right">
                            <div className="flex items-center justify-end gap-2">
-                              <span className="text-xs font-black text-emerald-400">100%</span>
+                              <span className="text-xs font-black text-emerald-400">OK</span>
                               <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                                  <div className="h-full bg-emerald-500 w-full" />
                               </div>
@@ -227,16 +229,16 @@ export function SuperDashboardPage() {
                
                <div className="mt-auto pt-8 border-t border-indigo-500/10 grid grid-cols-3 gap-6">
                   <div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">PLANO PRO</span>
-                    <span className="text-lg font-black text-white text-emerald-400">28 clínicas</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">CLÍNICAS ATIVAS</span>
+                    <span className="text-lg font-black text-emerald-400">{stats?.clinics?.active || 0}</span>
                   </div>
                   <div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">CHURN</span>
-                    <span className="text-lg font-black text-white text-red-400">0.8%</span>
+                    <span className="text-lg font-black text-red-400">{stats?.churn || '—'}</span>
                   </div>
                   <div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">PROJEÇÃO</span>
-                    <span className="text-lg font-black text-white">R$ 42.1K</span>
+                    <span className="text-lg font-black text-white">R$ {((stats?.mrr || 0) * 1.09).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</span>
                   </div>
                </div>
             </div>
@@ -252,7 +254,7 @@ export function SuperDashboardPage() {
                      </div>
                      <div>
                         <h3 className="text-sm font-black text-white uppercase tracking-widest">Uso da Inteligência Artificial</h3>
-                        <p className="text-[10px] font-bold text-purple-400 tracking-widest">85.420 calls este mês</p>
+                        <p className="text-[10px] font-bold text-purple-400 tracking-widest">{(stats?.aiUsage?.calls || 0).toLocaleString()} calls este mês</p>
                      </div>
                   </div>
                    <div className="text-right">
@@ -264,15 +266,15 @@ export function SuperDashboardPage() {
                <div className="mt-auto pt-8 border-t border-purple-500/10 grid grid-cols-3 gap-6">
                   <div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">SOFIA (CHAT)</span>
-                    <span className="text-lg font-black text-white">62.8K tokens</span>
+                    <span className="text-lg font-black text-white">{(stats?.aiUsage?.tokens || 0).toLocaleString()} tokens</span>
                   </div>
                   <div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">WHITSPER (VOICE)</span>
-                    <span className="text-lg font-black text-white">450 min</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">TOTAL CALLS</span>
+                    <span className="text-lg font-black text-white">{(stats?.aiUsage?.calls || 0).toLocaleString()}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">PEAKS</span>
-                    <span className="text-lg font-black text-purple-400">14:00 - 17:00</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">CUSTO BRL</span>
+                    <span className="text-lg font-black text-purple-400">R$ {((stats?.aiUsage?.cost || 0) * 5.8).toFixed(2)}</span>
                   </div>
                </div>
             </div>

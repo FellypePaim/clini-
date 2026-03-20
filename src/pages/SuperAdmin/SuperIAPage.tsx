@@ -20,9 +20,11 @@ import {
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 
 export function SuperIAPage() {
   const { getIaStats, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
   React.useEffect(() => {
@@ -55,7 +57,9 @@ export function SuperIAPage() {
               <Cpu className="text-purple-400" size={18} />
               <span className="text-[11px] font-black text-purple-400 uppercase tracking-widest">GEMINI-2.5-FLASH</span>
            </div>
-           <button className="p-3 bg-slate-800/40 border border-slate-700/50 text-slate-400 hover:text-white rounded-xl transition-all">
+           <button
+             onClick={() => toast({ title: 'Configurações de IA', description: 'Painel de configurações de modelos e thresholds em breve.', type: 'info' })}
+             className="p-3 bg-slate-800/40 border border-slate-700/50 text-slate-400 hover:text-white rounded-xl transition-all">
               <Settings2 size={20} />
            </button>
         </div>
@@ -123,35 +127,37 @@ export function SuperIAPage() {
            </div>
 
            {/* Ranking de Clínicas (Mais gastão) */}
+           {(data?.topClinics?.length > 0) && (
            <div className="space-y-4">
               <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
                  🏆 MAIOR CONSUMO POR CLÍNICA
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                 {[
-                   { name: 'OdontoPlus', tokens: '1.8M', limit: '80%', color: 'bg-red-500' },
-                   { name: 'Inovare Estetica', tokens: '1.2M', limit: '42%', color: 'bg-emerald-500' },
-                   { name: 'DermoCenter', tokens: '0.8M', limit: '15%', color: 'bg-blue-500' },
-                 ].map(c => (
-                   <div key={c.name} className="bg-slate-800/20 border border-slate-700/30 p-5 rounded-3xl relative overflow-hidden group">
+                 {(data?.topClinics || []).slice(0, 3).map((c: any, idx: number) => {
+                   const colors = ['bg-red-500', 'bg-emerald-500', 'bg-blue-500']
+                   const maxTokens = data.topClinics[0]?.tokens || 1
+                   const pct = Math.round((c.tokens / maxTokens) * 100)
+                   return (
+                   <div key={c.nome || c.name || idx} className="bg-slate-800/20 border border-slate-700/30 p-5 rounded-3xl relative overflow-hidden group">
                       <div className="relative z-10">
-                         <h4 className="text-xs font-black text-white mb-1 uppercase tracking-widest">{c.name}</h4>
-                         <p className="text-lg font-black text-slate-300 mb-3">{c.tokens}</p>
+                         <h4 className="text-xs font-black text-white mb-1 uppercase tracking-widest">{c.nome || c.name}</h4>
+                         <p className="text-lg font-black text-slate-300 mb-3">{c.tokens?.toLocaleString() || '0'} tokens</p>
                          <div className="flex justify-between text-[9px] font-black text-slate-600 uppercase mb-1">
-                            <span>Limite de Cota</span>
-                            <span>{c.limit}</span>
+                            <span>Uso Relativo</span>
+                            <span>{pct}%</span>
                          </div>
                          <div className="h-1 bg-slate-900 rounded-full overflow-hidden">
-                            <div className={cn("h-full", c.color)} style={{ width: c.limit }} />
+                            <div className={cn("h-full", colors[idx] || 'bg-purple-500')} style={{ width: `${pct}%` }} />
                          </div>
                       </div>
                       <div className="absolute top-0 right-0 p-3 text-slate-800 group-hover:text-slate-700 transition-colors">
                          <TrendingUp size={32} />
                       </div>
                    </div>
-                 ))}
+                 )})}
               </div>
            </div>
+           )}
         </div>
 
         {/* Console IA & Alertas */}
@@ -213,7 +219,9 @@ export function SuperIAPage() {
               <p className="text-xs font-medium text-slate-400 leading-relaxed">
                  O sistema bloqueará automaticamente clínicas que excederem o limite orçamentário do plano para evitar custos inesperados de infraestrutura.
               </p>
-              <button className="w-full py-4 bg-slate-800 text-slate-300 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 hover:border-slate-500 outline-none">
+              <button
+                onClick={() => toast({ title: 'Thresholds Globais', description: 'Configure limites de custo por clínica no Supabase Dashboard → Edge Functions.', type: 'info' })}
+                className="w-full py-4 bg-slate-800 text-slate-300 hover:text-white font-black text-[10px] uppercase tracking-widest rounded-2xl transition-all border border-slate-700 hover:border-slate-500 outline-none">
                  CONFIGURAR THRESHOLDS GLOBAIS
               </button>
            </div>

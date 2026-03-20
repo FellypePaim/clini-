@@ -15,11 +15,13 @@ import {
   Calendar
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 
 export function SuperLogsPage() {
   const { getAuditLogs, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [logs, setLogs] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -108,10 +110,14 @@ export function SuperLogsPage() {
             />
          </div>
          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+            <button
+              onClick={() => toast({ title: 'Filtro por Período', description: 'Selecione o intervalo de datas para filtrar os logs.', type: 'info' })}
+              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
                <Calendar size={18} /> Período
             </button>
-            <button className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+            <button
+              onClick={() => toast({ title: 'Filtro por Tipo', description: 'Filtro por CREATE, DELETE, UPDATE em breve.', type: 'info' })}
+              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
                <Filter size={18} /> Tipo
             </button>
          </div>
@@ -169,7 +175,9 @@ export function SuperLogsPage() {
                               ) : (
                                  <XCircle size={16} className="text-red-500" />
                               )}
-                              <button className="p-2 bg-slate-900 rounded-lg text-slate-600 hover:bg-purple-600 hover:text-white transition-all">
+                              <button
+                                onClick={() => toast({ title: 'Detalhe do Log', description: `Ação: ${log.acao} em ${log.recurso || 'N/A'} — ${log.resultado}`, type: 'info' })}
+                                className="p-2 bg-slate-900 rounded-lg text-slate-600 hover:bg-purple-600 hover:text-white transition-all">
                                  <Eye size={14} />
                               </button>
                            </div>

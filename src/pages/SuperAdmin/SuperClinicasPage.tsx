@@ -125,14 +125,14 @@ export function SuperClinicasPage() {
                      <Users size={14} />
                      <span className="text-[9px] font-black uppercase tracking-widest">Usuários</span>
                   </div>
-                  <p className="text-lg font-black text-white">12</p>
+                  <p className="text-lg font-black text-white">{clinica.user_count ?? '—'}</p>
                </div>
                <div className="bg-slate-900/40 rounded-2xl p-4 border border-slate-700/30">
                   <div className="flex items-center gap-2 text-slate-500 mb-1">
                      <Calendar size={14} />
                      <span className="text-[9px] font-black uppercase tracking-widest">Consultas</span>
                   </div>
-                  <p className="text-lg font-black text-white">428</p>
+                  <p className="text-lg font-black text-white">{clinica.appointment_count ?? '—'}</p>
                </div>
                <div className="bg-slate-900/40 rounded-2xl p-4 border border-slate-700/30">
                   <div className="flex items-center gap-2 text-slate-500 mb-1">
@@ -153,7 +153,9 @@ export function SuperClinicasPage() {
                  >
                    <Eye size={16} /> ENTRAR
                  </button>
-                 <button className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
+                 <button
+                   onClick={() => toast({ title: 'Configurações da Clínica', description: `Painel de configurações de "${clinica.nome}" em breve.`, type: 'info' })}
+                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
                    <Settings size={18} />
                  </button>
                </div>
@@ -166,7 +168,9 @@ export function SuperClinicasPage() {
                  >
                    <PauseCircle size={18} />
                  </button>
-                 <button className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
+                 <button
+                   onClick={() => toast({ title: 'Opções', description: `Editar, exportar ou excluir "${clinica.nome}" em breve.`, type: 'info' })}
+                   className="p-2.5 bg-slate-700/30 hover:bg-slate-700 text-slate-400 hover:text-white rounded-xl transition-all">
                    <MoreVertical size={18} />
                  </button>
                </div>

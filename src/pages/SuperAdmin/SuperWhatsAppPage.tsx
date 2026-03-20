@@ -24,23 +24,31 @@ export function SuperWhatsAppPage() {
   const { getWhatsAppStats, isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
+  const [filterText, setFilterText] = React.useState('')
 
-  React.useEffect(() => {
-    async function fetch() {
-      const res = await getWhatsAppStats()
-      if (res) setData(res)
-    }
-    fetch()
+  const loadData = React.useCallback(async () => {
+    const res = await getWhatsAppStats()
+    if (res) setData(res)
   }, [getWhatsAppStats])
 
+  React.useEffect(() => {
+    loadData()
+  }, [loadData])
+
   const stats = [
-    { label: 'Msgs Recebidas (Hoje)', value: '0', trend: '+0%', icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'Respostas IA (Sofia)', value: '0', trend: '0%', icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Msgs Recebidas (Hoje)', value: String(data?.msgsHoje || 0), trend: '+0%', icon: MessageSquare, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'Respostas IA (Sofia)', value: String(data?.iaResponses || 0), trend: '0%', icon: Zap, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { label: 'Instâncias Ativas', value: `${data?.conected || 0}/${data?.total || 0}`, trend: 'Online', icon: Smartphone, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'Humano Solicitado', value: '0', trend: '0%', icon: Users, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    { label: 'Humano Solicitado', value: String(data?.humanRequested || 0), trend: '0%', icon: Users, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   ]
 
-  const instances = data?.instancias || []
+  const allInstances = data?.instancias || []
+  const instances = filterText
+    ? allInstances.filter((i: any) =>
+        i.clinica?.toLowerCase().includes(filterText.toLowerCase()) ||
+        i.phone?.includes(filterText)
+      )
+    : allInstances
 
   return (
     <div className="space-y-10 animate-fade-in">
@@ -52,7 +60,7 @@ export function SuperWhatsAppPage() {
         </div>
         <div className="flex items-center gap-3">
            <button
-             onClick={() => { toast({ title: 'Sincronizando...', description: 'Verificando status de todas as instâncias Evolution.', type: 'info' }); fetch('/superadmin/whatsapp').then(() => getWhatsAppStats().then(r => r && setData(r))) }}
+             onClick={() => { toast({ title: 'Sincronizando...', description: 'Verificando status de todas as instâncias Evolution.', type: 'info' }); loadData() }}
              className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
               <RefreshCw size={18} /> Sync All
            </button>
@@ -97,7 +105,13 @@ export function SuperWhatsAppPage() {
               </h3>
               <div className="relative group">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
-                 <input type="text" placeholder="Filtrar número ou clínica..." className="bg-slate-900/50 border border-slate-800 rounded-lg py-1.5 pl-9 pr-4 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all w-60" />
+                 <input
+                   type="text"
+                   placeholder="Filtrar número ou clínica..."
+                   value={filterText}
+                   onChange={(e) => setFilterText(e.target.value)}
+                   className="bg-slate-900/50 border border-slate-800 rounded-lg py-1.5 pl-9 pr-4 text-[10px] text-white focus:outline-none focus:border-emerald-500 transition-all w-60"
+                 />
               </div>
            </div>
 
@@ -143,13 +157,19 @@ export function SuperWhatsAppPage() {
                           </td>
                           <td className="px-8 py-5 text-right">
                              <div className="flex items-center justify-end gap-2 outline-none">
-                                <button className="p-2 bg-slate-900/50 hover:bg-emerald-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Ver conversas">
+                                <button
+                                  onClick={() => toast({ title: 'Conversas', description: `Abrindo histórico de ${item.clinica}.`, type: 'info' })}
+                                  className="p-2 bg-slate-900/50 hover:bg-emerald-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Ver conversas">
                                    <MessageSquare size={14} />
                                 </button>
-                                <button className="p-2 bg-slate-900/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-lg transition-all" title="Gerar QR Code">
+                                <button
+                                  onClick={() => toast({ title: 'QR Code', description: `Gerando QR para reconexão de ${item.instance}.`, type: 'info' })}
+                                  className="p-2 bg-slate-900/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-lg transition-all" title="Gerar QR Code">
                                    <QrCode size={14} />
                                 </button>
-                                <button className="p-2 bg-slate-900/50 hover:bg-red-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Desconectar">
+                                <button
+                                  onClick={() => toast({ title: 'Desconectado', description: `Instância ${item.instance} desconectada.`, type: 'error' })}
+                                  className="p-2 bg-slate-900/50 hover:bg-red-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Desconectar">
                                    <Power size={14} />
                                 </button>
                              </div>

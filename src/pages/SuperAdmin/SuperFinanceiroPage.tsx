@@ -179,7 +179,7 @@ export function SuperFinanceiroPage() {
                  <CreditCard size={16} /> ÚLTIMAS TRANSAÇÕES
               </h3>
               <div className="flex items-center gap-2">
-                 <button className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 transition-colors"><Filter size={16} /></button>
+                 <button onClick={() => toast({ title: 'Filtros', description: 'Filtro por período e status em breve.', type: 'info' })} className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors"><Filter size={16} /></button>
               </div>
            </div>
 
@@ -226,9 +226,11 @@ export function SuperFinanceiroPage() {
               
               <div className="p-6 bg-slate-900/30 border-t border-slate-800/50 flex items-center justify-between">
                  <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                   <AlertCircle size={14} className="text-amber-500" /> 12 clínicas com vencimento em 7 dias
+                   <AlertCircle size={14} className="text-amber-500" /> Cobranças com vencimento em 7 dias
                  </div>
-                 <button className="text-[11px] font-black text-purple-400 hover:text-white transition-colors uppercase tracking-widest">
+                 <button
+                   onClick={() => toast({ title: 'Cobranças', description: 'Listagem completa de cobranças disponível na integração com gateway de pagamento.', type: 'info' })}
+                   className="text-[11px] font-black text-purple-400 hover:text-white transition-colors uppercase tracking-widest">
                    VER TODAS AS COBRANÇAS
                  </button>
               </div>
@@ -239,8 +241,8 @@ export function SuperFinanceiroPage() {
               <div className="relative z-10 flex flex-col h-full">
                  <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2">Projeção de Faturamento (30d)</h4>
                  <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-white tracking-tighter">R$ 42.150</span>
-                    <span className="text-xs font-bold text-emerald-400">+R$ 3.730 projetado</span>
+                    <span className="text-3xl font-black text-white tracking-tighter">R$ {((data?.mrr || 0) * 1.09).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</span>
+                    <span className="text-xs font-bold text-emerald-400">+9% projetado</span>
                  </div>
                  
                  <div className="mt-auto flex items-end justify-between gap-1 h-24">

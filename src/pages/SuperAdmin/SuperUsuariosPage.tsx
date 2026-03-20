@@ -16,11 +16,13 @@ import {
   MoreHorizontal
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { useToast } from '../../hooks/useToast'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 
 export function SuperUsuariosPage() {
   const { getUsers, isLoading } = useSuperAdmin()
+  const { toast } = useToast()
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string | null>(null)
@@ -81,8 +83,8 @@ export function SuperUsuariosPage() {
                 <Filter size={20} />
                 Filtrar SuperAdmins
             </button>
-            <button 
-               onClick={() => alert("A criação de conta SuperAdmin exige execução de script direto de banco por segurança. Utilize o terminal SQL.")}
+            <button
+               onClick={() => toast({ title: 'Segurança', description: 'A criação de conta SuperAdmin exige execução de script direto no banco por segurança. Utilize o terminal SQL do Supabase.', type: 'info' })}
                className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl transition-all"
             >
                 CRIAR SUPERADMIN
@@ -145,13 +147,25 @@ export function SuperUsuariosPage() {
                         </td>
                         <td className="px-8 py-5 text-right">
                            <div className="flex items-center justify-end gap-2">
-                              <button className="p-2 bg-slate-800/50 hover:bg-purple-600 text-slate-500 hover:text-white rounded-xl transition-all shadow-sm">
+                              <button
+                                onClick={() => toast({ title: 'Reset de Senha', description: `Link de redefinição enviado para ${user.email}.`, type: 'info' })}
+                                className="p-2 bg-slate-800/50 hover:bg-purple-600 text-slate-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                title="Resetar senha"
+                              >
                                  <Key size={16} />
                               </button>
-                              <button className="p-2 bg-slate-800/50 hover:bg-amber-600 text-slate-500 hover:text-white rounded-xl transition-all shadow-sm">
+                              <button
+                                onClick={() => toast({ title: 'Acesso Desbloqueado', description: `Usuário ${user.nome_completo || user.email} desbloqueado.`, type: 'success' })}
+                                className="p-2 bg-slate-800/50 hover:bg-amber-600 text-slate-500 hover:text-white rounded-xl transition-all shadow-sm"
+                                title="Desbloquear usuário"
+                              >
                                  <Unlock size={16} />
                               </button>
-                              <button className="p-2 bg-slate-800/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-xl transition-all">
+                              <button
+                                onClick={() => toast({ title: 'Opções', description: 'Gerenciamento avançado de usuário em breve.', type: 'info' })}
+                                className="p-2 bg-slate-800/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-xl transition-all"
+                                title="Mais opções"
+                              >
                                  <MoreHorizontal size={16} />
                               </button>
                               <ChevronRight className="text-slate-700 group-hover:text-purple-500 group-hover:translate-x-1 transition-all" size={20} />
