@@ -249,32 +249,39 @@ export function PublicAnamnesisPage() {
               }
 
               // Salvar na tabela anamneses (registro completo)
-              const { error: anamErr } = await supabase.from('anamneses').insert({
+              const insertData = {
                 paciente_id: patientId,
-                queixa_principal: formState.queixa,
-                alergias,
-                historico_medico: historico,
-                medicamentos_uso: formState.medicamentos,
-                habitos: habitos as any,
-                dados_extras: {
+                queixa_principal: formState.queixa || null,
+                alergias: alergias || null,
+                historico_medico: historico || null,
+                medicamentos_uso: formState.medicamentos || null,
+                habitos: JSON.parse(JSON.stringify(habitos)),
+                dados_extras: JSON.parse(JSON.stringify({
                   alergia_medicamentos: formState.alergiaMedicamentos,
                   problemas_cardiacos: formState.problemasCardiacos,
                   diabetes_hipertensao: formState.diabetesHipertensao,
-                } as any,
+                })),
                 preenchido_em: new Date().toISOString(),
                 token_link: token || null,
-              } as any)
+              }
 
-              if (anamErr) throw anamErr
+              const { error: anamErr } = await supabase
+                .from('anamneses')
+                .insert(insertData as any)
 
-              // Também atualizar campos resumidos no paciente
+              if (anamErr) {
+                console.error('Erro Supabase anamnese:', anamErr)
+                throw new Error(anamErr.message)
+              }
+
+              // Atualizar timestamp do paciente (não-crítico, ignora erro)
               await supabase.from('pacientes').update({
                 updated_at: new Date().toISOString()
-              } as any).eq('id', patientId)
+              } as any).eq('id', patientId).then(() => {}, () => {})
 
               setIsSubmitted(true);
-            } catch (err) {
-              alert('Erro ao enviar anamnese. Tente novamente.');
+            } catch (err: any) {
+              alert('Erro ao enviar anamnese: ' + (err?.message || 'Tente novamente.'));
             } finally {
               setIsSubmitting(false);
             }
