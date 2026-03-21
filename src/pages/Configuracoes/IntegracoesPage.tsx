@@ -52,14 +52,14 @@ export function IntegracoesPage() {
     // Carregar status WhatsApp
     const { data: instancias } = await supabase
       .from('whatsapp_instancias')
-      .select('status, numero')
+      .select('status, numero' as any)
       .eq('clinica_id', clinicaId)
       .eq('status', 'conectado')
       .limit(1)
 
     if (instancias && instancias.length > 0) {
       setWhatsappStatus('conectado')
-      setWhatsappNumero(instancias[0].numero || '')
+      setWhatsappNumero((instancias[0] as any).numero || '')
     } else {
       setWhatsappStatus('desconectado')
     }
@@ -71,8 +71,8 @@ export function IntegracoesPage() {
       .eq('id', clinicaId)
       .single()
 
-    if (clinica?.configuracoes?.ia) {
-      setIAConfig(prev => ({ ...prev, ...clinica.configuracoes.ia }))
+    if ((clinica?.configuracoes as any)?.ia) {
+      setIAConfig(prev => ({ ...prev, ...(clinica!.configuracoes as any).ia }))
     }
   }, [clinicaId])
 
@@ -84,7 +84,7 @@ export function IntegracoesPage() {
     setSavingIA(true)
     const { data: current } = await supabase
       .from('clinicas').select('configuracoes').eq('id', clinicaId).single()
-    const merged = { ...(current?.configuracoes || {}), ia: iaConfig }
+    const merged = { ...((current?.configuracoes as any) || {}), ia: iaConfig }
     const { error } = await supabase.from('clinicas').update({ configuracoes: merged }).eq('id', clinicaId)
     setSavingIA(false)
     if (error) {

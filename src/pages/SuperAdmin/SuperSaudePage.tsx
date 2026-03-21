@@ -181,7 +181,7 @@ export function SuperSaudePage() {
                  <AlertCircle size={16} className="text-red-400" /> Recent Errors (Production)
               </h3>
               <div className="space-y-3">
-                 {errorLogs.map(log => (
+                 {errorLogs.map((log: any) => (
                     <div key={log.id} className="bg-red-500/5 border border-red-500/10 p-5 rounded-3xl hover:border-red-500/30 transition-all cursor-pointer group">
                        <div className="flex justify-between items-start mb-2">
                           <Badge className="bg-red-500/10 text-red-500 border-none text-[8px] font-black py-0.5">{log.service.toUpperCase()}</Badge>

@@ -309,12 +309,12 @@ export function InadimplenciaReport() {
                   <Tooltip
                     contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 40px -10px rgb(0 0 0 / 0.1)', padding: '16px' }}
                     labelStyle={{ fontWeight: 900, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b' }}
-                    formatter={(value: any, name: string) => [
+                    formatter={((value: any, name: string) => [
                       name === 'valor'
                         ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
                         : value,
                       name === 'valor' ? 'Valor' : 'Quantidade',
-                    ]}
+                    ]) as any}
                   />
                   <Bar dataKey="valor" radius={[12, 12, 0, 0]}>
                     {agingBuckets.map((entry, index) => (

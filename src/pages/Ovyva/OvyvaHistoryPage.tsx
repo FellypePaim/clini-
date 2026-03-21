@@ -55,16 +55,27 @@ export function OvyvaHistoryPage() {
       }))
       setConversas(mapped)
 
-      // Calcular KPIs
+      // Calcular KPIs reais
       const total = mapped.length
       const resolvidosIA = mapped.filter(c => c.status === 'ia_ativa' || c.status === 'concluido').length
       const pct = total > 0 ? Math.round((resolvidosIA / total) * 100) : 0
 
+      // Buscar leads gerados a partir do OVYVA
+      const { count: leadsCount } = await supabase
+        .from('leads')
+        .select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId)
+        .eq('origem', 'WhatsApp OVYVA')
+
+      // Calcular tempo médio entre mensagens
+      const totalMsgs = mapped.reduce((acc, c) => acc + (c.total_mensagens || 0), 0)
+      const avgMsgsPerConv = total > 0 ? Math.round(totalMsgs / total) : 0
+
       setKpis({
         total,
         resolvidosIA: pct,
-        tempoMedio: '< 5s',
-        leadsGerados: 0,
+        tempoMedio: avgMsgsPerConv > 0 ? `~${avgMsgsPerConv} msgs/conv` : '—',
+        leadsGerados: leadsCount ?? 0,
       })
     }
     setLoading(false)

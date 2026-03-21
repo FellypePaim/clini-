@@ -47,7 +47,7 @@ export function ProcedimentosPieChart() {
     if (!clinicaId) return
     setLoading(true)
     const mesAtual = new Date()
-    const inicioMes = new Date(mesAtual.getFullYear(), mesAtual.getMonth() - 1, 1).toISOString()
+    const inicioMes = new Date(mesAtual.getFullYear(), mesAtual.getMonth(), mesAtual.getDate() - 28).toISOString()
 
     const { data } = await supabase
       .from('consultas')

@@ -25,7 +25,7 @@ export function SegurancaPage() {
     try {
       // Busca logs de acesso da tabela de audit (se existir) ou auth.audit_log_entries via RPC
       const { data } = await supabase
-        .from('ai_usage_logs')
+        .from('ai_usage_logs' as any)
         .select('id, clinica_id, created_at, action, tokens_used')
         .eq('clinica_id', user?.clinicaId || '')
         .order('created_at', { ascending: false })

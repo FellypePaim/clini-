@@ -65,9 +65,12 @@ export function SuperWhatsAppPage() {
               <RefreshCw size={18} /> Sync All
            </button>
            <button
-             onClick={() => toast({ title: 'Ação Restrita', description: 'O restart do cluster requer acesso SSH ao servidor Evolution API. Execute via terminal.', type: 'info' })}
-             className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-600/20 transition-all">
+             disabled
+             onClick={() => toast({ title: 'Em desenvolvimento', description: 'O restart do cluster via painel ainda est\u00e1 em desenvolvimento. Execute via terminal SSH.', type: 'info' })}
+             className="flex items-center gap-2 px-6 py-3 bg-emerald-600/50 text-white/60 font-black rounded-2xl shadow-xl transition-all cursor-not-allowed"
+             title="Em desenvolvimento - requer acesso SSH">
               RESTART CLUSTER
+              <span className="text-[8px] font-black bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30 uppercase tracking-widest">Dev</span>
            </button>
         </div>
       </div>
@@ -127,7 +130,7 @@ export function SuperWhatsAppPage() {
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-800/30">
-                    {instances.map((item) => (
+                    {instances.map((item: any) => (
                        <tr key={item.instance} className="hover:bg-slate-800/40 transition-colors group">
                           <td className="px-8 py-5">
                              <div className="flex flex-col">
@@ -158,18 +161,21 @@ export function SuperWhatsAppPage() {
                           <td className="px-8 py-5 text-right">
                              <div className="flex items-center justify-end gap-2 outline-none">
                                 <button
-                                  onClick={() => toast({ title: 'Conversas', description: `Abrindo histórico de ${item.clinica}.`, type: 'info' })}
-                                  className="p-2 bg-slate-900/50 hover:bg-emerald-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Ver conversas">
+                                  disabled
+                                  onClick={() => toast({ title: 'Em desenvolvimento', description: 'Visualiza\u00e7\u00e3o de conversas ainda em desenvolvimento.', type: 'info' })}
+                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Ver conversas (em desenvolvimento)">
                                    <MessageSquare size={14} />
                                 </button>
                                 <button
-                                  onClick={() => toast({ title: 'QR Code', description: `Gerando QR para reconexão de ${item.instance}.`, type: 'info' })}
-                                  className="p-2 bg-slate-900/50 hover:bg-slate-700 text-slate-500 hover:text-white rounded-lg transition-all" title="Gerar QR Code">
+                                  disabled
+                                  onClick={() => toast({ title: 'Em desenvolvimento', description: 'Gera\u00e7\u00e3o de QR Code via painel ainda em desenvolvimento.', type: 'info' })}
+                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Gerar QR Code (em desenvolvimento)">
                                    <QrCode size={14} />
                                 </button>
                                 <button
-                                  onClick={() => toast({ title: 'Desconectado', description: `Instância ${item.instance} desconectada.`, type: 'error' })}
-                                  className="p-2 bg-slate-900/50 hover:bg-red-600 text-slate-500 hover:text-white rounded-lg transition-all" title="Desconectar">
+                                  disabled
+                                  onClick={() => toast({ title: 'Em desenvolvimento', description: 'Desconex\u00e3o via painel ainda em desenvolvimento.', type: 'info' })}
+                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Desconectar (em desenvolvimento)">
                                    <Power size={14} />
                                 </button>
                              </div>

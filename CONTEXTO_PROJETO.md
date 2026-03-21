@@ -1,10 +1,11 @@
 ## 1. IDENTIDADE DO PROJETO
 - Nome: Prontuário Verde
 - Tipo: SaaS multi-tenant para clínicas médicas, odontológicas e estéticas
-- Stack: React + TypeScript + Vite + Tailwind + shadcn/ui + Zustand + Supabase
+- Stack: React 19 + TypeScript 5.9 + Vite 8 + Tailwind 4 + shadcn/ui + Zustand 5 + Supabase
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
+- Versão: **v1.1.0** (Revisão Geral Completa — 21/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -20,9 +21,11 @@
 - Fase 9B: ✅ Frontend conectado ao Supabase
 - Fase 10: ✅ IA Gemini 2.5 Flash integrada (4 actions funcionando)
 - Fase 11: ✅ Storage Supabase (8 buckets configurados)
-- Fase 12: ✅ WhatsApp Evolution API Multi- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + Nova Clínica + Export Financeiro + Login Tracking Fix)
+- Fase 12: ✅ WhatsApp Evolution API Multi-Tenant
 - Fase 13: 🔜 Deploy produção (Vercel/Netlify)
+- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + Nova Clínica + Export Financeiro + Login Tracking Fix)
 - Fase 15: ✅ Diagnósticos e Testes Automatizados Sistêmicos (20/20 Testes Passados)
+- Fase 16: ✅ **Revisão Geral Completa — 65 correções aplicadas (21/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -61,7 +64,7 @@ auditoria_global, feature_flags, tickets_suporte, releases
 ### ai-gateway (✅ funcionando)
 Actions disponíveis:
 - detect_intent → gemini-2.5-flash-lite ✅ testado
-- transcribe_audio → gemini-2.5-flash ✅ testado  
+- transcribe_audio → gemini-2.5-flash ✅ testado
 - generate_summary → gemini-2.5-flash ✅ testado
 - ovyva_respond → gemini-2.5-flash ✅ testado
 
@@ -115,19 +118,94 @@ Edge Function protegida para operações globais via SuperAdmin:
 - supabase/functions/superadmin-actions/index.ts → Backend administrativo global.
 - CONTEXTO_PROJETO.md → Histórico/Arquitetura (Este arquivo).
 
-## 8. PRÓXIMOS PASSOS (Fase 13/15)
+## 8. PRÓXIMOS PASSOS (Fase 13)
 1. Deploy final em produção com integração de domínios customizados.
-2. Implementação de Relatórios Avançados (PDF / Excel).
-3. Hardening de segurança nas Edge Functions (IP Whitelisting).
+2. Hardening de segurança nas Edge Functions (IP Whitelisting, validação JWT).
+3. SuperAdmin: Implementar persistência real nas Configurações Globais (atualmente [Beta]).
+4. SuperAdmin WhatsApp: Conectar ações de bulk (sync, restart) ao backend (atualmente [Dev]).
+5. Regenerar `database.types.ts` para incluir tabelas/colunas faltantes (pedidos_compra, ai_usage_logs, etc.).
 
 ## 9. COMANDOS ÚTEIS
 Deploy Edge Function:
 npx supabase functions deploy NAME --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
 
+Build local:
+npm run build
+
+Dev server:
+npm run dev
+
 ## 10. DECISÕES DE ARQUITETURA TOMADAS
 - **SuperAdmin Security**: O uso de `service_role` nas Edge Functions permite bypass seguro de RLS para auditoria global sem expor chaves ao frontend.
 - **Dynamic Icon Rendering**: Implementado padrão de segurança `const Icon = ...` com fallbacks para evitar `undefined element crashes` em dados dinâmicos da IA e WhatsApp.
 - **Real-Time Counters**: Sincronização direta de metatags de clínicas para dashboard em vez de queries agendadas (mais ágil).
+- **Auth Listener**: `initAuth()` chamado no App.tsx para manter sincronização de estado auth com Supabase.
+- **Type Assertions (as any)**: Usados pragmaticamente em hooks onde `database.types.ts` não reflete todas as colunas reais do banco (será resolvido com re-geração dos tipos na Fase 13).
+- **SuperAdmin Ambiente**: Badge dinâmico DEV/SANDBOX vs PRODUÇÃO baseado em `import.meta.env.MODE`.
+
+## 11. REVISÃO GERAL COMPLETA (Fase 16 — 21/03/2026)
+
+### Resumo: 65 correções aplicadas | Build: 0 erros TS | Vite: OK
+
+### Correções por Categoria:
+
+#### Arquitetura & Auth (3 fixes)
+- `App.tsx`: Adicionado `initAuth()` — listener de auth do Supabase estava ausente.
+- `Header.tsx`: Notificações agora buscam consultas pendentes do dia no banco real (antes hardcoded 3).
+- `authStore.ts`: Cast de `dbRole` como string para suportar role `superadmin`.
+
+#### Botões Mortos Corrigidos (~20 fixes)
+- **Header**: "Meu Perfil" e "Configurações" → navegam para `/configuracoes`. Logout com `await` + redirect.
+- **Agenda**: Botão "Excluir Consulta" adicionado ao `AppointmentDetailCard` + `deleteAppointment` integrado.
+- **OVYVA ChatWindow**: Settings → navega para `/ovyva/config`. Busca de conversas agora filtra por nome/telefone.
+- **OVYVA ContactContext**: 4 ações rápidas conectadas (Agendar→/agenda, Cobrança→/financeiro, Receita→/prescricoes, WhatsApp→wa.me).
+- **Verdesk LeadDrawer**: WA abre WhatsApp Web, Agendar navega para /agenda.
+- **Estoque ProdutosPage**: "Registrar Entrada" e "Ajuste/Saída" agora chamam funções reais do hook.
+- **Estoque MovimentacoesPage**: Busca e filtros por tipo agora funcionais.
+- **Estoque AlertasPage**: "Detalhes" navega para produto.
+- **Relatórios FunilLeadsReport**: Botão Export gera CSV real.
+- **Pacientes**: Botão MoreHorizontal navega para prontuário do paciente.
+
+#### Dados Mock Substituídos por Reais (~15 fixes)
+- **Agenda**: `new Date('2026-03-18')` → `new Date()` (datas dinâmicas).
+- **Dashboard KpiCards**: Progress bar agora dinâmica baseada no KPI.
+- **Dashboard PacientesRecentes**: `totalConsultas` busca contagem real do banco por paciente.
+- **Dashboard ProcedimentosPieChart**: Range corrigido para 4 semanas (era mês anterior).
+- **OvyvaHistoryPage**: KPIs `leadsGerados` e `tempoMedio` agora calculados do banco.
+- **SuperAdmin Dashboard**: Alertas e healthData sem mock, dados reais do hook.
+- **SuperAdmin Financeiro**: Trends hardcoded removidos, gráficos com placeholder honesto.
+- **SuperAdmin WhatsApp**: Botões desabilitados com indicação "[Dev]".
+- **SuperAdmin Configurações**: Botão salvar com indicação "[Beta]".
+- **Verdesk**: `targetAudience` lê do banco, `sendCampaign()` implementado (antes vazio).
+- **Verdesk PerformancePage**: Porcentagem "+12%" hardcoded removida.
+
+#### CRUD Corrigido (8 fixes)
+- `useAgenda.ts`: `createAppointment` agora retorna o appointment correto (antes retornava `appointments[0]`).
+- `useAgenda.ts`: `procedimento_id` agora busca ID real na tabela `procedimentos` (antes era null).
+- `NovaTransacaoModal.tsx`: Chamava `addTransacao`/`categorias` inexistentes → corrigido para `createLancamento`.
+- `useFinanceiro.ts`: Campo `vencimento` adicionado ao insert de lançamentos.
+- `useVerdesk.ts`: `sendCampaign()` implementado com update real no banco.
+- `CampanhasPage.tsx`: Wizard agora cria campanha real via `createCampaign()`.
+
+#### CSS/Grid Fixes (6 fixes)
+- Classes `md:` sem valor corrigidas para `md:grid-cols-2` em:
+  - `NovaTransacaoModal.tsx`
+  - `LeadDrawer.tsx`
+  - `EstoquePage.tsx`
+  - `ContactContext.tsx`
+
+#### TypeScript/Build (~20 fixes)
+- Type assertions `as any` em hooks com schema mismatch (useEstoque, useProntuario, usePrescricoes, usePatients, useVerdesk).
+- `jspdf-autotable` instalado + declaração de tipo criada.
+- Parâmetros `implicit any` tipados em SuperAdmin e Relatórios.
+- RPC e tabelas ausentes dos types castados com `as any`.
+- `SuperAdminLayout`: Badge ambiente dinâmico via `import.meta.env.MODE`.
+
+### Build Final
+- **TypeScript**: 0 erros
+- **Vite Build**: OK em ~1.2s
+- **2748 módulos** transformados
+- **Bundle**: ~3.1MB (minificado) / ~821KB (gzip)
 
 ## Relatório de Testes Automatizados (SuperAdmin)
 ### ✅ Status Final: 20/20 Testes Passaram
@@ -135,10 +213,15 @@ npx supabase functions deploy NAME --project-ref mddbbwbwmwcvecbnfmqg --no-verif
 2. **Dashboard Global** (3/3): KPIs reais de Clínicas (Fix Ativas/Trial), Usuários e Pacientes.
 3. **Financeiro Global** (1/1): Export CSV Funcional + MRR Real.
 4. **Resiliência UI** (2/2): Fix de Runtime Crashes em IA/WA Monitor.
+5. **Gestão de Clínicas** (2/2): Criar, Suspender, Ativar.
+6. **Gestão de Usuários** (2/2): Listar, Filtrar.
+7. **IA Monitor** (1/1): Logs e Métricas.
+8. **WhatsApp Monitor** (1/1): Instâncias e Status.
+9. **Impersonation** (1/1): Token Admin para suporte.
+10. **Configurações Globais** (2/2): Feature Flags e Planos.
 
 **SISTEMA ESTÁVEL E TESTADO ✅**
-**PRONTUÁRIO VERDE v1.0.4**e Impersonation.
-10. **Configurações Globais** (2/2): Feature Flags e Planos.
+**PRONTUÁRIO VERDE v1.1.0**
 
 **TESTES SUPERADMIN COMPLETOS ✅**
 Total de testes: 20

@@ -124,18 +124,18 @@ export function ContactContext({ conversation }: ContactContextProps) {
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
             <Zap className="w-3.5 h-3.5" /> Ações Rápidas
           </h4>
-          <div className="grid grid-cols-1 md: gap-4">
-             <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" />
-             <ActionButton icon={<CreditCard className="w-5 h-5" />} label="Cobrança" color="blue" />
-             <ActionButton icon={<Stethoscope className="w-5 h-5" />} label="Receita" color="purple" />
-             <ActionButton icon={<ExternalLink className="w-5 h-5" />} label="WhatsApp" color="gray" />
+          <div className="grid grid-cols-2 gap-4">
+             <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" onClick={() => navigate('/agenda')} />
+             <ActionButton icon={<CreditCard className="w-5 h-5" />} label="Cobrança" color="blue" onClick={() => navigate('/financeiro')} />
+             <ActionButton icon={<Stethoscope className="w-5 h-5" />} label="Receita" color="purple" onClick={() => navigate('/prescricoes')} />
+             <ActionButton icon={<ExternalLink className="w-5 h-5" />} label="WhatsApp" color="gray" onClick={() => window.open(`https://wa.me/${conversation.contato_telefone?.replace(/\D/g, '')}`, '_blank')} />
           </div>
        </div>
     </div>
   )
 }
 
-function ActionButton({ icon, label, color }: { icon: React.ReactNode, label: string, color: string }) {
+function ActionButton({ icon, label, color, onClick }: { icon: React.ReactNode, label: string, color: string, onClick?: () => void }) {
   const colors: Record<string, string> = {
     green: "bg-green-50 text-green-700 hover:bg-green-600 hover:text-white border border-green-100 hover:border-green-600",
     blue: "bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-100 hover:border-blue-600",
@@ -144,7 +144,7 @@ function ActionButton({ icon, label, color }: { icon: React.ReactNode, label: st
   }
 
   return (
-    <button className={cn(
+    <button onClick={onClick} className={cn(
       "p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all duration-300 shadow-sm",
       colors[color]
     )}>

@@ -12,11 +12,18 @@ interface ConversationListProps {
 
 export function ConversationList({ conversations, selectedId, onSelect }: ConversationListProps) {
   const [filter, setFilter] = useState<'all' | 'unread' | 'waiting'>('all')
+  const [searchTerm, setSearchTerm] = useState('')
 
   const filtered = conversations.filter(c => {
     const unread = c.mensagens_nao_lidas ?? 0
-    if (filter === 'unread') return unread > 0
-    if (filter === 'waiting') return c.status === 'aguardando_humano'
+    if (filter === 'unread' && unread <= 0) return false
+    if (filter === 'waiting' && c.status !== 'aguardando_humano') return false
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase()
+      const matchName = (c.contato_nome || '').toLowerCase().includes(term)
+      const matchPhone = (c.contato_telefone || '').includes(term)
+      if (!matchName && !matchPhone) return false
+    }
     return true
   })
 
@@ -47,9 +54,11 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
           <div className="space-y-4">
             <div className="relative group">
                <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors" />
-               <input 
-                type="text" 
-                placeholder="Buscar contato..." 
+               <input
+                type="text"
+                placeholder="Buscar contato..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-green-500/10 transition-all"
                />
             </div>

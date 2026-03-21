@@ -84,7 +84,7 @@ export function AppointmentCard({ appointment: apt, compact = false, onClick, on
                 {apt.horaInicio} – {apt.horaFim}
               </span>
               <span className="text-gray-300">·</span>
-              <span>{PROCEDIMENTO_LABEL[apt.procedimento]}</span>
+              <span>{PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}</span>
             </div>
 
             {/* Profissional */}
@@ -104,7 +104,7 @@ export function AppointmentCard({ appointment: apt, compact = false, onClick, on
 
         {compact && (
           <div className="text-[10px] text-gray-500 truncate">
-            {apt.horaInicio} · {PROCEDIMENTO_LABEL[apt.procedimento]}
+            {apt.horaInicio} · {PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}
           </div>
         )}
       </div>
@@ -130,7 +130,7 @@ export function AppointmentDetailCard({ appointment: apt, onClose, onStatusChang
       <div className="px-5 pt-5 pb-4" style={{ background: `${apt.profissionalCor}12` }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium text-gray-400 mb-0.5">{PROCEDIMENTO_LABEL[apt.procedimento]}</p>
+            <p className="text-xs font-medium text-gray-400 mb-0.5">{PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}</p>
             <h3 className="text-base font-bold text-gray-900">{apt.pacienteNome}</h3>
           </div>
           <span className={cn('px-2 py-1 rounded-full text-xs font-semibold', cfg.badgeBg, cfg.badgeText)}>
@@ -161,7 +161,7 @@ export function AppointmentDetailCard({ appointment: apt, onClose, onStatusChang
 
       {/* Ações rápidas de status */}
       {onStatusChange && apt.status !== 'concluido' && apt.status !== 'cancelado' && (
-        <div className="px-5 pb-5 flex gap-2">
+        <div className="px-5 pb-3 flex gap-2">
           <button
             onClick={() => onStatusChange('confirmado')}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors"
@@ -173,6 +173,18 @@ export function AppointmentDetailCard({ appointment: apt, onClose, onStatusChang
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition-colors"
           >
             <XCircle className="w-3.5 h-3.5" /> Cancelar
+          </button>
+        </div>
+      )}
+
+      {/* Botão excluir */}
+      {onDelete && (
+        <div className="px-5 pb-5">
+          <button
+            onClick={onDelete}
+            className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100 transition-colors border border-red-100"
+          >
+            <XCircle className="w-3.5 h-3.5" /> Excluir Consulta
           </button>
         </div>
       )}

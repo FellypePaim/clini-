@@ -201,7 +201,7 @@ export function DREReport() {
       body: linhasDRE,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [15, 23, 42] },
-      didParseCell: (data) => {
+      didParseCell: (data: any) => {
         const val = data.row.raw as string[]
         if (val[0] === 'RECEITAS' || val[0] === 'DESPESAS') {
           data.cell.styles.fontStyle = 'bold'
@@ -385,10 +385,10 @@ export function DREReport() {
                   <Tooltip
                     contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 40px -10px rgb(0 0 0 / 0.1)', padding: '16px' }}
                     labelStyle={{ fontWeight: 900, fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#64748b' }}
-                    formatter={(value: any, name: string) => [
+                    formatter={((value: any, name: string) => [
                       value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
                       name === 'receita' ? 'Receita' : 'Despesa',
-                    ]}
+                    ]) as any}
                   />
                   <Legend
                     iconType="circle"

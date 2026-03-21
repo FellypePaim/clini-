@@ -75,7 +75,7 @@ export function usePrescricoes() {
         conteudo: data.conteudo,
         assinatura_hash,
         status: 'ativa',
-      }).select().single()
+      } as any).select().single()
 
       if (error) throw error
       toast({ title: 'Prescrição criada', description: 'Assinada digitalmente.', type: 'success' })
@@ -90,7 +90,7 @@ export function usePrescricoes() {
   const cancelarPrescricao = useCallback(async (id: string) => {
     if (!clinicaId) return
     try {
-      const { error } = await supabase.from('prescricoes').update({ status: 'cancelada' }).eq('id', id).eq('clinica_id', clinicaId)
+      const { error } = await supabase.from('prescricoes').update({ status: 'cancelada' } as any).eq('id', id).eq('clinica_id', clinicaId)
       if (error) throw error
       setPrescricoes(prev => prev.map(p => p.id === id ? { ...p, status: 'cancelada' } : p))
       toast({ title: 'Cancelada', description: 'Prescrição cancelada.', type: 'info' })

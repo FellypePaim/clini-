@@ -133,7 +133,11 @@ export function SuperAdminLayout() {
             </button>
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ambiente:</span>
-              <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[10px] font-black border border-amber-500/20 animate-pulse">DEV / SANDBOX</span>
+              {import.meta.env.MODE === 'production' ? (
+                <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-black border border-emerald-500/20">PRODU&#199;&#195;O</span>
+              ) : (
+                <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-500 text-[10px] font-black border border-amber-500/20 animate-pulse">DEV / SANDBOX</span>
+              )}
             </div>
           </div>
 

@@ -148,12 +148,24 @@ export function useAgenda() {
           throw new Error('Já existe consulta agendada neste horário.')
         }
 
-        // Para simplificar, estamos pondo null no procedimento_id pois data.procedimento é string no Mock 
-        // e requereria buscar ID do procedimento real
+        // Buscar procedimento_id real se informado
+        let procedimentoId = null
+        if (data.procedimento) {
+          const { data: procData } = await supabase
+            .from('procedimentos')
+            .select('id')
+            .eq('clinica_id', clinicaId)
+            .ilike('nome', data.procedimento)
+            .limit(1)
+            .single()
+          if (procData) procedimentoId = procData.id
+        }
+
         const insertData = {
           clinica_id: clinicaId,
           paciente_id: data.pacienteId,
           profissional_id: data.profissionalId,
+          procedimento_id: procedimentoId,
           data_hora_inicio: dataHoraInicio,
           data_hora_fim: dataHoraFim,
           status: data.status as any,
@@ -172,11 +184,12 @@ export function useAgenda() {
 
         toast({ title: 'Sucesso', description: 'Consulta agendada.', type: 'success' })
         
-        // Dispara refetch em vez de montar manual as joins.
-        // O Realtime listener pode também pegar isso, mas chamamos para já garantir sync local se não houver listener para a prop user.
-        await getAppointments()
-        
-        return appointments[0] // Gambiarra provisória no retorno
+        // Refetch para garantir sync local com joins completas
+        const refreshed = await getAppointments()
+
+        // Retornar o appointment recém-criado pelo ID
+        const created = refreshed.find(a => a.id === ret.id)
+        return created || refreshed[0]
       } catch (err: any) {
         toast({ title: 'Atenção', description: err.message || 'Falha ao agendar', type: 'error' })
         throw err

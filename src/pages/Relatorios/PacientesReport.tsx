@@ -30,12 +30,12 @@ export function PacientesReport() {
       const { data: pacientes } = await supabase
         .from('pacientes')
         .select('id, sexo, data_nascimento, convenio, created_at')
-        .eq('clinica_id', user.clinicaId)
+        .eq('clinica_id', user.clinicaId) as any
 
       if (!pacientes) { setDados(null); return }
 
       const total = pacientes.length
-      const novosNoMes = pacientes.filter(p => p.created_at >= inicioMesStr).length
+      const novosNoMes = pacientes.filter((p: any) => p.created_at >= inicioMesStr).length
 
       // Por convênio
       const convenioMap = new Map<string, number>()

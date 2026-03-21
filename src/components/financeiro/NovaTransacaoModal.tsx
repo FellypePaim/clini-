@@ -24,7 +24,7 @@ interface NovaTransacaoModalProps {
 }
 
 export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps) {
-  const { addTransacao, categorias } = useFinanceiro()
+  const { createLancamento } = useFinanceiro()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm<FormValues>({
@@ -41,14 +41,13 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     try {
-      await addTransacao({
+      await createLancamento({
         descricao: data.descricao,
         valor: data.valor,
         tipo: data.tipo,
         status: data.status,
-        dataConsolidacao: data.dataConsolidacao,
-        formaPagamento: data.formaPagamento,
-        categoriaId: data.categoriaId || undefined,
+        categoria: data.categoriaId || 'Geral',
+        data_competencia: data.dataConsolidacao,
       })
       onClose()
     } catch (err) {
@@ -81,7 +80,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
         <form onSubmit={handleSubmit(onSubmit)} className="p-6">
           <div className="space-y-4">
             
-            <div className="grid grid-cols-1 md: gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase">Tipo</label>
                 <select 
@@ -115,7 +114,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
               {errors.descricao && <span className="text-xs text-red-500 font-medium">{errors.descricao.message}</span>}
             </div>
 
-            <div className="grid grid-cols-1 md: gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase">Valor Máximo (R$)</label>
                 <input 
@@ -139,14 +138,29 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
 
             <div className="space-y-1">
               <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
-              <select 
+              <select
                 {...register('categoriaId')}
                 className="input-base"
               >
                 <option value="">Selecione uma categoria...</option>
-                {categorias.filter(c => c.tipo === tipo).map(c => (
-                  <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
+                {tipo === 'receita' ? (
+                  <>
+                    <option value="Consulta">Consulta</option>
+                    <option value="Procedimento">Procedimento</option>
+                    <option value="Retorno">Retorno</option>
+                    <option value="Convênio">Convênio</option>
+                    <option value="Outros">Outros</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="Fornecedor">Fornecedor</option>
+                    <option value="Aluguel">Aluguel</option>
+                    <option value="Salários">Salários</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Equipamentos">Equipamentos</option>
+                    <option value="Outros">Outros</option>
+                  </>
+                )}
               </select>
             </div>
 

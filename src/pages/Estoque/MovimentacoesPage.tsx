@@ -40,12 +40,22 @@ export function MovimentacoesPage() {
   const [showNovaRegra, setShowNovaRegra] = useState(false)
   const [novaRegra, setNovaRegra] = useState<NovaRegraForm>({ procedureName: '', productId: '', quantity: 1 })
   const [savingRegra, setSavingRegra] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterType, setFilterType] = useState<'all' | 'Entrada' | 'Saída' | 'Ajuste'>('all')
+
+  const filteredMovimentos = movimentos.filter(mov => {
+    const matchesSearch = searchTerm === '' ||
+      mov.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      mov.reason.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = filterType === 'all' || mov.type === filterType
+    return matchesSearch && matchesType
+  })
 
   const handleCriarRegra = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!novaRegra.procedureName || !novaRegra.productId) return
     setSavingRegra(true)
-    await createConsumptionRule(novaRegra.procedureName, novaRegra.productId, novaRegra.quantity)
+    await createConsumptionRule({ procedureName: novaRegra.procedureName, productId: novaRegra.productId, quantity: novaRegra.quantity, isActive: true })
     setSavingRegra(false)
     setShowNovaRegra(false)
     setNovaRegra({ procedureName: '', productId: '', quantity: 1 })
@@ -92,23 +102,32 @@ export function MovimentacoesPage() {
              <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
               <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Buscar produto ou motivo..." 
+                <input
+                  type="text"
+                  placeholder="Buscar produto ou motivo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-9 pr-3 py-1.5 text-sm outline-none bg-transparent"
                 />
               </div>
               <div className="w-px h-6 bg-slate-200 mx-2" />
-              <button className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 font-bold bg-slate-100 rounded-lg hover:bg-slate-200">
-                <Calendar size={14} /> Período
+              <button
+                onClick={() => setFilterType('all')}
+                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === 'all' ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
+                <Calendar size={14} /> Todos
               </button>
-              <button className="flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 font-bold bg-slate-100 rounded-lg hover:bg-slate-200">
-                <Filter size={14} /> Tipo
-              </button>
+              {(['Entrada', 'Saída', 'Ajuste'] as const).map(tipo => (
+                <button
+                  key={tipo}
+                  onClick={() => setFilterType(prev => prev === tipo ? 'all' : tipo)}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === tipo ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
+                  <Filter size={14} /> {tipo}
+                </button>
+              ))}
             </div>
 
             {/* Feed Chronological */}
-            {movimentos.map(mov => (
+            {filteredMovimentos.map(mov => (
               <div key={mov.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
                 <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 border-2 ${TIPO_CONFIG[mov.type].bg} ${TIPO_CONFIG[mov.type].textColors} border-transparent`}>
                    {TIPO_CONFIG[mov.type].icon}

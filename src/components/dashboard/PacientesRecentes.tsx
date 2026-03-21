@@ -42,13 +42,21 @@ export function PacientesRecentes() {
       .limit(5)
 
     if (!error && data) {
-      setPacientes(data.map((p: any) => ({
-        id: p.id,
-        nome_completo: p.nome_completo,
-        contato: { telefone: p.whatsapp },
-        totalConsultas: 1, // Placeholder
-        ultimaConsulta: p.updated_at ? p.updated_at.split('T')[0] : null,
-      })))
+      // Buscar contagem real de consultas por paciente
+      const pacientesComConsultas = await Promise.all(data.map(async (p: any) => {
+        const { count } = await supabase
+          .from('consultas')
+          .select('*', { count: 'exact', head: true })
+          .eq('paciente_id', p.id)
+        return {
+          id: p.id,
+          nome_completo: p.nome_completo,
+          contato: { telefone: p.whatsapp },
+          totalConsultas: count ?? 0,
+          ultimaConsulta: p.updated_at ? p.updated_at.split('T')[0] : null,
+        }
+      }))
+      setPacientes(pacientesComConsultas)
     }
     setLoading(false)
   }

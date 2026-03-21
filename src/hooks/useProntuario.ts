@@ -109,13 +109,13 @@ export function useProntuario(pacienteId?: string) {
       const insertData = {
         clinica_id: clinicaId,
         paciente_id: data.pacienteId,
-        consulta_id: data.consultaId || null,
+        consulta_id: data.consultaId || '',
         profissional_id: data.profissionalId || profissionalId,
         data: data.data || new Date().toISOString().split('T')[0],
         texto: data.texto || '',
         cid10: data.cid10 || null,
         resumo_ia: data.resumoIA || null,
-      }
+      } as any
 
       const { data: ret, error } = await supabase
         .from('evolucoes')
@@ -125,15 +125,16 @@ export function useProntuario(pacienteId?: string) {
 
       if (error) throw error
 
+      const row = ret as any
       const novo: EvolutionRecord = {
-        id: ret.id,
-        pacienteId: ret.paciente_id,
-        consultaId: ret.consulta_id || '',
-        data: ret.data,
-        profissionalId: ret.profissional_id,
-        texto: ret.texto,
-        cid10: ret.cid10 || undefined,
-        resumoIA: ret.resumo_ia || undefined,
+        id: row.id,
+        pacienteId: row.paciente_id,
+        consultaId: row.consulta_id || '',
+        data: row.created_at,
+        profissionalId: row.profissional_id,
+        texto: row.texto_clinico,
+        cid10: row.cid10_codigo || undefined,
+        resumoIA: row.resumo_ia || undefined,
       }
       setEvolutions(prev => [novo, ...prev])
       return novo
@@ -192,18 +193,19 @@ export function useProntuario(pacienteId?: string) {
           profissional_id: profissionalId,
           data: new Date().toISOString().split('T')[0],
           zonas: zones,
-        })
+        } as any)
         .select()
         .single()
 
       if (error) throw error
 
+      const hRow = ret as any
       const nova: HarmonizationSession = {
-        id: ret.id,
-        pacienteId: ret.paciente_id,
-        data: ret.data,
-        profissionalId: ret.profissional_id,
-        zones: ret.zonas || [],
+        id: hRow.id,
+        pacienteId: hRow.paciente_id,
+        data: hRow.data,
+        profissionalId: hRow.profissional_id,
+        zones: hRow.zonas || [],
       }
       setSessions(prev => [nova, ...prev])
       return nova
@@ -229,23 +231,24 @@ export function useProntuario(pacienteId?: string) {
           paciente_id: pid,
           profissional_id: profissionalId,
           data: new Date().toISOString().split('T')[0],
-          itens: items,
+          itens: JSON.parse(JSON.stringify(items)) as any,
           assinada: true,
           qr_code: qrCode,
-        })
+        } as any)
         .select()
         .single()
 
       if (error) throw error
 
+      const pRow = ret as any
       const nova: Prescription = {
-        id: ret.id,
-        pacienteId: ret.paciente_id,
-        profissionalId: ret.profissional_id,
-        data: ret.data,
-        itens: ret.itens || [],
-        assinada: ret.assinada,
-        qrCode: ret.qr_code,
+        id: pRow.id,
+        pacienteId: pRow.paciente_id,
+        profissionalId: pRow.profissional_id,
+        data: pRow.data,
+        itens: pRow.itens || [],
+        assinada: pRow.assinada,
+        qrCode: pRow.qr_code,
       }
       setPrescriptions(prev => [nova, ...prev])
       return nova

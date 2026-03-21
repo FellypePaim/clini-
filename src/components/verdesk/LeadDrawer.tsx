@@ -118,7 +118,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/50">
           
           {/* Quick Actions & Status */}
-          <div className="grid grid-cols-1 md: gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 block">Estágio Atual</span>
               <select
@@ -135,13 +135,15 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
             <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
               <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ações</span>
               <div className="flex gap-2">
-                <button 
+                <button
+                  onClick={() => window.open(`https://wa.me/${lead.phone?.replace(/\D/g, '')}`, '_blank')}
                   className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-emerald-50 text-emerald-700 font-semibold text-xs rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-colors"
                   title="Abrir WhatsApp"
                 >
                   <MessageSquare size={14} /> WA
                 </button>
-                <button 
+                <button
+                  onClick={() => { onClose(); window.location.href = '/agenda' }}
                   className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-indigo-50 text-indigo-700 font-semibold text-xs rounded-lg border border-indigo-100 hover:bg-indigo-100 transition-colors"
                   title="Agendar Consulta"
                 >
@@ -167,7 +169,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
                 <User size={16} className="text-slate-400" /> Detalhes do Lead
               </h3>
             </div>
-            <div className="p-4 grid grid-cols-1 md: gap-y-4 gap-x-6 text-sm">
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-sm">
               <div>
                 <span className="block text-xs font-medium text-slate-500 mb-1">Valor Estimado</span>
                 <span className="font-bold text-slate-800">

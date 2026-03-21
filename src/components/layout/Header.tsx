@@ -1,5 +1,5 @@
 import React from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Bell,
   Search,
@@ -20,6 +20,7 @@ import {
   Menu,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 
 // ─── Mapa de rota → breadcrumb ────────────────────────
@@ -51,9 +52,29 @@ interface HeaderProps {
 
 export function Header({ sidebarWidth, onMenuClick }: HeaderProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const [showUserMenu, setShowUserMenu] = React.useState(false)
-  const [notifications] = React.useState(3)
+  const [notifications, setNotifications] = React.useState(0)
+
+  // Carregar contagem de notificações reais (consultas pendentes hoje)
+  React.useEffect(() => {
+    if (!user?.clinicaId) return
+    const loadNotifications = async () => {
+      const hoje = new Date()
+      const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
+      const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
+      const { count } = await supabase
+        .from('consultas')
+        .select('*', { count: 'exact', head: true })
+        .eq('clinica_id', user.clinicaId)
+        .eq('status', 'agendado')
+        .gte('data_hora_inicio', inicioHoje)
+        .lt('data_hora_inicio', fimHoje)
+      setNotifications(count ?? 0)
+    }
+    loadNotifications()
+  }, [user?.clinicaId])
 
   const currentRoute = Object.entries(ROUTE_INFO).find(([path]) =>
     location.pathname.startsWith(path)
@@ -149,14 +170,16 @@ export function Header({ sidebarWidth, onMenuClick }: HeaderProps) {
                 </div>
                 <div className="py-1">
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 
+                    onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
                                hover:bg-gray-50 hover:text-gray-900 transition-colors"
                   >
                     <User className="w-4 h-4" />
                     Meu Perfil
                   </button>
                   <button
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 
+                    onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
                                hover:bg-gray-50 hover:text-gray-900 transition-colors"
                   >
                     <Settings className="w-4 h-4" />
@@ -166,7 +189,7 @@ export function Header({ sidebarWidth, onMenuClick }: HeaderProps) {
                 <div className="border-t border-gray-100 py-1">
                   <button
                     id="header-logout"
-                    onClick={logout}
+                    onClick={async () => { await logout(); navigate('/login') }}
                     className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 
                                hover:bg-red-50 transition-colors"
                   >

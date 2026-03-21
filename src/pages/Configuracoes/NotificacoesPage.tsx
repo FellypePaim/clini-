@@ -50,8 +50,8 @@ export function NotificacoesPage() {
       .eq('id', clinicaId)
       .single()
 
-    if (data?.configuracoes?.notificacoes) {
-      setConfig(prev => ({ ...prev, ...data.configuracoes.notificacoes }))
+    if ((data?.configuracoes as any)?.notificacoes) {
+      setConfig(prev => ({ ...prev, ...(data!.configuracoes as any).notificacoes }))
     }
     setIsLoading(false)
   }, [clinicaId])
@@ -63,17 +63,17 @@ export function NotificacoesPage() {
     const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
 
-    const { error } = await supabase.rpc('update_clinica_config', {
+    const { error } = await supabase.rpc('update_clinica_config' as any, {
       p_clinica_id: clinicaId,
       p_path: 'notificacoes',
       p_value: newConfig,
-    }).catch(() => ({ error: null }))
+    } as any).then((res: any) => res, () => ({ error: null }))
 
     // Fallback: update direto no campo configuracoes
     if (error) {
       const { data: current } = await supabase
         .from('clinicas').select('configuracoes').eq('id', clinicaId).single()
-      const merged = { ...(current?.configuracoes || {}), notificacoes: newConfig }
+      const merged = { ...((current?.configuracoes as any) || {}), notificacoes: newConfig }
       await supabase.from('clinicas').update({ configuracoes: merged }).eq('id', clinicaId)
     }
 
@@ -92,7 +92,7 @@ export function NotificacoesPage() {
       usuario: config.smtp_usuario,
       senha: config.smtp_senha,
     }
-    const merged = { ...(current?.configuracoes || {}), smtp: smtpData }
+    const merged = { ...((current?.configuracoes as any) || {}), smtp: smtpData }
     const { error } = await supabase.from('clinicas').update({ configuracoes: merged }).eq('id', clinicaId)
     setIsSavingSmtp(false)
     if (error) {

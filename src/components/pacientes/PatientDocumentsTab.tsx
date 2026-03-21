@@ -29,8 +29,8 @@ export function PatientDocumentsTab({ pacienteId }: PatientDocumentsTabProps) {
   const loadFiles = async () => {
     try {
       setIsLoading(true)
-      const data = await listPatientFiles('pacientes-documentos', clinicaId, pacienteId)
-      const exames = await listPatientFiles('pacientes-exames', clinicaId, pacienteId)
+      const data = await listPatientFiles('pacientes-documentos', clinicaId || '', pacienteId)
+      const exames = await listPatientFiles('pacientes-exames', clinicaId || '', pacienteId)
       // Merge all buckets
       setFiles([...data, ...exames].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
     } catch (e: any) {

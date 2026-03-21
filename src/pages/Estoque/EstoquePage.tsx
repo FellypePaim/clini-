@@ -73,7 +73,7 @@ export function EstoquePage() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 md: gap-4 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between mb-2 relative z-10">
               <span className="text-sm font-semibold text-slate-500">Itens Cadastrados</span>
@@ -138,7 +138,7 @@ export function EstoquePage() {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 md: gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {alerts.slice(0, 3).map((product) => (
                 <div key={product.id} className={`p-4 rounded-xl border ${product.currentStock === 0 ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
                   <div className="flex justify-between items-start mb-2">

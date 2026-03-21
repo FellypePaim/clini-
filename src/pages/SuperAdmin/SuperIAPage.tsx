@@ -105,7 +105,7 @@ export function SuperIAPage() {
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-800/30">
-                    {actions.map((item) => (
+                    {actions.map((item: any) => (
                        <tr key={item.action} className="hover:bg-slate-800/40 transition-colors group">
                           <td className="px-8 py-5">
                              <div className="flex items-center gap-4">

@@ -33,7 +33,7 @@ const formVazio: ProdutoForm = {
 }
 
 export function ProdutosPage() {
-  const { getProducts, createProduct, updateProduct, loadProducts, isLoading } = useEstoque()
+  const { getProducts, createProduct, updateProduct, loadProducts, isLoading, registerEntry, registerExit } = useEstoque()
   const products = getProducts()
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -238,10 +238,26 @@ export function ProdutosPage() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-2 gap-3 mb-8">
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors">
+                <button
+                  onClick={() => {
+                    const qty = prompt('Quantidade a registrar como entrada:')
+                    if (qty && Number(qty) > 0) {
+                      registerEntry(selectedProduct.id, Number(qty), 'Entrada manual', 'Operador')
+                      setSelectedProduct(null)
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors">
                   <TrendingUp size={16} /> Registrar Entrada
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-700 font-bold text-sm rounded-xl border border-red-200 hover:bg-red-100 transition-colors">
+                <button
+                  onClick={() => {
+                    const qty = prompt('Quantidade a registrar como saída/ajuste:')
+                    if (qty && Number(qty) > 0) {
+                      registerExit(selectedProduct.id, Number(qty), 'Ajuste/Saída manual', 'Operador')
+                      setSelectedProduct(null)
+                    }
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-700 font-bold text-sm rounded-xl border border-red-200 hover:bg-red-100 transition-colors">
                   <TrendingDown size={16} /> Ajuste / Saída
                 </button>
               </div>

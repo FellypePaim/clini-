@@ -50,17 +50,9 @@ export function SuperDashboardPage() {
     { label: 'Consultas Hoje', value: stats?.appointmentsToday || '0', icon: Stethoscope, color: 'text-amber-400', bg: 'bg-amber-400/10' },
   ]
 
-  const alerts = [
-    { id: 1, type: 'error', clinica: 'SISTEMA', msg: 'Monitoramento de rotas ativo', time: 'Agora' },
-    { id: 2, type: 'success', clinica: 'INFRA', msg: 'Banco de dados sincronizado', time: 'Há 1 min' },
-  ]
+  const alerts: { id: number; type: string; clinica: string; msg: string; time: string }[] = stats?.alerts || []
 
-  const healthData = [
-      { name: 'Supabase Auth', status: 'Operacional', latency: '42ms', uptime: '99.98%' },
-      { name: 'Gemini (IA)', status: 'Operacional', latency: '1.2s', uptime: '98.50%' },
-      { name: 'Evolution API', status: 'Operacional', latency: '150ms', uptime: '95.20%' },
-      { name: 'Storage', status: 'Operacional', latency: '150ms', uptime: '100%' },
-  ]
+  const healthData: { name: string; status: string; latency: string; uptime: string }[] = stats?.healthData || []
 
   return (
     <div className="space-y-10">
@@ -130,7 +122,7 @@ export function SuperDashboardPage() {
                               <span className="font-bold text-slate-300 group-hover:text-purple-400 transition-colors">{row.nome}</span>
                            </div>
                         </td>
-                        <td className="px-6 py-4 font-bold text-slate-500">—</td>
+                        <td className="px-6 py-4 font-bold text-slate-500">{row.pacientes ?? '—'}</td>
                         <td className="px-6 py-4">
                            <Badge className={cn("text-[9px] font-black border-none", row.status_plano === 'suspensa' ? 'bg-red-500/10 text-red-500' : row.status_plano === 'trial' ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500')}>
                              {(row.status_plano || 'ativo').toUpperCase()}
@@ -139,9 +131,11 @@ export function SuperDashboardPage() {
                         <td className="px-6 py-4 font-medium text-slate-400">{new Date(row.created_at).toLocaleDateString()}</td>
                         <td className="px-6 py-4 text-right">
                            <div className="flex items-center justify-end gap-2">
-                              <span className="text-xs font-black text-emerald-400">OK</span>
+                              <span className={cn("text-xs font-black", row.status_plano === 'suspensa' ? 'text-red-400' : row.status_plano === 'trial' ? 'text-blue-400' : 'text-emerald-400')}>
+                                {row.status_plano === 'suspensa' ? 'SUSPENSA' : row.status_plano === 'trial' ? 'TRIAL' : 'ATIVO'}
+                              </span>
                               <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                                 <div className="h-full bg-emerald-500 w-full" />
+                                 <div className={cn("h-full", row.status_plano === 'suspensa' ? 'bg-red-500 w-[30%]' : row.status_plano === 'trial' ? 'bg-blue-500 w-[60%]' : 'bg-emerald-500 w-full')} />
                               </div>
                            </div>
                         </td>
@@ -162,7 +156,9 @@ export function SuperDashboardPage() {
                </div>
                
                <div className="space-y-5">
-                 {healthData.map(h => (
+                 {healthData.length === 0 ? (
+                   <p className="text-[10px] font-bold text-slate-600 text-center py-4 uppercase tracking-widest">Dados de infraestrutura indispon&#237;veis</p>
+                 ) : healthData.map(h => (
                    <div key={h.name} className="flex flex-col gap-2">
                       <div className="flex justify-between items-end">
                          <span className="text-xs font-bold text-slate-400">{h.name}</span>
@@ -185,6 +181,11 @@ export function SuperDashboardPage() {
                  <AlertCircle className="text-red-400" size={16} /> Alertas Críticos
               </h3>
               <div className="space-y-3">
+                 {alerts.length === 0 && (
+                   <div className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl text-center">
+                     <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Nenhum alerta no momento</p>
+                   </div>
+                 )}
                  {alerts.map(alert => (
                    <div key={alert.id} className="bg-slate-800/40 border border-slate-700/50 p-4 rounded-2xl flex gap-4 hover:border-slate-600 transition-colors cursor-pointer group">
                       <div className={cn(
@@ -218,7 +219,7 @@ export function SuperDashboardPage() {
                      </div>
                      <div>
                         <h3 className="text-sm font-black text-white uppercase tracking-widest">Receita Mensal (MRR)</h3>
-                        <p className="text-[10px] font-bold text-indigo-400 tracking-widest">+12.5% vs mês anterior</p>
+                        <p className="text-[10px] font-bold text-indigo-400 tracking-widest">Faturamento recorrente mensal</p>
                      </div>
                   </div>
                    <div className="text-right">

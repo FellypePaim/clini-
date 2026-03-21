@@ -193,7 +193,7 @@ export function KpiCards() {
               <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
                 <div
                   className={cn('h-full rounded-full transition-all duration-500', colors.icon.replace('text-', 'bg-'))}
-                  style={{ width: '60%' }}
+                  style={{ width: `${Math.min(100, kpi.id === 'comparecimento' ? parseInt(kpi.valor) || 0 : Math.min(100, (parseInt(kpi.valor.replace(/\D/g, '')) || 0) > 0 ? 70 + Math.min(30, variacao) : 0))}%` }}
                 />
               </div>
             </article>

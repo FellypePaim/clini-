@@ -23,7 +23,7 @@ const STATUS_CONFIG: Record<CampaignStatus, { icon: React.ReactNode, color: stri
 }
 
 export function CampanhasPage() {
-  const { campaigns, sendCampaign } = useVerdesk()
+  const { campaigns, sendCampaign, createCampaign } = useVerdesk()
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(1)
 
@@ -34,11 +34,21 @@ export function CampanhasPage() {
     message: ''
   })
 
-  // Mock Handle Send
-  const handleSendOrSchedule = () => {
-    setIsWizardOpen(false)
-    setWizardStep(1)
-    // alert('Campanha salva/enviada com sucesso!')
+  const handleSendOrSchedule = async () => {
+    if (!newCampaign.title.trim() || !newCampaign.message.trim()) return
+    try {
+      await createCampaign({
+        title: newCampaign.title,
+        status: 'Rascunho',
+        targetAudience: newCampaign.targetAudience,
+        message: newCampaign.message,
+      })
+      setNewCampaign({ title: '', targetAudience: 'Todos os contatos', message: '' })
+      setIsWizardOpen(false)
+      setWizardStep(1)
+    } catch (err) {
+      console.error('Erro ao criar campanha:', err)
+    }
   }
 
   return (
@@ -175,20 +185,26 @@ export function CampanhasPage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Nome da Campanha</label>
-                    <input 
-                      type="text" 
-                      placeholder="Ex: Promoção de Inverno" 
+                    <input
+                      type="text"
+                      placeholder="Ex: Promoção de Inverno"
+                      value={newCampaign.title}
+                      onChange={e => setNewCampaign(prev => ({ ...prev, title: e.target.value }))}
                       className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Audiência (Segmentação)</label>
-                    <select className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                      <option>Todos os contatos na base</option>
-                      <option>Pacientes sem retorno &gt; 6 meses</option>
-                      <option>Aniversariantes do mês</option>
-                      <option>Procedimento: Botox</option>
-                      <option>Estágio: Perdido</option>
+                    <select
+                      value={newCampaign.targetAudience}
+                      onChange={e => setNewCampaign(prev => ({ ...prev, targetAudience: e.target.value }))}
+                      className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    >
+                      <option value="Todos os contatos">Todos os contatos na base</option>
+                      <option value="Sem retorno > 6 meses">Pacientes sem retorno &gt; 6 meses</option>
+                      <option value="Aniversariantes do mês">Aniversariantes do mês</option>
+                      <option value="Procedimento: Botox">Procedimento: Botox</option>
+                      <option value="Estágio: Perdido">Estágio: Perdido</option>
                     </select>
                   </div>
                   <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-xl flex items-start gap-3">
@@ -206,11 +222,12 @@ export function CampanhasPage() {
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Mensagem do WhatsApp</label>
                     <div className="relative">
-                      <textarea 
+                      <textarea
                         rows={6}
                         placeholder="Olá {{nome}}, temos uma novidade..."
                         className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none resize-none bg-slate-50"
-                        defaultValue="Olá {{nome}}! Tudo bem? Passando para avisar que a nossa agenda de dezembro já está aberta. Gostaria de reservar um horário?"
+                        value={newCampaign.message}
+                        onChange={e => setNewCampaign(prev => ({ ...prev, message: e.target.value }))}
                       />
                       <div className="absolute right-3 bottom-3 flex gap-2">
                          <button className="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-2 py-1 rounded">{"{{nome}}"}</button>

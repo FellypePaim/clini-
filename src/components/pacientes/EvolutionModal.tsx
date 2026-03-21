@@ -51,7 +51,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
 
   const handleTranscribe = async () => {
     setIsTranscribing(true)
-    const text = await transcribeAudio()
+    const text = await transcribeAudio('')
     setContent(prev => prev + (prev ? '<br/>' : '') + text)
     setIsTranscribing(false)
   }
@@ -84,10 +84,9 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
     // Automação de estoque: Processa o procedimento para baixar materiais
     if (appointment.procedimento) {
       await processProcedure(
-        appointment.procedimento, 
-        appointment.profissionalNome, 
-        appointment.pacienteId,
-        appointment.id
+        appointment.procedimento,
+        appointment.profissionalNome,
+        appointment.pacienteId
       )
     }
 

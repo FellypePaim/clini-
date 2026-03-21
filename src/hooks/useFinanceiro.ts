@@ -86,6 +86,7 @@ export function useFinanceiro() {
     try {
       const { error } = await supabase.from('lancamentos').insert({
         clinica_id: clinicaId,
+        vencimento: data.data_competencia,
         ...data,
       })
       if (error) throw error

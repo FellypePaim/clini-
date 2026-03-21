@@ -191,7 +191,7 @@ export function useEstoque() {
         clinica_id: clinicaId,
         produto_id: productId,
         produto_nome: product.name,
-        tipo: 'Entrada',
+        tipo: 'entrada',
         quantidade: quantity,
         motivo: reason,
         responsavel: responsible,
@@ -226,7 +226,7 @@ export function useEstoque() {
         clinica_id: clinicaId,
         produto_id: productId,
         produto_nome: product.name,
-        tipo: 'Saída',
+        tipo: 'saida',
         quantidade: quantity,
         motivo: reason,
         responsavel: responsible,
@@ -255,7 +255,7 @@ export function useEstoque() {
     if (!clinicaId) return
     try {
       const { data, error } = await supabase
-        .from('pedidos_compra')
+        .from('pedidos_compra' as any)
         .insert({
           clinica_id: clinicaId,
           produto_id: orderData.productId,
@@ -263,18 +263,19 @@ export function useEstoque() {
           quantidade: orderData.quantity,
           data_prevista: orderData.expectedDate,
           status: 'Pendente',
-        })
+        } as any)
         .select()
         .single()
       if (error) throw error
+      const d = data as any
       const novo: PurchaseOrder = {
-        id: data.id,
-        productId: data.produto_id,
-        provider: data.fornecedor,
-        quantity: data.quantidade,
-        expectedDate: data.data_prevista,
-        status: data.status,
-        createdAt: data.created_at,
+        id: d.id,
+        productId: d.produto_id,
+        provider: d.fornecedor,
+        quantity: d.quantidade,
+        expectedDate: d.data_prevista,
+        status: d.status,
+        createdAt: d.created_at,
       }
       setPurchaseOrders(prev => [novo, ...prev])
     } catch (e: any) {
@@ -290,9 +291,9 @@ export function useEstoque() {
     try {
       const { error } = await supabase
         .from('procedimento_insumos')
-        .update({ ativo: !rule.isActive })
+        .update({ ativo: !rule.isActive } as any)
         .eq('id', ruleId)
-        .eq('clinica_id', clinicaId)
+        .eq('clinica_id' as any, clinicaId)
       if (error) throw error
       setConsumptionRules(prev => prev.map(r => r.id === ruleId ? { ...r, isActive: !r.isActive } : r))
     } catch (e: any) {
@@ -312,16 +313,17 @@ export function useEstoque() {
           produto_id: rule.productId,
           quantidade: rule.quantity,
           ativo: rule.isActive,
-        })
+        } as any)
         .select()
         .single()
       if (error) throw error
+      const d = data as any
       setConsumptionRules(prev => [...prev, {
-        id: data.id,
-        procedureName: data.procedimento_nome,
-        productId: data.produto_id,
-        quantity: data.quantidade,
-        isActive: data.ativo,
+        id: d.id,
+        procedureName: d.procedimento_nome,
+        productId: d.produto_id,
+        quantity: d.quantidade,
+        isActive: d.ativo,
       }])
     } catch (e: any) {
       console.error('Erro ao criar regra:', e.message)

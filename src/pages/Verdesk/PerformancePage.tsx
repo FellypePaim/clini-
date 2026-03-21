@@ -150,7 +150,7 @@ export function PerformancePage() {
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-slate-900">{stats.totalLeads}</span>
-              <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">+12% vs mês ant.</span>
+              <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">Total acumulado</span>
             </div>
           </div>
 

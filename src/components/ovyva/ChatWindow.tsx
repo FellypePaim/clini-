@@ -138,9 +138,9 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
                  <Bot className="w-3.5 h-3.5" /> Devolver para IA
                </button>
              )}
-             <button className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-400 transition-colors">
+             <Link to="/ovyva/config" className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-400 transition-colors">
                 <Settings className="w-5 h-5" />
-             </button>
+             </Link>
           </div>
        </div>
 

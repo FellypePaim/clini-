@@ -1,9 +1,7 @@
 import React from 'react'
-import { 
-  DollarSign, 
-  TrendingUp, 
-  ArrowUpRight, 
-  ArrowDownRight, 
+import {
+  DollarSign,
+  TrendingUp,
   CreditCard,
   Calendar,
   Users,
@@ -35,10 +33,10 @@ export function SuperFinanceiroPage() {
   }, [getFinanceiroStats])
 
   const stats = [
-    { label: 'MRR Atual', value: `R$ ${(data?.mrr || 0).toLocaleString()}`, trend: '+0.0%', icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'ARR Estimado', value: `R$ ${(data?.arr || 0).toLocaleString()}`, trend: '+0.0%', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'LTV Médio', value: `R$ ${(data?.ltv || 0).toLocaleString()}`, trend: '+0.0%', icon: UserCheck, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Churn Rate', value: `${data?.churn || 0}%`, trend: '-0.0%', icon: PieChart, color: 'text-red-400', bg: 'bg-red-400/10' },
+    { label: 'MRR Atual', value: `R$ ${(data?.mrr || 0).toLocaleString()}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
+    { label: 'ARR Estimado', value: `R$ ${(data?.arr || 0).toLocaleString()}`, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+    { label: 'LTV Médio', value: `R$ ${(data?.ltv || 0).toLocaleString()}`, icon: UserCheck, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+    { label: 'Churn Rate', value: `${data?.churn || 0}%`, icon: PieChart, color: 'text-red-400', bg: 'bg-red-400/10' },
   ]
 
   const planos = data?.planos || [
@@ -70,10 +68,7 @@ export function SuperFinanceiroPage() {
   }
 
   const handleFechamento = () => {
-    toast({ title: 'Processando...', description: 'Varrendo sistema por assinaturas em aberto.', type: 'info' })
-    setTimeout(() => {
-      toast({ title: 'Fechamento Concluído', description: 'Todas as cobranças válidas enviadas e faturas geradas.', type: 'success' })
-    }, 1500)
+    toast({ title: 'Em desenvolvimento', description: 'O fechamento mensal autom\u00e1tico ainda est\u00e1 em desenvolvimento. Realize o processo manualmente pelo painel financeiro.', type: 'info' })
   }
 
   return (
@@ -112,13 +107,6 @@ export function SuperFinanceiroPage() {
                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{stat.label}</p>
                    <div className="flex items-end gap-3">
                       <span className="text-2xl font-black text-white tracking-tight">{stat.value}</span>
-                      <span className={cn(
-                        "text-[10px] font-black flex items-center gap-0.5 px-1.5 py-0.5 rounded-md",
-                        stat.trend.startsWith('+') ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500'
-                      )}>
-                        {stat.trend.startsWith('+') ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                        {stat.trend}
-                      </span>
                    </div>
                 </div>
              </div>
@@ -148,7 +136,7 @@ export function SuperFinanceiroPage() {
               </div>
 
               <div className="space-y-4">
-                 {planos.map(p => (
+                 {planos.map((p: any) => (
                    <div key={p.nome} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50 hover:bg-slate-900 transition-colors">
                       <div className="flex items-center gap-3">
                          <div className={cn("w-2 h-2 rounded-full", p.cor)} />
@@ -200,7 +188,7 @@ export function SuperFinanceiroPage() {
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-slate-800/30">
-                    {recentes.map((item) => (
+                    {recentes.map((item: any) => (
                        <tr key={item.id} className="hover:bg-slate-800/40 transition-colors group cursor-pointer">
                           <td className="px-8 py-5">
                              <div className="flex flex-col">
@@ -249,15 +237,8 @@ export function SuperFinanceiroPage() {
                     <span className="text-xs font-bold text-emerald-400">+9% projetado</span>
                  </div>
                  
-                 <div className="mt-auto flex items-end justify-between gap-1 h-24">
-                    {Array.from({ length: 30 }).map((_, i) => (
-                       <div 
-                         key={i} 
-                         className="flex-1 bg-purple-500/40 rounded-t-sm hover:bg-purple-500 transition-all cursor-help" 
-                         style={{ height: `${20 + i * 2 + Math.random() * 10}%` }}
-                         title={`Dia ${i+1}: R$ ${(i*1.2 + 30).toFixed(1)}K`}
-                       />
-                    ))}
+                 <div className="mt-auto flex items-center justify-center h-24 border border-dashed border-purple-500/20 rounded-2xl">
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Dados do gr&#225;fico indispon&#237;veis &mdash; aguardando hist&#243;rico real</span>
                  </div>
               </div>
               <BarChart3 className="absolute -bottom-10 -right-10 w-48 h-48 text-purple-500/5 group-hover:scale-110 transition-transform duration-700" />

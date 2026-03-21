@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
   AlertTriangle,
@@ -14,6 +14,7 @@ import { Badge } from '../../components/ui/Badge'
 import type { Product } from '../../types/estoque'
 
 export function AlertasPage() {
+  const navigate = useNavigate()
   const { products, getAlerts, generatePurchaseOrder, purchaseOrders } = useEstoque()
   const alerts = getAlerts()
 
@@ -185,7 +186,9 @@ export function AlertasPage() {
                         <span>Entrega Prevista: {new Date(order.expectedDate).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <button className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors">
+                    <button
+                      onClick={() => navigate(`/estoque/produtos?highlight=${order.productId}`)}
+                      className="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors">
                       Detalhes
                     </button>
                   </div>

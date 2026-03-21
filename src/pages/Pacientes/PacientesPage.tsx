@@ -207,8 +207,12 @@ export function PacientesPage() {
                         ) : '—'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <button className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
+                    <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => navigate(`/pacientes/${p.id}`)}
+                        className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
+                        title="Ver prontuário"
+                      >
                         <MoreHorizontal className="w-5 h-5" />
                       </button>
                     </td>

@@ -100,7 +100,7 @@ export function CampanhasReport() {
         .sort((a, b) => {
           const parse = (s: string) => {
             const [m, y] = s.split('/')
-            return new Date(`20${y}`, ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'].indexOf(m.toLowerCase()), 1)
+            return new Date(parseInt(`20${y}`), ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'].indexOf(m.toLowerCase()), 1)
           }
           return parse(a[0]).getTime() - parse(b[0]).getTime()
         })

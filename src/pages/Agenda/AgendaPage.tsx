@@ -35,7 +35,7 @@ function getWeekLabel(date: Date): string {
 
 export function AgendaPage() {
   const [view, setView]       = useState<AgendaView>('semana')
-  const [date, setDate]       = useState(new Date('2026-03-18'))
+  const [date, setDate]       = useState(new Date())
   const [profFiltro, setProfFiltro] = useState<string>('todos')
   const [isModalOpen, setIsModalOpen]     = useState(false)
   const [modalInitialDate, setModalInitialDate]   = useState<string>()
@@ -43,7 +43,7 @@ export function AgendaPage() {
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
   const [detailPos, setDetailPos]         = useState({ x: 0, y: 0 })
 
-  const { appointments, createAppointment, updateAppointment, getAppointmentsByDate, getAppointmentsByRange } = useAgenda()
+  const { appointments, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate, getAppointmentsByRange } = useAgenda()
 
   // ── Lista de profissionais únicos (derivada dos agendamentos) ──
   const profissionaisUnicos = useMemo(() => {
@@ -144,7 +144,7 @@ export function AgendaPage() {
             <div className="flex items-center gap-2">
               <button
                 id="agenda-today"
-                onClick={() => setDate(new Date('2026-03-18'))}
+                onClick={() => setDate(new Date())}
                 className="btn-secondary text-xs px-3 py-1.5"
               >
                 Hoje
@@ -263,6 +263,7 @@ export function AgendaPage() {
                   appointment={selectedApt}
                   onClose={() => setSelectedApt(null)}
                   onStatusChange={(status) => handleStatusChange(selectedApt.id, status)}
+                  onDelete={async () => { await deleteAppointment(selectedApt.id); setSelectedApt(null) }}
                 />
               </div>
             </div>

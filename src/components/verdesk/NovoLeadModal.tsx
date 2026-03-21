@@ -11,7 +11,7 @@ const leadSchema = z.object({
   name: z.string().min(3, 'Nome muito curto'),
   phone: z.string().min(10, 'Telefone inválido'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
-  origin: z.enum(['Instagram', 'Facebook', 'WhatsApp', 'Site', 'Indicação', 'Manual']),
+  origin: z.enum(['Instagram', 'WhatsApp OVYVA', 'Indicação', 'Manual']),
   procedure: z.string().min(2, 'Informe o procedimento de interesse'),
   estimatedValue: z.number().min(0).optional(),
   stage: z.enum(['Perguntou Valor', 'Demonstrou Interesse', 'Quase Fechando', 'Agendado', 'Perdido'])
@@ -31,7 +31,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
-      origin: 'WhatsApp',
+      origin: 'WhatsApp OVYVA',
       stage: 'Perguntou Valor',
       estimatedValue: 0,
       procedure: ''
@@ -108,10 +108,8 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
                   {...register('origin')}
                   className="input-base"
                 >
-                  <option value="WhatsApp">WhatsApp</option>
+                  <option value="WhatsApp OVYVA">WhatsApp OVYVA</option>
                   <option value="Instagram">Instagram</option>
-                  <option value="Facebook">Facebook</option>
-                  <option value="Site">Site</option>
                   <option value="Indicação">Indicação</option>
                   <option value="Manual">Outro (Manual)</option>
                 </select>

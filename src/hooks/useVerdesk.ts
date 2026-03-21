@@ -123,7 +123,7 @@ export function useVerdesk() {
            estagio: data.stage,
            telefone: data.phone,
            email: data.email
-        })
+        } as any)
         .select()
         .single()
       
@@ -196,7 +196,7 @@ export function useVerdesk() {
         id: r.id,
         title: r.nome,
         status: r.status || 'Rascunho',
-        targetAudience: 'Todos (placeholder)',
+        targetAudience: r.publico_alvo || 'Todos os leads',
         message: r.mensagem,
         metrics: { sent: r.total_enviados || 0, delivered: r.total_destinatarios || 0, responded: r.total_respondidos || 0 }
       }))
@@ -224,8 +224,20 @@ export function useVerdesk() {
   }, [clinicaId, getCampaigns, toast])
 
   const sendCampaign = useCallback(async (campaignId: string) => {
-      // Mock logica de envio
-  }, [])
+    if (!clinicaId) return
+    try {
+      const { error: pbErr } = await supabase
+        .from('campanhas')
+        .update({ status: 'Enviada', data_envio: new Date().toISOString() })
+        .eq('id', campaignId)
+        .eq('clinica_id', clinicaId)
+      if (pbErr) throw pbErr
+      await getCampaigns()
+      toast({ title: 'Sucesso', description: 'Campanha enviada com sucesso.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: 'Erro ao enviar campanha.', type: 'error' })
+    }
+  }, [clinicaId, getCampaigns, toast])
 
   const deleteCampaign = useCallback(async (campaignId: string) => {
      if (!clinicaId) return

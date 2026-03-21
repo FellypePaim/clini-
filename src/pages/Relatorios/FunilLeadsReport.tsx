@@ -84,7 +84,20 @@ export function FunilLeadsReport() {
             </div>
           </div>
           
-          <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-black text-[11px] uppercase tracking-widest rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">
+          <button
+            onClick={() => {
+              const header = 'Estágio,Quantidade,Valor (R$)\n'
+              const rows = data.map(d => `${d.stage},${d.count},${d.value.toFixed(2)}`).join('\n')
+              const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'funil_leads.csv'
+              a.click()
+              URL.revokeObjectURL(url)
+            }}
+            className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white font-black text-[11px] uppercase tracking-widest rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all"
+          >
              <Download size={16} /> Exportar
           </button>
         </div>

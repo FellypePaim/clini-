@@ -50,9 +50,10 @@ export function SuperConfiguracoesPage() {
           <p className="text-slate-400 font-medium">Gestão global de parâmetros, chaves de API e políticas do sistema.</p>
         </div>
         <button
-          onClick={() => toast({ title: 'Configurações Salvas', description: 'Alterações de configuração persistidas com sucesso.', type: 'success' })}
+          onClick={() => toast({ title: 'Em desenvolvimento', description: 'A persist\u00eancia de configura\u00e7\u00f5es ainda est\u00e1 em desenvolvimento. As altera\u00e7\u00f5es n\u00e3o foram salvas.', type: 'info' })}
           className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group">
-           <Save size={18} /> SALVAR ALTERAÇÕES
+           <Save size={18} /> SALVAR ALTERA&#199;&#213;ES
+           <span className="ml-1 text-[8px] font-black bg-amber-500/20 text-amber-400 px-1.5 py-0.5 rounded border border-amber-500/30 uppercase tracking-widest">Beta</span>
         </button>
       </div>
 

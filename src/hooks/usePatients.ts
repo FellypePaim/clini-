@@ -41,8 +41,8 @@ export function usePatients() {
         },
         ativo: r.ativo ?? true,
         criadoEm: r.created_at || '',
-        ultimaConsulta: r.ultima_consulta || undefined,
-        totalConsultas: r.total_consultas || 0,
+        ultimaConsulta: (r as any).ultima_consulta || undefined,
+        totalConsultas: (r as any).total_consultas || 0,
       }))
 
       setPatients(mapped)
@@ -85,8 +85,8 @@ export function usePatients() {
         },
         ativo: data.ativo ?? true,
         criadoEm: data.created_at || '',
-        ultimaConsulta: data.ultima_consulta || undefined,
-        totalConsultas: data.total_consultas || 0,
+        ultimaConsulta: (data as any).ultima_consulta || undefined,
+        totalConsultas: (data as any).total_consultas || 0,
       } as Patient
     } catch (err: any) {
       toast({ title: 'Erro', description: 'Erro ao buscar dados do paciente.', type: 'error' })

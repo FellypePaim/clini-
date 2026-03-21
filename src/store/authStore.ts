@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
               .eq('id', data.user.id)
               .single()
 
-            const dbRole = profileData?.role || 'recepcao'
+            const dbRole = (profileData?.role || 'recepcao') as string
             const mappedRole: Role = dbRole === 'superadmin' ? 'superadmin'
                                    : dbRole === 'admin' ? 'administrador'
                                    : dbRole === 'recepcao' ? 'recepção'
@@ -50,7 +50,7 @@ export const useAuthStore = create<AuthState>()(
               email: data.user.email || '',
               role: mappedRole,
               especialidade: profileData?.especialidade || undefined,
-              crm: profileData?.crm || undefined,
+              crm: (profileData as any)?.crm || undefined,
               clinicaId: profileData?.clinica_id || '',
               ativo: true,
               criadoEm: data.user.created_at || new Date().toISOString(),
