@@ -8,44 +8,9 @@ export function useAgenda() {
   const [appointments, setAppointments] = useState<AgendaAppointment[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const { toast } = useToast()
-
-  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
-  useEffect(() => {
-    if (!clinicaId) return
-
-    const getInitialAppointments = async () => {
-      // Carrega inicial sem filtros fortes para ter algo na tela
-      await getAppointments()
-    }
-    
-    getInitialAppointments()
-
-    // Subscreve a mudanças na tabela de consultas da clinica
-    const channel = supabase.channel('agenda_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'consultas',
-          filter: `clinica_id=eq.${clinicaId}`
-        },
-        async (payload) => {
-          // Quando houver mudança (insert, update, delete), apenas re-buscamos atualizados
-          // Outra forma seria mesclar o payload diretamente no state frontend.
-          // Por simplicidade, refetch.
-          await getAppointments()
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [clinicaId])
 
   // ── Buscar consultas com filtros ──────────────────────────────────────
   const getAppointments = useCallback(
@@ -124,6 +89,32 @@ export function useAgenda() {
     [clinicaId, toast]
   )
 
+  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
+  useEffect(() => {
+    if (!clinicaId) return
+
+    getAppointments()
+
+    const channel = supabase.channel('agenda_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'consultas',
+          filter: `clinica_id=eq.${clinicaId}`
+        },
+        async (_payload) => {
+          await getAppointments()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [clinicaId, getAppointments])
+
   // ── Criar consulta ────────────────────────────────────────────────────
   const createAppointment = useCallback(
     async (data: AppointmentFormData): Promise<AgendaAppointment> => {
@@ -183,11 +174,8 @@ export function useAgenda() {
         if (pbErr) throw pbErr
 
         toast({ title: 'Sucesso', description: 'Consulta agendada.', type: 'success' })
-        
-        // Refetch para garantir sync local com joins completas
-        const refreshed = await getAppointments()
 
-        // Retornar o appointment recém-criado pelo ID
+        const refreshed = await getAppointments()
         const created = refreshed.find(a => a.id === ret.id)
         return created || refreshed[0]
       } catch (err: any) {
@@ -197,7 +185,7 @@ export function useAgenda() {
         setIsLoading(false)
       }
     },
-    [clinicaId, getAppointments, toast, appointments]
+    [clinicaId, getAppointments, toast]
   )
 
   // ── Atualizar consulta ────────────────────────────────────────────────

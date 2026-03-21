@@ -1,15 +1,12 @@
 import { useState, useMemo, useRef } from 'react'
 import { 
-  Sparkles, 
-  MapPin, 
-  Trash2, 
-  Save, 
-  History, 
-  ChevronDown, 
-  CheckCircle, 
-  Activity, 
-  Plus,
-  Info,
+  Sparkles,
+  MapPin,
+  Trash2,
+  Save,
+  History,
+  ChevronDown,
+  Activity,
   Camera
 } from 'lucide-react'
 import html2canvas from 'html2canvas'
@@ -113,15 +110,23 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
         scale: 2,
         useCORS: true,
         onclone: (doc: Document) => {
-          // Substituir oklch por fallback em todos os elementos clonados
+          // Patch 1: remover oklch das <style> tags antes do html2canvas parsear
+          doc.querySelectorAll('style').forEach(styleEl => {
+            if (styleEl.textContent?.includes('oklch')) {
+              styleEl.textContent = styleEl.textContent.replace(/oklch\([^)]+\)/g, 'transparent')
+            }
+          })
+          // Patch 2: forçar estilos inline nos elementos
           doc.querySelectorAll('*').forEach((node) => {
-            const computed = window.getComputedStyle(node as Element)
-            const style = (node as HTMLElement).style
+            const el = node as HTMLElement
+            if (!el.style) return
             try {
-              if (computed.color?.includes('oklch')) style.color = '#000000'
-              if (computed.backgroundColor?.includes('oklch')) style.backgroundColor = 'transparent'
-              if (computed.borderColor?.includes('oklch')) style.borderColor = '#e5e7eb'
-            } catch {}
+              const computed = doc.defaultView?.getComputedStyle(el) ?? window.getComputedStyle(el)
+              if (computed.color?.includes('oklch')) el.style.color = '#111827'
+              if (computed.backgroundColor?.includes('oklch')) el.style.backgroundColor = 'transparent'
+              if (computed.borderColor?.includes('oklch')) el.style.borderColor = '#e5e7eb'
+              if (computed.fill?.includes('oklch')) el.style.fill = '#374151'
+            } catch { /* ignored */ }
           })
         }
       })
@@ -443,28 +448,6 @@ function ZoneField({ label, children }: { label: string, children: React.ReactNo
        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">{label}</p>
        {children}
     </div>
-  )
-}
-
-function Calendar(props: any) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      {...props}
-    >
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
   )
 }
 

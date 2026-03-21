@@ -43,7 +43,7 @@ const INTERACTION_ICONS = {
 }
 
 export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
-  const { leads, moveLead, addLeadInteraction, updateLead } = useVerdesk()
+  const { leads, moveLead, addLeadInteraction, updateLead: _updateLead } = useVerdesk()
   const { createPatient, isLoading: isCreatingPatient } = usePatients()
   const lead = leads.find((l) => l.id === leadId)
   const [note, setNote] = useState('')
@@ -79,7 +79,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
     setNote('')
   }
 
-  const getInitials = (name: string) => {
+  const _getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
   }
 

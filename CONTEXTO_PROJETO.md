@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.1.0** (Revisão Geral Completa — 21/03/2026)
+- Versão: **v1.1.1** (Hotfix & Lint Cleanup — 21/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -206,6 +206,33 @@ npm run dev
 - **Vite Build**: OK em ~1.2s
 - **2748 módulos** transformados
 - **Bundle**: ~3.1MB (minificado) / ~821KB (gzip)
+
+## 12. HOTFIX v1.1.1 (21/03/2026)
+
+### Correções Críticas
+
+#### Ambiente / Dev
+- **.env**: Removido BOM UTF-8 (Byte Order Mark) que causava `supabaseUrl is required` e tela branca no dev server local. Vercel não era afetado pois as vars são injetadas pela plataforma.
+
+#### Hooks — Ordem de Declaração (React)
+- **`useAgenda.ts`**: `getAppointments` movido para **antes** do `useEffect` que o usa como dependência (forward reference de `const` causava comportamento indefinido).
+- **`useVerdesk.ts`**: `getLeads` e `getCampaigns` movidos para **antes** do `useEffect` de realtime + fetch inicial — mesma causa.
+
+#### Bugs Funcionais
+- **`useSuperAdmin.ts`**: `catch { console.error(_err) }` — `_err` era referência inválida (sem binding no catch). Corrigido para `catch (err) { console.error(err) }` em `getUsers` e `getAuditLogs`.
+- **`PatientTerms.tsx`**: Campo `descricao` → `conteudo` no insert (nome correto da coluna no banco). `useState(() => loadTermos())` → `useEffect` correto. Modal de visualização redesenhado como documento PDF.
+- **`FacialHarmonization.tsx`**: `html2canvas` não suportava cores `oklch` do Tailwind 4 — corrigido com patch nas `<style>` tags do documento clonado via regex antes da renderização.
+- **`PatientDocumentsTab.tsx`**: `loadFiles` convertido para `useCallback` com deps corretas; `useEffect` reordenado.
+
+#### ESLint
+- **`eslint.config.js`**: Regra `@typescript-eslint/no-unused-vars` adicionada com padrão `^_` para ignorar variáveis intencionalmente não usadas — lint cleanup em 68 arquivos.
+
+### Build Final v1.1.1
+- **TypeScript**: 0 erros
+- **Vite Build**: OK
+- **2749 módulos** transformados
+
+---
 
 ## Relatório de Testes Automatizados (SuperAdmin)
 ### ✅ Status Final: 20/20 Testes Passaram

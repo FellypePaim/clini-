@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState } from 'react'
 import 'react-quill/dist/quill.snow.css'
 import { 
   X, 
@@ -7,8 +7,7 @@ import {
   Save, 
   ClipboardList, 
   Search, 
-  Stethoscope, 
-  Play, 
+  Stethoscope,
   Activity,
   AlertCircle,
   PenTool,
@@ -41,7 +40,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
   const [summary, setSummary] = useState<any>(null)
   
   const [signature, setSignature] = useState<string | null>(null)
-  const [isRecording, setIsRecording] = useState(false)
+  const [_isRecording, _setIsRecording] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const filteredCids = CID10_MOCK.filter(c => 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Calendar, UserPlus, DollarSign, Target, TrendingUp, TrendingDown, Minus } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -38,12 +38,7 @@ export function KpiCards() {
   const [kpis, setKpis] = useState<KpiData[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadKpis()
-  }, [clinicaId])
-
-  async function loadKpis() {
+  const loadKpis = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
@@ -145,7 +140,12 @@ export function KpiCards() {
       },
     ])
     setLoading(false)
-  }
+  }, [clinicaId])
+
+  useEffect(() => {
+    if (!clinicaId) return
+    loadKpis()
+  }, [clinicaId, loadKpis])
 
   if (loading) {
     return (

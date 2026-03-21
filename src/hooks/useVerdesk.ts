@@ -13,30 +13,6 @@ export function useVerdesk() {
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
   const { toast } = useToast()
 
-  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
-  useEffect(() => {
-    if (!clinicaId) return
-
-    const fetchAll = async () => {
-      await getLeads()
-      await getCampaigns()
-    }
-    
-    fetchAll()
-
-    const channel = supabase.channel('leads_changes')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'leads', filter: `clinica_id=eq.${clinicaId}` },
-        async () => { await getLeads() }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [clinicaId])
-
   // ── Leads ─────────────────────────────────────────────────────────────
   const getLeads = useCallback(async () => {
     setIsLoading(true)
@@ -64,7 +40,7 @@ export function useVerdesk() {
         lastContactAt: r.ultimo_contato || r.updated_at,
         createdAt: r.created_at,
         updatedAt: r.updated_at,
-        interactions: [] // Idealmente buscar leads_historico, mas para simplificar
+        interactions: []
       }))
       setLeads(mapped)
     } catch (err: any) {
@@ -75,13 +51,53 @@ export function useVerdesk() {
     }
   }, [clinicaId, toast])
 
+  // ── Campaigns ─────────────────────────────────────────────────────────
+  const getCampaigns = useCallback(async () => {
+    if (!clinicaId) return
+    try {
+      const { data, error: pbErr } = await supabase.from('campanhas').select('*').eq('clinica_id', clinicaId)
+      if (pbErr) throw pbErr
+
+      const mapped: Campaign[] = (data || []).map((r: any) => ({
+        id: r.id,
+        title: r.nome,
+        status: r.status || 'Rascunho',
+        targetAudience: r.publico_alvo || 'Todos os leads',
+        message: r.mensagem,
+        metrics: { sent: r.total_enviados || 0, delivered: r.total_destinatarios || 0, responded: r.total_respondidos || 0 }
+      }))
+      setCampaigns(mapped)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }, [clinicaId])
+
+  // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
+  useEffect(() => {
+    if (!clinicaId) return
+
+    getLeads()
+    getCampaigns()
+
+    const channel = supabase.channel('leads_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads', filter: `clinica_id=eq.${clinicaId}` },
+        async () => { await getLeads() }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [clinicaId, getLeads, getCampaigns])
+
   const moveLead = useCallback(async (leadId: string, toStage: LeadStage) => {
     if (!clinicaId) {
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
       return
     }
     try {
-      // Optmistic UI
       const previous = leads
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
 
@@ -95,16 +111,15 @@ export function useVerdesk() {
         setLeads(previous)
         throw pbErr
       }
-      
-      // Criar entrada no histórico
+
       await supabase.from('leads_historico').insert({
-         lead_id: leadId,
-         estagio_novo: toStage as any,
-         anotacao: `Movido para ${toStage}`
+        lead_id: leadId,
+        estagio_novo: toStage as any,
+        anotacao: `Movido para ${toStage}`
       })
-      
+
       toast({ title: 'Sucesso', description: 'Lead movido.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao mover lead.', type: 'error' })
     }
   }, [clinicaId, toast, leads])
@@ -112,26 +127,26 @@ export function useVerdesk() {
   const createLead = useCallback(async (data: Omit<Lead, 'id' | 'interactions' | 'createdAt' | 'updatedAt' | 'lastContactAt'>) => {
     if (!clinicaId) return
     try {
-      const { data: ret, error: pbErr } = await supabase
+      const { error: pbErr } = await supabase
         .from('leads')
         .insert({
-           clinica_id: clinicaId,
-           nome: data.name,
-           origem: data.origin,
-           procedimento_interesse: data.procedure,
-           valor_estimado: data.estimatedValue,
-           estagio: data.stage,
-           telefone: data.phone,
-           email: data.email
+          clinica_id: clinicaId,
+          nome: data.name,
+          origem: data.origin,
+          procedimento_interesse: data.procedure,
+          valor_estimado: data.estimatedValue,
+          estagio: data.stage,
+          telefone: data.phone,
+          email: data.email
         } as any)
         .select()
         .single()
-      
+
       if (pbErr) throw pbErr
 
       await getLeads()
       toast({ title: 'Sucesso', description: 'Lead criado.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao criar lead.', type: 'error' })
     }
   }, [clinicaId, getLeads, toast])
@@ -149,10 +164,10 @@ export function useVerdesk() {
 
       const { error: pbErr } = await supabase.from('leads').update(updateData).eq('id', leadId).eq('clinica_id', clinicaId)
       if (pbErr) throw pbErr
-      
+
       await getLeads()
       toast({ title: 'Sucesso', description: 'Lead atualizado.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao atualizar lead.', type: 'error' })
     }
   }, [clinicaId, getLeads, toast])
@@ -161,13 +176,13 @@ export function useVerdesk() {
     if (!clinicaId) return
     try {
       const { error: pbErr } = await supabase.from('leads_historico').insert({
-         lead_id: leadId,
-         anotacao: interaction.content
+        lead_id: leadId,
+        anotacao: interaction.content
       })
       if (pbErr) throw pbErr
-      
+
       toast({ title: 'Sucesso', description: 'Interação adicionada.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao adicionar interação.', type: 'error' })
     }
   }, [clinicaId, toast])
@@ -177,50 +192,29 @@ export function useVerdesk() {
     try {
       const { error: pbErr } = await supabase.from('leads').delete().eq('id', leadId).eq('clinica_id', clinicaId)
       if (pbErr) throw pbErr
-      
+
       setLeads(prev => prev.filter(l => l.id !== leadId))
       toast({ title: 'Sucesso', description: 'Lead removido.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao remover lead.', type: 'error' })
     }
   }, [clinicaId, toast])
 
-  // ── Campaigns ─────────────────────────────────────────────────────────
-  const getCampaigns = useCallback(async () => {
+  const createCampaign = useCallback(async (campaign: Omit<Campaign, 'id' | 'sentAt'>) => {
     if (!clinicaId) return
     try {
-      const { data, error: pbErr } = await supabase.from('campanhas').select('*').eq('clinica_id', clinicaId)
+      const { error: pbErr } = await supabase.from('campanhas').insert({
+        clinica_id: clinicaId,
+        nome: campaign.title,
+        mensagem: campaign.message,
+        status: campaign.status
+      })
       if (pbErr) throw pbErr
-      
-      const mapped: Campaign[] = (data || []).map((r: any) => ({
-        id: r.id,
-        title: r.nome,
-        status: r.status || 'Rascunho',
-        targetAudience: r.publico_alvo || 'Todos os leads',
-        message: r.mensagem,
-        metrics: { sent: r.total_enviados || 0, delivered: r.total_destinatarios || 0, responded: r.total_respondidos || 0 }
-      }))
-      setCampaigns(mapped)
-    } catch (err: any) {
-       console.error(err)
+      await getCampaigns()
+      toast({ title: 'Sucesso', description: 'Campanha criada.', type: 'success' })
+    } catch {
+      toast({ title: 'Erro', description: 'Erro ao criar campanha.', type: 'error' })
     }
-  }, [clinicaId])
-
-  const createCampaign = useCallback(async (campaign: Omit<Campaign, 'id' | 'sentAt'>) => {
-     if (!clinicaId) return
-     try {
-       const { error: pbErr } = await supabase.from('campanhas').insert({
-          clinica_id: clinicaId,
-          nome: campaign.title,
-          mensagem: campaign.message,
-          status: campaign.status
-       })
-       if (pbErr) throw pbErr
-       await getCampaigns()
-       toast({ title: 'Sucesso', description: 'Campanha criada.', type: 'success' })
-     } catch(err: any) {
-       toast({ title: 'Erro', description: 'Erro ao criar campanha.', type: 'error' })
-     }
   }, [clinicaId, getCampaigns, toast])
 
   const sendCampaign = useCallback(async (campaignId: string) => {
@@ -234,17 +228,17 @@ export function useVerdesk() {
       if (pbErr) throw pbErr
       await getCampaigns()
       toast({ title: 'Sucesso', description: 'Campanha enviada com sucesso.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao enviar campanha.', type: 'error' })
     }
   }, [clinicaId, getCampaigns, toast])
 
   const deleteCampaign = useCallback(async (campaignId: string) => {
-     if (!clinicaId) return
-     try {
-       await supabase.from('campanhas').delete().eq('id', campaignId)
-       await getCampaigns()
-     } catch(err) { }
+    if (!clinicaId) return
+    try {
+      await supabase.from('campanhas').delete().eq('id', campaignId)
+      await getCampaigns()
+    } catch { }
   }, [clinicaId, getCampaigns])
 
   return {

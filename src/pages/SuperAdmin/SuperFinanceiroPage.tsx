@@ -4,7 +4,6 @@ import {
   TrendingUp,
   CreditCard,
   Calendar,
-  Users,
   BarChart3,
   PieChart,
   Download,
@@ -19,7 +18,7 @@ import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
 
 export function SuperFinanceiroPage() {
-  const { getFinanceiroStats, isLoading } = useSuperAdmin()
+  const { getFinanceiroStats, isLoading: _isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
   const [statusFilter, setStatusFilter] = React.useState<string>('todos')

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import {
-  FileSearch,
   Search,
   Download,
   Clock,
@@ -16,7 +15,7 @@ import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 
 export function SuperLogsPage() {
-  const { getAuditLogs, isLoading } = useSuperAdmin()
+  const { getAuditLogs, isLoading: _isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [logs, setLogs] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')

@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { 
-  Search, 
-  Filter, 
-  UserCircle, 
-  Mail, 
-  Shield, 
-  Clock, 
-  Key, 
-  Ban, 
-  Settings,
+  Search,
+  Filter,
+  Mail,
+  Shield,
+  Clock,
+  Key,
   Building2,
-  Lock,
   Unlock,
   ChevronRight,
   MoreHorizontal
@@ -106,7 +102,7 @@ export function SuperUsuariosPage() {
                   </tr>
                </thead>
                <tbody className="divide-y divide-slate-800/30">
-                  {filteredUsuarios.map((user, i) => (
+                  {filteredUsuarios.map((user, _i) => (
                      <tr key={user.id} className="hover:bg-slate-800/40 transition-colors group">
                         <td className="px-8 py-5">
                            <div className="flex items-center gap-4">

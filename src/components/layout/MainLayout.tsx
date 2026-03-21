@@ -4,7 +4,6 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { ToastProvider } from '../ui/ToastProvider'
 
-const SIDEBAR_WIDTH = 240
 
 export function MainLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

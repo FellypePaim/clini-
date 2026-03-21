@@ -1,27 +1,22 @@
 import React from 'react'
 import { 
-  Smartphone, 
-  MessageSquare, 
-  RefreshCw, 
-  Zap, 
-  BarChart3, 
-  QrCode, 
-  Power, 
-  CheckCircle2, 
-  XCircle, 
-  Clock, 
+  Smartphone,
+  MessageSquare,
+  RefreshCw,
+  Zap,
+  QrCode,
+  Power,
   ShieldCheck,
   Search,
   Users,
   AlertCircle
 } from 'lucide-react'
-import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
 
 export function SuperWhatsAppPage() {
-  const { getWhatsAppStats, isLoading } = useSuperAdmin()
+  const { getWhatsAppStats, isLoading: _isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
   const [filterText, setFilterText] = React.useState('')

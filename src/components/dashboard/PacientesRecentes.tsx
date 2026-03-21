@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Phone, ChevronRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -26,12 +26,7 @@ export function PacientesRecentes() {
   const [pacientes, setPacientes] = useState<Paciente[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadPacientes()
-  }, [clinicaId])
-
-  async function loadPacientes() {
+  const loadPacientes = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
     const { data, error } = await supabase
@@ -59,7 +54,12 @@ export function PacientesRecentes() {
       setPacientes(pacientesComConsultas)
     }
     setLoading(false)
-  }
+  }, [clinicaId])
+
+  useEffect(() => {
+    if (!clinicaId) return
+    loadPacientes()
+  }, [clinicaId, loadPacientes])
 
   return (
     <article className="bg-white rounded-xl border border-gray-100 p-5">

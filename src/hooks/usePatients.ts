@@ -88,7 +88,7 @@ export function usePatients() {
         ultimaConsulta: (data as any).ultima_consulta || undefined,
         totalConsultas: (data as any).total_consultas || 0,
       } as Patient
-    } catch (err: any) {
+    } catch (_err: any) {
       toast({ title: 'Erro', description: 'Erro ao buscar dados do paciente.', type: 'error' })
       return null
     } finally {
@@ -360,7 +360,7 @@ export function usePatients() {
 
       const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
       return `${baseUrl}/anamnese/${token}`
-    } catch (e: any) {
+    } catch (_e: any) {
       // Se o insert falhar (ex: policy), o link ainda funciona pois o token é stateless
       const tokenData = { pid: patientId, cid: clinicaId }
       const token = btoa(JSON.stringify(tokenData))

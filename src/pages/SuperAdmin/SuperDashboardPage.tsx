@@ -1,10 +1,8 @@
 import React from 'react'
 import { 
   Hospital, 
-  Users, 
-  Users2, 
-  Stethoscope, 
-  MessageSquare, 
+  Users,
+  Stethoscope,
   Bot, 
   Activity, 
   DollarSign,

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Filter, MessageSquare, Clock, UserCheck, CheckCircle2 } from 'lucide-react'
+import { Search, MessageSquare, Clock, UserCheck, CheckCircle2 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { OvyvaConversation } from '../../types/ovyva'
 import { Avatar } from '../ui/Avatar'

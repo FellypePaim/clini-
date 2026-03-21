@@ -4,25 +4,20 @@ import {
   Zap, 
   Cpu, 
   Coins, 
-  TrendingUp, 
-  AlertCircle,
+  TrendingUp,
   BarChart3,
   BrainCircuit,
   Settings2,
   Lock,
-  MessageSquare,
   Sparkles,
-  Command,
-  ArrowRight,
   DollarSign,
   Activity
 } from 'lucide-react'
-import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
 export function SuperIAPage() {
-  const { getIaStats, isLoading } = useSuperAdmin()
+  const { getIaStats, isLoading: _isLoading } = useSuperAdmin()
   const [data, setData] = React.useState<any>(null)
 
   React.useEffect(() => {

@@ -145,7 +145,7 @@ export function StorageDiagnosticoPage() {
         // Many APIs ignore deletion errors if file doesn't exist, but we can verify our helper wrapper doesn't crash app
         try {
           await deleteFile('pacientes-documentos', 'path_absurdo/naoexiste.pdf')
-        } catch (e: any) {
+        } catch {
            // Might throw or not based on RLS and supabase-js version. Both OK.
         }
     }},

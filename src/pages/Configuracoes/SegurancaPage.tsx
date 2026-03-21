@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Shield, Key, Download, MonitorPlay, LogOut, Loader2, RefreshCw } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { useToast } from '../../hooks/useToast'
@@ -20,7 +20,7 @@ export function SegurancaPage() {
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [loadingBackup, setLoadingBackup] = useState(false)
 
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     setLoadingLogs(true)
     try {
       // Busca logs de acesso da tabela de audit (se existir) ou auth.audit_log_entries via RPC
@@ -40,14 +40,14 @@ export function SegurancaPage() {
           event: r.action || 'Ação IA',
         })))
       }
-    } catch (e) {
+    } catch {
       // Se não houver tabela de audit, mantém vazio
     } finally {
       setLoadingLogs(false)
     }
-  }
+  }, [user?.clinicaId, user?.email])
 
-  useEffect(() => { loadAuditLogs() }, [])
+  useEffect(() => { loadAuditLogs() }, [loadAuditLogs])
 
   const handleBackup = async () => {
     setLoadingBackup(true)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -38,12 +38,7 @@ export function ProcedimentosPieChart() {
   const [procedimentos, setProcedimentos] = useState<ProcData[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadDados()
-  }, [clinicaId])
-
-  async function loadDados() {
+  const loadDados = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
     const mesAtual = new Date()
@@ -78,9 +73,14 @@ export function ProcedimentosPieChart() {
       setProcedimentos([])
     }
     setLoading(false)
-  }
+  }, [clinicaId])
 
-  const total = procedimentos.reduce((acc, p) => acc + p.valor, 0)
+  useEffect(() => {
+    if (!clinicaId) return
+    loadDados()
+  }, [clinicaId, loadDados])
+
+  const _total = procedimentos.reduce((acc, p) => acc + p.valor, 0)
 
   return (
     <article className="bg-white rounded-xl border border-gray-100 p-5">

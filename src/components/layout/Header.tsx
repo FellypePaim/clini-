@@ -21,7 +21,6 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { supabase } from '../../lib/supabase'
-import { cn } from '../../lib/utils'
 
 // ─── Mapa de rota → breadcrumb ────────────────────────
 const ROUTE_INFO: Record<string, { label: string; icon: React.ElementType }> = {
@@ -50,7 +49,7 @@ interface HeaderProps {
   onMenuClick?: () => void
 }
 
-export function Header({ sidebarWidth, onMenuClick }: HeaderProps) {
+export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()

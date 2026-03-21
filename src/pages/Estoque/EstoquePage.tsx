@@ -5,7 +5,6 @@ import {
   AlertTriangle, 
   DollarSign, 
   Calendar,
-  ArrowUpRight,
   ArrowRight,
   TrendingDown,
   Warehouse
@@ -13,7 +12,6 @@ import {
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
 import { ShoppingBag } from 'lucide-react'
-import type { Product } from '../../types/estoque'
 
 export function EstoquePage() {
   const { products, getAlerts } = useEstoque()

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { 
-  Plus, Send, Bot, User, Settings, Clock, CheckCircle, Play, Sparkles, CalendarDays
+  Plus, Send, Bot, User, Settings, Clock, CheckCircle, Play, CalendarDays
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { OvyvaConversation, OvyvaMessage } from '../../types/ovyva'
@@ -37,7 +37,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
     const groups: { label: string, date: Date, msgs: OvyvaMessage[] }[] = []
     
     // Fallback simple grouper by date/session
-    let currentGroupId: string | null = null
+    let _currentGroupId: string | null = null
     let currentGroup: OvyvaMessage[] = []
     let lastDate: Date = new Date(0)
 
@@ -62,7 +62,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
           groups.push({ label, date: firstInGroup, msgs: currentGroup })
         }
         currentGroup = [msg]
-        currentGroupId = msg.sessao_id || null
+        _currentGroupId = msg.sessao_id || null
       } else {
         currentGroup.push(msg)
       }

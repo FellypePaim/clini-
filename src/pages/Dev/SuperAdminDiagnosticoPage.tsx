@@ -91,7 +91,7 @@ export function SuperAdminDiagnosticoPage() {
          try {
            const ctx = (res.error as any).context
            if (ctx?.text) { const t = await ctx.text(); msg += ' | ' + t }
-         } catch (_) {}
+         } catch {}
          throw new Error(msg)
        }
 
@@ -147,7 +147,7 @@ export function SuperAdminDiagnosticoPage() {
 
     // ⚙️ Configurações & Feature Flags
     { id: 'cfg-1', module: 'Configurações Globais', name: "Feature Flags globais carregam do banco", status: 'idle', fn: async () => {
-       const { data, error } = await supabase.from('feature_flags' as any).select('*').limit(1)
+       const { error } = await supabase.from('feature_flags' as any).select('*').limit(1)
        if (error) throw error
     }},
     { id: 'cfg-2', module: 'Configurações Globais', name: "Planos e Preços carregam (financeiro)", status: 'idle', fn: async () => {
@@ -175,7 +175,7 @@ export function SuperAdminDiagnosticoPage() {
        try {
          await supabase.functions.invoke('superadmin-actions', { body: { action: 'TESTE_MALICIOSO' } })
          // Should return an internally handled error or throw
-       } catch (err: any) {
+       } catch {
          // good.
        }
     }},

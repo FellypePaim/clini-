@@ -48,7 +48,7 @@ async function callManager(action: string, payload: any = {}, token: string) {
 }
 
 export function WhatsAppConexaoPage() {
-  const { user } = useAuthStore()
+  const { user: _user } = useAuthStore()
   const { toast } = useToast()
   const [instancias, setInstancias] = useState<Instancia[]>([])
   const [loading, setLoading] = useState(true)
@@ -92,10 +92,10 @@ export function WhatsAppConexaoPage() {
           setPollingId(null)
           toast({ title: '✅ WhatsApp Conectado!', description: `Número ${numero_conectado} vinculado com sucesso.`, type: 'success' })
         }
-      } catch {}
+      } catch { /* ignored */ }
     }, 4000)
     return () => { if (pollingRef.current) clearInterval(pollingRef.current) }
-  }, [pollingId])
+  }, [pollingId, toast])
 
   const handleCriar = async () => {
     setCriando(true)

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ArrowLeft, Plus, Search, MoreVertical, Edit2,
+  ArrowLeft, Plus, Search, Edit2,
   TrendingDown, AlertTriangle, Info, History, TrendingUp, X, Loader2
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'

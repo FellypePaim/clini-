@@ -1,16 +1,11 @@
 import { useState, useRef } from 'react'
 import { 
-  X, 
-  Plus, 
-  Trash2, 
-  Download, 
-  FileText, 
-  Send, 
-  CheckCircle, 
-  AlertCircle, 
-  ClipboardList, 
-  Save, 
-  Pill,
+  X,
+  Plus,
+  Trash2,
+  Download,
+  CheckCircle,
+  ClipboardList,
   Smartphone,
   ShieldCheck,
   Lock,
@@ -23,7 +18,6 @@ import { supabase } from '../../lib/supabase'
 import { StorageHelpers } from '../../lib/storage'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../hooks/useToast'
-import { cn } from '../../lib/utils'
 import type { Patient } from '../../types'
 import type { PrescriptionItem } from '../../types/prontuario'
 
@@ -42,7 +36,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
   const [items, setItems] = useState<PrescriptionItem[]>([
     { id: '1', medicamento: '', dosagem: '', frequencia: '', duracao: '' }
   ])
-  const [showPreview, setShowPreview] = useState(false)
+  const [_showPreview, _setShowPreview] = useState(false)
   const [isSigned, setIsSigned] = useState(false)
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)

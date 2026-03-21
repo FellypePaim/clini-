@@ -8,12 +8,11 @@ import {
   Calendar as CalendarIcon,
   CheckCircle2,
   AlertCircle,
-  BarChart as BarChartIcon,
   Send,
   Users
 } from 'lucide-react'
 import { useVerdesk } from '../../hooks/useVerdesk'
-import type { Campaign, CampaignStatus } from '../../types/verdesk'
+import type { CampaignStatus } from '../../types/verdesk'
 import { Badge } from '../../components/ui/Badge'
 
 const STATUS_CONFIG: Record<CampaignStatus, { icon: React.ReactNode, color: string, bg: string }> = {

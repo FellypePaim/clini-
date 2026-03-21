@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { AgendaAppointment } from '../../types/agenda'
-import { AppointmentCard, STATUS_CONFIG } from './AppointmentCard'
+import { STATUS_CONFIG } from './AppointmentCard'
 import { cn } from '../../lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
-  DollarSign, TrendingUp, TrendingDown, Clock,
-  Plus, X, Loader2, Check, Trash2, RefreshCw, Filter
+  DollarSign, TrendingUp, TrendingDown,
+  Plus, X, Loader2, Check, Trash2, Filter
 } from 'lucide-react'
 import { useFinanceiro, type NovoLancamento } from '../../hooks/useFinanceiro'
 import { Badge } from '../../components/ui/Badge'

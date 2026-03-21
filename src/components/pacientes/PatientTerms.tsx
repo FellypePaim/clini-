@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { 
   FileCheck, 
@@ -48,7 +48,7 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const { getPatientById } = usePatients()
 
   // Carregar termos reais do banco
-  const loadTermos = async () => {
+  const loadTermos = useCallback(async () => {
     if (!pacienteId) return
     const { data, error } = await supabase
       .from('termos_consentimento')
@@ -60,9 +60,9 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
       // Fallback: tentar sem filtro de RLS
     }
     setTermos(data || [])
-  }
+  }, [pacienteId])
 
-  useState(() => { loadTermos() })
+  useEffect(() => { loadTermos() }, [pacienteId, loadTermos])
 
   const handleGenerateWithAI = async () => {
     if (!iaPrompt.trim() || !clinicaId) return
@@ -178,15 +178,17 @@ Responda APENAS com JSON válido nesta estrutura:
       const stored = await StorageHelpers.uploadTermo(clinicaId, pacienteId, file)
 
       // Save to DB
-      await supabase.from('termos_consentimento').insert({
+      const { error: dbErr } = await supabase.from('termos_consentimento').insert({
         clinica_id: clinicaId,
         paciente_id: pacienteId,
         tipo: 'consentimento',
-        titulo: activeTemplate?.titulo,
-        descricao: activeTemplate?.desc || null,
+        titulo: activeTemplate?.titulo || 'Termo de Consentimento',
+        conteudo: activeTemplate?.desc || null,
         assinatura_url: stored.url,
         assinado_em: new Date().toISOString()
       } as any)
+
+      if (dbErr) throw dbErr
 
       await loadTermos()
       toast({ title: 'Sucesso', description: 'Termo assinado e salvo com sucesso.', type: 'success' })
@@ -408,54 +410,119 @@ Responda APENAS com JSON válido nesta estrutura:
          </div>
       </div>
 
-      {/* Modal de Visualização do Termo */}
+      {/* Modal de Visualização — Estilo Documento PDF */}
       {viewingTermo && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setViewingTermo(null)} />
-          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden animate-slide-in">
-            <div className="bg-green-600 p-6 text-white flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-black">{viewingTermo.titulo || 'Termo de Consentimento'}</h3>
-                <p className="text-xs text-green-100 mt-1">
-                  {viewingTermo.assinado_em
-                    ? `Assinado em ${new Date(viewingTermo.assinado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
-                    : 'Pendente de assinatura'}
-                </p>
-              </div>
-              <button onClick={() => setViewingTermo(null)} className="p-2 hover:bg-white/10 rounded-xl">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-8 space-y-6">
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</p>
-                <span className={cn(
-                  "px-3 py-1.5 rounded-xl text-xs font-black uppercase border inline-block",
-                  viewingTermo.assinado_em ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
-                )}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fade-in" onClick={() => setViewingTermo(null)} />
+          <div className="relative bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slide-in flex flex-col">
+            {/* Toolbar */}
+            <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3 text-white">
+                <FileCheck className="w-5 h-5 text-green-400" />
+                <span className="text-sm font-bold truncate">{viewingTermo.titulo || 'Termo de Consentimento'}</span>
+                <span className={cn("px-2 py-0.5 rounded-md text-[9px] font-bold uppercase", viewingTermo.assinado_em ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400")}>
                   {viewingTermo.assinado_em ? 'Assinado' : 'Pendente'}
                 </span>
               </div>
-              {viewingTermo.assinatura_url && (
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assinatura Digital</p>
-                  <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 flex items-center justify-center">
-                    <img src={viewingTermo.assinatura_url} alt="Assinatura" className="max-h-48 object-contain" />
-                  </div>
-                </div>
-              )}
-              <div className="flex gap-3">
+              <div className="flex items-center gap-2">
                 {viewingTermo.assinatura_url && (
-                  <a
-                    href={viewingTermo.assinatura_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 btn-primary text-center flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-4 h-4" /> Baixar Assinatura
+                  <a href={viewingTermo.assinatura_url} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar">
+                    <Download className="w-4 h-4" />
                   </a>
                 )}
-                <button onClick={() => setViewingTermo(null)} className="flex-1 btn-secondary">Fechar</button>
+                <button onClick={() => setViewingTermo(null)} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Documento */}
+            <div className="flex-1 overflow-y-auto p-8 flex justify-center">
+              <div className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '600px' }}>
+                {/* Header do documento */}
+                <div className="border-b-2 border-green-600 p-8 pb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-black text-gray-900 leading-tight">Prontuario Verde</h2>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Sistema de Gestao Clinica</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Documento Digital</p>
+                      <p className="text-[10px] text-gray-300 mt-0.5">ID: {viewingTermo.id?.substring(0, 8) || '—'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Titulo do termo */}
+                <div className="px-8 pt-8 pb-4">
+                  <h3 className="text-base font-black text-gray-900 text-center uppercase tracking-wider leading-relaxed">
+                    {viewingTermo.titulo || 'Termo de Consentimento'}
+                  </h3>
+                  <div className="w-16 h-0.5 bg-green-500 mx-auto mt-3" />
+                </div>
+
+                {/* Conteudo */}
+                {viewingTermo.conteudo && (
+                  <div className="px-8 py-4">
+                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{viewingTermo.conteudo}</p>
+                  </div>
+                )}
+
+                {/* Info */}
+                <div className="px-8 py-4 space-y-3 text-xs">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Data</p>
+                      <p className="text-gray-700 font-bold mt-1">
+                        {new Date(viewingTermo.assinado_em || viewingTermo.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Horario</p>
+                      <p className="text-gray-700 font-bold mt-1">
+                        {new Date(viewingTermo.assinado_em || viewingTermo.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tipo</p>
+                      <p className="text-gray-700 font-bold mt-1 capitalize">{viewingTermo.tipo || 'Consentimento'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Profissional</p>
+                      <p className="text-gray-700 font-bold mt-1">{user?.nome || 'Profissional'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assinatura */}
+                <div className="px-8 py-6 mt-4">
+                  {viewingTermo.assinatura_url ? (
+                    <div className="border-t-2 border-dashed border-gray-200 pt-6">
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center mb-4">Assinatura Digital do Paciente</p>
+                      <div className="flex justify-center">
+                        <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 inline-block">
+                          <img src={viewingTermo.assinatura_url} alt="Assinatura" className="max-h-32 object-contain" />
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center gap-2 mt-4 text-green-600">
+                        <Lock className="w-3.5 h-3.5" />
+                        <p className="text-[9px] font-black uppercase tracking-widest">Documento Assinado Digitalmente</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-t-2 border-dashed border-yellow-200 pt-6 text-center">
+                      <p className="text-xs font-bold text-yellow-600">Aguardando assinatura do paciente</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
+                  <p className="text-[8px] text-gray-400 leading-relaxed">
+                    Este documento foi gerado eletronicamente pelo sistema Prontuario Verde.
+                    Possui validade juridica conforme Lei 14.063/2020.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

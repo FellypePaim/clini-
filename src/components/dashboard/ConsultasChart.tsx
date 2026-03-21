@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
@@ -38,12 +38,7 @@ export function ConsultasChart() {
   const [dados, setDados] = useState<SemanaData[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadDados()
-  }, [clinicaId])
-
-  async function loadDados() {
+  const loadDados = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
     // Últimas 4 semanas
@@ -71,7 +66,12 @@ export function ConsultasChart() {
 
     setDados(semanas)
     setLoading(false)
-  }
+  }, [clinicaId])
+
+  useEffect(() => {
+    if (!clinicaId) return
+    loadDados()
+  }, [clinicaId, loadDados])
 
   const total = dados.reduce((acc, d) => acc + d.consultas, 0)
   const lastWeek = dados[dados.length - 1]?.consultas ?? 0

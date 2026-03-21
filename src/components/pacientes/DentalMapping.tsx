@@ -1,7 +1,7 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import {
-  Save, Trash2, History, ChevronDown, Activity, Plus, Info, X,
-  AlertTriangle, CheckCircle, Clock, FileText, Search, Sparkles, Edit3
+  Save, Trash2, History, ChevronDown, Activity, Info, X,
+  AlertTriangle, CheckCircle, FileText, Search, Sparkles, Edit3
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -114,7 +114,7 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
     setActiveTooth(tooth)
   }
 
-  const applyCondition = () => {
+  const _applyCondition = () => {
     if (!activeTooth) return
     setToothMap(prev => ({
       ...prev,

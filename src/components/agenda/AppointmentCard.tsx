@@ -1,5 +1,5 @@
 import type { AgendaAppointment, AppointmentStatus } from '../../types/agenda'
-import { Clock, User, MoreVertical, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
+import { Clock, User, CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
 // ─── Configuração visual por status ──────────────────
@@ -38,7 +38,7 @@ interface AppointmentCardProps {
   onStatusChange?: (id: string, status: AppointmentStatus) => void
 }
 
-export function AppointmentCard({ appointment: apt, compact = false, onClick, onStatusChange }: AppointmentCardProps) {
+export function AppointmentCard({ appointment: apt, compact = false, onClick, onStatusChange: _onStatusChange }: AppointmentCardProps) {
   const cfg = STATUS_CONFIG[apt.status]
 
   return (
@@ -121,7 +121,7 @@ interface AppointmentDetailCardProps {
   onDelete?: () => void
 }
 
-export function AppointmentDetailCard({ appointment: apt, onClose, onStatusChange, onEdit, onDelete }: AppointmentDetailCardProps) {
+export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onStatusChange, onEdit: _onEdit, onDelete }: AppointmentDetailCardProps) {
   const cfg = STATUS_CONFIG[apt.status]
 
   return (

@@ -128,7 +128,7 @@ export function FileUpload({
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files)
     }
-  }, [disabled, multiple])
+  }, [disabled, multiple, handleFiles])
 
   const removeUpload = (id: string) => {
     setUploads(prev => {

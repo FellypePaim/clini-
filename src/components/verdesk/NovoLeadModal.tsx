@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { cn } from '../../lib/utils'
 import { useVerdesk } from '../../hooks/useVerdesk'
-import type { LeadStage, LeadOrigin } from '../../types/verdesk'
 
 const leadSchema = z.object({
   name: z.string().min(3, 'Nome muito curto'),

@@ -39,7 +39,7 @@ export async function uploadFile(
   clinica_id: string,
   paciente_id: string | null,
   file: File,
-  onProgress?: (percent: number) => void
+  _onProgress?: (percent: number) => void
 ): Promise<StorageFile> {
   const limit = STORAGE_LIMITS[bucket]
   if (file.size > limit.maxMB * 1024 * 1024) {

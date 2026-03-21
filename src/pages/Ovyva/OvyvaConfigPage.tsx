@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import {
-  Bot, Calendar, BookOpen, MessageSquare, Save, ArrowLeft,
+  Bot, Calendar, BookOpen, Save, ArrowLeft,
   Clock, Sparkles, Zap, HelpCircle, Smartphone
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'

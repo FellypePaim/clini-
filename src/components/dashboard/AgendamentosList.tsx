@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Clock, ChevronRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -34,12 +34,7 @@ export function AgendamentosList() {
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadAgendamentos()
-  }, [clinicaId])
-
-  async function loadAgendamentos() {
+  const loadAgendamentos = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
@@ -75,7 +70,12 @@ export function AgendamentosList() {
       })))
     }
     setLoading(false)
-  }
+  }, [clinicaId])
+
+  useEffect(() => {
+    if (!clinicaId) return
+    loadAgendamentos()
+  }, [clinicaId, loadAgendamentos])
 
   return (
     <article className="bg-white rounded-xl border border-gray-100 p-5">

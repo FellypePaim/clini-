@@ -14,14 +14,11 @@ import {
   Rocket,
   ShieldCheck,
   LogOut,
-  Menu,
-  X
+  Menu
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { ToastProvider } from '../ui/ToastProvider'
 import { cn } from '../../lib/utils'
-
-const SIDEBAR_WIDTH = 260
 
 export function SuperAdminLayout() {
   const { user, logout } = useAuthStore()

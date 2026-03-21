@@ -10,7 +10,7 @@ import { AppointmentDetailCard } from '../../components/agenda/AppointmentCard'
 import { ProfissionalFilter } from '../../components/agenda/ProfissionalFilter'
 import { cn } from '../../lib/utils'
 
-const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+const _MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 const VIEWS: { key: AgendaView; label: string; icon: typeof Calendar }[] = [
@@ -41,9 +41,9 @@ export function AgendaPage() {
   const [modalInitialDate, setModalInitialDate]   = useState<string>()
   const [modalInitialHour, setModalInitialHour]   = useState<string>()
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
-  const [detailPos, setDetailPos]         = useState({ x: 0, y: 0 })
+  const [_detailPos, _setDetailPos]         = useState({ x: 0, y: 0 })
 
-  const { appointments, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate, getAppointmentsByRange } = useAgenda()
+  const { appointments, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate: _getAppointmentsByDate, getAppointmentsByRange: _getAppointmentsByRange } = useAgenda()
 
   // ── Lista de profissionais únicos (derivada dos agendamentos) ──
   const profissionaisUnicos = useMemo(() => {
@@ -113,7 +113,7 @@ export function AgendaPage() {
     setIsModalOpen(true)
   }
 
-  const handleCardClick = (apt: AgendaAppointment, evt?: React.MouseEvent) => {
+  const handleCardClick = (apt: AgendaAppointment, _evt?: React.MouseEvent) => {
     setSelectedApt(apt)
   }
 

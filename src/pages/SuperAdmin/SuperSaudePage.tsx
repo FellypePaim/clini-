@@ -7,7 +7,6 @@ import {
   Cpu, 
   MessageSquare, 
   Zap, 
-  Clock, 
   AlertCircle,
   RefreshCw,
   Server,
@@ -19,8 +18,26 @@ import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
 
+const FAKE_CHART_HEIGHTS = Array.from({ length: 24 }, () => ({
+  p99: Math.random() * 60 + 20,
+  p50: Math.random() * 40 + 10,
+}))
+
+function FakeChartBars() {
+  return (
+    <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between gap-2 h-40">
+      {FAKE_CHART_HEIGHTS.map((h, i) => (
+        <div key={i} className="flex-1 flex flex-col gap-1 items-center group cursor-help">
+          <div className="w-full bg-purple-500/20 rounded-t-sm group-hover:bg-purple-500/40 transition-colors" style={{ height: `${h.p99}%` }} />
+          <div className="w-full bg-emerald-500/40 rounded-t-sm group-hover:bg-emerald-500/60 transition-colors" style={{ height: `${h.p50}%` }} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function SuperSaudePage() {
-  const { getSaudeStats, isLoading } = useSuperAdmin()
+  const { getSaudeStats, isLoading: _isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any>(null)
 
@@ -132,14 +149,7 @@ export function SuperSaudePage() {
               </div>
               
               {/* Fake Chart bars */}
-              <div className="absolute bottom-8 left-8 right-8 flex items-end justify-between gap-2 h-40">
-                 {Array.from({ length: 24 }).map((_, i) => (
-                   <div key={i} className="flex-1 flex flex-col gap-1 items-center group cursor-help">
-                      <div className="w-full bg-purple-500/20 rounded-t-sm group-hover:bg-purple-500/40 transition-colors" style={{ height: `${Math.random() * 60 + 20}%` }} />
-                      <div className="w-full bg-emerald-500/40 rounded-t-sm group-hover:bg-emerald-500/60 transition-colors" style={{ height: `${Math.random() * 40 + 10}%` }} />
-                   </div>
-                 ))}
-              </div>
+              <FakeChartBars />
            </div>
         </div>
 

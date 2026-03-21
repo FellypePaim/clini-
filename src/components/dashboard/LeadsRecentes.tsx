@@ -2,7 +2,6 @@ import React from 'react'
 import { MessageSquare, ArrowUpRight, Clock, Smartphone, Instagram, User, ExternalLink } from 'lucide-react'
 import { useVerdesk } from '../../hooks/useVerdesk'
 import { Avatar } from '../ui/Avatar'
-import { Badge } from '../ui/Badge'
 import { Link } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 

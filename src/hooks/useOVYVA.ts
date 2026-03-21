@@ -64,24 +64,6 @@ export function useOVYVA() {
     fetchConfig()
   }, [fetchConversations, fetchConfig])
 
-  // Realtime subscription
-  useEffect(() => {
-    if (!clinica_id) return
-    const sub = supabase
-      .channel('ovyva_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_mensagens' }, () => {
-        fetchConversations()
-        if (activeConversation) {
-          loadMessages(activeConversation.id)
-        }
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_conversas' }, () => {
-        fetchConversations()
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(sub) }
-  }, [clinica_id, activeConversation, fetchConversations])
-
   // Buscar mensagens — corrigido: filtra por clinica_id via JOIN com ovyva_conversas
   const loadMessages = useCallback(async (conversa_id: string) => {
     if (!clinica_id) return
@@ -111,6 +93,24 @@ export function useOVYVA() {
       }
     }
   }, [clinica_id])
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!clinica_id) return
+    const sub = supabase
+      .channel('ovyva_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_mensagens' }, () => {
+        fetchConversations()
+        if (activeConversation) {
+          loadMessages(activeConversation.id)
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_conversas' }, () => {
+        fetchConversations()
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(sub) }
+  }, [clinica_id, activeConversation, fetchConversations, loadMessages])
 
   // Selecionar conversa
   const selectConversation = useCallback((conv: OvyvaConversation) => {

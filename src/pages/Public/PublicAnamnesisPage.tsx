@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { CheckCircle, AlertCircle, Send, ClipboardList, Activity, Heart, Info, Stethoscope, FileCheck, Stamp, Lock, Maximize2 } from 'lucide-react'
+import { useParams } from 'react-router-dom'
+import { CheckCircle, Send, ClipboardList, Activity, Heart, Info, Stethoscope, FileCheck, Stamp, Lock } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import { useRef } from 'react'
 import { StorageHelpers } from '../../lib/storage'
@@ -17,7 +17,7 @@ const TERMS_TEMPLATES = [
 export function PublicAnamnesisPage() {
   const { token } = useParams<{ token: string }>()
   const [patientId, setPatientId] = useState<string | null>(null)
-  const [clinicaId, setClinicaId] = useState<string | null>(null)
+  const [_clinicaId, setClinicaId] = useState<string | null>(null)
   const [termoId, setTermoId] = useState<string | null>(null)
 
   const sigPad = useRef<SignatureCanvas>(null)

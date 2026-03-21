@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
-import type { Movement } from '../../types/estoque'
 
 const TIPO_CONFIG = {
   'Entrada': { icon: <ArrowDownRight size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50', bgHover: 'hover:bg-emerald-100', textColors: 'text-emerald-700' },

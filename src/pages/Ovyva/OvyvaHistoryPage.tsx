@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { 
-  ArrowLeft, Search, Filter, CheckCircle, Clock, UserPlus,
-  MoreHorizontal, MessageSquare, Bot, User, Zap, Download
+  ArrowLeft, Search, CheckCircle, Clock, UserPlus,
+  MessageSquare, Bot, User, Zap
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { cn } from '../../lib/utils'

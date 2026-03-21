@@ -6,14 +6,12 @@ import {
   Key, 
   ShieldCheck, 
   Globe, 
-  Bell, 
   Cloud, 
   Zap, 
   Lock,
   ChevronRight,
   Save,
   Palette,
-  Layout,
   Cpu
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
@@ -61,13 +59,13 @@ export function SuperConfiguracoesPage() {
         
         {/* Sidebar de Navegação de Configurações */}
         <div className="space-y-2 lg:col-span-1">
-           {settingsGroups.map((group, idx) => (
+           {settingsGroups.map((group, _idx) => (
              <div key={group.title} className="mb-6 last:mb-0">
                 <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 flex items-center gap-2">
                    <group.icon size={14} className="text-purple-400" /> {group.title}
                 </h3>
                 <div className="space-y-1">
-                   {group.items.map((item, itemIdx) => (
+                   {group.items.map((item, _itemIdx) => (
                      <button
                        key={item}
                        onClick={() => setActiveSettingItem(item)}

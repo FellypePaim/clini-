@@ -12,7 +12,6 @@ import {
   Megaphone,
   Briefcase,
   AlertCircle,
-  CreditCard,
   PhoneCall,
   Activity,
   ChevronRight

@@ -1,12 +1,11 @@
 import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { 
-  MessageSquare, 
-  Calendar, 
-  Edit2, 
+  MessageSquare,
+  Calendar,
+  Edit2,
   AlertCircle,
   Clock,
-  MoreVertical,
   Instagram,
   User,
   ExternalLink,
@@ -14,7 +13,6 @@ import {
 } from 'lucide-react'
 import type { Lead } from '../../types/verdesk'
 import { Avatar } from '../ui/Avatar'
-import { Badge } from '../ui/Badge'
 
 interface LeadCardProps {
   lead: Lead
@@ -46,7 +44,7 @@ export function LeadCard({ lead, onEdit, onAction, isDragging, onClick }: LeadCa
   const diffDays = Math.floor((Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24))
   const isUrgent = diffDays >= 3 && lead.stage !== 'Perdido' && lead.stage !== 'Agendado'
 
-  const getInitials = (name: string) => {
+  const _getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
   }
 

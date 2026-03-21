@@ -21,7 +21,7 @@ export function useSuperAdmin() {
     } finally {
       setIsLoading(false)
     }
-  }, [toast])
+  }, [])
 
   // 2. Clínicas
   const getClinics = useCallback(async () => {
@@ -38,7 +38,7 @@ export function useSuperAdmin() {
     } finally {
       setIsLoading(false)
     }
-  }, [toast])
+  }, [])
 
   const createClinic = useCallback(async (formData: any) => {
     setIsLoading(true)
@@ -59,12 +59,12 @@ export function useSuperAdmin() {
 
   const suspendClinic = useCallback(async (id: string, reason: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+      const { error } = await supabase.functions.invoke('superadmin-actions', {
         body: { action: 'suspend_clinic', clinicId: id, payload: { suspender: true, motivo: reason } }
       })
       if (error) throw error
       toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado com sucesso.', type: 'success' })
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Erro ao suspender clínica.', type: 'error' })
     }
   }, [toast])
@@ -101,7 +101,7 @@ export function useSuperAdmin() {
       sessionStorage.setItem('impersonation-clinic', clinicId)
 
       window.open(`/dashboard?impersonate=1&clinic=${clinicId}`, '_blank')
-    } catch (err: any) {
+    } catch {
       toast({ title: 'Erro', description: 'Não foi possível impersonar.', type: 'error' })
     } finally {
       setIsLoading(false)
@@ -134,7 +134,7 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       return data || null
-    } catch (err) {
+    } catch {
       return null
     } finally {
       setIsLoading(false)
@@ -150,7 +150,7 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       return data || null
-    } catch (err) {
+    } catch {
       return null
     } finally {
       setIsLoading(false)
@@ -166,7 +166,7 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       return data || null
-    } catch (err) {
+    } catch {
       return null
     } finally {
       setIsLoading(false)
@@ -182,7 +182,7 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       return data?.tickets || []
-    } catch (err) {
+    } catch {
       return []
     } finally {
       setIsLoading(false)
@@ -198,7 +198,7 @@ export function useSuperAdmin() {
       })
       if (error) throw error
       return data || null
-    } catch (err) {
+    } catch {
       return null
     } finally {
       setIsLoading(false)

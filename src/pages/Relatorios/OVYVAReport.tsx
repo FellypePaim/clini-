@@ -82,7 +82,7 @@ export function OVYVAReport() {
 
       const ids: string[] = (conversasData as any[] || []).map((c: any) => c.id)
 
-      let mensagensPorConversa: Record<string, number> = {}
+      const mensagensPorConversa: Record<string, number> = {}
 
       if (ids.length > 0) {
         const { data: mensagensData } = await supabase

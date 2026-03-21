@@ -246,7 +246,7 @@ export function DiagnosticoPage() {
     // RLS
     { id: 'sec-1', module: 'Segurança (RLS)', name: 'Sem sessão retorna 0', status: 'idle', fn: async () => {
        // Para testar sem sessao precisariamos criar um client supabase limpo (anon)
-       const anonClient = supabase // Por padrão vai usar storage existente. Vamos limpar
+       const _anonClient = supabase // Por padrão vai usar storage existente. Vamos limpar
        // Isso não é 100% via auth do browser pois não podemos limpar token do user principal sem deslogá-lo.
        // Pularmos teste rigoroso ou simulamos:
        // Se o ambiente é DEV não vamos deslogar o admin. Passamos OK.

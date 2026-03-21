@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   Download,
   Stethoscope,
-  TrendingUp,
   Award,
   DollarSign,
   Loader2,

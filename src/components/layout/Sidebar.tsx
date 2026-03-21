@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  FileText,
   MessageSquare,
   Briefcase,
   DollarSign,
@@ -15,7 +14,6 @@ import {
   Settings,
   Stethoscope,
   ChevronRight,
-  Wrench,
   Activity,
   Database
 } from 'lucide-react'

@@ -74,7 +74,7 @@ export function ClinicaPage() {
         }
         setIsLoading(false)
       })
-  }, [clinicaId])
+  }, [clinicaId, toast])
 
   const update = (field: keyof ClinicaForm, val: string) =>
     setForm(prev => ({ ...prev, [field]: val }))

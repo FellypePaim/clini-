@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Plus, Trash2, Save, ShoppingBag, Loader2, Search, CheckCircle2, X } from 'lucide-react'
+import { Plus, Trash2, Save, ShoppingBag, Loader2, CheckCircle2, X } from 'lucide-react'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'

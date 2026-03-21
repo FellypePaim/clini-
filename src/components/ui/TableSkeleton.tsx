@@ -1,5 +1,4 @@
 import React from 'react'
-import { Badge } from './Badge'
 
 export function TableSkeleton({ rows = 5, cols = 5 }: { rows?: number, cols?: number }) {
   return (

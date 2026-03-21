@@ -16,7 +16,7 @@ import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
 
 export function SuperSuportePage() {
-  const { getSuporteTickets, isLoading } = useSuperAdmin()
+  const { getSuporteTickets, isLoading: _isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [data, setData] = React.useState<any[]>([])
   const [searchTicket, setSearchTicket] = React.useState('')

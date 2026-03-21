@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Download, Target, Users, TrendingUp, AlertTriangle, Loader2, ArrowDown } from 'lucide-react'
+import { ArrowLeft, Download, Target, Users, TrendingUp, AlertTriangle, ArrowDown } from 'lucide-react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
-import { Badge } from '../../components/ui/Badge'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
-import { cn } from '../../lib/utils'
 
 interface FunilData {
   stage: string

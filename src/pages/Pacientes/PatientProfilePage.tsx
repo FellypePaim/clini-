@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { 
   ArrowLeft, 
@@ -10,8 +10,7 @@ import {
   Plus, 
   Clock, 
   User, 
-  Trash2, 
-  Download, 
+  Trash2,
   ExternalLink, 
   CheckCircle, 
   AlertCircle,
@@ -39,7 +38,6 @@ import { FacialHarmonization } from '../../components/pacientes/FacialHarmonizat
 import { PatientTerms } from '../../components/pacientes/PatientTerms'
 import { PatientDocumentsTab } from '../../components/pacientes/PatientDocumentsTab'
 import { DentalMapping } from '../../components/pacientes/DentalMapping'
-import type { EvolutionRecord, PrescriptionItem } from '../../types/prontuario'
 
 export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
@@ -51,7 +49,7 @@ export function PatientProfilePage() {
   
   const [patient, setPatient] = useState<Patient | null>(null)
   const [history, setHistory] = useState<Appointment[]>([])
-  const [docs, setDocs] = useState<PatientDocument[]>([])
+  const [_docs, setDocs] = useState<PatientDocument[]>([])
   const [financial, setFinancial] = useState<PatientFinancial[]>([])
   
   const [isAnamnesisModalOpen, setIsAnamnesisModalOpen] = useState(false)

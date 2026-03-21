@@ -86,7 +86,7 @@ export function ProfissionaisPage() {
       })))
     }
     setIsLoading(false)
-  }, [clinicaId])
+  }, [clinicaId, toast])
 
   useEffect(() => { loadProfissionais() }, [loadProfissionais])
 

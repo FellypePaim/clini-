@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { FileText, Loader2 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { FileUpload } from '../ui/FileUpload'
 import { FileViewer } from '../ui/FileViewer'
 import type { StorageFile } from '../../lib/storage'
-import { listPatientFiles, deleteFile } from '../../lib/storage'
+import { listPatientFiles, deleteFile as _deleteFile } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
 import { useToast } from '../../hooks/useToast'
 
@@ -21,12 +21,7 @@ export function PatientDocumentsTab({ pacienteId }: PatientDocumentsTabProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [viewingFile, setViewingFile] = useState<StorageFile | null>(null)
 
-  useEffect(() => {
-    if (!clinicaId || !pacienteId) return
-    loadFiles()
-  }, [clinicaId, pacienteId])
-
-  const loadFiles = async () => {
+  const loadFiles = useCallback(async () => {
     try {
       setIsLoading(true)
       const data = await listPatientFiles('pacientes-documentos', clinicaId || '', pacienteId)
@@ -38,7 +33,12 @@ export function PatientDocumentsTab({ pacienteId }: PatientDocumentsTabProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [clinicaId, pacienteId, toast])
+
+  useEffect(() => {
+    if (!clinicaId || !pacienteId) return
+    loadFiles()
+  }, [clinicaId, pacienteId, loadFiles])
 
   const handleUploadComplete = async (newFiles: StorageFile[]) => {
     setFiles(prev => [...newFiles, ...prev])

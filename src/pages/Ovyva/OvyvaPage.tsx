@@ -5,7 +5,6 @@ import { ContactContext } from '../../components/ovyva/ContactContext'
 import { useOVYVA } from '../../hooks/useOVYVA'
 import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { cn } from '../../lib/utils'
 
 export function OvyvaPage() {
   const { conversations, sendMessage, takeoverConversation, returnToAI } = useOVYVA()

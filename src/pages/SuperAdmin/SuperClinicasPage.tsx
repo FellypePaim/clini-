@@ -1,27 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Eye, 
-  Settings, 
-  PauseCircle, 
-  Ban, 
-  UserPlus, 
-  Layout, 
+import React, { useEffect, useState, useCallback } from 'react'
+import {
+  Plus,
+  Search,
+  MoreVertical,
+  Eye,
+  Settings,
+  PauseCircle,
+  Layout,
   Building2,
   Calendar,
   Users,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { Badge } from '../../components/ui/Badge'
 import { NovaClinicaModal } from '../../components/superadmin/NovaClinicaModal'
 import { useToast } from '../../hooks/useToast'
-import { cn } from '../../lib/utils'
+import { cn as _cn } from '../../lib/utils'
 
 export function SuperClinicasPage() {
   const { getClinics, isLoading, suspendClinic, impersonateClinic } = useSuperAdmin()
@@ -31,14 +25,14 @@ export function SuperClinicasPage() {
   const [statusFilter, setStatusFilter] = useState<string>('todos')
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const handleLoad = async () => {
+  const handleLoad = useCallback(async () => {
     const data = await getClinics()
     setClinicas(data)
-  }
+  }, [getClinics])
 
   useEffect(() => {
     handleLoad()
-  }, [getClinics])
+  }, [handleLoad])
 
   const filteredClinicas = clinicas.filter(c => {
     const matchSearch = c.nome.toLowerCase().includes(searchTerm.toLowerCase()) || c.cnpj?.includes(searchTerm)
