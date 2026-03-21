@@ -12,7 +12,9 @@ import {
   Maximize2,
   Lock,
   Stamp,
-  ClipboardList
+  ClipboardList,
+  Sparkles,
+  Activity
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -35,6 +37,11 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [termos, setTermos] = useState<any[]>([])
   const [viewingTermo, setViewingTermo] = useState<any | null>(null)
 
+  // IA - Gerar termo personalizado
+  const [iaPrompt, setIaPrompt] = useState('')
+  const [iaGenerating, setIaGenerating] = useState(false)
+  const [iaResult, setIaResult] = useState<{ titulo: string; conteudo: string } | null>(null)
+
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const { toast } = useToast()
@@ -52,6 +59,54 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   }
 
   useState(() => { loadTermos() })
+
+  const handleGenerateWithAI = async () => {
+    if (!iaPrompt.trim() || !clinicaId) return
+    setIaGenerating(true)
+    setIaResult(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-gateway', {
+        body: {
+          action: 'generate_summary',
+          payload: {
+            texto_clinico: `INSTRUÇÃO: Você é um advogado especialista em termos de consentimento para clínicas de saúde no Brasil.
+Gere um termo de consentimento COMPLETO e PROFISSIONAL com base na solicitação abaixo.
+
+SOLICITAÇÃO DO PROFISSIONAL:
+"${iaPrompt}"
+
+Responda APENAS com JSON válido nesta estrutura:
+{
+  "queixa_principal": "TÍTULO DO TERMO (ex: Termo de Consentimento para Preenchimento Labial)",
+  "diagnostico": "CONTEÚDO COMPLETO DO TERMO com parágrafos separados por \\n\\n, incluindo: 1) Identificação do procedimento, 2) Riscos e complicações possíveis, 3) Cuidados pós-procedimento, 4) Declaração de ciência do paciente, 5) Cláusula de autorização, 6) Cláusula LGPD"
+}`,
+          },
+          clinica_id: clinicaId,
+        }
+      })
+      if (error) throw error
+      const resumo = data?.resumo || data?.data?.resumo
+      if (resumo) {
+        setIaResult({
+          titulo: resumo.queixa_principal || 'Termo Gerado por IA',
+          conteudo: resumo.diagnostico || resumo.conduta || 'Erro ao extrair conteúdo.'
+        })
+        toast({ title: 'Termo gerado', description: 'Revise o conteúdo e use como modelo.', type: 'success' })
+      } else {
+        throw new Error('Resposta vazia da IA')
+      }
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao gerar termo.', type: 'error' })
+    } finally {
+      setIaGenerating(false)
+    }
+  }
+
+  const handleUseAITerm = () => {
+    if (!iaResult) return
+    setActiveTemplate({ id: 'ia', titulo: iaResult.titulo, desc: iaResult.conteudo })
+    setShowSignModal(true)
+  }
 
   const handleSendWhatsApp = async (e: React.MouseEvent, tpl: any) => {
     e.stopPropagation()
@@ -178,6 +233,67 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
                     </div>
                  </div>
                ))}
+            </div>
+         </div>
+
+         {/* Gerar Termo com IA */}
+         <div className="bg-white rounded-[40px] border border-purple-100 p-8 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+               <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600">
+                  <Sparkles className="w-5 h-5" />
+               </div>
+               <div>
+                  <h3 className="text-sm font-black text-gray-900 border-none">Criar Termo com IA</h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Descreva o procedimento e a IA gera o termo</p>
+               </div>
+            </div>
+
+            <div className="space-y-4">
+               <textarea
+                 value={iaPrompt}
+                 onChange={(e) => setIaPrompt(e.target.value)}
+                 placeholder="Ex: Termo de consentimento para aplicação de ácido hialurônico nos lábios com lista de riscos e cuidados pós-procedimento..."
+                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none resize-none shadow-sm min-h-[80px]"
+                 rows={3}
+               />
+               <button
+                 onClick={handleGenerateWithAI}
+                 disabled={iaGenerating || !iaPrompt.trim()}
+                 className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-purple-600/20"
+               >
+                 {iaGenerating ? (
+                   <><Activity className="w-4 h-4 animate-spin" /> Gerando termo...</>
+                 ) : (
+                   <><Sparkles className="w-4 h-4" /> Gerar com Gemini</>
+                 )}
+               </button>
+
+               {/* Resultado da IA */}
+               {iaResult && (
+                 <div className="mt-4 bg-purple-50/50 border border-purple-100 rounded-3xl p-6 space-y-4 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-black text-purple-700 uppercase tracking-widest">{iaResult.titulo}</h4>
+                      <span className="text-[9px] font-bold text-purple-400 bg-purple-100 px-2 py-1 rounded-lg">Gerado por IA</span>
+                    </div>
+                    <div className="bg-white rounded-2xl border border-purple-100 p-5 max-h-48 overflow-y-auto custom-scrollbar">
+                       <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{iaResult.conteudo}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                       <button
+                         onClick={handleUseAITerm}
+                         className="flex-1 py-3 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-purple-700 transition-all active:scale-95 shadow-lg shadow-purple-600/10"
+                       >
+                         <FileCheck className="w-4 h-4" /> Usar e Solicitar Assinatura
+                       </button>
+                       <button
+                         onClick={() => setIaResult(null)}
+                         className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all"
+                       >
+                         Descartar
+                       </button>
+                    </div>
+                 </div>
+               )}
             </div>
          </div>
       </div>
