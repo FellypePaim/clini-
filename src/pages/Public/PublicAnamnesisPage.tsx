@@ -262,7 +262,7 @@ export function PublicAnamnesisPage() {
                   diabetes_hipertensao: formState.diabetesHipertensao,
                 })),
                 preenchido_em: new Date().toISOString(),
-                token_link: token || null,
+                token_link: token ? token.substring(0, 64) : null,
               }
 
               const { error: anamErr } = await supabase
