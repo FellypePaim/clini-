@@ -608,71 +608,151 @@ Responda APENAS com JSON válido:
         </div>
       )}
 
-      {/* Histórico de Sessões */}
-      <div className="bg-gray-900 rounded-2xl p-6 text-white">
-        <div className="flex items-center justify-between mb-6 opacity-80">
-          <div className="flex items-center gap-3">
-            <History className="w-5 h-5" />
-            <h3 className="text-xs font-black uppercase tracking-widest">Histórico de Avaliações Odontológicas</h3>
-          </div>
-          <span className="text-[10px] font-bold text-gray-500">{sessions.length} registro(s)</span>
-        </div>
-        <div className="space-y-3">
-          {sessions.length > 0 ? sessions.map((s: any) => {
-            const map = s.mapeamento && typeof s.mapeamento === 'object' ? s.mapeamento : {}
-            const dentes = map.dentes ? Object.keys(map.dentes).length : 0
-            const isOpen = expandedSession === s.id
-            return (
-              <div key={s.id}>
-                <div className="p-4 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors">
-                  <div className="flex items-center gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isOpen ? null : s.id)}>
-                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-black uppercase tracking-widest">{new Date(s.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                      <p className="text-[10px] text-gray-400 font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'} · {dentes} dente(s)</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleLoadSession(s)}
-                      className="p-2 text-blue-400 hover:text-blue-300 hover:bg-white/10 rounded-lg transition-colors"
-                      title="Carregar para edição"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteSession(s.id)}
-                      className="p-2 text-red-400 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors"
-                      title="Excluir avaliação"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                    <button onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-2 text-gray-500 hover:text-white transition-colors">
-                      <ChevronDown className={cn("w-4 h-4 transition-transform", isOpen && "rotate-180")} />
-                    </button>
-                  </div>
-                </div>
-                {isOpen && (
-                  <div className="mt-2 p-4 bg-white/5 rounded-xl border border-white/10 space-y-2 animate-fade-in text-xs">
-                    {map.dentes && Object.values(map.dentes).map((d: any) => (
-                      <div key={d.tooth} className="flex items-center justify-between">
-                        <span className="font-bold text-blue-400">Dente {d.tooth}</span>
-                        <span className="text-gray-400">{d.condition} {d.faces?.length ? `(${d.faces.join(',')})` : ''} {d.procedimento_planejado ? `→ ${d.procedimento_planejado}` : ''}</span>
-                      </div>
-                    ))}
-                    {map.plano_tratamento && <p className="text-gray-400 mt-2 whitespace-pre-line border-t border-white/10 pt-2">{map.plano_tratamento}</p>}
-                    {map.observacoes && <p className="text-gray-500 italic">{map.observacoes}</p>}
-                  </div>
-                )}
+      {/* Histórico de Sessões — Visual Interativo */}
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-blue-950 rounded-2xl p-6 text-white overflow-hidden relative">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="relative">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <History className="w-5 h-5 text-blue-400" />
               </div>
-            )
-          }) : (
-            <div className="py-8 text-center opacity-40">
-              <p className="text-xs font-bold uppercase tracking-widest">Nenhuma avaliação anterior registrada</p>
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-widest">Histórico Odontológico</h3>
+                <p className="text-[10px] text-gray-500 font-medium mt-0.5">{sessions.length} avaliação(ões) registrada(s)</p>
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="space-y-4">
+            {sessions.length > 0 ? sessions.map((s: any, sIdx: number) => {
+              const map = s.mapeamento && typeof s.mapeamento === 'object' ? s.mapeamento : {}
+              const dentesObj = map.dentes || {}
+              const dentesArr = Object.values(dentesObj) as any[]
+              const dentesCount = dentesArr.length
+              const isOpen = expandedSession === s.id
+
+              // Mini stats por condição
+              const condStats: Record<string, number> = {}
+              dentesArr.forEach((d: any) => { condStats[d.condition] = (condStats[d.condition] || 0) + 1 })
+
+              return (
+                <div key={s.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isOpen ? "border-blue-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
+                  {/* Header */}
+                  <div className="p-5 flex items-start justify-between">
+                    <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isOpen ? null : s.id)}>
+                      {/* Número da sessão */}
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-blue-500/20 shrink-0">
+                        {sessions.length - sIdx}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-black">{new Date(s.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'}</p>
+
+                        {/* Mini badges de condições */}
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {Object.entries(condStats).map(([cond, count]) => {
+                            const cfg = CONDITIONS.find(c => c.value === cond)
+                            if (!cfg) return null
+                            return (
+                              <span key={cond} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold" style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}>
+                                {cfg.icon} {count} {cfg.label}
+                              </span>
+                            )
+                          })}
+                          {dentesCount === 0 && <span className="text-[10px] text-gray-600">Sem dentes registrados</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button onClick={() => handleLoadSession(s)} className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all" title="Editar">
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => handleDeleteSession(s.id)} className="p-2 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all" title="Excluir">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-2 text-gray-500 hover:text-white rounded-lg transition-all">
+                        <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", isOpen && "rotate-180")} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isOpen && (
+                    <div className="px-5 pb-5 animate-fade-in space-y-4">
+                      {/* Mini Odontograma Visual */}
+                      {dentesCount > 0 && (
+                        <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Mapa Dental</p>
+                          <div className="flex flex-wrap gap-1 justify-center">
+                            {[...Array(32)].map((_, i) => {
+                              const toothNum = i < 8 ? 18 - i : i < 16 ? 21 + (i - 8) : i < 24 ? 38 - (i - 16) : 41 + (i - 24)
+                              const d = dentesObj[toothNum]
+                              const cfg = d ? CONDITIONS.find(c => c.value === d.condition) : null
+                              return (
+                                <div
+                                  key={toothNum}
+                                  className={cn("w-6 h-7 rounded text-[8px] font-bold flex items-center justify-center border", i === 8 || i === 24 ? 'ml-2' : '')}
+                                  style={cfg ? { backgroundColor: `${cfg.color}25`, borderColor: `${cfg.color}50`, color: cfg.color } : { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)', color: '#4b5563' }}
+                                  title={d ? `${toothNum}: ${d.condition}` : `${toothNum}`}
+                                >
+                                  {d ? cfg?.icon : toothNum}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Detalhes por dente */}
+                      {dentesCount > 0 && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {dentesArr.map((d: any) => {
+                            const cfg = CONDITIONS.find(c => c.value === d.condition)
+                            return (
+                              <div key={d.tooth} className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg border border-white/5 text-xs">
+                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0" style={{ backgroundColor: `${cfg?.color || '#666'}20`, color: cfg?.color || '#666' }}>
+                                  {d.tooth}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold" style={{ color: cfg?.color }}>{cfg?.label}</span>
+                                    {d.faces?.length > 0 && <span className="text-gray-500">({d.faces.join(',')})</span>}
+                                  </div>
+                                  {d.procedimento_planejado && <p className="text-gray-400 text-[10px] truncate">{d.procedimento_planejado}</p>}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {/* Plano e observações */}
+                      {map.plano_tratamento && (
+                        <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10">
+                          <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><FileText className="w-3 h-3" /> Plano de Tratamento</p>
+                          <p className="text-xs text-gray-300 whitespace-pre-line leading-relaxed">{map.plano_tratamento}</p>
+                        </div>
+                      )}
+                      {map.observacoes && (
+                        <p className="text-xs text-gray-500 italic px-1">{map.observacoes}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            }) : (
+              <div className="py-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-gray-700" />
+                </div>
+                <p className="text-xs font-black text-gray-600 uppercase tracking-widest">Nenhuma avaliação anterior</p>
+                <p className="text-[10px] text-gray-700 mt-1">Preencha o odontograma acima e salve</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

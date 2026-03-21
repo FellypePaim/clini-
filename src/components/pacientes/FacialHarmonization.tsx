@@ -313,62 +313,96 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
             </div>
          </div>
 
-         {/* History of sessions */}
-         <div className="bg-gray-900 rounded-[40px] p-8 text-white">
-            <div className="flex items-center justify-between mb-8 opacity-80">
-               <div className="flex items-center gap-3">
-                 <History className="w-5 h-5" />
-                 <h3 className="text-sm font-black uppercase tracking-widest">Histórico de Sessões</h3>
-               </div>
-               <span className="text-[10px] font-bold text-gray-500">{sessions.length} sessão(ões)</span>
-            </div>
-
-            <div className="space-y-4">
-               {sessions.length > 0 ? sessions.map((session: any) => {
-                 const mapeamento = session.mapeamento && typeof session.mapeamento === 'object' ? session.mapeamento : {}
-                 const zonas = Array.isArray(mapeamento.zonas) ? mapeamento.zonas : []
-                 const profNome = (session.profiles as any)?.nome_completo || 'Profissional'
-                 const isExpanded = expandedSession === session.id
-                 return (
-                   <div key={session.id}>
-                     <div
-                       onClick={() => setExpandedSession(isExpanded ? null : session.id)}
-                       className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group"
-                     >
-                       <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
-                             <Calendar className="w-5 h-5 text-green-400" />
-                          </div>
-                          <div>
-                             <p className="text-xs font-black uppercase tracking-widest">
-                               {new Date(session.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-                             </p>
-                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">{profNome} · {zonas.length} zona(s)</p>
-                          </div>
-                       </div>
-                       <ChevronDown className={cn("w-5 h-5 text-gray-600 group-hover:text-white transition-all", isExpanded && "rotate-180")} />
-                     </div>
-                     {isExpanded && (
-                       <div className="mt-2 p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2 animate-fade-in">
-                         {zonas.map((z: any, i: number) => (
-                           <div key={i} className="flex items-center justify-between text-xs">
-                             <span className="font-bold text-green-400">{z.label || z.id}</span>
-                             <span className="text-gray-400">{z.procedimento} · {z.produto || '—'} ({z.quantidade || '—'})</span>
-                           </div>
-                         ))}
-                         {mapeamento.url && (
-                           <a href={mapeamento.url} target="_blank" rel="noopener noreferrer" className="block mt-3 text-[10px] font-bold text-green-400 hover:text-green-300 uppercase tracking-widest">Ver Mapa Salvo →</a>
-                         )}
-                         {zonas.length === 0 && <p className="text-xs text-gray-500 italic">Sem detalhes de zonas registrados</p>}
-                       </div>
-                     )}
+         {/* History of sessions — Visual Interativo */}
+         <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-950 rounded-[40px] p-8 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-green-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+            <div className="relative">
+              <div className="flex items-center justify-between mb-8">
+                 <div className="flex items-center gap-3">
+                   <div className="w-10 h-10 rounded-2xl bg-green-500/20 flex items-center justify-center">
+                     <History className="w-5 h-5 text-green-400" />
                    </div>
-                 )
-               }) : (
-                 <div className="py-8 text-center opacity-40">
-                    <p className="text-xs font-bold uppercase tracking-widest">Nenhuma sessão anterior registrada</p>
+                   <div>
+                     <h3 className="text-sm font-black uppercase tracking-widest">Sessões de Harmonização</h3>
+                     <p className="text-[10px] text-gray-500 font-medium mt-0.5">{sessions.length} sessão(ões) registrada(s)</p>
+                   </div>
                  </div>
-               )}
+              </div>
+
+              <div className="space-y-4">
+                 {sessions.length > 0 ? sessions.map((session: any, sIdx: number) => {
+                   const mapeamento = session.mapeamento && typeof session.mapeamento === 'object' ? session.mapeamento : {}
+                   const zonas = Array.isArray(mapeamento.zonas) ? mapeamento.zonas : []
+                   const profNome = (session.profiles as any)?.nome_completo || 'Profissional'
+                   const isExpanded = expandedSession === session.id
+
+                   // Agrupar por procedimento
+                   const procGroups: Record<string, number> = {}
+                   zonas.forEach((z: any) => { procGroups[z.procedimento || 'outro'] = (procGroups[z.procedimento || 'outro'] || 0) + 1 })
+
+                   const PROC_COLORS: Record<string, string> = { botox: '#22c55e', preenchimento: '#3b82f6', biorevolumizador: '#a855f7', fios: '#f59e0b', outros: '#6b7280' }
+
+                   return (
+                     <div key={session.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isExpanded ? "border-green-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
+                       <div className="p-5 flex items-start justify-between">
+                         <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isExpanded ? null : session.id)}>
+                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-green-500/20 shrink-0">
+                             {sessions.length - sIdx}
+                           </div>
+                           <div className="flex-1 min-w-0">
+                             <p className="text-sm font-black">{new Date(session.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">{profNome}</p>
+                             {/* Mini badges */}
+                             <div className="flex flex-wrap gap-1.5 mt-3">
+                               {Object.entries(procGroups).map(([proc, count]) => (
+                                 <span key={proc} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold capitalize" style={{ backgroundColor: `${PROC_COLORS[proc] || '#666'}20`, color: PROC_COLORS[proc] || '#666' }}>
+                                   {count}x {proc}
+                                 </span>
+                               ))}
+                               {zonas.length === 0 && <span className="text-[10px] text-gray-600">Sem zonas registradas</span>}
+                             </div>
+                           </div>
+                         </div>
+                         <button onClick={() => setExpandedSession(isExpanded ? null : session.id)} className="p-2 text-gray-500 hover:text-white rounded-lg transition-all shrink-0">
+                           <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", isExpanded && "rotate-180")} />
+                         </button>
+                       </div>
+
+                       {isExpanded && (
+                         <div className="px-5 pb-5 animate-fade-in space-y-3">
+                           {zonas.map((z: any, i: number) => {
+                             const pc = PROC_COLORS[z.procedimento] || '#666'
+                             return (
+                               <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 text-xs">
+                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${pc}20` }}>
+                                   <Sparkles className="w-4 h-4" style={{ color: pc }} />
+                                 </div>
+                                 <div className="flex-1 min-w-0">
+                                   <span className="font-bold text-white">{z.label || z.id}</span>
+                                   <p className="text-gray-400 text-[10px] mt-0.5">{z.procedimento} · {z.produto || '—'} ({z.quantidade || '—'})</p>
+                                 </div>
+                               </div>
+                             )
+                           })}
+                           {mapeamento.url && (
+                             <a href={mapeamento.url} target="_blank" rel="noopener noreferrer" className="block p-3 bg-green-500/10 rounded-xl border border-green-500/20 text-[10px] font-bold text-green-400 hover:text-green-300 uppercase tracking-widest text-center transition-all hover:bg-green-500/20">
+                               Ver Mapa Facial Salvo →
+                             </a>
+                           )}
+                         </div>
+                       )}
+                     </div>
+                   )
+                 }) : (
+                   <div className="py-12 text-center">
+                     <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+                       <Sparkles className="w-8 h-8 text-gray-700" />
+                     </div>
+                     <p className="text-xs font-black text-gray-600 uppercase tracking-widest">Nenhuma sessão registrada</p>
+                     <p className="text-[10px] text-gray-700 mt-1">Selecione zonas no mapa acima e salve</p>
+                   </div>
+                 )}
+              </div>
             </div>
          </div>
 
