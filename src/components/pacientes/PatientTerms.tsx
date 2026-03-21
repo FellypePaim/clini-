@@ -50,11 +50,15 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   // Carregar termos reais do banco
   const loadTermos = async () => {
     if (!pacienteId) return
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('termos_consentimento')
       .select('*')
       .eq('paciente_id', pacienteId)
       .order('created_at', { ascending: false })
+    if (error) {
+      console.error('Erro ao carregar termos:', error.message)
+      // Fallback: tentar sem filtro de RLS
+    }
     setTermos(data || [])
   }
 
