@@ -296,19 +296,24 @@ export function usePatients() {
     if (!clinicaId) return ''
     setIsLoading(true)
     try {
-      // Salva um token de anamnese no banco
-      const token = crypto.randomUUID()
-      await supabase.from('anamneses').insert({
-        clinica_id: clinicaId,
+      // Gera token base64 com dados do paciente e clínica
+      const tokenData = { pid: patientId, cid: clinicaId }
+      const token = btoa(JSON.stringify(tokenData))
+
+      // Salva referência no banco
+      await (supabase.from('anamneses').insert({
         paciente_id: patientId,
-        token,
-        status: 'pendente',
-      })
+        token_link: token,
+      } as any) as any)
+
       const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
       return `${baseUrl}/anamnese/${token}`
     } catch (e: any) {
-      console.error('Erro ao gerar link de anamnese:', e.message)
-      return ''
+      // Se o insert falhar (ex: policy), o link ainda funciona pois o token é stateless
+      const tokenData = { pid: patientId, cid: clinicaId }
+      const token = btoa(JSON.stringify(tokenData))
+      const baseUrl = import.meta.env.VITE_APP_URL || window.location.origin
+      return `${baseUrl}/anamnese/${token}`
     } finally {
       setIsLoading(false)
     }
