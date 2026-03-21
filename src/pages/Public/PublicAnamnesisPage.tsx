@@ -3,7 +3,6 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { CheckCircle, AlertCircle, Send, ClipboardList, Activity, Heart, Info, Stethoscope, FileCheck, Stamp, Lock, Maximize2 } from 'lucide-react'
 import SignatureCanvas from 'react-signature-canvas'
 import { useRef } from 'react'
-import { usePatients } from '../../hooks/usePatients'
 import { StorageHelpers } from '../../lib/storage'
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
@@ -21,7 +20,6 @@ export function PublicAnamnesisPage() {
   const [clinicaId, setClinicaId] = useState<string | null>(null)
   const [termoId, setTermoId] = useState<string | null>(null)
 
-  const { getPatientById } = usePatients()
   const sigPad = useRef<SignatureCanvas>(null)
 
   const [patient, setPatient] = useState<(Patient & { clinica_id?: string, clinicaId?: string }) | null>(null)
@@ -54,10 +52,22 @@ export function PublicAnamnesisPage() {
         setTermoId(decoded.tid || null)
         setClinicaId(decoded.cid || null)
 
+        // Busca direta sem depender de auth (página pública)
         if (decoded.pid) {
-          const p = await getPatientById(decoded.pid)
-          setPatient(p)
-          if (p) setClinicaId((p as any).clinicaId || (p as any).clinica_id || decoded.cid)
+          const { data: pData } = await supabase
+            .from('pacientes')
+            .select('id, nome_completo, clinica_id')
+            .eq('id', decoded.pid)
+            .single()
+
+          if (pData) {
+            setPatient({
+              id: pData.id,
+              nome: pData.nome_completo,
+              clinicaId: pData.clinica_id,
+            } as any)
+            setClinicaId(pData.clinica_id || decoded.cid)
+          }
         }
       } catch (err) {
         console.error('Falha ao decodificar token de anamnese:', err)
@@ -66,7 +76,7 @@ export function PublicAnamnesisPage() {
       }
     }
     load()
-  }, [token, getPatientById])
+  }, [token])
 
   const handleSignTerm = async () => {
     const clinica = patient?.clinicaId || patient?.clinica_id;
