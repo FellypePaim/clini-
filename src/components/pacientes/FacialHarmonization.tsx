@@ -91,7 +91,28 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
 
     try {
       // SVG -> Canvas -> Blob using html2canvas
-      const canvas = await html2canvas(mapRef.current, { backgroundColor: null, scale: 2 })
+      // Forçar cores RGB no elemento antes de capturar (html2canvas não suporta oklch do Tailwind 4)
+      const el = mapRef.current
+      const originalBg = el.style.backgroundColor
+      el.style.backgroundColor = '#ffffff'
+      const canvas = await html2canvas(el, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        onclone: (doc: Document) => {
+          // Substituir oklch por fallback em todos os elementos clonados
+          doc.querySelectorAll('*').forEach((node) => {
+            const computed = window.getComputedStyle(node as Element)
+            const style = (node as HTMLElement).style
+            try {
+              if (computed.color?.includes('oklch')) style.color = '#000000'
+              if (computed.backgroundColor?.includes('oklch')) style.backgroundColor = 'transparent'
+              if (computed.borderColor?.includes('oklch')) style.borderColor = '#e5e7eb'
+            } catch {}
+          })
+        }
+      })
+      el.style.backgroundColor = originalBg
       // Usa WebP para melhor compressão e performance
       const dataURL = canvas.toDataURL('image/webp', 0.8)
       const res = await fetch(dataURL)
