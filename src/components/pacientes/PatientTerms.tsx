@@ -155,11 +155,20 @@ Responda APENAS com JSON válido nesta estrutura:
 
     try {
       setIsSaving(true)
-      const dataURL = sigPad.current?.getTrimmedCanvas().toDataURL('image/webp', 0.6)
-      // Convert canvas DataURL to Blob
-      const res = await fetch(dataURL!)
-      const blob = await res.blob()
-      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}.webp`, { type: 'image/webp' })
+      // Usar getCanvas() em vez de getTrimmedCanvas() para evitar
+      // bug de interop do trim-canvas com Vite 8 / rolldown
+      const canvas = sigPad.current?.getCanvas()
+      if (!canvas) throw new Error('Não foi possível capturar a assinatura.')
+
+      // Converter canvas para Blob (PNG como fallback universal)
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => {
+          if (b) resolve(b)
+          else reject(new Error('Falha ao converter assinatura para imagem.'))
+        }, 'image/png')
+      })
+
+      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}_${Date.now()}.png`, { type: 'image/png' })
 
       // Upload to storage
       const stored = await StorageHelpers.uploadTermo(clinicaId, pacienteId, file)
@@ -170,15 +179,16 @@ Responda APENAS com JSON válido nesta estrutura:
         paciente_id: pacienteId,
         tipo: 'consentimento',
         titulo: activeTemplate?.titulo,
+        descricao: activeTemplate?.desc || null,
         assinatura_url: stored.url,
         assinado_em: new Date().toISOString()
-      })
+      } as any)
 
       await loadTermos()
       toast({ title: 'Sucesso', description: 'Termo assinado e salvo com sucesso.', type: 'success' })
       setShowSignModal(false)
     } catch (e: any) {
-      toast({ title: 'Erro', description: e.message, type: 'error' })
+      toast({ title: 'Erro', description: e.message || 'Falha ao salvar termo.', type: 'error' })
     } finally {
       setIsSaving(false)
     }
