@@ -291,6 +291,58 @@ export function usePatients() {
     }
   }, [clinicaId, toast])
 
+  // ── Deletar consulta da timeline ──────────────────────────────────────
+  const deleteConsulta = useCallback(async (consultaId: string) => {
+    if (!clinicaId) return
+    try {
+      const { error: pbErr } = await supabase
+        .from('consultas')
+        .delete()
+        .eq('id', consultaId)
+        .eq('clinica_id', clinicaId)
+      if (pbErr) throw pbErr
+      toast({ title: 'Sucesso', description: 'Atendimento removido.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao excluir.', type: 'error' })
+    }
+  }, [clinicaId, toast])
+
+  // ── Deletar anamnese ────────────────────────────────────────────────
+  const deleteAnamnese = useCallback(async (anamneseId: string) => {
+    if (!clinicaId) return
+    try {
+      const { error: pbErr } = await supabase
+        .from('anamneses')
+        .delete()
+        .eq('id', anamneseId)
+      if (pbErr) throw pbErr
+      toast({ title: 'Sucesso', description: 'Anamnese removida.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao excluir.', type: 'error' })
+    }
+  }, [clinicaId, toast])
+
+  // ── Criar orçamento para paciente ───────────────────────────────────
+  const createOrcamento = useCallback(async (pacienteId: string, data: { descricao: string; valor: number }) => {
+    if (!clinicaId) return
+    try {
+      const { error: pbErr } = await supabase
+        .from('orcamentos')
+        .insert({
+          clinica_id: clinicaId,
+          paciente_id: pacienteId,
+          descricao: data.descricao,
+          valor_total: data.valor,
+          status: 'pendente',
+          tipo: 'orcamento',
+        } as any)
+      if (pbErr) throw pbErr
+      toast({ title: 'Sucesso', description: 'Orçamento criado.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao criar orçamento.', type: 'error' })
+    }
+  }, [clinicaId, toast])
+
   // ── Gerar link de anamnese ────────────────────────────────────────────
   const sendAnamnesisLink = useCallback(async (patientId: string) => {
     if (!clinicaId) return ''
@@ -331,5 +383,8 @@ export function usePatients() {
     createPatient,
     updatePatient,
     sendAnamnesisLink,
+    deleteConsulta,
+    deleteAnamnese,
+    createOrcamento,
   }
 }

@@ -44,7 +44,7 @@ export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
-  const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink } = usePatients()
+  const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink, deleteConsulta, deleteAnamnese, createOrcamento } = usePatients()
   const { saveEvolution, saveHarmonizationSession, generatePrescription } = useProntuario()
   const { toast } = useToast()
   
@@ -61,6 +61,8 @@ export function PatientProfilePage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingAnamnesis, setIsSavingAnamnesis] = useState(false)
+  const [showOrcamentoModal, setShowOrcamentoModal] = useState(false)
+  const [orcamentoForm, setOrcamentoForm] = useState({ descricao: '', valor: '' })
   const { updatePatient } = usePatients()
 
   const [anamneseForm, setAnamneseForm] = useState({
@@ -249,10 +251,9 @@ export function PatientProfilePage() {
               <div className="relative pl-8 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
                 {history.length > 0 ? (
                   history.map((apt, idx) => (
-                    <div 
-                      key={apt.id} 
-                      className="relative group/apt cursor-pointer"
-                      onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
+                    <div
+                      key={apt.id}
+                      className="relative group/apt"
                     >
                       {/* Timeline dot */}
                       <div className={cn(
@@ -261,25 +262,51 @@ export function PatientProfilePage() {
                       )}>
                         {idx === 0 && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
                       </div>
-                      
+
                       <div className="group-hover/apt:translate-x-1 transition-transform">
-                        <div className="flex items-center gap-3 mb-1">
-                          <span className="text-xs font-bold text-gray-900">{new Date(apt.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                          <span className="text-[10px] uppercase font-bold text-gray-400">{apt.horaInicio}</span>
-                          <Badge variant="gray" className="text-[10px] px-2 py-0 h-4">{apt.procedimento}</Badge>
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-gray-900">{new Date(apt.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
+                            <span className="text-[10px] uppercase font-bold text-gray-400">{apt.horaInicio}</span>
+                            <Badge variant="gray" className="text-[10px] px-2 py-0 h-4">{apt.procedimento}</Badge>
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
+                              className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Editar evolução"
+                            >
+                              <Stethoscope className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm('Excluir este atendimento da linha do tempo?')) return
+                                await deleteConsulta(apt.id)
+                                const h = await getPatientHistory(id!)
+                                setHistory(h)
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Excluir atendimento"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                           <User className="w-3.5 h-3.5" />
                           <span>Atendido por <span className="font-semibold text-gray-700">{apt.profissionalNome}</span></span>
                         </div>
-                        <div className="p-4 bg-gray-50 group-hover/apt:bg-green-50/50 group-hover/apt:border-green-100 rounded-2xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all">
+                        <div
+                          onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
+                          className="p-4 bg-gray-50 group-hover/apt:bg-green-50/50 group-hover/apt:border-green-100 rounded-2xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
+                        >
                           <div className="flex items-center justify-between mb-2">
                              <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
                                <FileText className="w-3 h-3" /> Evolução Clínica
                              </span>
                              <span className="text-[9px] font-bold text-green-600 opacity-0 group-hover/apt:opacity-100">Clique para editar</span>
                           </div>
-                          <p className="italic">"Consulta realizada com sucesso. Paciente relata melhora nos sintomas..."</p>
+                          <p className="italic">{apt.observacoes || 'Sem evolução registrada — clique para adicionar'}</p>
                         </div>
                       </div>
                     </div>
@@ -368,7 +395,11 @@ export function PatientProfilePage() {
 
           {/* Histórico de Respostas do Paciente */}
           {anamneseHistory.length > 0 && (
-            <AnamneseHistorySection history={anamneseHistory} />
+            <AnamneseHistorySection history={anamneseHistory} onDelete={async (anamId: string) => {
+              await deleteAnamnese(anamId)
+              const { data } = await supabase.from('anamneses').select('*').eq('paciente_id', id!).order('created_at', { ascending: false })
+              setAnamneseHistory(data || [])
+            }} />
           )}
           </div>
         )}
@@ -384,7 +415,7 @@ export function PatientProfilePage() {
                 <h3 className="text-lg font-bold text-gray-900">Histórico Financeiro</h3>
                 <p className="text-sm text-gray-400">Orçamentos e faturas vinculadas ao paciente</p>
               </div>
-              <button className="btn-secondary">
+              <button className="btn-secondary" onClick={() => setShowOrcamentoModal(true)}>
                 <Plus className="w-4 h-4" /> Novo Orçamento
               </button>
             </div>
@@ -442,6 +473,57 @@ export function PatientProfilePage() {
           <PatientTerms pacienteId={patient.id} />
         )}
       </div>
+
+      {/* Modal Novo Orçamento */}
+      {showOrcamentoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowOrcamentoModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-slide-in">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-gray-900">Novo Orçamento</h3>
+              <button onClick={() => setShowOrcamentoModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <Plus className="w-5 h-5 rotate-45" />
+              </button>
+            </div>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              if (!orcamentoForm.descricao.trim() || !orcamentoForm.valor) return
+              await createOrcamento(patient.id, { descricao: orcamentoForm.descricao, valor: parseFloat(orcamentoForm.valor) })
+              const f = await getPatientFinancial(patient.id)
+              setFinancial(f)
+              setOrcamentoForm({ descricao: '', valor: '' })
+              setShowOrcamentoModal(false)
+            }} className="p-6 space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">Descrição</label>
+                <input
+                  value={orcamentoForm.descricao}
+                  onChange={(e) => setOrcamentoForm(p => ({ ...p, descricao: e.target.value }))}
+                  className="input-base"
+                  placeholder="Ex: Limpeza + Clareamento..."
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-gray-500 uppercase">Valor (R$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={orcamentoForm.valor}
+                  onChange={(e) => setOrcamentoForm(p => ({ ...p, valor: e.target.value }))}
+                  className="input-base"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button type="button" onClick={() => setShowOrcamentoModal(false)} className="flex-1 btn-secondary">Cancelar</button>
+                <button type="submit" className="flex-1 btn-primary">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Anamnesis Modal (QR Code) */}
       {isAnamnesisModalOpen && (
@@ -507,7 +589,7 @@ export function PatientProfilePage() {
 
 const ANAMNESE_PAGE_SIZE = 5
 
-function AnamneseHistorySection({ history }: { history: any[] }) {
+function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelete?: (id: string) => void }) {
   const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -540,20 +622,31 @@ function AnamneseHistorySection({ history }: { history: any[] }) {
                   <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">{dateLabel}</span>
                   <span className="text-xs text-gray-500 truncate max-w-[250px]">{anam.queixa_principal || 'Sem queixa informada'}</span>
                 </div>
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : (anam.id || idx.toString()))}
-                  className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 shrink-0 ml-3"
-                  style={isExpanded
-                    ? { background: '#f0fdf4', color: '#15803d', borderColor: '#bbf7d0' }
-                    : { background: 'white', color: '#6b7280', borderColor: '#e5e7eb' }
-                  }
-                >
-                  {isExpanded ? (
-                    <><ChevronLeft className="w-3.5 h-3.5 rotate-90" /> Ocultar</>
-                  ) : (
-                    <><FileText className="w-3.5 h-3.5" /> Ver Detalhes</>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : (anam.id || idx.toString()))}
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5"
+                    style={isExpanded
+                      ? { background: '#f0fdf4', color: '#15803d', borderColor: '#bbf7d0' }
+                      : { background: 'white', color: '#6b7280', borderColor: '#e5e7eb' }
+                    }
+                  >
+                    {isExpanded ? (
+                      <><ChevronLeft className="w-3.5 h-3.5 rotate-90" /> Ocultar</>
+                    ) : (
+                      <><FileText className="w-3.5 h-3.5" /> Ver Detalhes</>
+                    )}
+                  </button>
+                  {onDelete && anam.id && (
+                    <button
+                      onClick={() => { if (confirm('Excluir esta anamnese?')) onDelete(anam.id) }}
+                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200 transition-colors"
+                      title="Excluir anamnese"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   )}
-                </button>
+                </div>
               </div>
 
               {/* Detalhes expandidos */}
