@@ -51,7 +51,20 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
   const [activeZoneId, setActiveZoneId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fotosRegistro, setFotosRegistro] = useState<StorageFile[]>([])
+  const [sessions, setSessions] = useState<any[]>([])
+  const [expandedSession, setExpandedSession] = useState<string | null>(null)
   const mapRef = useRef<HTMLDivElement>(null)
+
+  // Carregar histórico de sessões do banco
+  useState(() => {
+    if (!pacienteId) return
+    supabase
+      .from('harmonizacoes')
+      .select('*, profiles:profissional_id(nome_completo)')
+      .eq('paciente_id', pacienteId)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setSessions(data) })
+  })
 
   const activeZoneConfig = useMemo(() => ZONES_CONFIG.find(z => z.id === activeZoneId), [activeZoneId])
   const activeZoneData   = useMemo(() => selectedZones.find(z => z.id === activeZoneId), [selectedZones, activeZoneId])
@@ -134,6 +147,14 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
       // Wait original hook callback if any
       await onSave(selectedZones)
       
+      // Recarregar sessões após salvar
+      const { data: refreshed } = await supabase
+        .from('harmonizacoes')
+        .select('*, profiles:profissional_id(nome_completo)')
+        .eq('paciente_id', pacienteId)
+        .order('created_at', { ascending: false })
+      if (refreshed) setSessions(refreshed)
+
       toast({ title: 'Sucesso', description: 'Mapeamento facial salvo com sucesso.', type: 'success' })
     } catch(err: any) {
       toast({ title: 'Erro ao salvar', description: err.message, type: 'error' })
@@ -299,23 +320,55 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                  <History className="w-5 h-5" />
                  <h3 className="text-sm font-black uppercase tracking-widest">Histórico de Sessões</h3>
                </div>
-               <ChevronDown className="w-5 h-5 opacity-40" />
+               <span className="text-[10px] font-bold text-gray-500">{sessions.length} sessão(ões)</span>
             </div>
 
             <div className="space-y-4">
-               {/* Fixed mock item */}
-               <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group">
-                  <div className="flex items-center gap-4">
-                     <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
-                        <Calendar className="w-5 h-5 text-green-400" />
+               {sessions.length > 0 ? sessions.map((session: any) => {
+                 const mapeamento = session.mapeamento && typeof session.mapeamento === 'object' ? session.mapeamento : {}
+                 const zonas = Array.isArray(mapeamento.zonas) ? mapeamento.zonas : []
+                 const profNome = (session.profiles as any)?.nome_completo || 'Profissional'
+                 const isExpanded = expandedSession === session.id
+                 return (
+                   <div key={session.id}>
+                     <div
+                       onClick={() => setExpandedSession(isExpanded ? null : session.id)}
+                       className="p-4 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer group"
+                     >
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center">
+                             <Calendar className="w-5 h-5 text-green-400" />
+                          </div>
+                          <div>
+                             <p className="text-xs font-black uppercase tracking-widest">
+                               {new Date(session.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                             </p>
+                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">{profNome} · {zonas.length} zona(s)</p>
+                          </div>
+                       </div>
+                       <ChevronDown className={cn("w-5 h-5 text-gray-600 group-hover:text-white transition-all", isExpanded && "rotate-180")} />
                      </div>
-                     <div>
-                        <p className="text-xs font-black uppercase tracking-widest">20 de Janeiro, 2026</p>
-                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">Dra. Julia Ramos · 2 procedimentos</p>
-                     </div>
-                  </div>
-                  <Plus className="w-5 h-5 text-gray-600 group-hover:text-white transition-colors" />
-               </div>
+                     {isExpanded && (
+                       <div className="mt-2 p-4 bg-white/5 rounded-2xl border border-white/10 space-y-2 animate-fade-in">
+                         {zonas.map((z: any, i: number) => (
+                           <div key={i} className="flex items-center justify-between text-xs">
+                             <span className="font-bold text-green-400">{z.label || z.id}</span>
+                             <span className="text-gray-400">{z.procedimento} · {z.produto || '—'} ({z.quantidade || '—'})</span>
+                           </div>
+                         ))}
+                         {mapeamento.url && (
+                           <a href={mapeamento.url} target="_blank" rel="noopener noreferrer" className="block mt-3 text-[10px] font-bold text-green-400 hover:text-green-300 uppercase tracking-widest">Ver Mapa Salvo →</a>
+                         )}
+                         {zonas.length === 0 && <p className="text-xs text-gray-500 italic">Sem detalhes de zonas registrados</p>}
+                       </div>
+                     )}
+                   </div>
+                 )
+               }) : (
+                 <div className="py-8 text-center opacity-40">
+                    <p className="text-xs font-bold uppercase tracking-widest">Nenhuma sessão anterior registrada</p>
+                 </div>
+               )}
             </div>
          </div>
 
