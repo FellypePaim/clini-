@@ -38,12 +38,13 @@ import { PrescriptionModal } from '../../components/pacientes/PrescriptionModal'
 import { FacialHarmonization } from '../../components/pacientes/FacialHarmonization'
 import { PatientTerms } from '../../components/pacientes/PatientTerms'
 import { PatientDocumentsTab } from '../../components/pacientes/PatientDocumentsTab'
+import { DentalMapping } from '../../components/pacientes/DentalMapping'
 import type { EvolutionRecord, PrescriptionItem } from '../../types/prontuario'
 
 export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
+  const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'odontograma' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
   const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink, deleteConsulta, deleteAnamnese, createOrcamento } = usePatients()
   const { saveEvolution, saveHarmonizationSession, generatePrescription } = useProntuario()
   const { toast } = useToast()
@@ -196,7 +197,7 @@ export function PatientProfilePage() {
 
       {/* Tabs Menu */}
       <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-100 shrink-0 overflow-x-auto">
-        {(['resumo', 'anamnese', 'documentos', 'financeiro', 'harmonizacao', 'termos'] as const).map(tab => (
+        {(['resumo', 'anamnese', 'odontograma', 'documentos', 'financeiro', 'harmonizacao', 'termos'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -207,11 +208,12 @@ export function PatientProfilePage() {
           >
             {tab === 'resumo' && <Activity className="w-4 h-4" />}
             {tab === 'anamnese' && <ClipboardList className="w-4 h-4" />}
+            {tab === 'odontograma' && <Stethoscope className="w-4 h-4" />}
             {tab === 'documentos' && <FileText className="w-4 h-4" />}
             {tab === 'financeiro' && <Wallet className="w-4 h-4" />}
             {tab === 'harmonizacao' && <Sparkles className="w-4 h-4" />}
             {tab === 'termos' && <UserCheck className="w-4 h-4" />}
-            {tab.replace('harmonizacao', 'Harmonização')}
+            {tab.replace('harmonizacao', 'Harmonização').replace('odontograma', 'Odontograma')}
           </button>
         ))}
       </div>
@@ -402,6 +404,10 @@ export function PatientProfilePage() {
             }} />
           )}
           </div>
+        )}
+
+        {activeTab === 'odontograma' && (
+          <DentalMapping pacienteId={patient.id} />
         )}
 
         {activeTab === 'documentos' && (
