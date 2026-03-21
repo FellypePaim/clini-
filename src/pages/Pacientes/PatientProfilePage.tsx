@@ -23,6 +23,7 @@ import {
 import { usePatients } from '../../hooks/usePatients'
 import { useProntuario } from '../../hooks/useProntuario'
 import { useToast } from '../../hooks/useToast'
+import { supabase } from '../../lib/supabase'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
@@ -68,6 +69,9 @@ export function PatientProfilePage() {
     habitos: { fumante: false, etilista: false, atividadeFisica: 'Nenhuma' }
   })
 
+  // Histórico de anamneses preenchidas (tabela anamneses)
+  const [anamneseHistory, setAnamneseHistory] = useState<any[]>([])
+
   useEffect(() => {
     async function loadData() {
       if (!id) return
@@ -89,6 +93,15 @@ export function PatientProfilePage() {
         antecedentesFamiliares: p?.antecedentesFamiliares || '',
         habitos: p?.habitos || { fumante: false, etilista: false, atividadeFisica: 'Nenhuma' }
       })
+
+      // Carregar histórico de anamneses da tabela anamneses
+      const { data: anamData } = await supabase
+        .from('anamneses')
+        .select('*')
+        .eq('paciente_id', id)
+        .order('created_at', { ascending: false })
+      setAnamneseHistory(anamData || [])
+
       setIsLoading(false)
     }
     loadData()
@@ -278,11 +291,79 @@ export function PatientProfilePage() {
         )}
 
         {activeTab === 'anamnese' && (
+          <div className="space-y-6">
+            {/* Histórico de Anamneses Preenchidas pelo Paciente */}
+            {anamneseHistory.length > 0 && (
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+                <div className="mb-6 border-b border-gray-100 pb-4">
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <ClipboardList className="w-5 h-5 text-green-600" /> Respostas do Paciente
+                  </h3>
+                  <p className="text-sm text-gray-400">{anamneseHistory.length} anamnese(s) preenchida(s) pelo paciente via link</p>
+                </div>
+                <div className="space-y-4">
+                  {anamneseHistory.map((anam: any, idx: number) => {
+                    const habitos = typeof anam.habitos === 'object' ? anam.habitos : {}
+                    const extras = typeof anam.dados_extras === 'object' ? anam.dados_extras : {}
+                    return (
+                      <div key={anam.id || idx} className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">
+                            Preenchido em {anam.preenchido_em ? new Date(anam.preenchido_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date(anam.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Queixa Principal</p>
+                            <p className="text-gray-800 font-medium">{anam.queixa_principal || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Medicamentos em Uso</p>
+                            <p className="text-gray-800 font-medium">{anam.medicamentos_uso || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Alergias</p>
+                            <p className="text-gray-800 font-medium">{anam.alergias || '—'}</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Histórico Médico</p>
+                            <p className="text-gray-800 font-medium">{anam.historico_medico || '—'}</p>
+                          </div>
+                          {(habitos.fuma !== undefined || habitos.alcool !== undefined || habitos.atividade_fisica) && (
+                            <div className="col-span-full">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hábitos</p>
+                              <div className="flex flex-wrap gap-2">
+                                {habitos.fuma && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Fumante</span>}
+                                {habitos.alcool && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold border border-orange-100">Etilista</span>}
+                                {habitos.atividade_fisica && <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">Ativ. Física: {habitos.atividade_fisica}</span>}
+                                {!habitos.fuma && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não fuma</span>}
+                                {!habitos.alcool && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não etilista</span>}
+                              </div>
+                            </div>
+                          )}
+                          {(extras.alergia_medicamentos || extras.problemas_cardiacos || extras.diabetes_hipertensao) && (
+                            <div className="col-span-full">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Condições Informadas</p>
+                              <div className="flex flex-wrap gap-2">
+                                {extras.alergia_medicamentos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Alergia a Medicamentos</span>}
+                                {extras.problemas_cardiacos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Problemas Cardíacos</span>}
+                                {extras.diabetes_hipertensao && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Diabetes/Hipertensão</span>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
           <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Anamnese Digital</h3>
-                <p className="text-sm text-gray-400">Histórico clínico detalhado do paciente</p>
+                <p className="text-sm text-gray-400">Edição manual pelo profissional</p>
               </div>
               <button className="btn-primary" onClick={handleSaveAnamnesis} disabled={isSavingAnamnesis}>
                 {isSavingAnamnesis ? 'Salvando...' : 'Salvar Alterações'}
@@ -347,6 +428,7 @@ export function PatientProfilePage() {
                 </div>
               </div>
             </div>
+          </div>
           </div>
         )}
 

@@ -18,15 +18,28 @@ const TERMS_TEMPLATES = [
 export function PublicAnamnesisPage() {
   const { token } = useParams<{ token: string }>()
   const [patientId, setPatientId] = useState<string | null>(null)
+  const [clinicaId, setClinicaId] = useState<string | null>(null)
   const [termoId, setTermoId] = useState<string | null>(null)
-  
+
   const { getPatientById } = usePatients()
   const sigPad = useRef<SignatureCanvas>(null)
-  
+
   const [patient, setPatient] = useState<(Patient & { clinica_id?: string, clinicaId?: string }) | null>(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Estado do formulário de anamnese
+  const [formState, setFormState] = useState({
+    queixa: '',
+    medicamentos: '',
+    alergiaMedicamentos: false,
+    problemasCardiacos: false,
+    diabetesHipertensao: false,
+    fuma: false,
+    alcool: false,
+    atividadeFisica: 'Nenhuma',
+  })
 
   useEffect(() => {
     async function load() {
@@ -39,10 +52,12 @@ export function PublicAnamnesisPage() {
         const decoded = JSON.parse(atob(token))
         setPatientId(decoded.pid || null)
         setTermoId(decoded.tid || null)
+        setClinicaId(decoded.cid || null)
 
         if (decoded.pid) {
           const p = await getPatientById(decoded.pid)
           setPatient(p)
+          if (p) setClinicaId((p as any).clinicaId || (p as any).clinica_id || decoded.cid)
         }
       } catch (err) {
         console.error('Falha ao decodificar token de anamnese:', err)
@@ -204,23 +219,48 @@ export function PublicAnamnesisPage() {
       </div>
 
       <div className="w-full max-w-md px-6 -mt-6 relative z-10 space-y-6">
-        <form 
-          onSubmit={async (e) => { 
-            e.preventDefault(); 
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
             if (!patientId) return;
-            
+
             setIsSubmitting(true);
             try {
-              const formData = new FormData(e.currentTarget);
-              const queixa = formData.get('queixa') as string;
-              const medicamentos = formData.get('medicamentos') as string;
+              const alergias = formState.alergiaMedicamentos ? 'Sim (informado na anamnese)' : 'Nenhuma informada'
+              const historico = [
+                formState.problemasCardiacos ? 'Problemas cardíacos' : '',
+                formState.diabetesHipertensao ? 'Diabetes/Hipertensão' : '',
+              ].filter(Boolean).join(', ') || 'Nenhum relatado'
 
-              // Atualiza o perfil do paciente com os dados da anamnese
+              const habitos = {
+                fuma: formState.fuma,
+                alcool: formState.alcool,
+                atividade_fisica: formState.atividadeFisica,
+              }
+
+              // Salvar na tabela anamneses (registro completo)
+              const { error: anamErr } = await supabase.from('anamneses').insert({
+                paciente_id: patientId,
+                queixa_principal: formState.queixa,
+                alergias,
+                historico_medico: historico,
+                medicamentos_uso: formState.medicamentos,
+                habitos: habitos as any,
+                dados_extras: {
+                  alergia_medicamentos: formState.alergiaMedicamentos,
+                  problemas_cardiacos: formState.problemasCardiacos,
+                  diabetes_hipertensao: formState.diabetesHipertensao,
+                } as any,
+                preenchido_em: new Date().toISOString(),
+                token_link: token || null,
+              } as any)
+
+              if (anamErr) throw anamErr
+
+              // Também atualizar campos resumidos no paciente
               await supabase.from('pacientes').update({
-                historico_medico: queixa,
-                medicamentos_em_uso: medicamentos,
                 updated_at: new Date().toISOString()
-              }).eq('id', patientId);
+              } as any).eq('id', patientId)
 
               setIsSubmitted(true);
             } catch (err) {
@@ -236,9 +276,11 @@ export function PublicAnamnesisPage() {
              <div className="space-y-4">
                <div>
                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">O que você está sentindo hoje?</label>
-                  <textarea 
+                  <textarea
                     name="queixa"
                     rows={3}
+                    value={formState.queixa}
+                    onChange={(e) => setFormState(s => ({ ...s, queixa: e.target.value }))}
                     placeholder="Aperte aqui para escrever..."
                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none resize-none shadow-sm"
                   />
@@ -249,15 +291,17 @@ export function PublicAnamnesisPage() {
           {/* Seção 2: Saúde Geral */}
           <Section icon={<Heart className="w-4 h-4" />} title="Histórico de Saúde">
              <div className="space-y-5">
-               <RadioToggle label="Alergia a Medicamentos?" />
-               <RadioToggle label="Problemas Cardíacos?" />
-               <RadioToggle label="Diabetes ou Hipertensão?" />
+               <RadioToggle label="Alergia a Medicamentos?" value={formState.alergiaMedicamentos} onChange={(v) => setFormState(s => ({ ...s, alergiaMedicamentos: v }))} />
+               <RadioToggle label="Problemas Cardíacos?" value={formState.problemasCardiacos} onChange={(v) => setFormState(s => ({ ...s, problemasCardiacos: v }))} />
+               <RadioToggle label="Diabetes ou Hipertensão?" value={formState.diabetesHipertensao} onChange={(v) => setFormState(s => ({ ...s, diabetesHipertensao: v }))} />
                <div>
                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Medicamentos em uso?</label>
-                   <input 
+                   <input
                      name="medicamentos"
-                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none shadow-sm" 
-                     placeholder="Ex: AAS, Glifage..." 
+                     value={formState.medicamentos}
+                     onChange={(e) => setFormState(s => ({ ...s, medicamentos: e.target.value }))}
+                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none shadow-sm"
+                     placeholder="Ex: AAS, Glifage..."
                    />
                </div>
              </div>
@@ -266,16 +310,22 @@ export function PublicAnamnesisPage() {
           {/* Seção 3: Hábitos */}
           <Section icon={<Activity className="w-4 h-4" />} title="Estilo de Vida">
              <div className="space-y-5">
-               <RadioToggle label="Você fuma?" />
-               <RadioToggle label="Ingere álcool regularmente?" />
+               <RadioToggle label="Você fuma?" value={formState.fuma} onChange={(v) => setFormState(s => ({ ...s, fuma: v }))} />
+               <RadioToggle label="Ingere álcool regularmente?" value={formState.alcool} onChange={(v) => setFormState(s => ({ ...s, alcool: v }))} />
                <div>
                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Atividade Física?</label>
                   <div className="flex gap-2">
                     {['Nenhuma', '1-2x semana', 'Todos os dias'].map(l => (
-                      <button 
+                      <button
                         key={l}
-                        type="button" 
-                        className="flex-1 py-3 px-2 bg-white border border-gray-200 rounded-xl text-[10px] font-bold text-gray-500 focus:bg-green-600 focus:text-white focus:border-green-600 transition-all active:scale-95 shadow-sm"
+                        type="button"
+                        onClick={() => setFormState(s => ({ ...s, atividadeFisica: l }))}
+                        className={cn(
+                          "flex-1 py-3 px-2 border rounded-xl text-[10px] font-bold transition-all active:scale-95 shadow-sm",
+                          formState.atividadeFisica === l
+                            ? "bg-green-600 text-white border-green-600"
+                            : "bg-white border-gray-200 text-gray-500"
+                        )}
                       >{l}</button>
                     ))}
                   </div>
@@ -318,26 +368,25 @@ function Section({ icon, title, children }: { icon: React.ReactNode, title: stri
   )
 }
 
-function RadioToggle({ label }: { label: string }) {
-  const [active, setActive] = useState(false)
+function RadioToggle({ label, value, onChange }: { label: string, value: boolean, onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
       <span className="text-sm font-bold text-gray-700">{label}</span>
       <div className="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl border border-gray-100">
-        <button 
+        <button
           type="button"
-          onClick={() => setActive(true)} 
+          onClick={() => onChange(true)}
           className={cn(
             "w-10 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-            active ? "bg-green-500 text-white shadow-xl shadow-green-200" : "text-gray-400 hover:bg-gray-50"
+            value ? "bg-green-500 text-white shadow-xl shadow-green-200" : "text-gray-400 hover:bg-gray-50"
           )}
         >SIM</button>
-        <button 
+        <button
           type="button"
-          onClick={() => setActive(false)} 
+          onClick={() => onChange(false)}
           className={cn(
             "w-10 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-            !active ? "bg-gray-400 text-white" : "text-gray-400 hover:bg-gray-50"
+            !value ? "bg-gray-400 text-white" : "text-gray-400 hover:bg-gray-50"
           )}
         >NÃO</button>
       </div>
