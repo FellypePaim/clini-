@@ -303,8 +303,8 @@ export function PatientProfilePage() {
                 </div>
                 <div className="space-y-4">
                   {anamneseHistory.map((anam: any, idx: number) => {
-                    const habitos = typeof anam.habitos === 'object' ? anam.habitos : {}
-                    const extras = typeof anam.dados_extras === 'object' ? anam.dados_extras : {}
+                    const habitos = anam.habitos && typeof anam.habitos === 'object' ? anam.habitos : {}
+                    const extras = anam.dados_extras && typeof anam.dados_extras === 'object' ? anam.dados_extras : {}
                     return (
                       <div key={anam.id || idx} className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
                         <div className="flex items-center justify-between mb-4">
