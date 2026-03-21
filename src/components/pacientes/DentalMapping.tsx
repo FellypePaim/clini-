@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react'
 import {
   Save, Trash2, History, ChevronDown, Activity, Plus, Info, X,
-  AlertTriangle, CheckCircle, Clock, FileText, Search
+  AlertTriangle, CheckCircle, Clock, FileText, Search, Sparkles, Edit3
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -84,6 +84,18 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
   const [planoTexto, setPlanoTexto] = useState('')
   const [observacoesGerais, setObservacoesGerais] = useState('')
 
+  // IA Plano de Tratamento
+  const [showIAModal, setShowIAModal] = useState(false)
+  const [iaGenerating, setIaGenerating] = useState(false)
+  const [iaForm, setIaForm] = useState({
+    queixaPrincipal: '',
+    urgencia: 'moderada',
+    orcamentoLimitado: false,
+    historicoPaciente: '',
+    preferencias: '',
+  })
+  const [iaResult, setIaResult] = useState<string | null>(null)
+
   // Carregar sessões anteriores
   useState(() => {
     if (!pacienteId) return
@@ -147,6 +159,96 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
   const carieCount = Object.values(toothMap).filter(t => t.condition === 'carie').length
   const ausentes = Object.values(toothMap).filter(t => t.condition === 'ausente' || t.condition === 'extracao').length
 
+  const reloadSessions = async () => {
+    const { data } = await supabase
+      .from('harmonizacoes')
+      .select('*, profiles:profissional_id(nome_completo)')
+      .eq('paciente_id', pacienteId)
+      .order('created_at', { ascending: false })
+    setSessions((data || []).filter((s: any) => s.mapeamento?.tipo === 'odontograma'))
+  }
+
+  const handleDeleteSession = async (sessionId: string) => {
+    if (!confirm('Excluir esta avaliação odontológica?')) return
+    try {
+      await supabase.from('harmonizacoes').delete().eq('id', sessionId)
+      await reloadSessions()
+      toast({ title: 'Sucesso', description: 'Avaliação removida.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }
+
+  const handleLoadSession = (session: any) => {
+    const map = session.mapeamento && typeof session.mapeamento === 'object' ? session.mapeamento : {}
+    if (map.dentes) setToothMap(map.dentes)
+    if (map.periodontal) setPerioMap(map.periodontal)
+    if (map.plano_tratamento) setPlanoTexto(map.plano_tratamento)
+    if (map.observacoes) setObservacoesGerais(map.observacoes)
+    toast({ title: 'Carregado', description: 'Avaliação carregada para edição.', type: 'success' })
+  }
+
+  const handleGenerateAIPlan = async () => {
+    if (!clinicaId) return
+    setIaGenerating(true)
+    setIaResult(null)
+    try {
+      const dentesResumo = Object.values(toothMap)
+        .filter(t => t.condition !== 'higido')
+        .map(t => `Dente ${t.tooth}: ${t.condition}${t.faces?.length ? ` (faces: ${t.faces.join(',')})` : ''}${t.procedimento_planejado ? ` → ${t.procedimento_planejado}` : ''}`)
+        .join('\n') || 'Nenhum dente registrado no odontograma.'
+
+      const perResumo = Object.values(perioMap)
+        .filter(p => p.sangramento || p.mobilidade > 0 || (p.profundidade[0] > 3 || p.profundidade[1] > 3))
+        .map(p => `Dente ${p.tooth}: prof. V=${p.profundidade[0]}mm L=${p.profundidade[1]}mm${p.sangramento ? ' SANGRAMENTO' : ''} mob=${p.mobilidade} rec=${p.recessao}mm`)
+        .join('\n') || 'Sem dados periodontais relevantes.'
+
+      const prompt = `INSTRUÇÃO: Você é um cirurgião-dentista especialista em planejamento de tratamento odontológico no Brasil.
+Gere um PLANO DE TRATAMENTO COMPLETO e detalhado com base nos dados abaixo.
+
+QUEIXA PRINCIPAL DO PACIENTE:
+"${iaForm.queixaPrincipal || 'Não informada'}"
+
+NÍVEL DE URGÊNCIA: ${iaForm.urgencia}
+ORÇAMENTO LIMITADO: ${iaForm.orcamentoLimitado ? 'Sim, priorizar custo-benefício' : 'Não'}
+
+HISTÓRICO DO PACIENTE:
+${iaForm.historicoPaciente || 'Sem histórico relevante informado.'}
+
+PREFERÊNCIAS DO PROFISSIONAL:
+${iaForm.preferencias || 'Nenhuma preferência específica.'}
+
+ODONTOGRAMA ATUAL:
+${dentesResumo}
+
+DADOS PERIODONTAIS:
+${perResumo}
+
+Responda APENAS com JSON válido:
+{
+  "queixa_principal": "resumo em 1-2 frases",
+  "diagnostico": "PLANO DE TRATAMENTO COMPLETO formatado assim:\\n\\n**FASE 1 - URGÊNCIA**\\n1. Procedimento...\\n2. Procedimento...\\n\\n**FASE 2 - RESTAURADOR**\\n1. ...\\n\\n**FASE 3 - REABILITAÇÃO**\\n1. ...\\n\\n**MANUTENÇÃO**\\n- Retornos a cada X meses\\n- Profilaxia semestral\\n\\n**PRAZO ESTIMADO:** X meses\\n**SESSÕES ESTIMADAS:** X sessões\\n**PRIORIDADE:** Alta/Média/Baixa"
+}`
+
+      const { data, error } = await supabase.functions.invoke('ai-gateway', {
+        body: { action: 'generate_summary', payload: { texto_clinico: prompt }, clinica_id: clinicaId }
+      })
+      if (error) throw error
+
+      const resumo = data?.resumo || data?.data?.resumo
+      if (resumo?.diagnostico) {
+        setIaResult(resumo.diagnostico)
+        toast({ title: 'Plano gerado', description: 'Revise e salve se estiver de acordo.', type: 'success' })
+      } else {
+        throw new Error('Resposta vazia da IA')
+      }
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao gerar plano.', type: 'error' })
+    } finally {
+      setIaGenerating(false)
+    }
+  }
+
   const handleSave = async () => {
     if (!clinicaId) return
     setIsSubmitting(true)
@@ -166,14 +268,7 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
         observacoes_gerais: observacoesGerais || null,
       } as any)
 
-      // Recarregar
-      const { data } = await supabase
-        .from('harmonizacoes')
-        .select('*, profiles:profissional_id(nome_completo)')
-        .eq('paciente_id', pacienteId)
-        .order('created_at', { ascending: false })
-      const dental = (data || []).filter((s: any) => s.mapeamento?.tipo === 'odontograma')
-      setSessions(dental)
+      await reloadSessions()
 
       toast({ title: 'Sucesso', description: 'Odontograma salvo com sucesso.', type: 'success' })
     } catch (err: any) {
@@ -468,9 +563,17 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
               <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Plano de Tratamento</h3>
               <p className="text-xs text-gray-400 mt-1">Defina as etapas e prioridades do tratamento</p>
             </div>
-            <button onClick={handleSave} disabled={isSubmitting} className="btn-primary py-2 px-5 text-xs flex items-center gap-2">
-              {isSubmitting ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar Plano
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowIAModal(true)}
+                className="py-2 px-5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-purple-600/20"
+              >
+                <Sparkles className="w-4 h-4" /> Gerar com IA
+              </button>
+              <button onClick={handleSave} disabled={isSubmitting} className="btn-primary py-2 px-5 text-xs flex items-center gap-2">
+                {isSubmitting ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar Plano
+              </button>
+            </div>
           </div>
 
           {/* Procedimentos detectados automaticamente */}
@@ -521,8 +624,8 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
             const isOpen = expandedSession === s.id
             return (
               <div key={s.id}>
-                <div onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-4 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-4">
+                <div className="p-4 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors">
+                  <div className="flex items-center gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isOpen ? null : s.id)}>
                     <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-blue-400">
                       <Clock className="w-5 h-5" />
                     </div>
@@ -531,7 +634,25 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
                       <p className="text-[10px] text-gray-400 font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'} · {dentes} dente(s)</p>
                     </div>
                   </div>
-                  <ChevronDown className={cn("w-5 h-5 text-gray-600 transition-transform", isOpen && "rotate-180")} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleLoadSession(s)}
+                      className="p-2 text-blue-400 hover:text-blue-300 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Carregar para edição"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSession(s.id)}
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-white/10 rounded-lg transition-colors"
+                      title="Excluir avaliação"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-2 text-gray-500 hover:text-white transition-colors">
+                      <ChevronDown className={cn("w-4 h-4 transition-transform", isOpen && "rotate-180")} />
+                    </button>
+                  </div>
                 </div>
                 {isOpen && (
                   <div className="mt-2 p-4 bg-white/5 rounded-xl border border-white/10 space-y-2 animate-fade-in text-xs">
@@ -554,6 +675,100 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
           )}
         </div>
       </div>
+
+      {/* Modal IA - Gerar Plano de Tratamento */}
+      {showIAModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setShowIAModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-in">
+            <div className="bg-purple-600 p-6 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Sparkles className="w-6 h-6" />
+                <div>
+                  <h3 className="text-lg font-black">Plano de Tratamento com IA</h3>
+                  <p className="text-xs text-purple-200">Responda as perguntas e a IA gera o plano</p>
+                </div>
+              </div>
+              <button onClick={() => setShowIAModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X className="w-5 h-5" /></button>
+            </div>
+
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Queixa principal do paciente</label>
+                <input value={iaForm.queixaPrincipal} onChange={(e) => setIaForm(p => ({ ...p, queixaPrincipal: e.target.value }))} placeholder="Ex: Dor no dente 36, sangramento gengival..." className="input-base text-sm" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Nível de urgência</label>
+                <div className="flex gap-2">
+                  {['baixa', 'moderada', 'alta', 'emergência'].map(u => (
+                    <button key={u} onClick={() => setIaForm(p => ({ ...p, urgencia: u }))} className={cn("flex-1 py-2 rounded-xl text-xs font-bold border transition-all capitalize", iaForm.urgencia === u ? "bg-purple-600 text-white border-purple-600" : "bg-gray-50 text-gray-500 border-gray-200")}>
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Histórico relevante do paciente</label>
+                <textarea value={iaForm.historicoPaciente} onChange={(e) => setIaForm(p => ({ ...p, historicoPaciente: e.target.value }))} placeholder="Ex: Diabético, usa anticoagulante, alergia a penicilina..." className="input-base text-sm min-h-[60px] resize-none" rows={2} />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Preferências do profissional</label>
+                <textarea value={iaForm.preferencias} onChange={(e) => setIaForm(p => ({ ...p, preferencias: e.target.value }))} placeholder="Ex: Priorizar estética, usar resina flow, evitar amalgama..." className="input-base text-sm min-h-[60px] resize-none" rows={2} />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <span className="text-xs font-bold text-gray-600">Paciente com orçamento limitado?</span>
+                <button onClick={() => setIaForm(p => ({ ...p, orcamentoLimitado: !p.orcamentoLimitado }))} className={cn("w-10 h-6 rounded-full p-1 transition-all", iaForm.orcamentoLimitado ? "bg-purple-500" : "bg-gray-200")}>
+                  <div className={cn("w-4 h-4 rounded-full bg-white shadow-sm transition-transform", iaForm.orcamentoLimitado ? "translate-x-4" : "translate-x-0")} />
+                </button>
+              </div>
+
+              {registeredCount > 0 && (
+                <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-600 font-medium flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 shrink-0" />
+                  {registeredCount} dente(s) do odontograma serão incluídos automaticamente na análise
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-100 flex gap-3">
+              <button onClick={() => setShowIAModal(false)} className="flex-1 btn-secondary">Cancelar</button>
+              <button
+                onClick={handleGenerateAIPlan}
+                disabled={iaGenerating}
+                className="flex-1 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all disabled:opacity-50 shadow-lg shadow-purple-600/20"
+              >
+                {iaGenerating ? <><Activity className="w-4 h-4 animate-spin" /> Gerando...</> : <><Sparkles className="w-4 h-4" /> Gerar Plano</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resultado do Plano IA */}
+      {iaResult && (
+        <div className="bg-purple-50 rounded-2xl border border-purple-100 p-6 space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-black text-purple-700 flex items-center gap-2">
+              <Sparkles className="w-4 h-4" /> Plano Gerado pela IA
+            </h4>
+            <span className="text-[9px] font-bold text-purple-400 bg-purple-100 px-2 py-1 rounded-lg">Gemini</span>
+          </div>
+          <div className="bg-white rounded-xl border border-purple-100 p-5 max-h-64 overflow-y-auto custom-scrollbar">
+            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{iaResult}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setPlanoTexto(iaResult); setIaResult(null); setShowIAModal(false); toast({ title: 'Aplicado', description: 'Plano inserido. Clique em Salvar Plano para gravar.', type: 'success' }) }}
+              className="flex-1 py-3 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-purple-700 transition-all shadow-lg shadow-purple-600/10"
+            >
+              <CheckCircle className="w-4 h-4" /> Usar este Plano
+            </button>
+            <button onClick={() => setIaResult(null)} className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all">
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 
