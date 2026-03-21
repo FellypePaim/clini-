@@ -18,7 +18,9 @@ import {
   Stethoscope,
   Activity,
   UserCheck,
-  Sparkles
+  Sparkles,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
 import { useProntuario } from '../../hooks/useProntuario'
@@ -292,73 +294,7 @@ export function PatientProfilePage() {
 
         {activeTab === 'anamnese' && (
           <div className="space-y-6">
-            {/* Histórico de Anamneses Preenchidas pelo Paciente */}
-            {anamneseHistory.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-                <div className="mb-6 border-b border-gray-100 pb-4">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                    <ClipboardList className="w-5 h-5 text-green-600" /> Respostas do Paciente
-                  </h3>
-                  <p className="text-sm text-gray-400">{anamneseHistory.length} anamnese(s) preenchida(s) pelo paciente via link</p>
-                </div>
-                <div className="space-y-4">
-                  {anamneseHistory.map((anam: any, idx: number) => {
-                    const habitos = anam.habitos && typeof anam.habitos === 'object' ? anam.habitos : {}
-                    const extras = anam.dados_extras && typeof anam.dados_extras === 'object' ? anam.dados_extras : {}
-                    return (
-                      <div key={anam.id || idx} className="p-5 bg-green-50/50 rounded-2xl border border-green-100">
-                        <div className="flex items-center justify-between mb-4">
-                          <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">
-                            Preenchido em {anam.preenchido_em ? new Date(anam.preenchido_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date(anam.created_at).toLocaleDateString('pt-BR')}
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Queixa Principal</p>
-                            <p className="text-gray-800 font-medium">{anam.queixa_principal || '—'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Medicamentos em Uso</p>
-                            <p className="text-gray-800 font-medium">{anam.medicamentos_uso || '—'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Alergias</p>
-                            <p className="text-gray-800 font-medium">{anam.alergias || '—'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Histórico Médico</p>
-                            <p className="text-gray-800 font-medium">{anam.historico_medico || '—'}</p>
-                          </div>
-                          {(habitos.fuma !== undefined || habitos.alcool !== undefined || habitos.atividade_fisica) && (
-                            <div className="col-span-full">
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hábitos</p>
-                              <div className="flex flex-wrap gap-2">
-                                {habitos.fuma && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Fumante</span>}
-                                {habitos.alcool && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold border border-orange-100">Etilista</span>}
-                                {habitos.atividade_fisica && <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">Ativ. Física: {habitos.atividade_fisica}</span>}
-                                {!habitos.fuma && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não fuma</span>}
-                                {!habitos.alcool && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não etilista</span>}
-                              </div>
-                            </div>
-                          )}
-                          {(extras.alergia_medicamentos || extras.problemas_cardiacos || extras.diabetes_hipertensao) && (
-                            <div className="col-span-full">
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Condições Informadas</p>
-                              <div className="flex flex-wrap gap-2">
-                                {extras.alergia_medicamentos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Alergia a Medicamentos</span>}
-                                {extras.problemas_cardiacos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Problemas Cardíacos</span>}
-                                {extras.diabetes_hipertensao && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Diabetes/Hipertensão</span>}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
+          {/* Formulário de edição manual pelo profissional */}
           <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
               <div>
@@ -429,6 +365,11 @@ export function PatientProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Histórico de Respostas do Paciente */}
+          {anamneseHistory.length > 0 && (
+            <AnamneseHistorySection history={anamneseHistory} />
+          )}
           </div>
         )}
 
@@ -559,6 +500,134 @@ export function PatientProfilePage() {
           patient={patient}
           onSave={async (items) => { if (patient) await generatePrescription(patient.id, items) }}
         />
+      )}
+    </div>
+  )
+}
+
+const ANAMNESE_PAGE_SIZE = 5
+
+function AnamneseHistorySection({ history }: { history: any[] }) {
+  const [page, setPage] = useState(1)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const totalPages = Math.ceil(history.length / ANAMNESE_PAGE_SIZE)
+  const paginated = history.slice((page - 1) * ANAMNESE_PAGE_SIZE, page * ANAMNESE_PAGE_SIZE)
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+      <div className="mb-6 border-b border-gray-100 pb-4">
+        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <ClipboardList className="w-5 h-5 text-green-600" /> Respostas do Paciente
+        </h3>
+        <p className="text-sm text-gray-400">{history.length} anamnese(s) preenchida(s) via link</p>
+      </div>
+
+      <div className="space-y-3">
+        {paginated.map((anam: any, idx: number) => {
+          const isExpanded = expandedId === (anam.id || idx.toString())
+          const habitos = anam.habitos && typeof anam.habitos === 'object' ? anam.habitos : {}
+          const extras = anam.dados_extras && typeof anam.dados_extras === 'object' ? anam.dados_extras : {}
+          const dateLabel = anam.preenchido_em
+            ? new Date(anam.preenchido_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+            : new Date(anam.created_at).toLocaleDateString('pt-BR')
+
+          return (
+            <div key={anam.id || idx} className="rounded-2xl border border-gray-100 overflow-hidden">
+              {/* Linha resumida - sempre visível */}
+              <div className="flex items-center justify-between p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">{dateLabel}</span>
+                  <span className="text-xs text-gray-500 truncate max-w-[250px]">{anam.queixa_principal || 'Sem queixa informada'}</span>
+                </div>
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : (anam.id || idx.toString()))}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg border transition-all flex items-center gap-1.5 shrink-0 ml-3"
+                  style={isExpanded
+                    ? { background: '#f0fdf4', color: '#15803d', borderColor: '#bbf7d0' }
+                    : { background: 'white', color: '#6b7280', borderColor: '#e5e7eb' }
+                  }
+                >
+                  {isExpanded ? (
+                    <><ChevronLeft className="w-3.5 h-3.5 rotate-90" /> Ocultar</>
+                  ) : (
+                    <><FileText className="w-3.5 h-3.5" /> Ver Detalhes</>
+                  )}
+                </button>
+              </div>
+
+              {/* Detalhes expandidos */}
+              {isExpanded && (
+                <div className="p-5 bg-green-50/30 border-t border-green-100 animate-fade-in">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Queixa Principal</p>
+                      <p className="text-gray-800 font-medium">{anam.queixa_principal || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Medicamentos em Uso</p>
+                      <p className="text-gray-800 font-medium">{anam.medicamentos_uso || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Alergias</p>
+                      <p className="text-gray-800 font-medium">{anam.alergias || '—'}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Histórico Médico</p>
+                      <p className="text-gray-800 font-medium">{anam.historico_medico || '—'}</p>
+                    </div>
+                    {(habitos.fuma !== undefined || habitos.alcool !== undefined || habitos.atividade_fisica) && (
+                      <div className="col-span-full">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hábitos</p>
+                        <div className="flex flex-wrap gap-2">
+                          {habitos.fuma && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Fumante</span>}
+                          {habitos.alcool && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold border border-orange-100">Etilista</span>}
+                          {habitos.atividade_fisica && <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">Ativ. Física: {habitos.atividade_fisica}</span>}
+                          {!habitos.fuma && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não fuma</span>}
+                          {!habitos.alcool && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não etilista</span>}
+                        </div>
+                      </div>
+                    )}
+                    {(extras.alergia_medicamentos || extras.problemas_cardiacos || extras.diabetes_hipertensao) && (
+                      <div className="col-span-full">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Condições Informadas</p>
+                        <div className="flex flex-wrap gap-2">
+                          {extras.alergia_medicamentos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Alergia a Medicamentos</span>}
+                          {extras.problemas_cardiacos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Problemas Cardíacos</span>}
+                          {extras.diabetes_hipertensao && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Diabetes/Hipertensão</span>}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 text-sm text-gray-500">
+          <p>Mostrando {(page - 1) * ANAMNESE_PAGE_SIZE + 1}–{Math.min(page * ANAMNESE_PAGE_SIZE, history.length)} de {history.length}</p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-3 text-xs font-bold">{page} / {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )
