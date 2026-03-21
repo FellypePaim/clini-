@@ -27,21 +27,31 @@ const TERMS_TEMPLATES = [
   { id: '3', titulo: 'Autorização Cirúrgica de Pequeno Porte', desc: 'Consentimento para procedimentos invasivos simples.' }
 ]
 
-const SIGNED_TERMS_MOCK = [
-  { id: '101', titulo: 'Termo de Responsabilidade LGPD', data: '2026-03-01', status: 'assinado', profissional: 'Dr. Mendes' },
-  { id: '102', titulo: 'Autorização Cirúrgica', data: '2026-01-15', status: 'pendente', profissional: 'Dra. Ana Lima' }
-]
-
 export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [showSignModal, setShowSignModal] = useState(false)
   const [activeTemplate, setActiveTemplate] = useState<typeof TERMS_TEMPLATES[0] | null>(null)
   const sigPad = useRef<SignatureCanvas>(null)
   const [isSaving, setIsSaving] = useState(false)
-  
+  const [termos, setTermos] = useState<any[]>([])
+  const [viewingTermo, setViewingTermo] = useState<any | null>(null)
+
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const { toast } = useToast()
   const { getPatientById } = usePatients()
+
+  // Carregar termos reais do banco
+  const loadTermos = async () => {
+    if (!pacienteId) return
+    const { data } = await supabase
+      .from('termos_consentimento')
+      .select('*')
+      .eq('paciente_id', pacienteId)
+      .order('created_at', { ascending: false })
+    setTermos(data || [])
+  }
+
+  useState(() => { loadTermos() })
 
   const handleSendWhatsApp = async (e: React.MouseEvent, tpl: any) => {
     e.stopPropagation()
@@ -109,6 +119,7 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
         assinado_em: new Date().toISOString()
       })
 
+      await loadTermos()
       toast({ title: 'Sucesso', description: 'Termo assinado e salvo com sucesso.', type: 'success' })
       setShowSignModal(false)
     } catch (e: any) {
@@ -174,49 +185,152 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
       {/* History Area */}
       <div className="flex-1 space-y-6">
          <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
-            <div className="flex items-center gap-2 mb-8 opacity-40">
-               <Stamp className="w-5 h-5" />
-               <h3 className="text-[11px] font-black uppercase tracking-[0.2em] border-none">Termos Gerados & Assinados</h3>
+            <div className="flex items-center justify-between mb-8">
+               <div className="flex items-center gap-2 opacity-60">
+                  <Stamp className="w-5 h-5" />
+                  <h3 className="text-[11px] font-black uppercase tracking-[0.2em] border-none">Termos Gerados & Assinados</h3>
+               </div>
+               <span className="text-[10px] font-bold text-gray-400">{termos.length} termo(s)</span>
             </div>
 
             <div className="space-y-4">
-               {SIGNED_TERMS_MOCK.map(st => (
-                 <div key={st.id} className="p-6 bg-white border border-gray-100 rounded-[32px] flex items-center justify-between shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all hover:scale-[1.01] group">
+               {termos.length > 0 ? termos.map((st: any) => {
+                 const isAssinado = !!st.assinado_em
+                 return (
+                   <div key={st.id} className="p-6 bg-white border border-gray-100 rounded-[32px] flex items-center justify-between shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all hover:scale-[1.01] group">
                     <div className="flex items-center gap-6">
                        <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center",
-                        st.status === 'assinado' ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
+                        isAssinado ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
                        )}>
                           <FileCheck className="w-6 h-6" />
                        </div>
                        <div>
-                          <p className="text-sm font-black text-gray-900 mb-1">{st.titulo}</p>
+                          <p className="text-sm font-black text-gray-900 mb-1">{st.titulo || 'Termo de Consentimento'}</p>
                           <div className="flex items-center gap-4 text-[10px] text-gray-400 font-medium">
-                             <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {new Date(st.data).toLocaleDateString()}</span>
-                             <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" /> {st.profissional}</span>
+                             <span className="flex items-center gap-1.5">
+                               <Calendar className="w-3.5 h-3.5" />
+                               {new Date(st.assinado_em || st.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                             </span>
+                             <span className="flex items-center gap-1.5">
+                               <User className="w-3.5 h-3.5" /> {st.tipo || 'consentimento'}
+                             </span>
                           </div>
                        </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                        <span className={cn(
                         "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border",
-                        st.status === 'assinado' ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
+                        isAssinado ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
                        )}>
-                          {st.status}
+                          {isAssinado ? 'Assinado' : 'Pendente'}
                        </span>
-                       
+
                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button className="p-2.5 bg-gray-900 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-gray-900/10">
-                             <Download className="w-4 h-4" />
+                          {/* Visualizar assinatura */}
+                          {st.assinatura_url && (
+                            <button
+                              onClick={() => setViewingTermo(st)}
+                              className="p-2.5 bg-blue-600 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-blue-600/10"
+                              title="Visualizar assinatura"
+                            >
+                              <Maximize2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          {/* Download */}
+                          {st.assinatura_url && (
+                            <a
+                              href={st.assinatura_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2.5 bg-gray-900 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-gray-900/10 inline-flex"
+                              title="Baixar assinatura"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                          )}
+                          {/* Excluir */}
+                          <button
+                            onClick={async () => {
+                              if (!confirm('Excluir este termo?')) return
+                              await supabase.from('termos_consentimento').delete().eq('id', st.id)
+                              await loadTermos()
+                              toast({ title: 'Sucesso', description: 'Termo removido.', type: 'success' })
+                            }}
+                            className="p-2.5 bg-red-500 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-red-500/10"
+                            title="Excluir termo"
+                          >
+                            <X className="w-4 h-4" />
                           </button>
                        </div>
                     </div>
                  </div>
-               ))}
+                 )
+               }) : (
+                 <div className="py-12 flex flex-col items-center justify-center text-center opacity-30 select-none">
+                    <Stamp className="w-12 h-12 text-gray-200 mb-4" />
+                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Nenhum termo registrado</p>
+                    <p className="text-[10px] text-gray-300 mt-1">Selecione um modelo ao lado para gerar</p>
+                 </div>
+               )}
             </div>
          </div>
       </div>
+
+      {/* Modal de Visualização do Termo */}
+      {viewingTermo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setViewingTermo(null)} />
+          <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-lg overflow-hidden animate-slide-in">
+            <div className="bg-green-600 p-6 text-white flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-black">{viewingTermo.titulo || 'Termo de Consentimento'}</h3>
+                <p className="text-xs text-green-100 mt-1">
+                  {viewingTermo.assinado_em
+                    ? `Assinado em ${new Date(viewingTermo.assinado_em).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                    : 'Pendente de assinatura'}
+                </p>
+              </div>
+              <button onClick={() => setViewingTermo(null)} className="p-2 hover:bg-white/10 rounded-xl">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-8 space-y-6">
+              <div className="space-y-2">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</p>
+                <span className={cn(
+                  "px-3 py-1.5 rounded-xl text-xs font-black uppercase border inline-block",
+                  viewingTermo.assinado_em ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
+                )}>
+                  {viewingTermo.assinado_em ? 'Assinado' : 'Pendente'}
+                </span>
+              </div>
+              {viewingTermo.assinatura_url && (
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Assinatura Digital</p>
+                  <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4 flex items-center justify-center">
+                    <img src={viewingTermo.assinatura_url} alt="Assinatura" className="max-h-48 object-contain" />
+                  </div>
+                </div>
+              )}
+              <div className="flex gap-3">
+                {viewingTermo.assinatura_url && (
+                  <a
+                    href={viewingTermo.assinatura_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 btn-primary text-center flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" /> Baixar Assinatura
+                  </a>
+                )}
+                <button onClick={() => setViewingTermo(null)} className="flex-1 btn-secondary">Fechar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Signature Modal */}
       {showSignModal && activeTemplate && (
