@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { 
   Sparkles,
   MapPin,
@@ -53,7 +53,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
   const mapRef = useRef<HTMLDivElement>(null)
 
   // Carregar histórico de sessões do banco
-  useState(() => {
+  useEffect(() => {
     if (!pacienteId) return
     supabase
       .from('harmonizacoes')
@@ -61,7 +61,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
       .eq('paciente_id', pacienteId)
       .order('created_at', { ascending: false })
       .then(({ data }) => { if (data) setSessions(data) })
-  })
+  }, [pacienteId])
 
   const activeZoneConfig = useMemo(() => ZONES_CONFIG.find(z => z.id === activeZoneId), [activeZoneId])
   const activeZoneData   = useMemo(() => selectedZones.find(z => z.id === activeZoneId), [selectedZones, activeZoneId])

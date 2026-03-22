@@ -51,7 +51,8 @@ export function OvyvaConfigPage() {
       .select('configuracoes')
       .eq('id', clinicaId)
       .single()
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { console.error('Erro ao carregar config OVYVA:', error.message) }
         const ovyva = (data?.configuracoes as any)?.ovyva
         if (ovyva) {
           setForm({

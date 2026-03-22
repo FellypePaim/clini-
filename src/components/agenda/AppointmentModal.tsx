@@ -75,7 +75,10 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
     if (!clinicaId) return
     supabase.from('profiles').select('id, nome_completo, especialidade')
       .eq('clinica_id', clinicaId).eq('role', 'profissional').eq('ativo', true)
-      .then(({ data }) => setProfissionais((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, especialidade: p.especialidade || '' }))))
+      .then(({ data, error }) => {
+        if (error) { console.error('Erro ao carregar profissionais:', error.message); return }
+        setProfissionais((data || []).map((p: any) => ({ id: p.id, nome: p.nome_completo, especialidade: p.especialidade || '' })))
+      })
   }, [clinicaId])
 
   // Busca pacientes ao digitar

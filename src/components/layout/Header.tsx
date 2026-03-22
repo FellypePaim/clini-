@@ -60,17 +60,19 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
   React.useEffect(() => {
     if (!user?.clinicaId) return
     const loadNotifications = async () => {
-      const hoje = new Date()
-      const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
-      const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
-      const { count } = await supabase
-        .from('consultas')
-        .select('*', { count: 'exact', head: true })
-        .eq('clinica_id', user.clinicaId)
-        .eq('status', 'agendado')
-        .gte('data_hora_inicio', inicioHoje)
-        .lt('data_hora_inicio', fimHoje)
-      setNotifications(count ?? 0)
+      try {
+        const hoje = new Date()
+        const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
+        const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
+        const { count, error } = await supabase
+          .from('consultas')
+          .select('*', { count: 'exact', head: true })
+          .eq('clinica_id', user.clinicaId)
+          .eq('status', 'agendado')
+          .gte('data_hora_inicio', inicioHoje)
+          .lt('data_hora_inicio', fimHoje)
+        if (!error) setNotifications(count ?? 0)
+      } catch { /* silently ignore notification load errors */ }
     }
     loadNotifications()
   }, [user?.clinicaId])

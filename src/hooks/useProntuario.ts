@@ -62,6 +62,10 @@ export function useProntuario(pacienteId?: string) {
           .order('data', { ascending: false }),
       ])
 
+      if (evolvRes.error) console.error('Erro ao carregar evoluções:', evolvRes.error.message)
+      if (prescRes.error) console.error('Erro ao carregar prescrições:', prescRes.error.message)
+      if (harmRes.error) console.error('Erro ao carregar harmonizações:', harmRes.error.message)
+
       if (evolvRes.data) {
         setEvolutions(evolvRes.data.map((r: any) => ({
           id: r.id,

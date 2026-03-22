@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { GoogleGenerativeAI } from "npm:@google/generative-ai@^0.21.0"
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": Deno.env.get("ALLOWED_ORIGIN") ?? "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 }
 
@@ -30,15 +30,15 @@ Deno.serve(async (req) => {
 
     const serviceKey = (Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "").trim()
     const anonKey = (Deno.env.get("SUPABASE_ANON_KEY") ?? "").trim()
-    const isValidKey = 
-      token === serviceKey || 
-      token === anonKey || 
-      token.length > 100 ||
-      token === (Deno.env.get("EVOLUTION_API_KEY") ?? "").trim()
+    const evolutionKey = (Deno.env.get("EVOLUTION_API_KEY") ?? "").trim()
+    const isServiceKey =
+      token === serviceKey ||
+      token === anonKey ||
+      (evolutionKey && token === evolutionKey)
 
     let user = null
-    // 2. Só tenta buscar usuário se não for uma chave mestre/API
-    if (!isValidKey) {
+    // 2. Se não for chave de serviço, validar JWT do usuário
+    if (!isServiceKey) {
       const supabaseAuth = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_ANON_KEY")!,
@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
       )
       const { data: authData } = await supabaseAuth.auth.getUser()
       user = authData?.user ?? null
-      
+
       if (!user) return errorResponse("Não autorizado", 401)
     }
 
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     }
 
     // 5. Salvar log de uso (não bloqueia a resposta)
-    if (clinica_id && clinica_id !== "teste") {
+    if (clinica_id) {
       supabaseAdmin.from("ai_usage_logs").insert({
         clinica_id,
         usuario_id: user?.id ?? null,
@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
         custo_estimado: calcularCusto(result.modelo, result.usage),
         duracao_ms: Date.now() - startTime,
         sucesso: true,
-      }).then(() => { }).catch(() => { })
+      }).then(() => { }).catch((e: unknown) => { console.error("Erro ao salvar log de uso:", e) })
     }
 
     return new Response(
@@ -538,8 +538,8 @@ async function handleDashboardInsights(clinica_id: string, supabase: any) {
 
   const [consultasHoje, receitaMes, pacientesNovos, leadsAtivos, clinicaRes] = await Promise.all([
     supabase.from("consultas").select("id, status", { count: "exact" })
-      .eq("clinica_id", clinica_id).eq("data_consulta", hoje),
-    supabase.from("lancamentos_financeiros").select("valor")
+      .eq("clinica_id", clinica_id).gte("data_hora_inicio", hoje).lt("data_hora_inicio", hoje + "T23:59:59"),
+    supabase.from("lancamentos").select("valor")
       .eq("clinica_id", clinica_id).eq("tipo", "receita")
       .gte("data", inicioMes).eq("status", "pago"),
     supabase.from("pacientes").select("id", { count: "exact" })

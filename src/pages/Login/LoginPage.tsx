@@ -21,13 +21,13 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>
 
-// ─── Credenciais de demonstração ─────────────────────
-const DEMO_CREDENTIALS = [
+// ─── Credenciais de demonstração (apenas em dev) ─────
+const DEMO_CREDENTIALS = import.meta.env.DEV ? [
   { label: 'Administrador', email: 'admin@clinicaverde.com.br', senha: 'admin123' },
   { label: 'Profissional',  email: 'profissional@clinicaverde.com.br', senha: 'prof123' },
   { label: 'Recepção',      email: 'recepcao@clinicaverde.com.br', senha: 'rec123' },
   { label: 'SuperAdmin',     email: 'superadmin@cliniplus.com',      senha: 'superpassword' },
-]
+] : []
 
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -198,7 +198,8 @@ export function LoginPage() {
             </button>
           </form>
 
-          {/* Demo credentials */}
+          {/* Demo credentials (apenas em dev) */}
+          {DEMO_CREDENTIALS.length > 0 && (
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -215,7 +216,7 @@ export function LoginPage() {
                   key={demo.email}
                   type="button"
                   onClick={() => fillDemo(demo.email, demo.senha)}
-                  className="flex flex-col items-center gap-1 p-3 rounded-lg border border-gray-200 
+                  className="flex flex-col items-center gap-1 p-3 rounded-lg border border-gray-200
                              hover:border-green-300 hover:bg-green-50 transition-all duration-150 group"
                 >
                   <span className="text-xs font-semibold text-gray-700 group-hover:text-green-700">
@@ -228,6 +229,7 @@ export function LoginPage() {
               ))}
             </div>
           </div>
+          )}
 
           <p className="text-center text-xs text-gray-400 mt-8">
             Prontuário Verde © {new Date().getFullYear()} · Todos os direitos reservados

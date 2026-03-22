@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') ?? '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -25,16 +25,32 @@ Deno.serve(async (req) => {
 
     // 1. Verificar se o usuário está autenticado
     const { data: { user }, error: authError } = await authClient.auth.getUser()
-    console.log('User Auth Check:', user?.id, authError)
-    
-    // Check if user has superadmin profile or bypass explicitly
-    // Por enquanto, vamos permitir a execução baseada no token (em desenvolvimento)
-    // para debugarmos o acesso real às tabelas.
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
+    }
+
+    // 2. Verificar se o usuário é superadmin
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.role !== 'superadmin') {
+      return new Response(JSON.stringify({ error: 'Acesso negado: requer permissão de superadmin' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 403,
+      })
+    }
 
     let body;
     try {
       body = await req.json()
-      console.log('Action received:', body.action)
+
     } catch (e) {
       console.error('Error parsing JSON:', e)
       throw new Error('Corpo da requisição inválido.')
@@ -49,15 +65,13 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case 'get_platform_stats': {
-        console.log('Stats: Iniciando queries...')
-        
         let totalClinics = 0, activeClinics = 0, totalUsers = 0, totalPatients = 0, appointmentsToday = 0
         let recentClinics = []
 
         try {
           const { count } = await supabaseClient.from('clinicas').select('*', { count: 'exact', head: true })
           totalClinics = count || 0
-          console.log('Stats: Clinics count ok')
+
         } catch (e) { console.error('Error clinicas count:', e) }
 
         try {
@@ -66,14 +80,12 @@ Deno.serve(async (req) => {
           const trialClinics = cData?.filter((c: any) => c.configuracoes?.status === 'trial').length || 0
           const suspendedClinics = cData?.filter((c: any) => c.configuracoes?.status === 'suspensa').length || 0
           
-          // Total active implementations (ativo + trial)
-          const operacionais = activeClinics + trialClinics
         } catch (e) { console.error('Error active clinicas:', e) }
 
         try {
           const { count } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true })
           totalUsers = count || 0
-          console.log('Stats: Users count ok')
+
         } catch (e) { console.error('Error users count:', e) }
 
         try {
@@ -97,38 +109,49 @@ Deno.serve(async (req) => {
           activeClinics = cData?.filter((c: any) => c.configuracoes?.status === 'ativo').length || 0
           const trialClinics = cData?.filter((c: any) => c.configuracoes?.status === 'trial').length || 0
           const suspendedClinics = cData?.filter((c: any) => c.configuracoes?.status === 'suspensa').length || 0
-          
+
+          // Buscar dados reais de uso de IA
+          let aiCalls = 0, aiCost = 0, aiTokens = 0
+          try {
+            const { data: aiLogs } = await supabaseClient.from('ai_usage_logs').select('custo_estimado, tokens_entrada, tokens_saida')
+            if (aiLogs) {
+              aiCalls = aiLogs.length
+              aiCost = aiLogs.reduce((s: number, l: any) => s + (l.custo_estimado ?? 0), 0)
+              aiTokens = aiLogs.reduce((s: number, l: any) => s + (l.tokens_entrada ?? 0) + (l.tokens_saida ?? 0), 0)
+            }
+          } catch { /* ai_usage_logs may not exist yet */ }
+
           result = {
             clinics: { active: activeClinics, trial: trialClinics, suspended: suspendedClinics, total: totalClinics },
             users: { active: totalUsers, total: totalUsers },
             patientBase: totalPatients,
             appointmentsToday: appointmentsToday,
-            aiUsage: { calls: 12540, cost: 42.15, tokens: 62800, voiceMin: 450 },
+            aiUsage: { calls: aiCalls, cost: Number(aiCost.toFixed(4)), tokens: aiTokens, voiceMin: 0 },
             uptime: 99.99,
             mrr: activeClinics * 199,
             recentClinicsData: recentClinics
           }
-        } catch (e) { 
+        } catch (e) {
           result = { clinics: { active: activeClinics, trial: 0, suspended: 0, total: totalClinics }, /* ...fallback... */ }
         }
         break
       }
 
       case 'get_clinics': {
-        console.log('Clinics: Listando...')
+
         // Removido planos(nome) para evitar erro de cache de relacionamento
         const { data, error } = await supabaseClient.from('clinicas').select('*').order('nome', { ascending: true })
         if (error) {
           console.error('Error fetch clinics:', error)
           throw error
         }
-        console.log('Clinics: Listagem ok, total:', data?.length)
+
         result = data
         break
       }
 
       case 'create_clinic': {
-        console.log('create_clinic payload:', JSON.stringify(pd))
+
         // Insere apenas colunas reais da tabela clinicas (sem status_plano / plano_id)
         const { data: newClinic, error: clinicErr } = await supabaseClient
           .from('clinicas')

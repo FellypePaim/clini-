@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Save, Trash2, History, ChevronDown, Activity, Info, X,
   AlertTriangle, CheckCircle, FileText, Search, Sparkles, Edit3
@@ -97,7 +97,7 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
   const [iaResult, setIaResult] = useState<string | null>(null)
 
   // Carregar sessões anteriores
-  useState(() => {
+  useEffect(() => {
     if (!pacienteId) return
     supabase
       .from('harmonizacoes')
@@ -108,7 +108,7 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
         const dental = (data || []).filter((s: any) => s.mapeamento?.tipo === 'odontograma')
         setSessions(dental)
       })
-  })
+  }, [pacienteId])
 
   const handleToothClick = (tooth: number) => {
     setActiveTooth(tooth)

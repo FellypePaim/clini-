@@ -312,7 +312,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                    </div>
                    
                    <div className="mt-8 self-end">
-                      <QRCodeSVG value="https://clinicaverde.com.br/validar" size={32} />
+                      <QRCodeSVG value={`${window.location.origin}/validar`} size={32} />
                       <p className="text-[5px] text-gray-300 text-right mt-1">v.2.0.26</p>
                    </div>
                 </div>
