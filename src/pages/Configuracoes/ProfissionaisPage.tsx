@@ -70,6 +70,8 @@ export function ProfissionaisPage() {
   const [linkForm, setLinkForm] = useState({ email: '', role: 'profissional' as string })
   const [saving, setSaving] = useState(false)
   const [linking, setLinking] = useState(false)
+  const [editingProf, setEditingProf] = useState<Profissional | null>(null)
+  const [editForm, setEditForm] = useState({ nome_completo: '', especialidade: '', conselho: '', role: '' })
 
   const loadProfissionais = useCallback(async () => {
     if (!clinicaId) return
@@ -145,6 +147,42 @@ export function ProfissionaisPage() {
     } catch (e: any) {
       console.error('Erro criar colaborador:', e)
       toast({ title: 'Erro', description: e.message || 'Falha ao criar colaborador.', type: 'error' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const openEditModal = (prof: Profissional) => {
+    setEditingProf(prof)
+    setEditForm({
+      nome_completo: prof.nome_completo,
+      especialidade: prof.especialidade || '',
+      conselho: prof.conselho || '',
+      role: prof.role,
+    })
+  }
+
+  const handleEditSave = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingProf) return
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          nome_completo: editForm.nome_completo,
+          especialidade: editForm.especialidade || null,
+          conselho: editForm.conselho || null,
+          role: editForm.role,
+        })
+        .eq('id', editingProf.id)
+
+      if (error) throw error
+      toast({ title: 'Perfil atualizado!', description: `${editForm.nome_completo} atualizado com sucesso.`, type: 'success' })
+      setEditingProf(null)
+      await loadProfissionais()
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message || 'Falha ao atualizar.', type: 'error' })
     } finally {
       setSaving(false)
     }
@@ -266,7 +304,7 @@ export function ProfissionaisPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
+                      <button onClick={() => openEditModal(prof)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
                         <Edit2 size={18} />
                       </button>
                     </div>
@@ -401,6 +439,62 @@ export function ProfissionaisPage() {
                 <button type="submit" disabled={linking} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50">
                   {linking ? <Loader2 size={16} className="animate-spin" /> : <LinkIcon size={16} />}
                   {linking ? 'Vinculando...' : 'Vincular à Equipe'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Editar Perfil ──────────────────────────── */}
+      {editingProf && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Edit2 className="w-5 h-5 text-indigo-600" /> Editar Perfil
+              </h2>
+              <button onClick={() => setEditingProf(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSave} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                <input type="text" required className="input-base"
+                  value={editForm.nome_completo} onChange={e => setEditForm(f => ({ ...f, nome_completo: e.target.value }))} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de acesso</label>
+                <select className="input-base" value={editForm.role} onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}>
+                  <option value="profissional">Profissional de Saúde</option>
+                  <option value="recepcao">Recepção</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                  <input type="text" className="input-base" placeholder="Ex: Dermatologia"
+                    value={editForm.especialidade} onChange={e => setEditForm(f => ({ ...f, especialidade: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Conselho (CRM/CRO)</label>
+                  <input type="text" className="input-base" placeholder="CRM-SP 12345"
+                    value={editForm.conselho} onChange={e => setEditForm(f => ({ ...f, conselho: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setEditingProf(null)} className="btn-secondary flex-1">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50">
+                  {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  {saving ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
               </div>
             </form>

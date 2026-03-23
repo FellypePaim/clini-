@@ -32,7 +32,7 @@ export function DashboardPage() {
         body: { action: 'dashboard_insights', clinica_id: user?.clinicaId },
       })
       if (error) throw error
-      setInsightText(data?.insights ?? 'Nenhum insight disponível no momento.')
+      setInsightText(data?.data?.insights ?? data?.insights ?? 'Nenhum insight disponível no momento.')
     } catch {
       setInsightText('Não foi possível gerar insights agora. Verifique a conexão com a IA.')
     } finally {
