@@ -10,7 +10,7 @@ import { AppointmentDetailCard } from '../../components/agenda/AppointmentCard'
 import { ProfissionalFilter } from '../../components/agenda/ProfissionalFilter'
 import { cn } from '../../lib/utils'
 
-const _MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+// Removido _MESES não usado
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 const VIEWS: { key: AgendaView; label: string; icon: typeof Calendar }[] = [
@@ -20,7 +20,10 @@ const VIEWS: { key: AgendaView; label: string; icon: typeof Calendar }[] = [
 ]
 
 function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0]
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function getWeekLabel(date: Date): string {
@@ -41,9 +44,8 @@ export function AgendaPage() {
   const [modalInitialDate, setModalInitialDate]   = useState<string>()
   const [modalInitialHour, setModalInitialHour]   = useState<string>()
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
-  const [_detailPos, _setDetailPos]         = useState({ x: 0, y: 0 })
 
-  const { appointments, createAppointment, updateAppointment, deleteAppointment, getAppointmentsByDate: _getAppointmentsByDate, getAppointmentsByRange: _getAppointmentsByRange } = useAgenda()
+  const { appointments, createAppointment, updateAppointment, deleteAppointment } = useAgenda()
 
   // ── Lista de profissionais únicos (derivada dos agendamentos) ──
   const profissionaisUnicos = useMemo(() => {
@@ -141,47 +143,46 @@ export function AgendaPage() {
     <div className="flex flex-col h-[calc(100vh-64px)] -m-6 overflow-hidden">
       {/* ── Barra de ferramentas ──────────────────────── */}
       <div className="bg-white border-b border-gray-100 px-6 py-3 shrink-0">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           {/* Linha 1: navegação + views + botão novo */}
           <div className="flex items-center justify-between gap-4">
             {/* Navegação */}
-            <div className="flex items-center gap-2">
-              <button
-                id="agenda-today"
-                onClick={() => setDate(new Date())}
-                className="btn-secondary text-xs px-3 py-1.5"
-              >
-                Hoje
-              </button>
-              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
                 <button
-                  id="agenda-prev"
                   onClick={() => navigate(-1)}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
                 <button
-                  id="agenda-next"
+                  onClick={() => setDate(new Date())}
+                  className="px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                >
+                  Hoje
+                </button>
+                <button
                   onClick={() => navigate(1)}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-500"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-              <span className="text-sm font-semibold text-gray-800 capitalize min-w-0">
-                {dateLabel}
-              </span>
+
+              <div className="flex items-center gap-2">
+                <h2 className="text-base font-bold text-gray-900 capitalize">{dateLabel}</h2>
+                <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                  {visibleAppointments.length} consulta{visibleAppointments.length !== 1 ? 's' : ''}
+                </span>
+              </div>
             </div>
 
             {/* Views + botão novo */}
             <div className="flex items-center gap-2 shrink-0">
-              {/* Abas Dia / Semana / Mês */}
               <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
                 {VIEWS.map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
-                    id={`agenda-view-${key}`}
                     onClick={() => setView(key)}
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
@@ -197,13 +198,12 @@ export function AgendaPage() {
               </div>
 
               <button
-                id="agenda-new"
                 onClick={() => {
                   setModalInitialDate(toDateStr(date))
                   setModalInitialHour('08:00')
                   setIsModalOpen(true)
                 }}
-                className="btn-primary text-xs px-3 py-1.5"
+                className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Nova Consulta
               </button>
@@ -211,7 +211,9 @@ export function AgendaPage() {
           </div>
 
           {/* Linha 2: filtro por profissional */}
-          <ProfissionalFilter selected={profFiltro} onChange={setProfFiltro} profissionais={profissionaisUnicos} />
+          {profissionaisUnicos.length > 0 && (
+            <ProfissionalFilter selected={profFiltro} onChange={setProfFiltro} profissionais={profissionaisUnicos} />
+          )}
         </div>
       </div>
 

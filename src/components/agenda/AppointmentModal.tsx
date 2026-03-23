@@ -97,7 +97,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
       repetir: false,
       recorrenciaTipo: 'semanal',
       quantidadeRepeticoes: 4,
-      data: initialDate ?? new Date().toISOString().split('T')[0],
+      data: initialDate ?? (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(),
       horaInicio: initialHour ?? '08:00',
       horaFim: initialHour ? `${String(parseInt(initialHour.split(':')[0]) + 1).padStart(2,'0')}:00` : '09:00',
     },
@@ -115,7 +115,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
         repetir: false,
         recorrenciaTipo: 'semanal',
         quantidadeRepeticoes: 4,
-        data: initialDate ?? new Date().toISOString().split('T')[0],
+        data: initialDate ?? (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` })(),
         horaInicio: initialHour ?? '08:00',
         horaFim: initialHour ? `${String(parseInt(initialHour.split(':')[0]) + 1).padStart(2,'0')}:00` : '09:00',
       })

@@ -8,7 +8,10 @@ const DIAS_SEMANA  = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 const MESES_LABELS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 function toDateStr(d: Date): string {
-  return d.toISOString().split('T')[0]
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 function getMonthDays(year: number, month: number): (Date | null)[] {
@@ -67,7 +70,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
       </div>
 
       {/* Cabeçalho dias da semana */}
-      <div className="grid grid-cols-1 md: mb-1">
+      <div className="grid grid-cols-7 mb-1">
         {DIAS_SEMANA.map(d => (
           <div key={d} className="text-[11px] font-semibold text-gray-400 text-center py-1">
             {d}
@@ -76,7 +79,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md: gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+      <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
         {days.map((day, idx) => {
           if (!day) return (
             <div key={`empty-${idx}`} className="bg-gray-50 min-h-24" />
