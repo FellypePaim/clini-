@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { 
+import {
   Sparkles,
   MapPin,
   Trash2,
@@ -7,7 +7,8 @@ import {
   History,
   ChevronDown,
   Activity,
-  Camera
+  Camera,
+  X
 } from 'lucide-react'
 import html2canvas from 'html2canvas'
 import { cn } from '../../lib/utils'
@@ -60,7 +61,9 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
       .select('*, profiles:profissional_id(nome_completo)')
       .eq('paciente_id', pacienteId)
       .order('created_at', { ascending: false })
-      .then(({ data }) => { if (data) setSessions(data) })
+      .then(({ data }) => {
+        if (data) setSessions(data.filter((s: any) => !s.mapeamento?.tipo || s.mapeamento.tipo !== 'odontograma'))
+      })
   }, [pacienteId])
 
   const activeZoneConfig = useMemo(() => ZONES_CONFIG.find(z => z.id === activeZoneId), [activeZoneId])
@@ -158,7 +161,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
         .select('*, profiles:profissional_id(nome_completo)')
         .eq('paciente_id', pacienteId)
         .order('created_at', { ascending: false })
-      if (refreshed) setSessions(refreshed)
+      if (refreshed) setSessions(refreshed.filter((s: any) => !s.mapeamento?.tipo || s.mapeamento.tipo !== 'odontograma'))
 
       toast({ title: 'Sucesso', description: 'Mapeamento facial salvo com sucesso.', type: 'success' })
     } catch(err: any) {
@@ -355,7 +358,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                              {sessions.length - sIdx}
                            </div>
                            <div className="flex-1 min-w-0">
-                             <p className="text-sm font-black">{new Date(session.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                             <p className="text-sm font-black">{(() => { const p = (session.created_at as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}</p>
                              <p className="text-[10px] text-gray-400 font-medium mt-0.5">{profNome}</p>
                              {/* Mini badges */}
                              <div className="flex flex-wrap gap-1.5 mt-3">
@@ -451,22 +454,3 @@ function ZoneField({ label, children }: { label: string, children: React.ReactNo
   )
 }
 
-function X(props: any) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      {...props}
-    >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  )
-}
