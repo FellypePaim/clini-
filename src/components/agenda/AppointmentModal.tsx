@@ -177,7 +177,6 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
             <label className="modal-label">Paciente *</label>
             <div ref={searchRef} className="relative">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                 <input
                   type="text"
                   placeholder="Buscar paciente pelo nome..."
@@ -192,7 +191,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                     searchPacientes(e.target.value)
                   }}
                   onFocus={() => setShowPacienteDropdown(true)}
-                  className={cn('input-base pl-9', errors.pacienteId && 'border-red-400')}
+                  className={cn('input-base', errors.pacienteId && 'border-red-400')}
                 />
               </div>
 
@@ -224,10 +223,9 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           <div>
             <label className="modal-label">Profissional *</label>
             <div className="relative">
-              <Stethoscope className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
               <select
                 {...register('profissionalId')}
-                className={cn('input-base pl-9 pr-8 appearance-none cursor-pointer', errors.profissionalId && 'border-red-400')}
+                className={cn('input-base pr-8 appearance-none cursor-pointer', errors.profissionalId && 'border-red-400')}
               >
                 <option value="">Selecione o profissional</option>
                 {profissionais.map(p => (
