@@ -1,35 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Bell, Mail, Smartphone, Zap, Loader2, Save } from 'lucide-react'
+import { Bell, Smartphone, Zap, Loader2, Clock } from 'lucide-react'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 
 interface NotifConfig {
+  // WhatsApp → Pacientes
   whatsapp_confirmacao: boolean
   whatsapp_lembrete: boolean
+  whatsapp_lembrete_horas: number
+  whatsapp_pos_consulta: boolean
   whatsapp_aniversario: boolean
   whatsapp_cobranca: boolean
+  // Sistema → Equipe
   sistema_novo_lead: boolean
   sistema_checkin: boolean
   sistema_estoque_baixo: boolean
-  smtp_host: string
-  smtp_porta: string
-  smtp_usuario: string
-  smtp_senha: string
+  sistema_consulta_pendente: boolean
 }
 
 const defaultConfig: NotifConfig = {
   whatsapp_confirmacao: true,
   whatsapp_lembrete: true,
+  whatsapp_lembrete_horas: 24,
+  whatsapp_pos_consulta: false,
   whatsapp_aniversario: false,
-  whatsapp_cobranca: true,
+  whatsapp_cobranca: false,
   sistema_novo_lead: true,
   sistema_checkin: false,
   sistema_estoque_baixo: true,
-  smtp_host: '',
-  smtp_porta: '587',
-  smtp_usuario: '',
-  smtp_senha: '',
+  sistema_consulta_pendente: true,
 }
 
 export function NotificacoesPage() {
@@ -39,7 +39,6 @@ export function NotificacoesPage() {
 
   const [config, setConfig] = useState<NotifConfig>(defaultConfig)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSavingSmtp, setIsSavingSmtp] = useState(false)
 
   const loadConfig = useCallback(async () => {
     if (!clinicaId) return
@@ -58,48 +57,30 @@ export function NotificacoesPage() {
 
   useEffect(() => { loadConfig() }, [loadConfig])
 
-  const saveToggle = async (key: keyof NotifConfig, value: boolean) => {
+  const saveConfig = async (newConfig: NotifConfig) => {
     if (!clinicaId) return
-    const newConfig = { ...config, [key]: value }
     setConfig(newConfig)
 
-    const { error } = await supabase.rpc('update_clinica_config' as any, {
-      p_clinica_id: clinicaId,
-      p_path: 'notificacoes',
-      p_value: newConfig,
-    } as any).then((res: any) => res, () => ({ error: null }))
-
-    // Fallback: update direto no campo configuracoes
-    if (error) {
-      const { data: current } = await supabase
-        .from('clinicas').select('configuracoes').eq('id', clinicaId).single()
-      const merged = { ...((current?.configuracoes as any) || {}), notificacoes: newConfig }
-      await supabase.from('clinicas').update({ configuracoes: merged }).eq('id', clinicaId)
-    }
-
-    toast({ title: 'Salvo', description: 'Configuração atualizada.', type: 'success' })
-  }
-
-  const saveSmtp = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!clinicaId) return
-    setIsSavingSmtp(true)
     const { data: current } = await supabase
       .from('clinicas').select('configuracoes').eq('id', clinicaId).single()
-    const smtpData = {
-      host: config.smtp_host,
-      porta: config.smtp_porta,
-      usuario: config.smtp_usuario,
-      senha: config.smtp_senha,
-    }
-    const merged = { ...((current?.configuracoes as any) || {}), smtp: smtpData }
+    const merged = { ...((current?.configuracoes as any) || {}), notificacoes: newConfig }
     const { error } = await supabase.from('clinicas').update({ configuracoes: merged }).eq('id', clinicaId)
-    setIsSavingSmtp(false)
+
     if (error) {
       toast({ title: 'Erro', description: error.message, type: 'error' })
     } else {
-      toast({ title: 'SMTP Salvo', description: 'Configurações de e-mail atualizadas.', type: 'success' })
+      toast({ title: 'Salvo', description: 'Configuração atualizada.', type: 'success' })
     }
+  }
+
+  const toggle = (key: keyof NotifConfig) => {
+    const newConfig = { ...config, [key]: !config[key] }
+    saveConfig(newConfig)
+  }
+
+  const setHoras = (value: number) => {
+    const newConfig = { ...config, whatsapp_lembrete_horas: value }
+    saveConfig(newConfig)
   }
 
   if (isLoading) {
@@ -112,99 +93,137 @@ export function NotificacoesPage() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Bell className="text-indigo-600" />
-            Régua de Comunicação e Notificações
-          </h2>
-          <p className="text-sm font-medium text-slate-500 mt-1">Configure quais eventos acionam alertas via WhatsApp, Push Web e e-mails na clínica.</p>
-        </div>
+      <div className="p-6 border-b border-slate-100 bg-slate-50/50">
+        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <Bell className="text-indigo-600" />
+          Notificações e Comunicação
+        </h2>
+        <p className="text-sm font-medium text-slate-500 mt-1">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
       </div>
 
       <div className="p-8 space-y-8">
-        {/* WhatsApp Channel */}
+        {/* WhatsApp → Pacientes */}
         <div>
-          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <Smartphone size={18} className="text-emerald-500" /> Alertas Via WhatsApp (Pacientes)
+          <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
+            <Smartphone size={18} className="text-emerald-500" /> WhatsApp Automático (Pacientes)
           </h3>
-          <div className="space-y-4 max-w-2xl">
-            <ToggleRow label="Confirmação de Agendamento (Novo e Reagendamento)" value={config.whatsapp_confirmacao}
-              onChange={v => saveToggle('whatsapp_confirmacao', v)} />
-            <ToggleRow label="Lembrete Automático 24 horas antes" value={config.whatsapp_lembrete}
-              onChange={v => saveToggle('whatsapp_lembrete', v)} />
-            <ToggleRow label="Mensagem de Feliz Aniversário do Paciente" value={config.whatsapp_aniversario}
-              onChange={v => saveToggle('whatsapp_aniversario', v)} />
-            <ToggleRow label="Cobrança/Boleto perto do Vencimento" value={config.whatsapp_cobranca}
-              onChange={v => saveToggle('whatsapp_cobranca', v)} />
+          <p className="text-xs text-slate-400 mb-4">Mensagens enviadas automaticamente pela OVYVA via WhatsApp para os pacientes.</p>
+
+          <div className="space-y-3 max-w-2xl">
+            <ToggleRow
+              label="Confirmação de agendamento"
+              description="Envia mensagem quando uma consulta é agendada ou reagendada"
+              value={config.whatsapp_confirmacao}
+              onChange={() => toggle('whatsapp_confirmacao')}
+            />
+            <ToggleRow
+              label="Lembrete antes da consulta"
+              description="Envia lembrete automático antes do horário agendado"
+              value={config.whatsapp_lembrete}
+              onChange={() => toggle('whatsapp_lembrete')}
+            />
+
+            {/* Timing do lembrete */}
+            {config.whatsapp_lembrete && (
+              <div className="ml-4 pl-4 border-l-2 border-emerald-200">
+                <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
+                  <Clock size={16} className="text-emerald-600 shrink-0" />
+                  <span className="text-sm font-medium text-slate-700">Enviar</span>
+                  <select
+                    value={config.whatsapp_lembrete_horas}
+                    onChange={e => setHoras(Number(e.target.value))}
+                    className="px-3 py-1.5 text-sm font-bold border border-emerald-200 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none"
+                  >
+                    <option value={2}>2 horas</option>
+                    <option value={6}>6 horas</option>
+                    <option value={12}>12 horas</option>
+                    <option value={24}>24 horas</option>
+                    <option value={48}>48 horas</option>
+                  </select>
+                  <span className="text-sm font-medium text-slate-700">antes da consulta</span>
+                </div>
+              </div>
+            )}
+
+            <ToggleRow
+              label="Pós-consulta (satisfação)"
+              description="Envia pesquisa de satisfação após o atendimento ser concluído"
+              value={config.whatsapp_pos_consulta}
+              onChange={() => toggle('whatsapp_pos_consulta')}
+            />
+            <ToggleRow
+              label="Feliz aniversário"
+              description="Envia mensagem de parabéns na data de nascimento do paciente"
+              value={config.whatsapp_aniversario}
+              onChange={() => toggle('whatsapp_aniversario')}
+            />
+            <ToggleRow
+              label="Cobrança / boleto"
+              description="Envia lembrete quando há valores pendentes próximos do vencimento"
+              value={config.whatsapp_cobranca}
+              onChange={() => toggle('whatsapp_cobranca')}
+            />
           </div>
         </div>
 
-        {/* Sistema (Equipe) */}
+        {/* Sistema → Equipe */}
         <div className="pt-2">
-          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <Zap size={18} className="text-amber-500" /> Alertas de Sistema Web (Administradores/Recepção)
+          <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
+            <Zap size={18} className="text-amber-500" /> Alertas do Sistema (Equipe)
           </h3>
-          <div className="space-y-4 max-w-2xl">
-            <ToggleRow label="Aviso: Novo Lead entrou no Funil (Verdesk)" value={config.sistema_novo_lead}
-              onChange={v => saveToggle('sistema_novo_lead', v)} />
-            <ToggleRow label="Aviso: Paciente Chegou / Check-in na Recepção" value={config.sistema_checkin}
-              onChange={v => saveToggle('sistema_checkin', v)} />
-            <ToggleRow label="Aviso: Estoque de Insumos abaixo do Mínimo" value={config.sistema_estoque_baixo}
-              onChange={v => saveToggle('sistema_estoque_baixo', v)} />
-          </div>
-        </div>
+          <p className="text-xs text-slate-400 mb-4">Notificações visíveis no painel para administradores e recepcionistas.</p>
 
-        {/* SMTP */}
-        <div className="pt-2">
-          <h3 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2 border-b border-slate-100 pb-2">
-            <Mail size={18} className="text-slate-500" /> Servidor de E-mail Interno (SMTP / SES)
-          </h3>
-          <form onSubmit={saveSmtp}>
-            <div className="grid grid-cols-2 gap-6 max-w-3xl bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Host SMTP</label>
-                <input type="text" value={config.smtp_host} placeholder="smtp.seudominio.com"
-                  onChange={e => setConfig(c => ({ ...c, smtp_host: e.target.value }))}
-                  className="w-full p-2.5 text-sm font-mono border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Porta (TLS/SSL)</label>
-                <input type="text" value={config.smtp_porta} placeholder="587"
-                  onChange={e => setConfig(c => ({ ...c, smtp_porta: e.target.value }))}
-                  className="w-full p-2.5 text-sm font-mono border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Usuário / Access Key</label>
-                <input type="text" value={config.smtp_usuario} placeholder="usuario@exemplo.com"
-                  onChange={e => setConfig(c => ({ ...c, smtp_usuario: e.target.value }))}
-                  className="w-full p-2.5 text-sm font-mono border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Senha Privada</label>
-                <input type="password" value={config.smtp_senha} placeholder="••••••••"
-                  onChange={e => setConfig(c => ({ ...c, smtp_senha: e.target.value }))}
-                  className="w-full p-2.5 text-sm font-mono border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
-            </div>
-            <button type="submit" disabled={isSavingSmtp}
-              className="mt-4 flex items-center gap-2 px-5 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors disabled:opacity-50">
-              {isSavingSmtp ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-              Salvar Configurações SMTP
-            </button>
-          </form>
+          <div className="space-y-3 max-w-2xl">
+            <ToggleRow
+              label="Novo lead no funil"
+              description="Alerta quando um novo contato entra pelo WhatsApp ou formulário"
+              value={config.sistema_novo_lead}
+              onChange={() => toggle('sistema_novo_lead')}
+            />
+            <ToggleRow
+              label="Consulta pendente de aprovação"
+              description="Alerta quando a OVYVA cria um pré-agendamento que precisa de confirmação"
+              value={config.sistema_consulta_pendente}
+              onChange={() => toggle('sistema_consulta_pendente')}
+            />
+            <ToggleRow
+              label="Check-in do paciente"
+              description="Alerta quando o paciente faz check-in na recepção"
+              value={config.sistema_checkin}
+              onChange={() => toggle('sistema_checkin')}
+            />
+            <ToggleRow
+              label="Estoque abaixo do mínimo"
+              description="Alerta quando um produto atinge o nível mínimo configurado"
+              value={config.sistema_estoque_baixo}
+              onChange={() => toggle('sistema_estoque_baixo')}
+            />
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function ToggleRow({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
+function ToggleRow({ label, description, value, onChange }: {
+  label: string
+  description: string
+  value: boolean
+  onChange: () => void
+}) {
   return (
-    <div className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition-colors cursor-pointer group"
-      onClick={() => onChange(!value)}>
-      <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors">{label}</span>
-      <button type="button" className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out ${value ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+    <div
+      className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition-colors cursor-pointer group"
+      onClick={onChange}
+    >
+      <div className="flex-1 mr-4">
+        <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors">{label}</span>
+        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+      </div>
+      <button
+        type="button"
+        className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out shrink-0 ${value ? 'bg-emerald-500' : 'bg-slate-300'}`}
+      >
         <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out ${value ? 'translate-x-6' : 'translate-x-0'}`} />
       </button>
     </div>
