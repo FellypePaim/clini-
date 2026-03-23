@@ -35,6 +35,7 @@ import type { Patient, Appointment, PatientDocument, PatientFinancial } from '..
 import { QRCodeSVG } from 'qrcode.react'
 
 // Novos componentes
+import { PatientAnamnese } from '../../components/pacientes/PatientAnamnese'
 import { EvolutionModal } from '../../components/pacientes/EvolutionModal'
 import { PrescriptionModal } from '../../components/pacientes/PrescriptionModal'
 import { FacialHarmonization } from '../../components/pacientes/FacialHarmonization'
@@ -414,7 +415,14 @@ export function PatientProfilePage() {
 
         {activeTab === 'anamnese' && (
           <div className="space-y-6">
-            {/* Status da anamnese */}
+            {/* Sinais Vitais + Condições + Evolução */}
+            <PatientAnamnese
+              pacienteId={patient.id}
+              patient={patient}
+              onUpdatePatient={updatePatient}
+            />
+
+            {/* Status da anamnese preenchida via link */}
             {anamneseHistory.length > 0 && (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
