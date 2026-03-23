@@ -472,6 +472,65 @@ Responda APENAS com JSON válido nesta estrutura:
     sigPad.current?.clear()
   }
 
+  const handlePrintBlank = () => {
+    const content = editableContent || activeTemplate?.desc || ''
+    const titulo = activeTemplate?.titulo || 'Termo de Consentimento'
+    const dp = new Date().toISOString().split('T')[0].split('-')
+    const hoje = `${dp[2]}/${dp[1]}/${dp[0]}`
+
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(`<!DOCTYPE html><html><head><title>${titulo}</title><style>
+      @page { margin: 25mm 20mm; }
+      body { font-family: Georgia, 'Times New Roman', serif; margin: 0; color: #111; font-size: 12px; line-height: 1.8; }
+      .header { border-bottom: 2px solid #16a34a; padding-bottom: 12px; margin-bottom: 20px; }
+      .header h1 { font-size: 18px; margin: 0 0 2px; }
+      .header small { color: #999; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; }
+      .titulo { text-align: center; font-size: 14px; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; margin: 30px 0 8px; }
+      .barra { width: 40px; height: 2px; background: #16a34a; margin: 0 auto 30px; }
+      .conteudo { white-space: pre-line; text-align: justify; margin-bottom: 30px; }
+      .info { display: flex; gap: 40px; margin: 30px 0; padding: 12px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; font-size: 11px; }
+      .info div label { font-size: 8px; text-transform: uppercase; letter-spacing: 1px; color: #999; display: block; margin-bottom: 2px; }
+      .assinatura-area { margin-top: 50px; }
+      .assinatura-area h4 { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 8px; }
+      .linha-assinatura { border-bottom: 1px solid #333; height: 60px; margin-bottom: 6px; }
+      .nome-assinatura { font-size: 10px; color: #666; }
+      .grid-assinaturas { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+      .footer { margin-top: 40px; text-align: center; font-size: 8px; color: #bbb; border-top: 1px solid #eee; padding-top: 12px; }
+    </style></head><body>
+      <div class="header">
+        <h1>${user?.clinicaNome || 'Prontuário Verde'}</h1>
+        <small>Sistema de Gestão Clínica</small>
+      </div>
+      <div class="titulo">${titulo}</div>
+      <div class="barra"></div>
+      <div class="conteudo">${content}</div>
+      <div class="info">
+        <div><label>Data</label>${hoje}</div>
+        <div><label>Paciente</label>${patientData?.nome || '________________________'}</div>
+        <div><label>CPF</label>${patientData?.cpf || '___.___.___-__'}</div>
+        <div><label>Profissional</label>${user?.nome || '________________________'}</div>
+      </div>
+      <div class="assinatura-area">
+        <div class="grid-assinaturas">
+          <div>
+            <h4>Assinatura do Paciente</h4>
+            <div class="linha-assinatura"></div>
+            <div class="nome-assinatura">${patientData?.nome || 'Nome do Paciente'}</div>
+          </div>
+          <div>
+            <h4>Assinatura do Profissional</h4>
+            <div class="linha-assinatura"></div>
+            <div class="nome-assinatura">${user?.nome || 'Nome do Profissional'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer">Este documento foi gerado pelo sistema Prontuário Verde. Válido conforme Lei 14.063/2020.</div>
+    </body></html>`)
+    win.document.close()
+    setTimeout(() => { win.print() }, 600)
+  }
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 animate-fade-in">
       {/* Templates List */}
@@ -836,12 +895,20 @@ Responda APENAS com JSON válido nesta estrutura:
 
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
               <button onClick={() => setShowEditModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</button>
-              <button
-                onClick={proceedToSign}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
-              >
-                Prosseguir para Assinatura <CheckCircle className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePrintBlank}
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors"
+                >
+                  <Printer className="w-4 h-4" /> Imprimir (assinar à mão)
+                </button>
+                <button
+                  onClick={proceedToSign}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                >
+                  Assinatura Digital <CheckCircle className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
