@@ -228,16 +228,27 @@ export function useProntuario(pacienteId?: string) {
     try {
       const qrCode = `${clinicaId}-${pid}-${Date.now()}`
 
+      const itensJson = items.map(i => ({
+        medicamento: i.medicamento,
+        dosagem: i.dosagem,
+        frequencia: i.frequencia,
+        duracao: i.duracao,
+        observacoes: i.observacoes || '',
+      }))
+
       const { data: ret, error } = await supabase
         .from('prescricoes')
         .insert({
           clinica_id: clinicaId,
           paciente_id: pid,
           profissional_id: profissionalId,
-          data: new Date().toISOString().split('T')[0],
-          itens: JSON.parse(JSON.stringify(items)) as any,
-          assinada: true,
-          qr_code: qrCode,
+          itens: itensJson,
+          conteudo: itensJson.map(i => `${i.medicamento} — ${i.dosagem}, ${i.frequencia}, ${i.duracao}`).join('\n'),
+          assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
+          qr_code_token: qrCode,
+          status: 'ativa',
+          validade_dias: 180,
+          updated_at: new Date().toISOString(),
         } as any)
         .select()
         .single()
