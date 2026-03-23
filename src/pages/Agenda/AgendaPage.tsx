@@ -128,6 +128,10 @@ export function AgendaPage() {
     await createAppointment(data)
   }
 
+  const handleDrop = async (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => {
+    await updateAppointment(id, { data: newDate, horaInicio: newHoraInicio, horaFim: newHoraFim })
+  }
+
   const handleDayClick = (dateStr: string) => {
     setDate(new Date(dateStr + 'T00:00:00'))
     setView('dia')
@@ -221,6 +225,7 @@ export function AgendaPage() {
               onCardClick={handleCardClick}
               onSlotClick={(h) => handleSlotClick(toDateStr(date), h)}
               onStatusChange={handleStatusChange}
+              onDrop={handleDrop}
             />
           )}
 
@@ -231,6 +236,7 @@ export function AgendaPage() {
               onCardClick={handleCardClick}
               onSlotClick={handleSlotClick}
               onStatusChange={handleStatusChange}
+              onDrop={handleDrop}
             />
           )}
 

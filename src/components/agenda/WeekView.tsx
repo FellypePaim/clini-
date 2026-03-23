@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react'
 import type { AgendaAppointment, AppointmentStatus } from '../../types/agenda'
 import { AppointmentCard } from './AppointmentCard'
 import { cn } from '../../lib/utils'
@@ -27,6 +28,12 @@ function timeToMinutes(t: string) {
   return h * 60 + m
 }
 
+function minutesToTime(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+}
+
 function getCardStyle(apt: AgendaAppointment): React.CSSProperties {
   const startMin = timeToMinutes(apt.horaInicio) - 7 * 60
   const endMin   = timeToMinutes(apt.horaFim)   - 7 * 60
@@ -41,12 +48,70 @@ interface WeekViewProps {
   onCardClick: (apt: AgendaAppointment) => void
   onSlotClick: (date: string, hour: number) => void
   onStatusChange: (id: string, status: AppointmentStatus) => void
+  onDrop?: (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => void
 }
 
-export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, onStatusChange }: WeekViewProps) {
+export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, onStatusChange, onDrop }: WeekViewProps) {
   const today      = new Date()
   const weekDays   = getWeekDays(currentDate)
   const totalHeight = HOURS.length * SLOT_HEIGHT
+
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dropPreview, setDropPreview] = useState<{ dayIdx: number; top: number } | null>(null)
+  const colRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  const handleDragStart = (e: React.DragEvent, apt: AgendaAppointment) => {
+    setDraggingId(apt.id)
+    e.dataTransfer.setData('appointment-id', apt.id)
+    e.dataTransfer.setData('duration', String(timeToMinutes(apt.horaFim) - timeToMinutes(apt.horaInicio)))
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent, dayIdx: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    const col = colRefs.current[dayIdx]
+    if (col) {
+      const rect = col.getBoundingClientRect()
+      const y = e.clientY - rect.top
+      const minutes = Math.round((y / SLOT_HEIGHT) * 60 / 15) * 15
+      const snappedTop = (minutes / 60) * SLOT_HEIGHT
+      setDropPreview({ dayIdx, top: snappedTop })
+    }
+  }
+
+  const handleDragLeave = () => {
+    setDropPreview(null)
+  }
+
+  const handleDrop = (e: React.DragEvent, dayIdx: number) => {
+    e.preventDefault()
+    setDropPreview(null)
+    setDraggingId(null)
+    if (!onDrop) return
+
+    const aptId = e.dataTransfer.getData('appointment-id')
+    const duration = Number(e.dataTransfer.getData('duration')) || 30
+    const col = colRefs.current[dayIdx]
+    if (!col) return
+
+    const rect = col.getBoundingClientRect()
+    const y = e.clientY - rect.top
+    const rawMinutes = (y / SLOT_HEIGHT) * 60
+    const snappedMinutes = Math.round(rawMinutes / 15) * 15
+    const startMinutes = 7 * 60 + snappedMinutes
+
+    const newDate = toDateStr(weekDays[dayIdx])
+    const newHoraInicio = minutesToTime(startMinutes)
+    const newHoraFim = minutesToTime(startMinutes + duration)
+
+    onDrop(aptId, newDate, newHoraInicio, newHoraFim)
+  }
+
+  const handleDragEnd = () => {
+    setDraggingId(null)
+    setDropPreview(null)
+  }
 
   return (
     <div className="flex-1 overflow-auto">
@@ -116,11 +181,15 @@ export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, 
           return (
             <div
               key={idx}
+              ref={(el) => { colRefs.current[idx] = el }}
               className={cn(
                 'relative border-l border-gray-100',
                 isToday && 'bg-green-50/20'
               )}
               style={{ height: totalHeight }}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx)}
             >
               {/* Linhas de hora / slots clicáveis */}
               {HOURS.map((h) => (
@@ -136,9 +205,24 @@ export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, 
                 </div>
               ))}
 
+              {/* Drop preview */}
+              {dropPreview?.dayIdx === idx && (
+                <div
+                  className="absolute left-1 right-1 bg-green-200/40 border-2 border-dashed border-green-400 rounded-lg pointer-events-none z-30 transition-all duration-75"
+                  style={{ top: dropPreview.top, height: SLOT_HEIGHT / 2 }}
+                />
+              )}
+
               {/* Cards */}
               {dayApts.map((apt) => (
-                <div key={apt.id} style={getCardStyle(apt)} className="z-10">
+                <div
+                  key={apt.id}
+                  style={getCardStyle(apt)}
+                  className={cn('z-10 cursor-grab active:cursor-grabbing', draggingId === apt.id && 'opacity-30')}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, apt)}
+                  onDragEnd={handleDragEnd}
+                >
                   <AppointmentCard
                     appointment={apt}
                     compact
