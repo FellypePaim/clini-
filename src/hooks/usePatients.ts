@@ -117,7 +117,7 @@ export function usePatients() {
         profissionalId: r.profissional_id,
         profissionalNome: r.profiles?.nome_completo || '',
         data: r.data_hora?.split('T')[0] || '',
-        horaInicio: r.data_hora ? new Date(r.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '',
+        horaInicio: r.data_hora ? (r.data_hora as string).split('T')[1]?.substring(0, 5) ?? '' : '',
         horaFim: '',
         procedimento: r.procedimento || 'consulta',
         status: r.status || 'concluido',

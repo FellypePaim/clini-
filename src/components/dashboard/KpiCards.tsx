@@ -47,11 +47,14 @@ export function KpiCards() {
     if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
-    const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
-    const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
-    const mesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
-    const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString()
-    const fimMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`
+    const inicioHoje = `${hojeStr}T00:00:00`
+    const fimHoje = `${hojeStr}T23:59:59`
+    const mesAtual = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-01T00:00:00`
+    const mesAntDate = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
+    const mesAnterior = `${mesAntDate.getFullYear()}-${pad(mesAntDate.getMonth() + 1)}-01T00:00:00`
+    const fimMesAnterior = mesAtual
 
     const [consultasRes, pacMesRes, pacMesAntRes, faturamentoRes, agendadasRes, concluidasRes] = await Promise.all([
       supabase.from('consultas').select('*', { count: 'exact', head: true })

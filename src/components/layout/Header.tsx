@@ -62,8 +62,10 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
     const loadNotifications = async () => {
       try {
         const hoje = new Date()
-        const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
-        const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`
+        const inicioHoje = `${hojeStr}T00:00:00`
+        const fimHoje = `${hojeStr}T23:59:59`
         const { count, error } = await supabase
           .from('consultas')
           .select('*', { count: 'exact', head: true })

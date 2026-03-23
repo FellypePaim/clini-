@@ -38,8 +38,9 @@ export function AgendamentosList() {
     if (!clinicaId) return
     setLoading(true)
     const hoje = new Date()
-    const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
-    const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
+    const hojeStr = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`
+    const inicioHoje = `${hojeStr}T00:00:00`
+    const fimHoje = `${hojeStr}T23:59:59`
 
     const { data, error } = await supabase
       .from('consultas')
@@ -61,7 +62,7 @@ export function AgendamentosList() {
     if (!error && data) {
       setAgendamentos(data.map((c: any) => ({
         id: c.id,
-        horaInicio: new Date(c.data_hora_inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+        horaInicio: (c.data_hora_inicio as string)?.split('T')[1]?.substring(0, 5) ?? '--:--',
         pacienteNome: c.paciente?.nome_completo ?? 'Paciente',
         procedimento: c.procedimento_rel?.nome ?? 'Consulta',
         profissionalNome: c.profissional?.nome_completo ?? 'Profissional',
