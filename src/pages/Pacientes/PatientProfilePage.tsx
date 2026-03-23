@@ -19,7 +19,9 @@ import {
   UserCheck,
   Sparkles,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Phone,
+  Mail
 } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
 import { useProntuario } from '../../hooks/useProntuario'
@@ -219,100 +221,190 @@ export function PatientProfilePage() {
       {/* Content */}
       <div className="flex-1">
         {activeTab === 'resumo' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Demographic Info */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm shadow-gray-100/50">
-                <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Informações de Contato</h3>
-                <div className="space-y-4 text-sm">
-                  <InfoRow label="Telefone" value={patient.contato.telefone} />
-                  <InfoRow label="Email" value={patient.contato.email || '-'} />
-                </div>
+          <div className="space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <p className="text-xs text-gray-400 font-medium">Total Consultas</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{history.length}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm shadow-gray-100/50">
-                <h3 className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Endereço</h3>
-                <div className="text-sm text-gray-600 space-y-1">
-                  <p>{patient.endereco.logradouro}, {patient.endereco.numero}</p>
-                  <p>{patient.endereco.bairro} - {patient.endereco.cidade}, {patient.endereco.estado}</p>
-                  <p className="text-xs text-gray-400 mt-1">CEP: {patient.endereco.cep}</p>
-                </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <p className="text-xs text-gray-400 font-medium">Última Visita</p>
+                <p className="text-sm font-bold text-gray-900 mt-1">
+                  {history.length > 0
+                    ? (() => { const d = history[0].data.split('-'); return `${d[2]}/${d[1]}/${d[0]}` })()
+                    : '—'}
+                </p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <p className="text-xs text-gray-400 font-medium">Convênio</p>
+                <p className="text-sm font-bold text-green-600 mt-1">{patient.convenio || 'Particular'}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4">
+                <p className="text-xs text-gray-400 font-medium">Alergias</p>
+                <p className="text-sm font-bold mt-1 truncate" title={patient.alergias?.join(', ')}>
+                  {patient.alergias?.length ? (
+                    <span className="text-red-600">{patient.alergias.join(', ')}</span>
+                  ) : (
+                    <span className="text-gray-400">Nenhuma</span>
+                  )}
+                </p>
               </div>
             </div>
 
-            {/* Timeline */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm shadow-gray-100/50">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-6">
-                <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-gray-400" /> Linha do Tempo de Atendimentos
-                </h3>
-                <span className="text-xs text-gray-400">{history.length} atendimentos registrados</span>
-              </div>
-              
-              <div className="relative pl-8 space-y-8 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-100">
-                {history.length > 0 ? (
-                  history.map((apt, idx) => (
-                    <div
-                      key={apt.id}
-                      className="relative group/apt"
-                    >
-                      {/* Timeline dot */}
-                      <div className={cn(
-                        "absolute -left-[30px] top-1 w-6 h-6 rounded-full border-4 border-white flex items-center justify-center shadow-sm transition-transform group-hover/apt:scale-125 z-10",
-                        idx === 0 ? "bg-green-500 ring-2 ring-green-100" : "bg-gray-200 group-hover/apt:bg-green-400"
-                      )}>
-                        {idx === 0 && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Info lateral */}
+              <div className="lg:col-span-1 space-y-4">
+                {/* Contato */}
+                <div className="bg-white rounded-xl border border-gray-100 p-5">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Contato</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+                        <Phone className="w-4 h-4 text-green-600" />
                       </div>
-
-                      <div className="group-hover/apt:translate-x-1 transition-transform">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs font-bold text-gray-900">{new Date(apt.data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                            <span className="text-[10px] uppercase font-bold text-gray-400">{apt.horaInicio}</span>
-                            <Badge variant="gray" className="text-[10px] px-2 py-0 h-4">{apt.procedimento}</Badge>
-                          </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                              className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Editar evolução"
-                            >
-                              <Stethoscope className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (!confirm('Excluir este atendimento da linha do tempo?')) return
-                                await deleteConsulta(apt.id)
-                                const h = await getPatientHistory(id!)
-                                setHistory(h)
-                              }}
-                              className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Excluir atendimento"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                          <User className="w-3.5 h-3.5" />
-                          <span>Atendido por <span className="font-semibold text-gray-700">{apt.profissionalNome}</span></span>
-                        </div>
-                        <div
-                          onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                          className="p-4 bg-gray-50 group-hover/apt:bg-green-50/50 group-hover/apt:border-green-100 rounded-2xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                             <span className="text-[9px] font-black uppercase text-gray-400 tracking-widest flex items-center gap-1.5">
-                               <FileText className="w-3 h-3" /> Evolução Clínica
-                             </span>
-                             <span className="text-[9px] font-bold text-green-600 opacity-0 group-hover/apt:opacity-100">Clique para editar</span>
-                          </div>
-                          <p className="italic">{apt.observacoes || 'Sem evolução registrada — clique para adicionar'}</p>
-                        </div>
+                      <div>
+                        <p className="text-xs text-gray-400">Telefone</p>
+                        <p className="font-medium text-gray-900">{patient.contato?.telefone || '—'}</p>
                       </div>
                     </div>
-                  ))
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                        <Mail className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-400">E-mail</p>
+                        <p className="font-medium text-gray-900 truncate">{patient.contato?.email || '—'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Endereço */}
+                {patient.endereco && (patient.endereco.logradouro || patient.endereco.cidade) && (
+                  <div className="bg-white rounded-xl border border-gray-100 p-5">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Endereço</h3>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      {patient.endereco.logradouro && (
+                        <p>{patient.endereco.logradouro}{patient.endereco.numero ? `, ${patient.endereco.numero}` : ''}</p>
+                      )}
+                      {(patient.endereco.bairro || patient.endereco.cidade) && (
+                        <p>{[patient.endereco.bairro, patient.endereco.cidade, patient.endereco.estado].filter(Boolean).join(' — ')}</p>
+                      )}
+                      {patient.endereco.cep && (
+                        <p className="text-xs text-gray-400">CEP: {patient.endereco.cep}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Ações rápidas */}
+                <div className="bg-white rounded-xl border border-gray-100 p-5">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Ações Rápidas</h3>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => navigate('/agenda')}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                    >
+                      <Calendar className="w-4 h-4" /> Agendar consulta
+                    </button>
+                    {patient.contato?.telefone && (
+                      <a
+                        href={`https://wa.me/${patient.contato.telefone.replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                      >
+                        <Phone className="w-4 h-4" /> Enviar WhatsApp
+                      </a>
+                    )}
+                    <button
+                      onClick={() => setIsPrescriptionModalOpen(true)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                    >
+                      <FileText className="w-4 h-4" /> Nova prescrição
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4" /> Linha do Tempo
+                  </h3>
+                  <span className="text-xs text-gray-400">{history.length} registro{history.length !== 1 ? 's' : ''}</span>
+                </div>
+
+                {history.length > 0 ? (
+                  <div className="relative pl-7 space-y-6 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
+                    {history.map((apt, idx) => {
+                      const dateParts = apt.data.split('-')
+                      const dataFormatada = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
+                      return (
+                        <div key={apt.id} className="relative group/apt">
+                          <div className={cn(
+                            "absolute -left-[22px] top-1 w-5 h-5 rounded-full border-[3px] border-white flex items-center justify-center shadow-sm z-10 transition-all group-hover/apt:scale-110",
+                            idx === 0 ? "bg-green-500 ring-2 ring-green-100" : "bg-gray-200 group-hover/apt:bg-green-400"
+                          )}>
+                            {idx === 0 && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+                          </div>
+
+                          <div className="group-hover/apt:translate-x-0.5 transition-transform">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-bold text-gray-900">{dataFormatada}</span>
+                                <span className="text-[10px] font-semibold text-gray-400">{apt.horaInicio}</span>
+                                <Badge variant="gray" className="text-[10px] px-2 py-0 h-4">{apt.procedimento}</Badge>
+                              </div>
+                              <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
+                                  className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                  title="Editar evolução"
+                                >
+                                  <Stethoscope className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (!confirm('Excluir este atendimento?')) return
+                                    await deleteConsulta(apt.id)
+                                    const h = await getPatientHistory(id!)
+                                    setHistory(h)
+                                  }}
+                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  title="Excluir"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <p className="text-xs text-gray-500 mb-2">
+                              <User className="w-3 h-3 inline mr-1" />
+                              {apt.profissionalNome}
+                            </p>
+
+                            <div
+                              onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
+                              className="p-3 bg-gray-50 group-hover/apt:bg-green-50/40 rounded-xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
+                            >
+                              <p className={apt.observacoes ? '' : 'italic text-gray-400'}>
+                                {apt.observacoes || 'Sem evolução — clique para adicionar'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
                 ) : (
-                  <p className="text-center py-10 text-gray-400 text-sm italic">Nenhum atendimento anterior encontrado.</p>
+                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <Clock className="w-10 h-10 mb-3 text-gray-200" />
+                    <p className="text-sm font-medium">Nenhum atendimento registrado</p>
+                    <p className="text-xs mt-1">Os atendimentos aparecerão aqui conforme forem realizados</p>
+                  </div>
                 )}
               </div>
             </div>
