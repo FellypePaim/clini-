@@ -27,18 +27,38 @@ import { useToast } from '../../hooks/useToast'
 import { usePatients } from '../../hooks/usePatients'
 
 const TERMS_TEMPLATES = [
-  { id: '1', titulo: 'Consentimento de Aplicação de Toxina Botulínica', desc: 'Autorização específica para procedimentos estéticos com botox.' },
-  { id: '2', titulo: 'Termo de Responsabilidade LGPD', desc: 'Autorização para tratamento de dados pessoais sensíveis.' },
-  { id: '3', titulo: 'Autorização Cirúrgica de Pequeno Porte', desc: 'Consentimento para procedimentos invasivos simples.' }
+  { id: '1', titulo: 'Consentimento Geral de Tratamento', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a realização do(s) procedimento(s) proposto(s) pelo profissional responsável. Declaro ter sido informado(a) sobre os riscos, benefícios e alternativas do tratamento.\n\nEstou ciente de que:\n1. Todo procedimento possui riscos inerentes\n2. Os resultados podem variar de pessoa para pessoa\n3. Devo seguir as orientações pós-procedimento\n4. Posso revogar este consentimento a qualquer momento', categoria: 'geral' },
+  { id: '2', titulo: 'Consentimento para Toxina Botulínica', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a aplicação de toxina botulínica tipo A nas regiões indicadas pelo profissional.\n\nFui informado(a) sobre:\n1. Possíveis efeitos colaterais: edema, equimose, cefaleia, ptose palpebral\n2. O efeito não é permanente (duração média de 4-6 meses)\n3. Pode ser necessário retoque após 15 dias\n4. Contra-indicações: gravidez, amamentação, doenças neuromusculares\n5. Devo evitar deitar-se por 4 horas e exercício físico por 24 horas', categoria: 'estetico' },
+  { id: '3', titulo: 'Consentimento para Preenchimento com Ácido Hialurônico', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a realização de preenchimento dérmico com ácido hialurônico na(s) região(ões) indicada(s).\n\nRiscos possíveis incluem:\n1. Edema, equimose, eritema no local\n2. Assimetria (pode necessitar retoque)\n3. Nódulos ou granulomas (raro)\n4. Necrose tecidual por oclusão vascular (muito raro)\n5. Reação alérgica\n\nO produto será absorvido pelo organismo em 12-18 meses.', categoria: 'estetico' },
+  { id: '4', titulo: 'Autorização Cirúrgica de Pequeno Porte', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a realização de procedimento cirúrgico de pequeno porte conforme descrito pelo profissional.\n\nDeclaro estar ciente de:\n1. Riscos de infecção, sangramento e cicatrização inadequada\n2. Possibilidade de necessidade de novo procedimento\n3. Importância de seguir o protocolo pós-operatório\n4. Necessidade de relatar alergias e medicamentos em uso', categoria: 'cirurgico' },
+  { id: '5', titulo: 'Autorização de Uso de Imagem (Antes/Depois)', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a {{CLINICA_NOME}} a capturar, armazenar e utilizar registros fotográficos e/ou em vídeo do meu rosto e/ou corpo, realizados antes e após procedimentos clínicos e estéticos.\n\nAs imagens poderão ser utilizadas para:\n1. Documentação clínica e prontuário\n2. Divulgação em redes sociais e materiais de marketing (sem identificação, a menos que autorizado)\n3. Fins acadêmicos e científicos\n\n( ) Autorizo uso com identificação\n( ) Autorizo uso APENAS sem identificação\n( ) NÃO autorizo uso para marketing', categoria: 'imagem' },
+  { id: '6', titulo: 'Termo de Responsabilidade LGPD', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, autorizo a {{CLINICA_NOME}} a coletar, armazenar e processar meus dados pessoais e de saúde, nos termos da Lei Geral de Proteção de Dados (Lei 13.709/2018).\n\nOs dados serão utilizados exclusivamente para:\n1. Prestação de serviços de saúde\n2. Prontuário eletrônico e histórico médico\n3. Comunicação sobre agendamentos e tratamentos\n4. Faturamento e obrigações legais\n\nGarantias:\n- Seus dados não serão compartilhados com terceiros sem consentimento\n- Você pode solicitar acesso, correção ou exclusão dos dados a qualquer momento\n- Os dados de saúde serão mantidos por prazo mínimo legal de 20 anos', categoria: 'lgpd' },
+  { id: '7', titulo: 'Responsabilidade Financeira', desc: 'Eu, {{PACIENTE_NOME}}, CPF {{PACIENTE_CPF}}, declaro estar ciente e de acordo com os valores apresentados no orçamento para o(s) tratamento(s) proposto(s) pela {{CLINICA_NOME}}.\n\nCondiçoes:\n1. O pagamento deve ser realizado conforme acordado\n2. Em caso de desistência após início do tratamento, será cobrado proporcionalmente\n3. Não comparecimento sem aviso prévio de 24h poderá ser cobrado\n4. Os valores podem ser reajustados mediante aviso prévio', categoria: 'financeiro' },
+  { id: '8', titulo: 'Consentimento para Menor de Idade', desc: 'Eu, _________________________ (responsável legal), CPF _______________, na qualidade de responsável legal pelo(a) menor {{PACIENTE_NOME}}, nascido(a) em {{PACIENTE_NASCIMENTO}}, AUTORIZO a realização do(s) procedimento(s) proposto(s) pelo profissional da {{CLINICA_NOME}}.\n\nDeclaro ter sido informado(a) sobre riscos, benefícios e alternativas.\n\nAssinatura do responsável legal: ___________________________\nGrau de parentesco: ___________________________', categoria: 'menor' },
 ]
+
+const CATEGORIAS: Record<string, { label: string; color: string }> = {
+  geral: { label: 'Geral', color: 'bg-blue-100 text-blue-700' },
+  estetico: { label: 'Estético', color: 'bg-pink-100 text-pink-700' },
+  cirurgico: { label: 'Cirúrgico', color: 'bg-orange-100 text-orange-700' },
+  imagem: { label: 'Imagem', color: 'bg-purple-100 text-purple-700' },
+  lgpd: { label: 'LGPD', color: 'bg-cyan-100 text-cyan-700' },
+  financeiro: { label: 'Financeiro', color: 'bg-yellow-100 text-yellow-700' },
+  menor: { label: 'Menor', color: 'bg-red-100 text-red-700' },
+}
 
 export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [showSignModal, setShowSignModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [activeTemplate, setActiveTemplate] = useState<typeof TERMS_TEMPLATES[0] | null>(null)
-  const sigPad = useRef<SignatureCanvas>(null)
+  const [editableContent, setEditableContent] = useState('')
+  const sigPadPaciente = useRef<SignatureCanvas>(null)
+  const sigPadProf = useRef<SignatureCanvas>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [termos, setTermos] = useState<any[]>([])
   const [viewingTermo, setViewingTermo] = useState<any | null>(null)
+  const [patientData, setPatientData] = useState<any>(null)
+  const [catFilter, setCatFilter] = useState<string>('todos')
 
   const [resolvedSignUrl, setResolvedSignUrl] = useState<string | null>(null)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
@@ -65,6 +85,22 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const clinicaId = user?.clinicaId
   const { toast } = useToast()
   const { getPatientById } = usePatients()
+
+  // Carregar dados do paciente para preencher templates
+  useEffect(() => {
+    if (!pacienteId) return
+    getPatientById(pacienteId).then(p => setPatientData(p))
+  }, [pacienteId, getPatientById])
+
+  const fillTemplate = (content: string) => {
+    const nascParts = patientData?.dataNascimento?.split('-')
+    const nascFormatado = nascParts?.length === 3 ? `${nascParts[2]}/${nascParts[1]}/${nascParts[0]}` : '___/___/______'
+    return content
+      .replace(/\{\{PACIENTE_NOME\}\}/g, patientData?.nome || '________________________')
+      .replace(/\{\{PACIENTE_CPF\}\}/g, patientData?.cpf || '___.___.___-__')
+      .replace(/\{\{PACIENTE_NASCIMENTO\}\}/g, nascFormatado)
+      .replace(/\{\{CLINICA_NOME\}\}/g, user?.clinicaNome || 'Clínica')
+  }
 
   // Carregar termos reais do banco
   const loadTermos = useCallback(async () => {
@@ -127,8 +163,10 @@ Responda APENAS com JSON válido nesta estrutura:
 
   const handleUseAITerm = () => {
     if (!iaResult) return
-    setActiveTemplate({ id: 'ia', titulo: iaResult.titulo, desc: iaResult.conteudo })
-    setShowSignModal(true)
+    const tpl = { id: 'ia', titulo: iaResult.titulo, desc: iaResult.conteudo, categoria: 'geral' }
+    setActiveTemplate(tpl)
+    setEditableContent(fillTemplate(iaResult.conteudo))
+    setShowEditModal(true)
   }
 
   const handleSendWhatsApp = async (e: React.MouseEvent, tpl: any) => {
@@ -170,8 +208,19 @@ Responda APENAS com JSON válido nesta estrutura:
     }
   }
 
+  const openTermForEdit = (tpl: typeof TERMS_TEMPLATES[0]) => {
+    setActiveTemplate(tpl)
+    setEditableContent(fillTemplate(tpl.desc))
+    setShowEditModal(true)
+  }
+
+  const proceedToSign = () => {
+    setShowEditModal(false)
+    setShowSignModal(true)
+  }
+
   const handleSign = async () => {
-    if (sigPad.current?.isEmpty() || !clinicaId || !pacienteId) {
+    if (sigPadPaciente.current?.isEmpty() || !clinicaId || !pacienteId) {
       toast({ title: 'Aviso', description: 'Por favor, assine o documento.', type: 'warning' })
       return
     }
@@ -180,21 +229,26 @@ Responda APENAS com JSON válido nesta estrutura:
       setIsSaving(true)
       // Usar getCanvas() em vez de getTrimmedCanvas() para evitar
       // bug de interop do trim-canvas com Vite 8 / rolldown
-      const canvas = sigPad.current?.getCanvas()
-      if (!canvas) throw new Error('Não foi possível capturar a assinatura.')
+      // Assinatura do paciente
+      const canvasPac = sigPadPaciente.current?.getCanvas()
+      if (!canvasPac) throw new Error('Não foi possível capturar a assinatura do paciente.')
 
-      // Converter canvas para Blob (PNG como fallback universal)
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((b) => {
-          if (b) resolve(b)
-          else reject(new Error('Falha ao converter assinatura para imagem.'))
-        }, 'image/png')
+      const blobPac = await new Promise<Blob>((resolve, reject) => {
+        canvasPac.toBlob((b) => { b ? resolve(b) : reject(new Error('Falha ao converter assinatura.')) }, 'image/png')
       })
+      const filePac = new File([blobPac], `assinatura_paciente_${Date.now()}.png`, { type: 'image/png' })
+      const storedPac = await StorageHelpers.uploadTermo(clinicaId, pacienteId, filePac)
 
-      const file = new File([blob], `assinatura_${activeTemplate?.titulo || 'termo'}_${Date.now()}.png`, { type: 'image/png' })
-
-      // Upload to storage
-      const stored = await StorageHelpers.uploadTermo(clinicaId, pacienteId, file)
+      // Assinatura do profissional (opcional)
+      let storedProf = null
+      if (sigPadProf.current && !sigPadProf.current.isEmpty()) {
+        const canvasProf = sigPadProf.current.getCanvas()
+        const blobProf = await new Promise<Blob>((resolve, reject) => {
+          canvasProf.toBlob((b) => { b ? resolve(b) : reject(new Error('Falha.')) }, 'image/png')
+        })
+        const fileProf = new File([blobProf], `assinatura_profissional_${Date.now()}.png`, { type: 'image/png' })
+        storedProf = await StorageHelpers.uploadTermo(clinicaId, pacienteId, fileProf)
+      }
 
       // Save to DB
       const { error: dbErr } = await supabase.from('termos_consentimento').insert({
@@ -202,8 +256,9 @@ Responda APENAS com JSON válido nesta estrutura:
         paciente_id: pacienteId,
         tipo: 'consentimento',
         titulo: activeTemplate?.titulo || 'Termo de Consentimento',
-        conteudo: activeTemplate?.desc || null,
-        assinatura_url: stored.url,
+        conteudo: editableContent || activeTemplate?.desc || null,
+        assinatura_url: storedPac.url,
+        assinatura_profissional_url: storedProf?.url || null,
         assinado_em: new Date().toISOString()
       } as any)
 
@@ -418,50 +473,57 @@ Responda APENAS com JSON válido nesta estrutura:
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 animate-fade-in">
+    <div className="flex flex-col lg:flex-row gap-6 animate-fade-in">
       {/* Templates List */}
-      <div className="lg:col-span-1 space-y-6">
-         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm h-fit">
-            <div className="flex items-center gap-3 mb-8">
-               <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
-                  <ClipboardList className="w-5 h-5" />
+      <div className="lg:w-[420px] space-y-5 shrink-0">
+         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+               <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
+                     <ClipboardList className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                     <h3 className="text-sm font-bold text-gray-900">Modelos de Termos</h3>
+                     <p className="text-xs text-gray-400 mt-0.5">Selecione, revise e solicite assinatura</p>
+                  </div>
                </div>
-               <div>
-                  <h3 className="text-sm font-black text-gray-900 border-none">Modelos Disponíveis</h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Selecione para solicitar assinatura</p>
+
+               {/* Filtro por categoria */}
+               <div className="flex flex-wrap gap-1.5 mt-3">
+                  <button onClick={() => setCatFilter('todos')} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === 'todos' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200')}>Todos</button>
+                  {Object.entries(CATEGORIAS).map(([k, v]) => (
+                     <button key={k} onClick={() => setCatFilter(k)} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === k ? v.color + ' border-transparent' : 'bg-white text-gray-500 border-gray-200')}>{v.label}</button>
+                  ))}
                </div>
             </div>
 
-            <div className="space-y-4">
-               {TERMS_TEMPLATES.map(tpl => (
-                 <div 
-                  key={tpl.id} 
-                  className="w-full text-left p-6 bg-gray-50/50 hover:bg-white border border-gray-100 hover:border-blue-100 rounded-3xl transition-all group flex flex-col gap-3"
+            <div className="p-4 space-y-2 max-h-[500px] overflow-y-auto">
+               {TERMS_TEMPLATES.filter(t => catFilter === 'todos' || (t as any).categoria === catFilter).map(tpl => {
+                 const cat = CATEGORIAS[(tpl as any).categoria] || CATEGORIAS.geral
+                 return (
+                 <div
+                  key={tpl.id}
+                  className="p-4 bg-gray-50/50 hover:bg-white border border-gray-100 hover:border-blue-200 rounded-xl transition-all group cursor-pointer"
+                  onClick={() => openTermForEdit(tpl)}
                  >
-                    <p className="text-xs font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors uppercase tracking-widest">{tpl.titulo}</p>
-                    <p className="text-[10px] text-gray-400 font-medium leading-relaxed">{tpl.desc}</p>
-                    <div className="flex items-center gap-3 mt-2 opacity-10 group-hover:opacity-100 transition-opacity">
-                       <button 
-                         onClick={() => { setActiveTemplate(tpl); setShowSignModal(true); }}
-                         className="flex items-center gap-2 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition-colors active:scale-95"
-                       >
-                         <Plus className="w-3.5 h-3.5 text-blue-500" />
-                         <span className="text-[9px] font-black uppercase text-blue-500 tracking-widest">Apenas Assinar</span>
-                       </button>
-
-                       <button 
-                         onClick={(e) => handleSendWhatsApp(e, tpl)}
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                       <p className="text-xs font-bold text-gray-900 leading-snug group-hover:text-blue-600 transition-colors">{tpl.titulo}</p>
+                       <span className={cn('px-2 py-0.5 rounded-md text-[9px] font-semibold shrink-0', cat.color)}>{cat.label}</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed">{tpl.desc.substring(0, 100)}...</p>
+                    <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <span className="text-[9px] font-semibold text-blue-500 flex items-center gap-1"><FileCheck className="w-3 h-3" /> Revisar e Assinar</span>
+                       <button
+                         onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(e, tpl) }}
                          disabled={isSaving}
-                         className="flex items-center gap-2 hover:bg-green-50 px-3 py-1.5 rounded-xl transition-colors active:scale-95 ml-auto"
+                         className="flex items-center gap-1 text-[9px] font-semibold text-green-600 ml-auto hover:bg-green-50 px-2 py-1 rounded-lg transition-colors"
                        >
-                         <Send className="w-3.5 h-3.5 text-green-500" />
-                         <span className="text-[9px] font-black uppercase text-green-500 tracking-widest">
-                           {isSaving ? 'Enviando...' : 'Enviar Termo WhatsApp'}
-                         </span>
+                         <Send className="w-3 h-3" /> WhatsApp
                        </button>
                     </div>
                  </div>
-               ))}
+                 )
+               })}
             </div>
          </div>
 
@@ -749,69 +811,114 @@ Responda APENAS com JSON válido nesta estrutura:
         </div>
       )}
 
-      {/* Signature Modal */}
+      {/* Modal de Revisão do Conteúdo */}
+      {showEditModal && activeTemplate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fade-in">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Revisar Termo</h3>
+                <p className="text-xs text-gray-400 mt-0.5">{activeTemplate.titulo}</p>
+              </div>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Conteúdo do termo (editável)</p>
+              <textarea
+                value={editableContent}
+                onChange={e => setEditableContent(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none min-h-[300px] font-mono"
+              />
+              <p className="text-[9px] text-gray-300 mt-2">Dados do paciente (nome, CPF) foram preenchidos automaticamente. Edite conforme necessário.</p>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
+              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</button>
+              <button
+                onClick={proceedToSign}
+                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+              >
+                Prosseguir para Assinatura <CheckCircle className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Assinatura (Paciente + Profissional) */}
       {showSignModal && activeTemplate && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-           <div className="absolute inset-0 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setShowSignModal(false)} />
-           
-           <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in">
-              <div className="bg-blue-600 p-8 text-white relative flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
-                    <Maximize2 className="w-6 h-6" />
+           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSignModal(false)} />
+
+           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
+              <div className="bg-blue-600 px-6 py-4 text-white flex items-center gap-3">
+                 <Maximize2 className="w-5 h-5" />
+                 <div className="flex-1">
+                    <h3 className="text-base font-bold">Assinatura Digital</h3>
+                    <p className="text-xs text-blue-200">{activeTemplate.titulo}</p>
                  </div>
-                 <div>
-                    <h3 className="text-xl font-black leading-tight">Assinatura no Local</h3>
-                    <p className="text-xs text-blue-100 font-medium">{activeTemplate.titulo}</p>
-                 </div>
-                 <button onClick={() => setShowSignModal(false)} className="ml-auto p-2 hover:bg-white/10 rounded-xl">
-                    <X className="w-6 h-6" />
-                 </button>
+                 <button onClick={() => setShowSignModal(false)} className="p-2 hover:bg-white/10 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
-                 <div className="bg-gray-50 p-8 rounded-[32px] border border-dashed border-gray-200 mb-8 h-48 overflow-y-auto text-xs text-gray-500 leading-relaxed font-medium">
-                    {activeTemplate.desc} <br/><br/>
-                    Este é um simulador de termo de consentimento. Ao assinar abaixo, o paciente confirma ter lido e compreendido todos os riscos e benefícios do procedimento descrito acima. A assinatura será criptografada e armazenada com o IP e data/hora do evento.
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                 {/* Preview do conteúdo */}
+                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 max-h-32 overflow-y-auto text-xs text-gray-500 leading-relaxed whitespace-pre-line">
+                    {editableContent || activeTemplate.desc}
                  </div>
 
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between px-2">
-                       <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Assinatura do Paciente</label>
-                       <button onClick={clearSig} className="text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600">Limpar</button>
+                 {/* Assinatura do Paciente */}
+                 <div>
+                    <div className="flex items-center justify-between mb-2">
+                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-blue-500" /> Assinatura do Paciente *</label>
+                       <button onClick={() => sigPadPaciente.current?.clear()} className="text-[10px] font-semibold text-red-400 hover:text-red-600">Limpar</button>
                     </div>
-                    <div className="bg-gray-100 rounded-3xl border-2 border-gray-100 h-48 overflow-hidden touch-none relative group">
-                       <SignatureCanvas 
-                        ref={sigPad}
+                    <div className="bg-gray-50 rounded-xl border-2 border-gray-200 h-36 overflow-hidden touch-none relative">
+                       <SignatureCanvas
+                        ref={sigPadPaciente}
                         penColor='#111827'
-                        canvasProps={{ className: 'w-full h-full' }} 
+                        canvasProps={{ className: 'w-full h-full' }}
                        />
-                       <div className="absolute left-1/2 -translate-x-1/2 bottom-4 opacity-5 pointer-events-none text-center">
-                          <Stamp className="w-24 h-24 mx-auto" />
-                          <p className="text-[10px] uppercase font-black tracking-widest mt-2">ÁREA DE ASSINATURA</p>
+                       <div className="absolute left-1/2 -translate-x-1/2 bottom-3 opacity-[0.03] pointer-events-none">
+                          <Stamp className="w-16 h-16 mx-auto" />
                        </div>
                     </div>
                  </div>
+
+                 {/* Assinatura do Profissional */}
+                 <div>
+                    <div className="flex items-center justify-between mb-2">
+                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-green-500" /> Assinatura do Profissional</label>
+                       <button onClick={() => sigPadProf.current?.clear()} className="text-[10px] font-semibold text-red-400 hover:text-red-600">Limpar</button>
+                    </div>
+                    <div className="bg-gray-50 rounded-xl border-2 border-gray-200 h-36 overflow-hidden touch-none relative">
+                       <SignatureCanvas
+                        ref={sigPadProf}
+                        penColor='#1e40af'
+                        canvasProps={{ className: 'w-full h-full' }}
+                       />
+                       <div className="absolute left-1/2 -translate-x-1/2 bottom-3 opacity-[0.03] pointer-events-none">
+                          <Stamp className="w-16 h-16 mx-auto" />
+                       </div>
+                    </div>
+                    <p className="text-[9px] text-gray-300 mt-1">Opcional — assine para validar como profissional responsável</p>
+                 </div>
               </div>
 
-              <div className="bg-gray-50/80 p-8 px-12 flex items-center justify-between border-t border-gray-100 shrink-0">
-                 <div className="flex items-center gap-3 text-green-600">
-                    <Lock className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Ambiente Seguro</span>
+              <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 shrink-0">
+                 <div className="flex items-center gap-2 text-green-600">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider">Ambiente Seguro</span>
                  </div>
-                 
-                 <div className="flex items-center gap-4">
-                    <button 
-                      onClick={() => setShowSignModal(false)}
-                      className="text-sm font-bold text-gray-400 hover:text-gray-600"
-                    >
-                      Cancelar
-                    </button>
-                    <button 
+                 <div className="flex items-center gap-3">
+                    <button onClick={() => setShowSignModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</button>
+                    <button
                       onClick={handleSign}
                       disabled={isSaving}
-                      className="px-8 py-4 bg-gray-900 hover:bg-black text-white rounded-2xl text-sm font-black shadow-xl shadow-gray-900/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+                      className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl text-sm font-bold shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
-                      {isSaving ? 'Salvando...' : 'Concluir e Salvar'} <CheckCircle className="w-5 h-5 text-green-400" />
+                      {isSaving ? 'Salvando...' : 'Concluir e Salvar'} <CheckCircle className="w-4 h-4 text-green-400" />
                     </button>
                  </div>
               </div>
