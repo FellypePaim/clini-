@@ -330,7 +330,8 @@ export function usePatients() {
   const createOrcamento = useCallback(async (pacienteId: string, data: { descricao: string; valor: number }) => {
     if (!clinicaId) return
     try {
-      const { error: pbErr } = await supabase
+      // 1. Criar orçamento
+      const { data: orc, error: pbErr } = await supabase
         .from('orcamentos')
         .insert({
           clinica_id: clinicaId,
@@ -341,10 +342,53 @@ export function usePatients() {
           total: data.valor,
           status: 'pendente',
         } as any)
+        .select('id')
+        .single()
       if (pbErr) throw pbErr
-      toast({ title: 'Sucesso', description: 'Orçamento criado.', type: 'success' })
+
+      // 2. Criar lançamento vinculado no financeiro da clínica
+      await supabase.from('lancamentos').insert({
+        clinica_id: clinicaId,
+        paciente_id: pacienteId,
+        orcamento_id: orc.id,
+        tipo: 'receita',
+        descricao: data.descricao,
+        valor: data.valor,
+        status: 'pendente',
+        categoria: 'procedimento',
+        vencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      } as any)
+
+      toast({ title: 'Sucesso', description: 'Orçamento criado e vinculado ao financeiro.', type: 'success' })
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message || 'Falha ao criar orçamento.', type: 'error' })
+    }
+  }, [clinicaId, toast])
+
+  const marcarOrcamentoPago = useCallback(async (orcamentoId: string, formaPagamento?: string) => {
+    if (!clinicaId) return
+    try {
+      const agora = new Date().toISOString()
+
+      // 1. Atualizar orçamento
+      const { error: orcErr } = await supabase
+        .from('orcamentos')
+        .update({ status: 'aprovado', aprovado_em: agora } as any)
+        .eq('id', orcamentoId)
+      if (orcErr) throw orcErr
+
+      // 2. Atualizar lançamento vinculado
+      await supabase.from('lancamentos')
+        .update({
+          status: 'pago',
+          pago_em: agora,
+          forma_pagamento: formaPagamento || 'dinheiro',
+        } as any)
+        .eq('orcamento_id', orcamentoId)
+
+      toast({ title: 'Pago!', description: 'Orçamento marcado como pago e financeiro atualizado.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message || 'Falha ao marcar como pago.', type: 'error' })
     }
   }, [clinicaId, toast])
 
@@ -391,5 +435,6 @@ export function usePatients() {
     deleteConsulta,
     deleteAnamnese,
     createOrcamento,
+    marcarOrcamentoPago,
   }
 }

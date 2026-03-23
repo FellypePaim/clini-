@@ -21,7 +21,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Phone,
-  Mail
+  Mail,
+  DollarSign
 } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
 import { useProntuario } from '../../hooks/useProntuario'
@@ -45,7 +46,7 @@ export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'odontograma' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
-  const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink, deleteConsulta, deleteAnamnese, createOrcamento } = usePatients()
+  const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink, deleteConsulta, deleteAnamnese, createOrcamento, marcarOrcamentoPago } = usePatients()
   const { saveEvolution, saveHarmonizationSession, generatePrescription } = useProntuario()
   const { toast } = useToast()
   
@@ -607,16 +608,31 @@ export function PatientProfilePage() {
                               <p className="text-xs text-gray-400 mt-0.5">{formatData(f.data)}</p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={cn("text-sm font-bold", isCancelado ? "text-gray-400 line-through" : "text-gray-900")}>
-                              {f.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                            </p>
-                            <span className={cn(
-                              "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1",
-                              isPago ? "bg-green-50 text-green-700" : isCancelado ? "bg-gray-100 text-gray-400" : "bg-yellow-50 text-yellow-700"
-                            )}>
-                              {isPago ? 'Pago' : isCancelado ? 'Cancelado' : 'Pendente'}
-                            </span>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <p className={cn("text-sm font-bold", isCancelado ? "text-gray-400 line-through" : "text-gray-900")}>
+                                {f.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                              </p>
+                              <span className={cn(
+                                "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1",
+                                isPago ? "bg-green-50 text-green-700" : isCancelado ? "bg-gray-100 text-gray-400" : "bg-yellow-50 text-yellow-700"
+                              )}>
+                                {isPago ? 'Pago' : isCancelado ? 'Cancelado' : 'Pendente'}
+                              </span>
+                            </div>
+                            {!isPago && !isCancelado && (
+                              <button
+                                onClick={async () => {
+                                  await marcarOrcamentoPago(f.id)
+                                  const fin = await getPatientFinancial(patient.id)
+                                  setFinancial(fin)
+                                }}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold rounded-lg border border-green-200 transition-colors"
+                                title="Marcar como pago"
+                              >
+                                <DollarSign className="w-3.5 h-3.5" /> Pagar
+                              </button>
+                            )}
                           </div>
                         </div>
                       )
