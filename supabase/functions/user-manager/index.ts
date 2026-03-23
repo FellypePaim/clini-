@@ -132,6 +132,54 @@ Deno.serve(async (req) => {
       })
     }
 
+    if (action === "link_user") {
+      const { email, role: newRole } = body
+      if (!email) {
+        return new Response(JSON.stringify({ error: "E-mail é obrigatório" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      // Buscar profile pelo email (sem clínica ou de outra clínica não é permitido roubar)
+      const { data: target, error: targetErr } = await supabaseAdmin
+        .from("profiles")
+        .select("id, clinica_id, nome_completo")
+        .eq("email", email)
+        .single()
+
+      if (targetErr || !target) {
+        return new Response(JSON.stringify({ error: "Nenhum usuário encontrado com este e-mail. O colaborador precisa criar uma conta primeiro." }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      if (target.clinica_id && target.clinica_id !== solicitanteProfile.clinica_id) {
+        return new Response(JSON.stringify({ error: "Este usuário já está vinculado a outra clínica." }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      // Vincular à clínica do admin
+      const { error: updateErr } = await supabaseAdmin
+        .from("profiles")
+        .update({
+          clinica_id: solicitanteProfile.clinica_id,
+          role: newRole || "profissional",
+          ativo: true,
+        })
+        .eq("id", target.id)
+
+      if (updateErr) {
+        return new Response(JSON.stringify({ error: updateErr.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
+
+      return new Response(JSON.stringify({ success: true, nome: target.nome_completo }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
+
     return new Response(JSON.stringify({ error: "Ação desconhecida" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

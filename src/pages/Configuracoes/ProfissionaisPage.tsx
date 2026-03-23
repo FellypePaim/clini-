@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Plus, Edit2, Check, X, UserCog, BriefcaseMedical, Loader2 } from 'lucide-react'
+import { Plus, Edit2, Check, X, UserCog, BriefcaseMedical, Loader2, Mail, Link as LinkIcon } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
@@ -65,8 +65,11 @@ export function ProfissionaisPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
+  const [showLinkModal, setShowLinkModal] = useState(false)
   const [form, setForm] = useState<NovoColaboradorForm>(formVazio)
+  const [linkForm, setLinkForm] = useState({ email: '', role: 'profissional' as string })
   const [saving, setSaving] = useState(false)
+  const [linking, setLinking] = useState(false)
 
   const loadProfissionais = useCallback(async () => {
     if (!clinicaId) return
@@ -139,6 +142,32 @@ export function ProfissionaisPage() {
     }
   }
 
+  const handleVincular = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!linkForm.email) return
+    setLinking(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('user-manager', {
+        body: {
+          action: 'link_user',
+          email: linkForm.email.trim().toLowerCase(),
+          role: linkForm.role,
+        },
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+
+      toast({ title: 'Colaborador vinculado!', description: `${data.nome || linkForm.email} adicionado à equipe.`, type: 'success' })
+      setShowLinkModal(false)
+      setLinkForm({ email: '', role: 'profissional' })
+      await loadProfissionais()
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message || 'Falha ao vincular colaborador.', type: 'error' })
+    } finally {
+      setLinking(false)
+    }
+  }
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -149,12 +178,20 @@ export function ProfissionaisPage() {
           </h2>
           <p className="text-sm font-medium text-slate-500 mt-1">Gerencie os profissionais e seus níveis de acesso.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-5 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors"
-        >
-          <Plus size={18} /> Cadastrar Colaborador
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowLinkModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-colors"
+          >
+            <LinkIcon size={16} /> Vincular por E-mail
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-5 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-colors"
+          >
+            <Plus size={18} /> Cadastrar do Zero
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -294,6 +331,68 @@ export function ProfissionaisPage() {
                 <button type="submit" disabled={saving} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                   {saving ? 'Criando...' : 'Criar Colaborador'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ── Modal Vincular por E-mail ──────────────────────────── */}
+      {showLinkModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <LinkIcon className="w-5 h-5 text-indigo-600" /> Vincular Colaborador
+              </h2>
+              <button onClick={() => { setShowLinkModal(false); setLinkForm({ email: '', role: 'profissional' }); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <form onSubmit={handleVincular} className="p-6 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-700 leading-relaxed">
+                  Informe o e-mail de um colaborador que já criou conta no sistema.
+                  Ele será vinculado à sua clínica e receberá acesso imediato.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail do colaborador *</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    required
+                    className="input-base pl-10"
+                    placeholder="colaborador@email.com"
+                    value={linkForm.email}
+                    onChange={e => setLinkForm(f => ({ ...f, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Cargo na clínica *</label>
+                <select
+                  className="input-base"
+                  value={linkForm.role}
+                  onChange={e => setLinkForm(f => ({ ...f, role: e.target.value }))}
+                >
+                  <option value="profissional">Profissional de Saúde</option>
+                  <option value="recepcao">Recepção</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => { setShowLinkModal(false); setLinkForm({ email: '', role: 'profissional' }); }} className="btn-secondary flex-1">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={linking} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors disabled:opacity-50">
+                  {linking ? <Loader2 size={16} className="animate-spin" /> : <LinkIcon size={16} />}
+                  {linking ? 'Vinculando...' : 'Vincular à Equipe'}
                 </button>
               </div>
             </form>
