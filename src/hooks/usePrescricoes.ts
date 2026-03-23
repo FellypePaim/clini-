@@ -98,7 +98,6 @@ export function usePrescricoes() {
       if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Erro') }
       const [ret] = await res.json()
 
-      if (error) throw error
       toast({ title: 'Prescrição criada', description: 'Assinada digitalmente.', type: 'success' })
       await loadPrescricoes()
       return ret
