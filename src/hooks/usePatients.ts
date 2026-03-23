@@ -277,6 +277,9 @@ export function usePatients() {
       if (data.ativo !== undefined) updateData.ativo = data.ativo
       if (data.convenio !== undefined) updateData.convenio = data.convenio
       if (data.observacoes !== undefined) updateData.observacoes = data.observacoes
+      if ((data as any).condicoes_medicas !== undefined) updateData.condicoes_medicas = (data as any).condicoes_medicas
+      if ((data as any).historico_medico !== undefined) updateData.historico_medico = (data as any).historico_medico
+      if ((data as any).medicamentos_uso !== undefined) updateData.medicamentos_uso = (data as any).medicamentos_uso
 
       const { error: pbErr } = await supabase
         .from('pacientes')

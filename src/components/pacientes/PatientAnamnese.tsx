@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
-  Heart, Thermometer, Weight, Ruler, Activity, AlertTriangle,
-  Save, Loader2, Plus, TrendingUp, ClipboardList, CheckCircle
+  Heart, Activity, AlertTriangle,
+  Save, Loader2, TrendingUp, ClipboardList, CheckCircle, Trash2, Edit3
 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
 import { cn } from '../../lib/utils'
@@ -63,6 +63,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
   const [historySinais, setHistorySinais] = useState<any[]>([])
   const [condicoes, setCondicoes] = useState<string[]>(patient?.condicoes_medicas || [])
   const [savingCondicoes, setSavingCondicoes] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Carregar histórico de sinais vitais
   const loadSinais = useCallback(async () => {
@@ -112,6 +113,63 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
       if (error) throw error
       toast({ title: 'Sinais vitais registrados', type: 'success' })
       setSinais(sinaisVazio)
+      await loadSinais()
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } finally {
+      setSavingSinais(false)
+    }
+  }
+
+  const handleDeleteSinais = async (id: string) => {
+    if (!confirm('Excluir este registro de sinais vitais?')) return
+    try {
+      await supabase.from('sinais_vitais').delete().eq('id', id)
+      toast({ title: 'Removido', type: 'success' })
+      await loadSinais()
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }
+
+  const handleEditSinais = (record: any) => {
+    setEditingId(record.id)
+    setSinais({
+      pressao_sistolica: record.pressao_sistolica?.toString() || '',
+      pressao_diastolica: record.pressao_diastolica?.toString() || '',
+      frequencia_cardiaca: record.frequencia_cardiaca?.toString() || '',
+      saturacao_o2: record.saturacao_o2?.toString() || '',
+      temperatura: record.temperatura?.toString() || '',
+      peso: record.peso?.toString() || '',
+      altura: record.altura?.toString() || '',
+      escala_dor: record.escala_dor ?? 0,
+      observacoes: record.observacoes || '',
+    })
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleSaveSinaisEdited = async () => {
+    if (!editingId) return
+    setSavingSinais(true)
+    try {
+      const imc = calcIMC()
+      const { error } = await supabase.from('sinais_vitais').update({
+        pressao_sistolica: sinais.pressao_sistolica ? parseInt(sinais.pressao_sistolica) : null,
+        pressao_diastolica: sinais.pressao_diastolica ? parseInt(sinais.pressao_diastolica) : null,
+        frequencia_cardiaca: sinais.frequencia_cardiaca ? parseInt(sinais.frequencia_cardiaca) : null,
+        saturacao_o2: sinais.saturacao_o2 ? parseInt(sinais.saturacao_o2) : null,
+        temperatura: sinais.temperatura ? parseFloat(sinais.temperatura) : null,
+        peso: sinais.peso ? parseFloat(sinais.peso) : null,
+        altura: sinais.altura ? parseFloat(sinais.altura) : null,
+        imc: imc ? parseFloat(imc) : null,
+        escala_dor: sinais.escala_dor,
+        observacoes: sinais.observacoes || null,
+      } as any).eq('id', editingId)
+      if (error) throw error
+      toast({ title: 'Atualizado', type: 'success' })
+      setSinais(sinaisVazio)
+      setEditingId(null)
       await loadSinais()
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, type: 'error' })
@@ -179,15 +237,24 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-red-500" />
             <h3 className="text-sm font-bold text-gray-900">Sinais Vitais</h3>
-            <span className="text-xs text-gray-400">— registrar agora</span>
+            <span className="text-xs text-gray-400">— {editingId ? 'editando registro' : 'registrar agora'}</span>
           </div>
-          <button
-            onClick={handleSaveSinais}
-            disabled={savingSinais}
-            className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
-          >
-            {savingSinais ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Registrar
-          </button>
+          <div className="flex items-center gap-2">
+            {editingId && (
+              <button onClick={() => { setEditingId(null); setSinais(sinaisVazio) }} className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700">
+                Cancelar
+              </button>
+            )}
+            <button
+              onClick={editingId ? handleSaveSinaisEdited : handleSaveSinais}
+              disabled={savingSinais}
+              className={cn("flex items-center gap-1.5 px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50",
+                editingId ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")}
+            >
+              {savingSinais ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+              {editingId ? 'Atualizar' : 'Registrar'}
+            </button>
+          </div>
         </div>
 
         <div className="p-6">
@@ -376,13 +443,14 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                   <th className="py-3 px-3">Peso</th>
                   <th className="py-3 px-3">IMC</th>
                   <th className="py-3 px-3">Dor</th>
+                  <th className="py-3 px-3 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {historySinais.slice(0, 10).map((s: any) => {
                   const dp = (s.created_at as string).split('T')[0].split('-')
                   return (
-                    <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50/50">
+                    <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50/50 group">
                       <td className="py-2.5 px-4 font-semibold text-gray-700">{dp[2]}/{dp[1]}</td>
                       <td className="py-2.5 px-3 text-center">{s.pressao_sistolica && s.pressao_diastolica ? `${s.pressao_sistolica}/${s.pressao_diastolica}` : '—'}</td>
                       <td className="py-2.5 px-3 text-center">{s.frequencia_cardiaca || '—'}</td>
@@ -394,6 +462,16 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                         {s.escala_dor != null ? (
                           <span className="font-bold" style={{ color: DOR_CORES[s.escala_dor] || '#999' }}>{s.escala_dor}</span>
                         ) : '—'}
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => handleEditSinais(s)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
+                            <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+                          <button onClick={() => handleDeleteSinais(s.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
