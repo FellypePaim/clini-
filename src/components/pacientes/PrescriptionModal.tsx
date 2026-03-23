@@ -80,7 +80,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
   }
 
   const handleSendWA = () => {
-    const text = encodeURIComponent(`Olá ${patient.nome}, segue sua prescrição digital gerada pela Clínica Verde.`)
+    const text = encodeURIComponent(`Olá ${patient.nome}, segue sua prescrição digital gerada pela ${user?.clinicaNome || 'clínica'}.`)
     window.open(`https://wa.me/${patient.contato.telefone.replace(/\D/g, '')}?text=${text}`, '_blank')
   }
 
@@ -270,8 +270,8 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                    <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center text-white mb-2 shadow-sm">
                       <Plus className="w-5 h-5" />
                    </div>
-                   <h1 className="text-[10px] font-black uppercase text-gray-900 tracking-wider">Prontuário Verde · Saúde & Bem Estar</h1>
-                   <p className="text-[7px] text-gray-400 font-bold mt-0.5">Av. Paulista, 1000 · São Paulo - SP · (11) 98765-4321</p>
+                   <h1 className="text-[10px] font-black uppercase text-gray-900 tracking-wider">{user?.clinicaNome || 'Clínica'}</h1>
+                   <p className="text-[7px] text-gray-400 font-bold mt-0.5">Prescrição Digital</p>
                 </div>
 
                 {/* Patient Info */}
@@ -299,8 +299,8 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                 <div className="mt-auto pt-8 flex flex-col items-center">
                    <div className="relative flex flex-col items-center">
                       <div className="w-24 h-0.5 bg-gray-200 mb-2"></div>
-                      <p className="text-[7px] font-black text-gray-900">Dr. Mendes</p>
-                      <p className="text-[6px] text-gray-400">CRM/SP 123456</p>
+                      <p className="text-[7px] font-black text-gray-900">{user?.nome || 'Profissional'}</p>
+                      {user?.crm && <p className="text-[6px] text-gray-400">{user.crm}</p>}
                       
                       {isSigned && password && (
                         <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-80 pointer-events-none">

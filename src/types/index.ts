@@ -64,6 +64,7 @@ export interface User {
   especialidade?: string
   crm?: string
   clinicaId: string
+  clinicaNome?: string
   ativo: boolean
   criadoEm: string
 }

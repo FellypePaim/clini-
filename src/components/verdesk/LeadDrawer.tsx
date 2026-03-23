@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useVerdesk } from '../../hooks/useVerdesk'
 import { usePatients } from '../../hooks/usePatients'
+import { useAuthStore } from '../../store/authStore'
 import { Avatar } from '../ui/Avatar'
 import { Badge } from '../ui/Badge'
 import type { LeadStage } from '../../types/verdesk'
@@ -45,6 +46,7 @@ const INTERACTION_ICONS = {
 export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
   const { leads, moveLead, addLeadInteraction, updateLead: _updateLead } = useVerdesk()
   const { createPatient, isLoading: isCreatingPatient } = usePatients()
+  const { user } = useAuthStore()
   const lead = leads.find((l) => l.id === leadId)
   const [note, setNote] = useState('')
 
@@ -74,7 +76,7 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
     addLeadInteraction(lead.id, {
       type: 'note',
       content: note,
-      author: 'AtendenteAtual' // Mock author
+      author: user?.nome || 'Atendente'
     })
     setNote('')
   }

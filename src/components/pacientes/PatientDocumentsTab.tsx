@@ -118,7 +118,7 @@ export function PatientDocumentsTab({ pacienteId }: PatientDocumentsTabProps) {
           onDelete={(f) => {
              setFiles(prev => prev.filter(x => x.id !== f.id))
              // Sync DB removal handled manually here or inside component? Component already calls deleteFile.
-             supabase.from('documentos_paciente').delete().eq('storage_path', f.path).then()
+             supabase.from('documentos_paciente').delete().eq('storage_path', f.path).then(() => { }).catch(() => { })
           }}
           isAdmin={true}
         />

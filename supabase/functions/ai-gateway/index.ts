@@ -144,7 +144,8 @@ async function handleIntent(payload: any) {
   `)
 
   const usage = result.response.usageMetadata
-  const data = JSON.parse(result.response.text())
+  let data
+  try { data = JSON.parse(result.response.text()) } catch { throw new Error("Resposta inválida da IA (JSON malformado)") }
 
   return {
     data,
@@ -231,7 +232,8 @@ async function handleSummary(payload: any) {
   `)
 
   const usage = result.response.usageMetadata
-  const resumo = JSON.parse(result.response.text())
+  let resumo
+  try { resumo = JSON.parse(result.response.text()) } catch { throw new Error("Resposta inválida da IA (JSON malformado)") }
 
   return {
     data: { resumo },
@@ -446,7 +448,8 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
   const result = await chat.sendMessage(userContent)
   const usage = result.response.usageMetadata
-  const resposta = JSON.parse(result.response.text())
+  let resposta
+  try { resposta = JSON.parse(result.response.text()) } catch { throw new Error("Resposta inválida da IA (JSON malformado)") }
 
   // 8. Atualizar ultimo_contato
   await supabase.from("ovyva_conversas").update({
@@ -490,7 +493,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
           hora_consulta: horaAg,
           status: 'pendente',
           observacoes: `[PRÉ-AGENDAMENTO OVYVA] Gerado via WhatsApp. Aguardando aprovação humana.`
-       }).then()
+       }).then(() => { }).catch((e: unknown) => console.error("Erro ao criar pré-agendamento:", e))
     }
 
     await supabase.from("leads")
@@ -503,7 +506,6 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
      await supabase.from("leads")
       .update({ procedimento_interesse: resposta.dados_agendamento.procedimento })
       .eq("conversa_id", conversa.id)
-      .then()
   }
 
   if (resposta.acao_sugerida === "cancelar" && conversa.paciente_id) {
@@ -514,7 +516,6 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         .eq("status", "confirmado")
         .gte("data_consulta", new Date().toISOString().split('T')[0])
         .limit(1)
-        .then()
   }
 
   return {

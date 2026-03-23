@@ -13,8 +13,8 @@ Deno.serve(async (req) => {
                    req.headers.get("x-api-key") ??
                    req.headers.get("authorization")?.replace("Bearer ", "")
 
-    const evolutionKey = Deno.env.get("EVOLUTION_API_KEY") ?? ""
-    if (apiKey && apiKey !== evolutionKey && apiKey.length < 100) {
+    const evolutionKey = (Deno.env.get("EVOLUTION_API_KEY") ?? "").trim()
+    if (!evolutionKey || (apiKey && apiKey !== evolutionKey)) {
       return new Response("Unauthorized", { status: 401 })
     }
 

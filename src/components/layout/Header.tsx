@@ -99,7 +99,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <span className="text-gray-400 hidden sm:inline">Clínica Verde</span>
+        <span className="text-gray-400 hidden sm:inline">{user?.clinicaNome || 'Clínica'}</span>
         <ChevronRight className="w-3.5 h-3.5 text-gray-300 hidden sm:block" />
         {routeInfo && (
           <div className="flex items-center gap-1.5 text-gray-700 font-medium">

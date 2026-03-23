@@ -89,7 +89,7 @@ export function useOVYVA() {
       setConversations(prev => prev.map(c => c.id === conversa_id ? { ...c, mensagens: mappedData as OvyvaMessage[] } : c))
       const unreadIds = data.filter(m => !m.lida && m.remetente === 'paciente').map(m => m.id)
       if (unreadIds.length > 0) {
-        supabase.from('ovyva_mensagens').update({ lida: true }).in('id', unreadIds).then()
+        supabase.from('ovyva_mensagens').update({ lida: true }).in('id', unreadIds).then(() => { }).catch(() => { })
       }
     }
   }, [clinica_id])

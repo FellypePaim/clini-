@@ -20,7 +20,10 @@ Deno.serve(async (req) => {
 
     const apiUrl = Deno.env.get("EVOLUTION_API_URL")
     const apiKey = Deno.env.get("EVOLUTION_API_KEY")
-    const instance = Deno.env.get("EVOLUTION_INSTANCE") || "prontuario-verde"
+    const instance = Deno.env.get("EVOLUTION_INSTANCE")
+    if (!instance) {
+      throw new Error("EVOLUTION_INSTANCE não configurado nos Secrets.")
+    }
 
     if (!apiUrl || !apiKey) {
       throw new Error("Configurações da Evolution API não encontradas nos Secrets.")
@@ -59,8 +62,6 @@ Deno.serve(async (req) => {
     }
 
     const fullUrl = `${apiUrl}/message/${endpoint}/${instance}`
-    console.log(`Sending to Evolution API: ${fullUrl}`)
-
     const response = await fetch(fullUrl, {
       method: "POST",
       headers: {
@@ -71,7 +72,6 @@ Deno.serve(async (req) => {
     })
 
     const data = await response.json()
-    console.log("Evolution API Response:", JSON.stringify(data, null, 2))
 
     if (!response.ok) {
        throw new Error(`Erro na Evolution API: ${data.message || response.statusText}`)
