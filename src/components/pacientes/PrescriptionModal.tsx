@@ -21,6 +21,33 @@ import { useToast } from '../../hooks/useToast'
 import type { Patient } from '../../types'
 import type { PrescriptionItem } from '../../types/prontuario'
 
+// Banco de medicamentos comuns com dosagens padrão
+const MEDICAMENTOS_COMUNS = [
+  { nome: 'Amoxicilina 500mg', dosagem: '1 comprimido', frequencia: 'De 8 em 8 horas', duracao: '7 dias' },
+  { nome: 'Azitromicina 500mg', dosagem: '1 comprimido', frequencia: '1x ao dia', duracao: '3 dias' },
+  { nome: 'Ibuprofeno 600mg', dosagem: '1 comprimido', frequencia: 'De 8 em 8 horas', duracao: '5 dias' },
+  { nome: 'Dipirona 500mg', dosagem: '1 comprimido', frequencia: 'De 6 em 6 horas', duracao: 'Se dor' },
+  { nome: 'Paracetamol 750mg', dosagem: '1 comprimido', frequencia: 'De 6 em 6 horas', duracao: 'Se dor/febre' },
+  { nome: 'Nimesulida 100mg', dosagem: '1 comprimido', frequencia: 'De 12 em 12 horas', duracao: '5 dias' },
+  { nome: 'Prednisolona 20mg', dosagem: '1 comprimido', frequencia: '1x ao dia (manhã)', duracao: '5 dias' },
+  { nome: 'Cefalexina 500mg', dosagem: '1 comprimido', frequencia: 'De 6 em 6 horas', duracao: '7 dias' },
+  { nome: 'Metronidazol 400mg', dosagem: '1 comprimido', frequencia: 'De 8 em 8 horas', duracao: '7 dias' },
+  { nome: 'Omeprazol 20mg', dosagem: '1 cápsula', frequencia: '1x ao dia (jejum)', duracao: '30 dias' },
+  { nome: 'Clindamicina 300mg', dosagem: '1 cápsula', frequencia: 'De 8 em 8 horas', duracao: '7 dias' },
+  { nome: 'Dexametasona 4mg', dosagem: '1 comprimido', frequencia: '1x ao dia', duracao: '3 dias' },
+  { nome: 'Clorexidina 0,12%', dosagem: 'Bochechar 15ml', frequencia: '2x ao dia', duracao: '7 dias' },
+  { nome: 'Fluconazol 150mg', dosagem: '1 comprimido', frequencia: 'Dose única', duracao: '1 dia' },
+]
+
+// Interações básicas
+const INTERACOES: Record<string, string[]> = {
+  'Amoxicilina': ['Metotrexato', 'Varfarina'],
+  'Ibuprofeno': ['Varfarina', 'Ácido Acetilsalicílico', 'Lítio'],
+  'Dipirona': ['Metotrexato', 'Ciclosporina'],
+  'Metronidazol': ['Álcool', 'Varfarina', 'Lítio'],
+  'Nimesulida': ['Varfarina', 'Lítio', 'Metotrexato'],
+}
+
 interface PrescriptionModalProps {
   isOpen: boolean
   onClose: () => void
@@ -40,7 +67,36 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
   const [isSigned, setIsSigned] = useState(false)
   const [password, setPassword] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [searchMed, setSearchMed] = useState('')
+  const [showSuggestions, setShowSuggestions] = useState<number | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+
+  // Validade da prescrição (180 dias)
+  const validade = new Date()
+  validade.setDate(validade.getDate() + 180)
+  const validadeStr = `${String(validade.getDate()).padStart(2, '0')}/${String(validade.getMonth() + 1).padStart(2, '0')}/${validade.getFullYear()}`
+
+  // Verificar interações
+  const interacoesDetectadas: string[] = []
+  const medsNomes = items.map(i => i.medicamento.split(' ')[0])
+  medsNomes.forEach(med => {
+    const inter = INTERACOES[med]
+    if (inter) {
+      inter.forEach(i => {
+        if (medsNomes.some(m => m.toLowerCase().includes(i.toLowerCase()) && m !== med)) {
+          interacoesDetectadas.push(`${med} × ${i}`)
+        }
+      })
+    }
+  })
+
+  const selectMedicamento = (idx: number, med: typeof MEDICAMENTOS_COMUNS[0]) => {
+    const newItems = [...items]
+    newItems[idx] = { ...newItems[idx], medicamento: med.nome, dosagem: med.dosagem, frequencia: med.frequencia, duracao: med.duracao }
+    setItems(newItems)
+    setShowSuggestions(null)
+    setSearchMed('')
+  }
 
   const addItem = () => {
     setItems([...items, { id: Date.now().toString(), medicamento: '', dosagem: '', frequencia: '', duracao: '' }])
@@ -149,6 +205,25 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
              </div>
 
              <div className="space-y-6">
+               {/* Alerta de interações */}
+               {interacoesDetectadas.length > 0 && (
+                 <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+                   <ShieldCheck className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                   <div>
+                     <p className="text-sm font-bold text-red-800">Possível interação medicamentosa</p>
+                     <div className="flex flex-wrap gap-1.5 mt-1">
+                       {interacoesDetectadas.map(i => <span key={i} className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md text-xs font-semibold">{i}</span>)}
+                     </div>
+                   </div>
+                 </div>
+               )}
+
+               {/* Validade */}
+               <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3 flex items-center gap-2 text-xs">
+                 <Lock className="w-4 h-4 text-blue-500" />
+                 <span className="text-blue-700 font-medium">Prescrição válida por 180 dias — até {validadeStr}</span>
+               </div>
+
                <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-sm font-black text-gray-900 border-none">Medicamentos</h3>
@@ -166,12 +241,29 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <PrescriptionField 
-                            label="Medicamento" 
-                            placeholder="Ex: Amoxicilina 500mg" 
-                            value={item.medicamento}
-                            onChange={(v) => updateItem(item.id, 'medicamento', v)}
-                          />
+                          <div className="relative">
+                            <PrescriptionField
+                              label="Medicamento"
+                              placeholder="Digite para buscar..."
+                              value={item.medicamento}
+                              onChange={(v) => { updateItem(item.id, 'medicamento', v); setSearchMed(v); setShowSuggestions(index) }}
+                              onFocus={() => setShowSuggestions(index)}
+                            />
+                            {showSuggestions === index && searchMed.length >= 2 && (
+                              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-40 overflow-y-auto">
+                                {MEDICAMENTOS_COMUNS.filter(m => m.nome.toLowerCase().includes(searchMed.toLowerCase())).map(m => (
+                                  <button key={m.nome} type="button" onClick={() => selectMedicamento(index, m)}
+                                    className="w-full text-left px-3 py-2 text-xs hover:bg-green-50 transition-colors border-b border-gray-50 last:border-0">
+                                    <span className="font-semibold text-gray-900">{m.nome}</span>
+                                    <span className="text-gray-400 ml-2">{m.dosagem} · {m.frequencia}</span>
+                                  </button>
+                                ))}
+                                {MEDICAMENTOS_COMUNS.filter(m => m.nome.toLowerCase().includes(searchMed.toLowerCase())).length === 0 && (
+                                  <p className="px-3 py-2 text-xs text-gray-400">Nenhum medicamento encontrado</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
                           <PrescriptionField 
                             label="Dosagem / Quantidade" 
                             placeholder="Ex: 1 comprimido" 
@@ -359,14 +451,15 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
   )
 }
 
-function PrescriptionField({ label, placeholder, value, onChange }: { label: string, placeholder: string, value: string, onChange: (v: string) => void }) {
+function PrescriptionField({ label, placeholder, value, onChange, onFocus }: { label: string, placeholder: string, value: string, onChange: (v: string) => void, onFocus?: () => void }) {
   return (
     <div className="space-y-1.5">
       <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{label}</label>
-      <input 
-        type="text" 
+      <input
+        type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        onFocus={onFocus}
         placeholder={placeholder}
         className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-medium focus:ring-4 focus:ring-purple-500/10 focus:border-purple-200 transition-all outline-none shadow-sm"
       />
