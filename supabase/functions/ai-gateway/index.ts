@@ -352,7 +352,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .select("data_hora_inicio, duracao_minutos, profissional_id, status")
       .eq("clinica_id", clinica_id)
       .gte("data_hora_inicio", new Date().toISOString().split('T')[0])
-      .in("status", ["agendado", "confirmado", "pendente"])
+      .in("status", ["agendado", "confirmado"])
       .limit(100)
   ])
 
@@ -502,7 +502,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         .update({ status: "cancelado", observacoes: "[REAGENDADO POR OVYVA] Paciente solicitou nova data via WhatsApp." })
         .eq("clinica_id", clinica_id)
         .eq("paciente_id", conversa.paciente_id)
-        .in("status", ["agendado", "confirmado", "pendente"])
+        .in("status", ["agendado", "confirmado"])
         .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
         .limit(1)
     }
@@ -524,7 +524,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         data_hora_inicio: dataHoraInicio,
         data_hora_fim: dataHoraFim,
         duracao_minutos: duracao,
-        status: "pendente",
+        status: "agendado",
         observacoes: `[PRÉ-AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp. Aguardando aprovação.`,
       }).then(() => { }).catch((e: unknown) => console.error("Erro ao criar pré-agendamento:", e))
     }
@@ -543,7 +543,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .update({ status: "cancelado", observacoes: "[CANCELADO POR OVYVA] Paciente solicitou cancelamento via WhatsApp." })
       .eq("clinica_id", clinica_id)
       .eq("paciente_id", conversa.paciente_id)
-      .in("status", ["agendado", "confirmado", "pendente"])
+      .in("status", ["agendado", "confirmado"])
       .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
       .limit(1)
   }
