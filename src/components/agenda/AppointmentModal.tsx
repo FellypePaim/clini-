@@ -245,25 +245,16 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="modal-label">Data *</label>
-              <div className="relative">
-                <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                <input type="date" {...register('data')} className={cn('input-base pl-9', errors.data && 'border-red-400')} />
-              </div>
+              <input type="date" {...register('data')} className={cn('input-base', errors.data && 'border-red-400')} />
               {errors.data && <p className="mt-1 text-xs text-red-500">{errors.data.message}</p>}
             </div>
             <div>
               <label className="modal-label">Início *</label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                <input type="time" {...register('horaInicio')} className={cn('input-base pl-9', errors.horaInicio && 'border-red-400')} />
-              </div>
+              <input type="time" {...register('horaInicio')} className={cn('input-base', errors.horaInicio && 'border-red-400')} />
             </div>
             <div>
               <label className="modal-label">Término *</label>
-              <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
-                <input type="time" {...register('horaFim')} className={cn('input-base pl-9', errors.horaFim && 'border-red-400')} />
-              </div>
+              <input type="time" {...register('horaFim')} className={cn('input-base', errors.horaFim && 'border-red-400')} />
               {errors.horaFim && <p className="mt-1 text-xs text-red-500">{errors.horaFim.message}</p>}
             </div>
           </div>
