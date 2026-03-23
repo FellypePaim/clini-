@@ -90,7 +90,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
               {errors.name && <span className="text-xs text-red-500 font-medium">{errors.name.message}</span>}
             </div>
 
-            <div className="grid grid-cols-1 md: gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase">Telefone / WhatsApp</label>
                 <input 
@@ -125,7 +125,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
               />
             </div>
             
-            <div className="grid grid-cols-1 md: gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase">Em que ele tem interesse?</label>
                 <input 

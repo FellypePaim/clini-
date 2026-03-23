@@ -262,8 +262,9 @@ Responda APENAS com JSON válido:
       }
 
       await supabase.from('harmonizacoes').insert({
+        clinica_id: clinicaId,
         paciente_id: pacienteId,
-        profissional_id: user?.id || '',
+        profissional_id: user?.id || null,
         mapeamento: JSON.parse(JSON.stringify(mapeamento)),
         observacoes_gerais: observacoesGerais || null,
       } as any)

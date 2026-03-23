@@ -139,13 +139,13 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
       const file = new File([blob], `harmonizacao_${pacienteId}_${Date.now()}.webp`, { type: 'image/webp' })
       const stored = await StorageHelpers.uploadMapaHarmonizacao(clinicaId, pacienteId, file)
 
-      // Assuming table "harmonizacoes" or similar exists, injecting into DB:
       await supabase.from('harmonizacoes').insert({
+        clinica_id: clinicaId,
         paciente_id: pacienteId,
-        profissional_id: user?.id || '00000000-0000-0000-0000-000000000000',
+        profissional_id: user?.id || null,
         mapeamento: {
            url: stored.url,
-           zonas: selectedZones as any // Escape strict Json intersection mismatch
+           zonas: selectedZones as any
         },
       })
 

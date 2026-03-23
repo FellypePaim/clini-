@@ -43,13 +43,13 @@ Deno.serve(async (req) => {
     }
 
     // Verificar se o solicitante é admin na clínica
-    const { data: solicitanteProfile } = await supabaseAdmin
+    const { data: solicitanteProfile, error: profileErr } = await supabaseAdmin
       .from("profiles")
       .select("role, clinica_id")
       .eq("id", requestingUser.id)
       .single()
 
-    if (!solicitanteProfile || !["admin", "administrador"].includes(solicitanteProfile.role)) {
+    if (profileErr || !solicitanteProfile || !["admin", "administrador"].includes(solicitanteProfile.role)) {
       return new Response(JSON.stringify({ error: "Apenas administradores podem criar colaboradores" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -110,13 +110,13 @@ Deno.serve(async (req) => {
       const { user_id } = body
 
       // Verificar que o usuário pertence à mesma clínica
-      const { data: targetProfile } = await supabaseAdmin
+      const { data: targetProfile, error: targetErr } = await supabaseAdmin
         .from("profiles")
         .select("clinica_id")
         .eq("id", user_id)
         .single()
 
-      if (targetProfile?.clinica_id !== solicitanteProfile.clinica_id) {
+      if (targetErr || !targetProfile || targetProfile.clinica_id !== solicitanteProfile.clinica_id) {
         return new Response(JSON.stringify({ error: "Acesso negado" }), {
           status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

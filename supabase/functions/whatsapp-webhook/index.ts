@@ -54,7 +54,8 @@ Deno.serve(async (req) => {
     let mediaMimeType = null
 
     // 1. Identificar Clínica
-    const { data: inst } = await supabase.from("whatsapp_instancias").select("clinica_id").eq("nome_instancia", instanceName).single()
+    const { data: inst, error: instErr } = await supabase.from("whatsapp_instancias").select("clinica_id").eq("nome_instancia", instanceName).single()
+    if (instErr) console.error("Erro ao buscar instância:", instErr.message)
     const clinica_id = inst?.clinica_id || Deno.env.get("CLINICA_ID")
     if (!clinica_id) return new Response("clinica not found", { status: 404 })
 
@@ -134,7 +135,8 @@ Deno.serve(async (req) => {
 async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: string) {
     const { data } = await supabase.from("ovyva_conversas").select("id").eq("clinica_id", clinica_id).eq("contato_telefone", phone).single()
     if (data?.id) return data.id
-    const { data: nova } = await supabase.from("ovyva_conversas").insert({ clinica_id, contato_telefone: phone, status: "ia_ativa" }).select("id").single()
+    const { data: nova, error } = await supabase.from("ovyva_conversas").insert({ clinica_id, contato_telefone: phone, status: "ia_ativa" }).select("id").single()
+    if (error || !nova) { console.error("Erro ao criar conversa:", error); return null }
     return nova.id
 }
 

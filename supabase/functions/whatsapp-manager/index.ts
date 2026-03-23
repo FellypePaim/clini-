@@ -57,11 +57,12 @@ Deno.serve(async (req) => {
     // ─────────────────────────────────────────────────────────────
     if (action === "criar_instancia") {
       // Gerar nome único para a instância: slug da clínica + random
-      const { data: clinica } = await supabase
+      const { data: clinica, error: clinicaErr } = await supabase
         .from("clinicas")
         .select("nome")
         .eq("id", clinicaId)
         .single()
+      if (clinicaErr) console.error("Erro ao buscar clínica:", clinicaErr.message)
 
       const slug = (clinica?.nome ?? "clinica")
         .toLowerCase()
@@ -134,14 +135,14 @@ Deno.serve(async (req) => {
     if (action === "obter_qrcode") {
       const { instancia_id } = payload
 
-      const { data: instancia } = await supabase
+      const { data: instancia, error: instErr } = await supabase
         .from("whatsapp_instancias")
         .select("*")
         .eq("id", instancia_id)
         .eq("clinica_id", clinicaId)
         .single()
 
-      if (!instancia) return json({ error: "Instância não encontrada" }, 404)
+      if (instErr || !instancia) return json({ error: "Instância não encontrada" }, 404)
 
       const evResp = await fetch(
         `${evolutionUrl}/instance/connect/${instancia.nome_instancia}`,
@@ -171,14 +172,14 @@ Deno.serve(async (req) => {
     if (action === "verificar_status") {
       const { instancia_id } = payload
 
-      const { data: instancia } = await supabase
+      const { data: instancia, error: instErr } = await supabase
         .from("whatsapp_instancias")
         .select("*")
         .eq("id", instancia_id)
         .eq("clinica_id", clinicaId)
         .single()
 
-      if (!instancia) return json({ error: "Instância não encontrada" }, 404)
+      if (instErr || !instancia) return json({ error: "Instância não encontrada" }, 404)
 
       const evResp = await fetch(
         `${evolutionUrl}/instance/connectionState/${instancia.nome_instancia}`,
@@ -236,14 +237,14 @@ Deno.serve(async (req) => {
     if (action === "desconectar") {
       const { instancia_id } = payload
 
-      const { data: instancia } = await supabase
+      const { data: instancia, error: instErr } = await supabase
         .from("whatsapp_instancias")
         .select("*")
         .eq("id", instancia_id)
         .eq("clinica_id", clinicaId)
         .single()
 
-      if (!instancia) return json({ error: "Instância não encontrada" }, 404)
+      if (instErr || !instancia) return json({ error: "Instância não encontrada" }, 404)
 
       // Desconectar na Evolution API
       await fetch(`${evolutionUrl}/instance/logout/${instancia.nome_instancia}`, {
