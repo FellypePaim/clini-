@@ -139,42 +139,21 @@ export function RegisterPage() {
           setIsLoading(true)
           setGlobalError(null)
           try {
-            // 1. Criar conta auth
-            const { data: authData, error: authErr } = await supabase.auth.signUp({
-              email: data.email,
-              password: data.senha,
-            })
-            if (authErr) throw new Error(authErr.message)
-            if (!authData.user) throw new Error('Erro ao criar conta.')
-
-            // 2. Criar clínica
-            const { data: clinica, error: clinicaErr } = await supabase
-              .from('clinicas')
-              .insert({
-                nome: data.clinica_nome,
-                cnpj: data.clinica_cnpj || null,
-                telefone: data.clinica_telefone || null,
-                endereco: data.clinica_endereco || null,
-                configuracoes: { status: 'trial' },
-              })
-              .select('id')
-              .single()
-            if (clinicaErr) throw new Error(clinicaErr.message)
-
-            // 3. Criar profile como admin
-            const { error: profileErr } = await supabase
-              .from('profiles')
-              .upsert({
-                id: authData.user.id,
-                nome_completo: data.nome,
+            const { data: result, error } = await supabase.functions.invoke('register', {
+              body: {
+                action: 'register_admin',
                 email: data.email,
-                role: 'admin',
-                clinica_id: clinica.id,
-                ativo: true,
-              })
-            if (profileErr) throw new Error(profileErr.message)
+                senha: data.senha,
+                nome: data.nome,
+                clinica_nome: data.clinica_nome,
+                clinica_cnpj: data.clinica_cnpj || null,
+                clinica_telefone: data.clinica_telefone || null,
+                clinica_endereco: data.clinica_endereco || null,
+              },
+            })
+            if (error) throw new Error(error.message)
+            if (result?.error) throw new Error(result.error)
 
-            // 4. Redirecionar para login
             navigate('/login', { state: { success: 'Conta criada com sucesso! Faça login para continuar.' } })
           } catch (e: any) {
             setGlobalError(e.message || 'Erro ao criar conta.')
@@ -198,31 +177,20 @@ export function RegisterPage() {
         setIsLoading(true)
         setGlobalError(null)
         try {
-          // 1. Criar conta auth
-          const { data: authData, error: authErr } = await supabase.auth.signUp({
-            email: data.email,
-            password: data.senha,
-          })
-          if (authErr) throw new Error(authErr.message)
-          if (!authData.user) throw new Error('Erro ao criar conta.')
-
-          // 2. Criar profile SEM clinica_id (aguardando aprovação)
-          const { error: profileErr } = await supabase
-            .from('profiles')
-            .upsert({
-              id: authData.user.id,
-              nome_completo: data.nome,
+          const { data: result, error } = await supabase.functions.invoke('register', {
+            body: {
+              action: 'register_funcionario',
               email: data.email,
+              senha: data.senha,
+              nome: data.nome,
               telefone: data.telefone || null,
               especialidade: data.especialidade || null,
               conselho: data.conselho || null,
-              role: 'profissional',
-              clinica_id: null,
-              ativo: false,
-            })
-          if (profileErr) throw new Error(profileErr.message)
+            },
+          })
+          if (error) throw new Error(error.message)
+          if (result?.error) throw new Error(result.error)
 
-          // 3. Redirecionar para login
           navigate('/login', { state: { success: 'Conta criada! Aguarde o administrador da clínica vincular seu e-mail à equipe.' } })
         } catch (e: any) {
           setGlobalError(e.message || 'Erro ao criar conta.')
