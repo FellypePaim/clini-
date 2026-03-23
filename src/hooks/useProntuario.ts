@@ -242,20 +242,25 @@ export function useProntuario(pacienteId?: string) {
 
       const conteudoTexto = itensJson.map(i => `${i.medicamento} — ${i.dosagem}, ${i.frequencia}, ${i.duracao}`).join('\n')
 
+      // Usar RPC ou insert direto — garantir que itens é JSONB válido
+      const insertPayload: Record<string, unknown> = {
+        clinica_id: clinicaId,
+        paciente_id: pid,
+        profissional_id: profissionalId,
+        itens: itensJson,
+        conteudo: conteudoTexto || 'Prescrição',
+        assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
+        qr_code_token: qrCode,
+        status: 'ativa',
+        validade_dias: 180,
+        updated_at: new Date().toISOString(),
+      }
+
+      console.log('Prescricao insert payload:', JSON.stringify(insertPayload))
+
       const { data: ret, error } = await supabase
         .from('prescricoes')
-        .insert({
-          clinica_id: clinicaId,
-          paciente_id: pid,
-          profissional_id: profissionalId,
-          itens: JSON.parse(JSON.stringify(itensJson)),
-          conteudo: conteudoTexto || 'Prescrição sem conteúdo',
-          assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
-          qr_code_token: qrCode,
-          status: 'ativa',
-          validade_dias: 180,
-          updated_at: new Date().toISOString(),
-        } as any)
+        .insert(insertPayload as any)
         .select()
         .single()
 
