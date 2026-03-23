@@ -115,7 +115,7 @@ export function ProfissionaisPage() {
     setSaving(true)
     try {
       // Chama a Edge Function user-manager para criar o usuário com service role
-      const { data, error } = await supabase.functions.invoke('user-manager', {
+      const res = await supabase.functions.invoke('user-manager', {
         body: {
           action: 'create_user',
           email: form.email,
@@ -128,8 +128,11 @@ export function ProfissionaisPage() {
         },
       })
 
-      if (error) throw error
-      if (data?.error) throw new Error(data.error)
+      // Edge functions retornam o body de erro no data quando status != 2xx
+      const result = res.data
+      if (res.error || result?.error) {
+        throw new Error(result?.error || res.error?.message || 'Erro na edge function')
+      }
 
       toast({ title: 'Colaborador criado!', description: `${form.nome} adicionado com sucesso.`, type: 'success' })
       setShowModal(false)

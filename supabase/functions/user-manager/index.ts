@@ -11,29 +11,29 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Criar cliente com service_role para poder criar usuários
-    const supabaseAdmin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    // Verificar autenticação do solicitante (deve ser admin da clínica)
-    const authHeader = req.headers.get("Authorization")
-    if (!authHeader) {
+    const reqAuthHeader = req.headers.get("Authorization")
+    if (!reqAuthHeader) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       })
     }
 
-    // Validar token do solicitante
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
+    // Cliente para verificar o token do usuário
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: reqAuthHeader } } }
     )
-    const { data: { user: requestingUser }, error: authError } = await supabaseUser.auth.getUser()
+
+    // Cliente com service_role para operações admin
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    )
+
+    // Verificar autenticação
+    const { data: { user: requestingUser }, error: authError } = await authClient.auth.getUser()
     if (authError || !requestingUser) {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
