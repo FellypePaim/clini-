@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>()(
               criadoEm: data.user.created_at || new Date().toISOString(),
               avatar: profileData?.avatar_url || undefined,
             }
-            const pendingApproval = !profileData?.clinica_id || !profileData?.ativo
+            const pendingApproval = dbRole !== 'superadmin' && (!profileData?.clinica_id || profileData?.ativo === false)
             set({
               user: userParsed,
               isAuthenticated: true,
