@@ -18,7 +18,8 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
-import { StorageHelpers } from '../../lib/storage'
+import { StorageHelpers, getSignedUrl } from '../../lib/storage'
+import type { StorageBucket } from '../../lib/storage'
 import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../hooks/useToast'
 import { usePatients } from '../../hooks/usePatients'
@@ -36,6 +37,20 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [isSaving, setIsSaving] = useState(false)
   const [termos, setTermos] = useState<any[]>([])
   const [viewingTermo, setViewingTermo] = useState<any | null>(null)
+
+  const [resolvedSignUrl, setResolvedSignUrl] = useState<string | null>(null)
+
+  // Resolver URL assinada de um placeholder "signed:bucket:path"
+  const resolveUrl = async (url: string): Promise<string> => {
+    if (!url) return ''
+    if (url.startsWith('signed:')) {
+      const parts = url.split(':')
+      const bucket = parts[1] as StorageBucket
+      const path = parts.slice(2).join(':')
+      return await getSignedUrl(bucket, path)
+    }
+    return url
+  }
 
   // IA - Gerar termo personalizado
   const [iaPrompt, setIaPrompt] = useState('')
@@ -363,7 +378,11 @@ Responda APENAS com JSON válido nesta estrutura:
                           {/* Visualizar assinatura */}
                           {st.assinatura_url && (
                             <button
-                              onClick={() => setViewingTermo(st)}
+                              onClick={async () => {
+                                const url = await resolveUrl(st.assinatura_url)
+                                setResolvedSignUrl(url)
+                                setViewingTermo(st)
+                              }}
                               className="p-2.5 bg-blue-600 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-blue-600/10"
                               title="Visualizar assinatura"
                             >
@@ -372,15 +391,16 @@ Responda APENAS com JSON válido nesta estrutura:
                           )}
                           {/* Download */}
                           {st.assinatura_url && (
-                            <a
-                              href={st.assinatura_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={async () => {
+                                const url = await resolveUrl(st.assinatura_url)
+                                window.open(url, '_blank')
+                              }}
                               className="p-2.5 bg-gray-900 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-gray-900/10 inline-flex"
                               title="Baixar assinatura"
                             >
                               <Download className="w-4 h-4" />
-                            </a>
+                            </button>
                           )}
                           {/* Excluir */}
                           <button
@@ -413,7 +433,7 @@ Responda APENAS com JSON válido nesta estrutura:
       {/* Modal de Visualização — Estilo Documento PDF */}
       {viewingTermo && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fade-in" onClick={() => setViewingTermo(null)} />
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fade-in" onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} />
           <div className="relative bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slide-in flex flex-col">
             {/* Toolbar */}
             <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
@@ -425,12 +445,12 @@ Responda APENAS com JSON válido nesta estrutura:
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                {viewingTermo.assinatura_url && (
-                  <a href={viewingTermo.assinatura_url} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar">
+                {resolvedSignUrl && (
+                  <a href={resolvedSignUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar">
                     <Download className="w-4 h-4" />
                   </a>
                 )}
-                <button onClick={() => setViewingTermo(null)} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                <button onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -501,7 +521,7 @@ Responda APENAS com JSON válido nesta estrutura:
                       <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center mb-4">Assinatura Digital do Paciente</p>
                       <div className="flex justify-center">
                         <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 inline-block">
-                          <img src={viewingTermo.assinatura_url} alt="Assinatura" className="max-h-32 object-contain" />
+                          <img src={resolvedSignUrl || ''} alt="Assinatura" className="max-h-32 object-contain" />
                         </div>
                       </div>
                       <div className="flex items-center justify-center gap-2 mt-4 text-green-600">
