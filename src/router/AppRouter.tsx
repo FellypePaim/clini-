@@ -68,8 +68,8 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user } = useAuthStore()
-  if (isAuthenticated) {
+  const { isAuthenticated, isPendingApproval, user } = useAuthStore()
+  if (isAuthenticated && !isPendingApproval) {
     return user?.role === 'superadmin'
       ? <Navigate to="/superadmin" replace />
       : <Navigate to="/dashboard" replace />
