@@ -135,7 +135,7 @@ Responda APENAS com JSON válido nesta estrutura:
       const { error } = await supabase.functions.invoke('whatsapp-send', {
         body: {
           numero: paciente.contato.telefone,
-          texto: `Olá ${paciente.nome.split(' ')[0]},\n\nPor favor, assine o termo *${tpl.titulo}* acessando o link seguro abaixo:\n\n${link}\n\nAtenciosamente,\nClínica Clini+`,
+          texto: `Olá ${paciente.nome.split(' ')[0]},\n\nPor favor, assine o termo *${tpl.titulo}* acessando o link seguro abaixo:\n\n${link}\n\nAtenciosamente,\n${user?.clinicaNome || 'Clínica'}`,
           tipo: 'texto',
           clinica_id: clinicaId
         }
@@ -342,7 +342,7 @@ Responda APENAS com JSON válido nesta estrutura:
                           <div className="flex items-center gap-4 text-[10px] text-gray-400 font-medium">
                              <span className="flex items-center gap-1.5">
                                <Calendar className="w-3.5 h-3.5" />
-                               {new Date(st.assinado_em || st.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                               {(() => { const p = ((st.assinado_em || st.created_at) as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}
                              </span>
                              <span className="flex items-center gap-1.5">
                                <User className="w-3.5 h-3.5" /> {st.tipo || 'consentimento'}
@@ -474,13 +474,13 @@ Responda APENAS com JSON válido nesta estrutura:
                     <div>
                       <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Data</p>
                       <p className="text-gray-700 font-bold mt-1">
-                        {new Date(viewingTermo.assinado_em || viewingTermo.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                        {(() => { const p = ((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}
                       </p>
                     </div>
                     <div>
                       <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Horario</p>
                       <p className="text-gray-700 font-bold mt-1">
-                        {new Date(viewingTermo.assinado_em || viewingTermo.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        {((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[1]?.substring(0, 5) ?? '—'}
                       </p>
                     </div>
                     <div>
