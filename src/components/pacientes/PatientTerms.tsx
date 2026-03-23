@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
-import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import {
   FileCheck,
@@ -221,27 +220,150 @@ Responda APENAS com JSON válido nesta estrutura:
   }
 
   const handleDownloadPdf = async () => {
-    if (!docRef.current || !viewingTermo) return
+    if (!viewingTermo) return
     setIsGeneratingPdf(true)
     try {
-      const el = docRef.current
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        onclone: (doc: Document) => {
-          doc.querySelectorAll('style').forEach(s => {
-            if (s.textContent?.includes('oklch')) s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, 'transparent')
-          })
-        }
-      })
-      const imgData = canvas.toDataURL('image/png')
       const pdf = new jsPDF('p', 'mm', 'a4')
-      const pdfW = pdf.internal.pageSize.getWidth()
-      const pdfH = (canvas.height * pdfW) / canvas.width
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH)
-      pdf.save(`${(viewingTermo.titulo || 'termo').replace(/\s+/g, '_')}.pdf`)
+      const w = pdf.internal.pageSize.getWidth()
+      const margin = 20
+      const contentW = w - margin * 2
+      let y = 20
+
+      // Header
+      pdf.setFillColor(22, 163, 74) // green-600
+      pdf.rect(0, 0, w, 2, 'F')
+
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(18)
+      pdf.setTextColor(17, 24, 39)
+      pdf.text(user?.clinicaNome || 'Prontuário Verde', margin, y + 8)
+      pdf.setFontSize(8)
+      pdf.setTextColor(156, 163, 175)
+      pdf.text('Sistema de Gestão Clínica', margin, y + 14)
+
+      pdf.setFontSize(8)
+      pdf.text('Documento Digital', w - margin, y + 8, { align: 'right' })
+      pdf.text(`ID: ${viewingTermo.id?.substring(0, 8) || '—'}`, w - margin, y + 14, { align: 'right' })
+
+      y += 22
+      pdf.setDrawColor(22, 163, 74)
+      pdf.setLineWidth(0.5)
+      pdf.line(margin, y, w - margin, y)
+
+      // Título
+      y += 12
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(14)
+      pdf.setTextColor(17, 24, 39)
+      const titulo = viewingTermo.titulo || 'Termo de Consentimento'
+      pdf.text(titulo.toUpperCase(), w / 2, y, { align: 'center' })
+
+      y += 4
+      pdf.setFillColor(22, 163, 74)
+      pdf.rect(w / 2 - 10, y, 20, 0.7, 'F')
+
+      // Conteúdo
+      if (viewingTermo.conteudo) {
+        y += 10
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(10)
+        pdf.setTextColor(75, 85, 99)
+        const lines = pdf.splitTextToSize(viewingTermo.conteudo, contentW)
+        for (const line of lines) {
+          if (y > 260) { pdf.addPage(); y = 20 }
+          pdf.text(line, margin, y)
+          y += 5
+        }
+      }
+
+      // Info box
+      y += 8
+      if (y > 240) { pdf.addPage(); y = 20 }
+      pdf.setFillColor(249, 250, 251)
+      pdf.roundedRect(margin, y, contentW, 28, 2, 2, 'F')
+
+      const dateParts = ((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[0].split('-')
+      const dataFmt = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
+      const horaFmt = ((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[1]?.substring(0, 5) || '—'
+
+      pdf.setFontSize(7)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(156, 163, 175)
+      pdf.text('DATA', margin + 4, y + 6)
+      pdf.text('HORÁRIO', margin + 44, y + 6)
+      pdf.text('TIPO', margin + 84, y + 6)
+      pdf.text('PROFISSIONAL', margin + 124, y + 6)
+
+      pdf.setFontSize(9)
+      pdf.setTextColor(55, 65, 81)
+      pdf.text(dataFmt, margin + 4, y + 13)
+      pdf.text(horaFmt, margin + 44, y + 13)
+      pdf.text(viewingTermo.tipo || 'Consentimento', margin + 84, y + 13)
+      pdf.text(user?.nome || 'Profissional', margin + 124, y + 13)
+
+      // Assinatura
+      y += 36
+      if (y > 230) { pdf.addPage(); y = 20 }
+
+      pdf.setDrawColor(229, 231, 235)
+      pdf.setLineDashPattern([2, 2], 0)
+      pdf.line(margin, y, w - margin, y)
+      pdf.setLineDashPattern([], 0)
+
+      y += 8
+      pdf.setFontSize(7)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(156, 163, 175)
+      pdf.text('ASSINATURA DIGITAL DO PACIENTE', w / 2, y, { align: 'center' })
+
+      if (resolvedSignUrl) {
+        try {
+          // Fetch imagem como base64
+          const imgResp = await fetch(resolvedSignUrl)
+          const imgBlob = await imgResp.blob()
+          const imgBase64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader()
+            reader.onloadend = () => resolve(reader.result as string)
+            reader.readAsDataURL(imgBlob)
+          })
+          y += 4
+          pdf.addImage(imgBase64, 'PNG', w / 2 - 30, y, 60, 25)
+          y += 28
+        } catch {
+          y += 10
+          pdf.setTextColor(234, 179, 8)
+          pdf.text('Assinatura não disponível', w / 2, y, { align: 'center' })
+          y += 8
+        }
+      } else {
+        y += 10
+        pdf.setTextColor(234, 179, 8)
+        pdf.text('Aguardando assinatura do paciente', w / 2, y, { align: 'center' })
+        y += 8
+      }
+
+      // Selo
+      if (viewingTermo.assinado_em) {
+        y += 4
+        pdf.setFontSize(7)
+        pdf.setFont('helvetica', 'bold')
+        pdf.setTextColor(22, 163, 74)
+        pdf.text('DOCUMENTO ASSINADO DIGITALMENTE', w / 2, y, { align: 'center' })
+      }
+
+      // Footer
+      y += 10
+      if (y > 270) { pdf.addPage(); y = 270 }
+      pdf.setFillColor(249, 250, 251)
+      pdf.rect(0, 282, w, 15, 'F')
+      pdf.setFontSize(6)
+      pdf.setTextColor(156, 163, 175)
+      pdf.text('Este documento foi gerado eletronicamente pelo sistema Prontuário Verde. Possui validade jurídica conforme Lei 14.063/2020.', w / 2, 288, { align: 'center' })
+
+      pdf.save(`${titulo.replace(/\s+/g, '_')}.pdf`)
+      toast({ title: 'PDF gerado', description: 'Download iniciado.', type: 'success' })
     } catch (err: any) {
+      console.error('Erro PDF:', err)
       toast({ title: 'Erro', description: 'Falha ao gerar PDF.', type: 'error' })
     } finally {
       setIsGeneratingPdf(false)
@@ -250,25 +372,45 @@ Responda APENAS com JSON válido nesta estrutura:
 
   const handlePrint = () => {
     if (!docRef.current) return
-    const printContent = docRef.current.innerHTML
-    const printWindow = window.open('', '_blank', 'width=800,height=600')
-    if (!printWindow) return
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>${viewingTermo?.titulo || 'Termo'}</title>
-          <style>
-            body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
-            * { box-sizing: border-box; }
-            img { max-height: 120px; object-fit: contain; }
-          </style>
-          <link rel="stylesheet" href="${window.location.origin}/assets/index.css" />
-        </head>
-        <body>${printContent}</body>
-      </html>
-    `)
-    printWindow.document.close()
-    setTimeout(() => { printWindow.print(); printWindow.close() }, 500)
+    const win = window.open('', '_blank')
+    if (!win) return
+    win.document.write(`<!DOCTYPE html><html><head><title>${viewingTermo?.titulo || 'Termo'}</title><style>
+      body { font-family: Georgia, serif; margin: 40px; color: #111827; }
+      .header { border-bottom: 2px solid #16a34a; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; }
+      .header h1 { font-size: 20px; margin: 0; }
+      .header small { color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; }
+      .titulo { text-align: center; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin: 24px 0; }
+      .barra { width: 40px; height: 2px; background: #16a34a; margin: 8px auto 24px; }
+      .conteudo { font-size: 12px; line-height: 1.8; color: #4b5563; white-space: pre-line; }
+      .info { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; background: #f9fafb; padding: 16px; border-radius: 8px; margin: 24px 0; font-size: 11px; }
+      .info label { font-size: 9px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+      .assinatura { text-align: center; border-top: 2px dashed #e5e7eb; padding-top: 24px; margin-top: 32px; }
+      .assinatura img { max-height: 100px; }
+      .selo { color: #16a34a; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-top: 12px; }
+      .footer { text-align: center; font-size: 8px; color: #9ca3af; margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+      @media print { body { margin: 20px; } }
+    </style></head><body>
+      <div class="header">
+        <div><h1>${user?.clinicaNome || 'Prontuário Verde'}</h1><small>Sistema de Gestão Clínica</small></div>
+        <div style="text-align:right"><small>Documento Digital</small><br><small>ID: ${viewingTermo?.id?.substring(0, 8) || '—'}</small></div>
+      </div>
+      <div class="titulo">${viewingTermo?.titulo || 'Termo de Consentimento'}</div>
+      <div class="barra"></div>
+      ${viewingTermo?.conteudo ? `<div class="conteudo">${viewingTermo.conteudo}</div>` : ''}
+      <div class="info">
+        <div><label>Data</label><br>${(() => { const p = ((viewingTermo?.assinado_em || viewingTermo?.created_at) as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}</div>
+        <div><label>Horário</label><br>${((viewingTermo?.assinado_em || viewingTermo?.created_at) as string).split('T')[1]?.substring(0, 5) || '—'}</div>
+        <div><label>Tipo</label><br>${viewingTermo?.tipo || 'Consentimento'}</div>
+        <div><label>Profissional</label><br>${user?.nome || 'Profissional'}</div>
+      </div>
+      <div class="assinatura">
+        <small style="color:#9ca3af;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">Assinatura Digital do Paciente</small><br><br>
+        ${resolvedSignUrl ? `<img src="${resolvedSignUrl}" /><div class="selo">Documento Assinado Digitalmente</div>` : '<p style="color:#eab308">Aguardando assinatura</p>'}
+      </div>
+      <div class="footer">Este documento foi gerado eletronicamente pelo sistema Prontuário Verde. Possui validade jurídica conforme Lei 14.063/2020.</div>
+    </body></html>`)
+    win.document.close()
+    setTimeout(() => { win.print() }, 800)
   }
 
   const clearSig = () => {
