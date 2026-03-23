@@ -68,14 +68,35 @@ export function usePrescricoes() {
       // Gerar assinatura (hash simples: userId + timestamp)
       const assinatura_hash = btoa(`${user.id}:${Date.now()}:${clinicaId}`)
 
-      const { data: ret, error } = await supabase.from('prescricoes').insert({
-        clinica_id: clinicaId,
-        paciente_id: data.paciente_id,
-        profissional_id: user.id,
-        conteudo: data.conteudo,
-        assinatura_hash,
-        status: 'ativa',
-      } as any).select().single()
+      // REST API direto para contornar bug supabase-js com JSONB
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      const session = await supabase.auth.getSession()
+      const token = session.data.session?.access_token
+
+      const itensArr = [{ medicamento: 'Prescrição livre', dosagem: '', frequencia: '', duracao: '', observacoes: data.conteudo }]
+
+      const res = await fetch(`${supabaseUrl}/rest/v1/prescricoes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${token}`,
+          'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({
+          clinica_id: clinicaId,
+          paciente_id: data.paciente_id,
+          profissional_id: user.id,
+          itens: itensArr,
+          conteudo: data.conteudo,
+          assinatura_hash,
+          status: 'ativa',
+          updated_at: new Date().toISOString(),
+        }),
+      })
+
+      if (!res.ok) { const err = await res.json(); throw new Error(err.message || 'Erro') }
+      const [ret] = await res.json()
 
       if (error) throw error
       toast({ title: 'Prescrição criada', description: 'Assinada digitalmente.', type: 'success' })
