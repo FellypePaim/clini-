@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Calendar, UserPlus, DollarSign, Target, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Calendar, UserPlus, DollarSign, Target, TrendingUp, TrendingDown } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { cn } from '../../lib/utils'
@@ -8,26 +8,31 @@ interface KpiData {
   id: string
   titulo: string
   valor: string
+  subtitulo: string
   icone: string
   cor: keyof typeof COLOR_MAP
   variacao: number
+  progresso: number
 }
 
 const ICON_MAP = { Calendar, UserPlus, DollarSign, Target }
 
 const COLOR_MAP = {
-  green:  { bg: 'bg-green-50',  icon: 'text-green-600',  border: 'hover:border-green-200'  },
-  blue:   { bg: 'bg-blue-50',   icon: 'text-blue-600',   border: 'hover:border-blue-200'   },
-  purple: { bg: 'bg-purple-50', icon: 'text-purple-600', border: 'hover:border-purple-200' },
-  orange: { bg: 'bg-orange-50', icon: 'text-orange-600', border: 'hover:border-orange-200' },
+  green:  { bg: 'bg-green-50',  icon: 'text-green-600',  bar: 'bg-green-500', ring: 'ring-green-100'  },
+  blue:   { bg: 'bg-blue-50',   icon: 'text-blue-600',   bar: 'bg-blue-500',  ring: 'ring-blue-100'   },
+  purple: { bg: 'bg-purple-50', icon: 'text-purple-600', bar: 'bg-purple-500', ring: 'ring-purple-100' },
+  orange: { bg: 'bg-orange-50', icon: 'text-orange-600', bar: 'bg-orange-500', ring: 'ring-orange-100' },
 }
 
 function KpiSkeleton() {
   return (
-    <div className="kpi-card animate-pulse">
-      <div className="w-10 h-10 rounded-xl bg-gray-100 mb-4" />
-      <div className="h-8 w-20 bg-gray-100 rounded mb-2" />
-      <div className="h-3 w-32 bg-gray-100 rounded" />
+    <div className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+      <div className="flex items-center justify-between mb-4">
+        <div className="w-10 h-10 rounded-xl bg-gray-100" />
+        <div className="w-16 h-5 bg-gray-100 rounded-full" />
+      </div>
+      <div className="h-8 w-24 bg-gray-100 rounded mb-1" />
+      <div className="h-4 w-32 bg-gray-100 rounded" />
     </div>
   )
 }
@@ -44,162 +49,112 @@ export function KpiCards() {
     const hoje = new Date()
     const inicioHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString()
     const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() + 1).toISOString()
-
     const mesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
     const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1).toISOString()
     const fimMesAnterior = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString()
 
-    // Consultas hoje
-    const { count: consultasHoje } = await supabase
-      .from('consultas')
-      .select('*', { count: 'exact', head: true })
-      .eq('clinica_id', clinicaId)
-      .gte('data_hora_inicio', inicioHoje)
-      .lt('data_hora_inicio', fimHoje)
+    const [consultasRes, pacMesRes, pacMesAntRes, faturamentoRes, agendadasRes, concluidasRes] = await Promise.all([
+      supabase.from('consultas').select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId).gte('data_hora_inicio', inicioHoje).lt('data_hora_inicio', fimHoje),
+      supabase.from('pacientes').select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId).gte('created_at', mesAtual),
+      supabase.from('pacientes').select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId).gte('created_at', mesAnterior).lt('created_at', fimMesAnterior),
+      supabase.from('lancamentos').select('valor')
+        .eq('clinica_id', clinicaId).eq('tipo', 'receita').eq('status', 'pago').gte('data', mesAtual.split('T')[0]),
+      supabase.from('consultas').select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId).gte('data_hora_inicio', mesAtual),
+      supabase.from('consultas').select('*', { count: 'exact', head: true })
+        .eq('clinica_id', clinicaId).in('status', ['finalizado', 'concluido']).gte('data_hora_inicio', mesAtual),
+    ])
 
-    // Novos pacientes este mês
-    const { count: pacientesMes } = await supabase
-      .from('pacientes')
-      .select('*', { count: 'exact', head: true })
-      .eq('clinica_id', clinicaId)
-      .gte('created_at', mesAtual)
-
-    // Novos pacientes mês anterior
-    const { count: pacientesMesAnterior } = await supabase
-      .from('pacientes')
-      .select('*', { count: 'exact', head: true })
-      .eq('clinica_id', clinicaId)
-      .gte('created_at', mesAnterior)
-      .lt('created_at', fimMesAnterior)
-
-    // Faturamento do mês (transações do tipo receita e status pago)
-    const { data: lancamentosData } = await supabase
-      .from('transacoes' as any)
-      .select('valor')
-      .eq('clinica_id', clinicaId)
-      .eq('tipo', 'receita')
-      .eq('status', 'pago')
-      .gte('data_consolidacao', mesAtual.split('T')[0])
-
-    const faturamento = (lancamentosData as any[])?.reduce((sum, l) => sum + (l.valor ?? 0), 0) ?? 0
-
-    // Taxa de comparecimento (consultas concluídas / total agendadas este mês)
-    const { count: agendadasMes } = await supabase
-      .from('consultas')
-      .select('*', { count: 'exact', head: true })
-      .eq('clinica_id', clinicaId)
-      .gte('data_hora_inicio', mesAtual)
-
-    const { count: concluidasMes } = await supabase
-      .from('consultas')
-      .select('*', { count: 'exact', head: true })
-      .eq('clinica_id', clinicaId)
-      .eq('status', 'finalizado')
-      .gte('data_hora_inicio', mesAtual)
-
-    const taxaComparecimento = agendadasMes && agendadasMes > 0
-      ? Math.round(((concluidasMes ?? 0) / agendadasMes) * 100)
-      : 0
-
-    const variacaoPacientes = pacientesMesAnterior && pacientesMesAnterior > 0
-      ? Math.round((((pacientesMes ?? 0) - pacientesMesAnterior) / pacientesMesAnterior) * 100)
-      : 0
+    const consultasHoje = consultasRes.count ?? 0
+    const pacientesMes = pacMesRes.count ?? 0
+    const pacientesMesAnt = pacMesAntRes.count ?? 0
+    const faturamento = (faturamentoRes.data ?? []).reduce((s: number, l: any) => s + (l.valor ?? 0), 0)
+    const agendadasMes = agendadasRes.count ?? 0
+    const concluidasMes = concluidasRes.count ?? 0
+    const taxaComparecimento = agendadasMes > 0 ? Math.round((concluidasMes / agendadasMes) * 100) : 0
+    const varPacientes = pacientesMesAnt > 0 ? Math.round(((pacientesMes - pacientesMesAnt) / pacientesMesAnt) * 100) : 0
 
     setKpis([
       {
-        id: 'consultas-hoje',
-        titulo: 'Consultas Hoje',
-        valor: String(consultasHoje ?? 0),
-        icone: 'Calendar',
-        cor: 'green',
-        variacao: 0,
+        id: 'consultas', titulo: 'Consultas Hoje', valor: String(consultasHoje),
+        subtitulo: 'agendadas para hoje', icone: 'Calendar', cor: 'green', variacao: 0,
+        progresso: Math.min(100, consultasHoje * 10),
       },
       {
-        id: 'novos-pacientes',
-        titulo: 'Novos Pacientes (Mês)',
-        valor: String(pacientesMes ?? 0),
-        icone: 'UserPlus',
-        cor: 'blue',
-        variacao: variacaoPacientes,
+        id: 'pacientes', titulo: 'Novos Pacientes', valor: String(pacientesMes),
+        subtitulo: 'este mês', icone: 'UserPlus', cor: 'blue', variacao: varPacientes,
+        progresso: Math.min(100, pacientesMes * 5),
       },
       {
-        id: 'faturamento',
-        titulo: 'Faturamento (Mês)',
-        valor: `R$ ${faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`,
-        icone: 'DollarSign',
-        cor: 'purple',
-        variacao: 0,
+        id: 'faturamento', titulo: 'Faturamento',
+        valor: faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }),
+        subtitulo: 'receita do mês', icone: 'DollarSign', cor: 'purple', variacao: 0,
+        progresso: Math.min(100, faturamento > 0 ? 60 : 0),
       },
       {
-        id: 'comparecimento',
-        titulo: 'Taxa de Comparecimento',
-        valor: `${taxaComparecimento}%`,
-        icone: 'Target',
-        cor: 'orange',
-        variacao: 0,
+        id: 'comparecimento', titulo: 'Comparecimento', valor: `${taxaComparecimento}%`,
+        subtitulo: `${concluidasMes} de ${agendadasMes} consultas`, icone: 'Target', cor: 'orange', variacao: 0,
+        progresso: taxaComparecimento,
       },
     ])
     setLoading(false)
   }, [clinicaId])
 
-  useEffect(() => {
-    if (!clinicaId) return
-    loadKpis()
-  }, [clinicaId, loadKpis])
+  useEffect(() => { if (clinicaId) loadKpis() }, [clinicaId, loadKpis])
 
   if (loading) {
     return (
-      <section>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => <KpiSkeleton key={i} />)}
-        </div>
-      </section>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {[1,2,3,4].map(i => <KpiSkeleton key={i} />)}
+      </div>
     )
   }
 
   return (
-    <section>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {kpis.map((kpi) => {
-          const Icon = ICON_MAP[kpi.icone as keyof typeof ICON_MAP] ?? Calendar
-          const colors = COLOR_MAP[kpi.cor]
-          const variacao = kpi.variacao ?? 0
-          const TrendIcon = variacao > 0 ? TrendingUp : variacao < 0 ? TrendingDown : Minus
-          const trendColor = variacao > 0 ? 'text-green-600' : variacao < 0 ? 'text-red-500' : 'text-gray-400'
-          const trendBg   = variacao > 0 ? 'bg-green-50' : variacao < 0 ? 'bg-red-50' : 'bg-gray-50'
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {kpis.map((kpi) => {
+        const Icon = ICON_MAP[kpi.icone as keyof typeof ICON_MAP] ?? Calendar
+        const colors = COLOR_MAP[kpi.cor]
+        const v = kpi.variacao
 
-          return (
-            <article
-              key={kpi.id}
-              className={cn('kpi-card group cursor-default', colors.border)}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center', colors.bg)}>
-                  <Icon className={cn('w-5 h-5', colors.icon)} />
-                </div>
-                {variacao !== 0 && (
-                  <div className={cn('flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium', trendBg, trendColor)}>
-                    <TrendIcon className="w-3 h-3" />
-                    {Math.abs(variacao)}%
-                  </div>
-                )}
+        return (
+          <article
+            key={kpi.id}
+            className={cn(
+              'bg-white rounded-2xl border border-gray-100 p-5 transition-all duration-200',
+              'hover:shadow-lg hover:shadow-gray-100/80 hover:border-gray-200 hover:-translate-y-0.5'
+            )}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center ring-4', colors.bg, colors.ring)}>
+                <Icon className={cn('w-5 h-5', colors.icon)} />
               </div>
+              {v !== 0 && (
+                <span className={cn(
+                  'flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full',
+                  v > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                )}>
+                  {v > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {Math.abs(v)}%
+                </span>
+              )}
+            </div>
 
-              <div>
-                <p className="text-2xl font-bold text-gray-900 leading-none mb-1">{kpi.valor}</p>
-                <p className="text-sm text-gray-500">{kpi.titulo}</p>
-              </div>
+            <p className="text-2xl font-bold text-gray-900 tracking-tight">{kpi.valor}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{kpi.subtitulo}</p>
 
-              <div className="mt-4 h-1 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={cn('h-full rounded-full transition-all duration-500', colors.icon.replace('text-', 'bg-'))}
-                  style={{ width: `${Math.min(100, kpi.id === 'comparecimento' ? parseInt(kpi.valor) || 0 : Math.min(100, (parseInt(kpi.valor.replace(/\D/g, '')) || 0) > 0 ? 70 + Math.min(30, variacao) : 0))}%` }}
-                />
-              </div>
-            </article>
-          )
-        })}
-      </div>
-    </section>
+            <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div
+                className={cn('h-full rounded-full transition-all duration-700 ease-out', colors.bar)}
+                style={{ width: `${kpi.progresso}%` }}
+              />
+            </div>
+          </article>
+        )
+      })}
+    </div>
   )
 }

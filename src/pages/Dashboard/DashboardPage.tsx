@@ -6,8 +6,9 @@ import { ProcedimentosPieChart } from '../../components/dashboard/ProcedimentosP
 import { AgendamentosList } from '../../components/dashboard/AgendamentosList'
 import { PacientesRecentes } from '../../components/dashboard/PacientesRecentes'
 import { LeadsRecentes } from '../../components/dashboard/LeadsRecentes'
-import { Sparkles, X, Loader2 } from 'lucide-react'
+import { Sparkles, X, Loader2, CalendarDays, ArrowRight } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { Link } from 'react-router-dom'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -16,12 +17,22 @@ function getGreeting() {
   return 'Boa noite'
 }
 
+function getDateFormatted() {
+  const d = new Date()
+  const weekday = d.toLocaleDateString('pt-BR', { weekday: 'long' })
+  const day = d.getDate()
+  const month = d.toLocaleDateString('pt-BR', { month: 'long' })
+  const year = d.getFullYear()
+  return { weekday, full: `${day} de ${month}, ${year}` }
+}
+
 export function DashboardPage() {
   const { user } = useAuthStore()
   const firstName = user?.nome?.split(' ')[0] ?? 'Usuário'
   const [insightModal, setInsightModal] = useState(false)
   const [insightText, setInsightText] = useState('')
   const [insightLoading, setInsightLoading] = useState(false)
+  const date = getDateFormatted()
 
   const handleInsights = async () => {
     setInsightModal(true)
@@ -42,35 +53,40 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
-      {/* ── Cabeçalho da página ─────────────────────── */}
-      <div className="flex items-center justify-between">
+      {/* ── Header ──────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {getGreeting()}, {firstName} 👋
-          </h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Aqui está o resumo da clínica para hoje,{' '}
-            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          <p className="text-sm font-medium text-gray-400 capitalize flex items-center gap-1.5">
+            <CalendarDays className="w-3.5 h-3.5" />
+            {date.weekday}, {date.full}
           </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">
+            {getGreeting()}, {firstName}
+          </h1>
         </div>
 
-        <button
-          id="dashboard-ai-insight"
-          onClick={handleInsights}
-          className="hidden sm:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500
-                     text-white text-sm font-medium rounded-xl hover:from-green-700 hover:to-emerald-600
-                     transition-all duration-200 shadow-sm shadow-green-200"
-        >
-          <Sparkles className="w-4 h-4" />
-          Insights com IA
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/agenda"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all"
+          >
+            Ver agenda <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <button
+            onClick={handleInsights}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-700 hover:to-emerald-600 transition-all shadow-sm shadow-green-200/50 active:scale-[0.98]"
+          >
+            <Sparkles className="w-4 h-4" />
+            Insights IA
+          </button>
+        </div>
       </div>
 
-      {/* ── KPI Cards ───────────────────────────────── */}
+      {/* ── KPI Cards ────────────────────────────────── */}
       <KpiCards />
 
-      {/* ── Gráficos ────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      {/* ── Gráficos ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
         <div className="lg:col-span-3">
           <ConsultasChart />
         </div>
@@ -79,44 +95,55 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* ── CRM & Listas ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-        <div className="lg:col-span-3">
+      {/* ── Agendamentos + Leads + Pacientes ──────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-1">
           <AgendamentosList />
         </div>
-        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
-           <LeadsRecentes />
-           <PacientesRecentes />
+        <div className="lg:col-span-1">
+          <LeadsRecentes />
+        </div>
+        <div className="lg:col-span-1">
+          <PacientesRecentes />
         </div>
       </div>
 
-      {/* ── Modal Insights IA ──────────────────────────── */}
+      {/* ── Modal Insights IA ─────────────────────────── */}
       {insightModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg animate-fade-in">
             <div className="flex items-center justify-between p-5 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-green-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Insights com IA</h2>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-sm">
+                  <Sparkles className="w-4.5 h-4.5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-gray-900">Insights com IA</h2>
+                  <p className="text-[11px] text-gray-400">Análise baseada nos dados da sua clínica</p>
+                </div>
               </div>
-              <button onClick={() => setInsightModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
+              <button onClick={() => setInsightModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                <X className="w-4.5 h-4.5" />
               </button>
             </div>
-            <div className="p-5 min-h-[120px] flex items-center justify-center">
+            <div className="p-6 min-h-[140px] flex items-center justify-center">
               {insightLoading ? (
                 <div className="flex flex-col items-center gap-3 text-gray-500">
-                  <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-                  <p className="text-sm">Gerando insights da clínica...</p>
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full border-2 border-green-100 flex items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-green-500" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">Analisando dados da clínica...</p>
                 </div>
               ) : (
                 <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{insightText}</p>
               )}
             </div>
-            <div className="px-5 pb-5 flex justify-end">
+            <div className="px-6 pb-5 flex justify-end">
               <button
                 onClick={() => setInsightModal(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 bg-gray-100 text-gray-600 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors"
               >
                 Fechar
               </button>
