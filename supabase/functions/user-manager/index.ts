@@ -31,10 +31,9 @@ Deno.serve(async (req) => {
     const supabaseUser = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
     )
-    const { data: { user: requestingUser }, error: authError } = await supabaseUser.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    )
+    const { data: { user: requestingUser }, error: authError } = await supabaseUser.auth.getUser()
     if (authError || !requestingUser) {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
