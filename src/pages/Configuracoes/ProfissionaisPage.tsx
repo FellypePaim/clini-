@@ -128,17 +128,22 @@ export function ProfissionaisPage() {
         },
       })
 
-      // Edge functions retornam o body de erro no data quando status != 2xx
-      const result = res.data
-      if (res.error || result?.error) {
-        throw new Error(result?.error || res.error?.message || 'Erro na edge function')
+      // supabase.functions.invoke: quando status != 2xx, error contém o body
+      if (res.error) {
+        // Tentar extrair mensagem do body de erro
+        const errMsg = typeof res.error === 'object' && 'message' in res.error
+          ? res.error.message
+          : typeof res.error === 'string' ? res.error : 'Erro na edge function'
+        throw new Error(errMsg)
       }
+      if (res.data?.error) throw new Error(res.data.error)
 
       toast({ title: 'Colaborador criado!', description: `${form.nome} adicionado com sucesso.`, type: 'success' })
       setShowModal(false)
       setForm(formVazio)
       await loadProfissionais()
     } catch (e: any) {
+      console.error('Erro criar colaborador:', e)
       toast({ title: 'Erro', description: e.message || 'Falha ao criar colaborador.', type: 'error' })
     } finally {
       setSaving(false)

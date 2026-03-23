@@ -82,16 +82,26 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Criar/atualizar profile (trigger já deve criar, mas garantimos aqui)
-      await supabaseAdmin.from("profiles").upsert({
+      // Criar/atualizar profile
+      const { error: profileError } = await supabaseAdmin.from("profiles").upsert({
         id: newUser.user.id,
         clinica_id,
         nome_completo: nome,
+        email,
         role,
         especialidade: especialidade || null,
         conselho: conselho || null,
         ativo: true,
       })
+
+      if (profileError) {
+        // Rollback: deletar auth user
+        await supabaseAdmin.auth.admin.deleteUser(newUser.user.id)
+        return new Response(JSON.stringify({ error: "Erro ao criar profile: " + profileError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        })
+      }
 
       return new Response(JSON.stringify({ user: newUser.user, success: true }), {
         status: 200,
