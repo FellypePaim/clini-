@@ -87,7 +87,14 @@ export function usePatients() {
         criadoEm: data.created_at || '',
         ultimaConsulta: (data as any).ultima_consulta || undefined,
         totalConsultas: (data as any).total_consultas || 0,
-      } as Patient
+        alergias: (data as any).alergias || [],
+        historicoMedico: (data as any).historico_medico || '',
+        medicamentosEmUso: (data as any).medicamentos_uso || '',
+        antecedentesFamiliares: (data as any).antecedentes_familiares || '',
+        habitos: (data as any).habitos || { fumante: false, etilista: false, atividadeFisica: 'Nenhuma' },
+        observacoes: data.observacoes || '',
+        condicoes_medicas: (data as any).condicoes_medicas || [],
+      } as Patient & { condicoes_medicas: string[] }
     } catch (_err: any) {
       toast({ title: 'Erro', description: 'Erro ao buscar dados do paciente.', type: 'error' })
       return null

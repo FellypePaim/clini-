@@ -213,8 +213,28 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
 
   return (
     <div className="space-y-5">
-      {/* Alertas */}
-      {temAlertas && (
+      {/* Condições ativas do paciente */}
+      {condicoesAtivas.length > 0 && !temAlertas && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+          <ClipboardList className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-bold text-blue-800">Condições médicas registradas</p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {condicoesAtivas.map(c => {
+                const colorMap: Record<string, string> = {
+                  red: 'bg-red-100 text-red-700', orange: 'bg-orange-100 text-orange-700',
+                  purple: 'bg-purple-100 text-purple-700', blue: 'bg-blue-100 text-blue-700',
+                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-gray-700',
+                }
+                return <span key={c.id} className={cn('px-2 py-0.5 rounded-md text-xs font-semibold', colorMap[c.cor])}>{c.label}</span>
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alertas vermelhos + todas condições quando tem alertas */}
+      {temAlertas && condicoesAtivas.length > 0 && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
           <div>
@@ -223,9 +243,14 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
               {alergias.map((a: string) => (
                 <span key={a} className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md text-xs font-semibold">Alergia: {a}</span>
               ))}
-              {condicoesAtivas.filter(c => c.cor === 'red').map(c => (
-                <span key={c.id} className="px-2 py-0.5 bg-red-100 text-red-700 rounded-md text-xs font-semibold">{c.label}</span>
-              ))}
+              {condicoesAtivas.map(c => {
+                const colorMap: Record<string, string> = {
+                  red: 'bg-red-100 text-red-700', orange: 'bg-orange-100 text-orange-700',
+                  purple: 'bg-purple-100 text-purple-700', blue: 'bg-blue-100 text-blue-700',
+                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-gray-700',
+                }
+                return <span key={c.id} className={cn('px-2 py-0.5 rounded-md text-xs font-semibold', colorMap[c.cor])}>{c.label}</span>
+              })}
             </div>
           </div>
         </div>
