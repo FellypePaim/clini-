@@ -3,9 +3,10 @@ import { useForm } from 'react-hook-form'
 import { useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2, UserPlus } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2, UserPlus, KeyRound, CheckCircle } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 
 // ─── Schema de validação ──────────────────────────────
@@ -33,6 +34,10 @@ const DEMO_CREDENTIALS = import.meta.env.DEV ? [
 export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const { login, isLoading, error: authError } = useAuthStore()
+  const [showReset, setShowReset] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
   const location = useLocation()
   const error = authError || (location.state as any)?.error
   const successMessage = (location.state as any)?.success
@@ -186,6 +191,13 @@ export function LoginPage() {
               )}
             </div>
 
+            {/* Esqueci minha senha */}
+            <div className="flex justify-end">
+              <button type="button" onClick={() => setShowReset(true)} className="text-xs text-green-600 hover:text-green-700 font-medium">
+                Esqueci minha senha
+              </button>
+            </div>
+
             {/* Erro global */}
             {error && (
               <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
@@ -256,6 +268,66 @@ export function LoginPage() {
           </p>
         </div>
       </div>
+      {/* Modal Reset de Senha */}
+      {showReset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setShowReset(false); setResetSent(false) }} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-fade-in">
+            <div className="p-6">
+              {resetSent ? (
+                <div className="text-center space-y-4">
+                  <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto">
+                    <CheckCircle className="w-7 h-7 text-green-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">E-mail enviado!</h3>
+                  <p className="text-sm text-gray-500">Verifique sua caixa de entrada em <b>{resetEmail}</b> e siga as instruções para redefinir sua senha.</p>
+                  <button onClick={() => { setShowReset(false); setResetSent(false) }} className="btn-primary w-full justify-center py-2.5 text-sm">Voltar ao login</button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
+                      <KeyRound className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900">Recuperar senha</h3>
+                      <p className="text-xs text-gray-400">Enviaremos um link de redefinição</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">E-mail da conta</label>
+                      <input type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} placeholder="seu@email.com.br"
+                        className="input-base" autoFocus />
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={() => setShowReset(false)} className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancelar</button>
+                      <button
+                        disabled={resetLoading || !resetEmail.includes('@')}
+                        onClick={async () => {
+                          setResetLoading(true)
+                          try {
+                            const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                              redirectTo: `${window.location.origin}/login`,
+                            })
+                            if (error) throw error
+                            setResetSent(true)
+                          } catch (e: any) {
+                            alert(e.message || 'Erro ao enviar e-mail.')
+                          } finally { setResetLoading(false) }
+                        }}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-xl transition-colors disabled:opacity-50"
+                      >
+                        {resetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />} Enviar
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

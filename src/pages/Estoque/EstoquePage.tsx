@@ -23,12 +23,16 @@ export function EstoquePage() {
     
     const totalValue = products.reduce((sum, p) => sum + (p.currentStock * p.unitCost), 0);
     
-    // Simulate expiring items for mock
-    const expiringItems = products.filter(p => p.expirationDate && 
-      new Date(p.expirationDate).getTime() < Date.now() + 30 * 24 * 60 * 60 * 1000
+    const now = Date.now()
+    const in30d = now + 30 * 24 * 60 * 60 * 1000
+    const expiringItems = products.filter(p => p.expirationDate &&
+      new Date(p.expirationDate).getTime() < in30d && new Date(p.expirationDate).getTime() > now
+    ).length;
+    const expiredItems = products.filter(p => p.expirationDate &&
+      new Date(p.expirationDate).getTime() < now
     ).length;
 
-    return { totalItems, criticalItems, zeroItems, totalValue, expiringItems };
+    return { totalItems, criticalItems, zeroItems, totalValue, expiringItems, expiredItems };
   }, [products]);
 
   const alerts = getAlerts();
@@ -109,14 +113,17 @@ export function EstoquePage() {
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className={`bg-white p-5 rounded-2xl border shadow-sm ${stats.expiredItems > 0 ? 'border-red-200 bg-red-50/30' : 'border-slate-200'}`}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Vencimento Próximo</span>
-              <div className="p-2 bg-amber-50 text-amber-600 rounded-lg"><Calendar size={18} /></div>
+              <span className="text-sm font-semibold text-slate-500">Validade</span>
+              <div className={`p-2 rounded-lg ${stats.expiredItems > 0 ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}><Calendar size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{stats.expiringItems}</span>
-              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Próximos 30 dias</span>
+              <span className="text-3xl font-bold text-slate-900">{stats.expiringItems + stats.expiredItems}</span>
+              <div className="flex flex-col gap-0.5">
+                {stats.expiredItems > 0 && <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">{stats.expiredItems} vencido{stats.expiredItems > 1 ? 's' : ''}</span>}
+                {stats.expiringItems > 0 && <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">{stats.expiringItems} vence em 30d</span>}
+              </div>
             </div>
           </div>
         </div>
