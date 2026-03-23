@@ -539,59 +539,101 @@ export function PatientProfilePage() {
           <PatientDocumentsTab pacienteId={patient.id} />
         )}
 
-        {activeTab === 'financeiro' && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-             <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Histórico Financeiro</h3>
-                <p className="text-sm text-gray-400">Orçamentos e faturas vinculadas ao paciente</p>
-              </div>
-              <button className="btn-secondary" onClick={() => setShowOrcamentoModal(true)}>
-                <Plus className="w-4 h-4" /> Novo Orçamento
-              </button>
-            </div>
+        {activeTab === 'financeiro' && (() => {
+          const totalPendente = financial.filter(f => f.status === 'pendente').reduce((s, f) => s + f.valor, 0)
+          const totalConcluido = financial.filter(f => f.status === 'concluido').reduce((s, f) => s + f.valor, 0)
+          const formatData = (d: string) => { const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : d }
 
-            <div className="space-y-4">
-              {financial.length > 0 ? (
-                financial.map(f => (
-                  <div key={f.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100 hover:bg-white transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
-                        f.tipo === 'pagamento' ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"
-                      )}>
-                        {f.tipo === 'pagamento' ? <CheckCircle className="w-5 h-5" /> : <ClipboardList className="w-5 h-5" />}
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">{f.descricao}</p>
-                        <p className="text-xs text-gray-400 uppercase tracking-widest mt-0.5">{f.tipo === 'pagamento' ? 'Fatura Gerada' : 'Orçamento em Aberto'} · {new Date(f.data).toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-sm font-black text-gray-900">R$ {f.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                        <Badge variant="gray" className={cn(
-                          "text-[9px] h-4 mt-1 uppercase",
-                          f.status === 'concluido' ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
-                        )}>
-                          {f.status}
-                        </Badge>
-                      </div>
-                      <button className="p-2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 rounded-xl text-gray-400">
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-20 text-center flex flex-col items-center gap-3">
-                  <Wallet className="w-12 h-12 text-gray-100" />
-                  <p className="text-gray-400 text-sm">Sem movimentações financeiras no momento.</p>
+          return (
+          <div className="space-y-5">
+            {/* KPIs */}
+            {financial.length > 0 && (
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-white rounded-xl border border-gray-100 p-4">
+                  <p className="text-xs text-gray-400 font-medium">Total</p>
+                  <p className="text-lg font-bold text-gray-900 mt-1">
+                    {(totalPendente + totalConcluido).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
                 </div>
-              )}
+                <div className="bg-white rounded-xl border border-gray-100 p-4">
+                  <p className="text-xs text-gray-400 font-medium">Pendente</p>
+                  <p className="text-lg font-bold text-yellow-600 mt-1">
+                    {totalPendente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
+                </div>
+                <div className="bg-white rounded-xl border border-gray-100 p-4">
+                  <p className="text-xs text-gray-400 font-medium">Pago</p>
+                  <p className="text-lg font-bold text-green-600 mt-1">
+                    {totalConcluido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Lista */}
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <Wallet className="w-4 h-4 text-green-600" /> Histórico Financeiro
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">{financial.length} registro{financial.length !== 1 ? 's' : ''}</p>
+                </div>
+                <button
+                  onClick={() => setShowOrcamentoModal(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
+                >
+                  <Plus className="w-4 h-4" /> Novo Orçamento
+                </button>
+              </div>
+
+              <div className="p-5">
+                {financial.length > 0 ? (
+                  <div className="space-y-3">
+                    {financial.map(f => {
+                      const isPago = f.status === 'concluido'
+                      const isCancelado = f.status === 'cancelado'
+                      return (
+                        <div key={f.id} className="flex items-center justify-between p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group">
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+                              isPago ? "bg-green-50 text-green-600" : isCancelado ? "bg-gray-100 text-gray-400" : "bg-yellow-50 text-yellow-600"
+                            )}>
+                              {isPago ? <CheckCircle className="w-5 h-5" /> : <ClipboardList className="w-5 h-5" />}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-gray-900">{f.descricao}</p>
+                              <p className="text-xs text-gray-400 mt-0.5">{formatData(f.data)}</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn("text-sm font-bold", isCancelado ? "text-gray-400 line-through" : "text-gray-900")}>
+                              {f.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </p>
+                            <span className={cn(
+                              "inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full mt-1",
+                              isPago ? "bg-green-50 text-green-700" : isCancelado ? "bg-gray-100 text-gray-400" : "bg-yellow-50 text-yellow-700"
+                            )}>
+                              {isPago ? 'Pago' : isCancelado ? 'Cancelado' : 'Pendente'}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center flex flex-col items-center gap-3">
+                    <Wallet className="w-12 h-12 text-gray-100" />
+                    <p className="text-sm text-gray-400 font-medium">Nenhum orçamento registrado</p>
+                    <p className="text-xs text-gray-300">Crie o primeiro orçamento usando o botão acima</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
+          )
+        })()}
 
         {activeTab === 'harmonizacao' && (
           <FacialHarmonization 
