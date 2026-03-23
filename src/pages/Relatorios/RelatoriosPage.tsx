@@ -42,6 +42,7 @@ const REPORTS: ReportConfig[] = [
   { id: 'rec-conv', title: 'Receita por Convênio', description: 'Distribuição financeira entre atendimentos Particulares e Convênios médicos.', category: 'Financeiro', icon: <Briefcase size={24} className="text-emerald-500" />, path: '/relatorios/convenios', isImplemented: true },
   { id: 'inadimp', title: 'Inadimplência', description: 'Boletos vencidos, glosas e contas a receber não liquidadas.', category: 'Financeiro', icon: <AlertCircle size={24} className="text-emerald-500" />, path: '/relatorios/inadimplencia', isImplemented: true },
   { id: 'dre-simp', title: 'DRE Simplificado', description: 'Demonstrativo de Resultado do Exercício adaptado para clínicas.', category: 'Financeiro', icon: <BarChart size={24} className="text-emerald-500" />, path: '/relatorios/dre', isImplemented: true },
+  { id: 'fiscal', title: 'Relatório Fiscal', description: 'Resumo para DARF/RPA: receitas por forma de pagamento, categoria e alíquotas.', category: 'Financeiro', icon: <FileText size={24} className="text-emerald-500" />, path: '/relatorios/fiscal', isImplemented: true },
 
   // Marketing / CRM
   { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas', isImplemented: true },

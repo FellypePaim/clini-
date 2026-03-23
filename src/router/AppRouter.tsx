@@ -59,6 +59,7 @@ import { DREReport } from '../pages/Relatorios/DREReport'
 import { CampanhasReport } from '../pages/Relatorios/CampanhasReport'
 import { OrigemReport } from '../pages/Relatorios/OrigemReport'
 import { OVYVAReport } from '../pages/Relatorios/OVYVAReport'
+import { FiscalReport } from '../pages/Relatorios/FiscalReport'
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isPendingApproval } = useAuthStore()
@@ -158,6 +159,7 @@ export function AppRouter() {
         <Route path="/relatorios/campanhas" element={<CampanhasReport />} />
         <Route path="/relatorios/origem" element={<OrigemReport />} />
         <Route path="/relatorios/ovyva" element={<OVYVAReport />} />
+        <Route path="/relatorios/fiscal" element={<FiscalReport />} />
 
         {/* Módulo Financeiro */}
         <Route path="/financeiro" element={<FinanceiroPage />} />
