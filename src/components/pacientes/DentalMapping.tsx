@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import {
   Save, Trash2, History, ChevronDown, Activity, Info, X,
-  AlertTriangle, CheckCircle, FileText, Search, Sparkles, Edit3
+  AlertTriangle, CheckCircle, FileText, Search, Sparkles, Edit3,
+  Printer, DollarSign, GitCompare
 } from 'lucide-react'
+import jsPDF from 'jspdf'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -54,6 +56,8 @@ interface ToothData {
   faces?: string[]       // M, D, V, L, O
   observacao?: string
   procedimento_planejado?: string
+  status_tratamento?: 'pendente' | 'em_andamento' | 'concluido'
+  profissional_cor?: string
 }
 
 interface PeriodontalData {
@@ -84,6 +88,14 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
   const [planoTexto, setPlanoTexto] = useState('')
   const [observacoesGerais, setObservacoesGerais] = useState('')
 
+  // Comparação de sessões
+  const [compareMode, setCompareMode] = useState(false)
+  const [compareSessionA, setCompareSessionA] = useState<string | null>(null)
+  const [compareSessionB, setCompareSessionB] = useState<string | null>(null)
+
+  // Profissionais para cor
+  const [profissionais, setProfissionais] = useState<{ id: string; nome: string; cor: string }[]>([])
+
   // IA Plano de Tratamento
   const [showIAModal, setShowIAModal] = useState(false)
   const [iaGenerating, setIaGenerating] = useState(false)
@@ -95,6 +107,18 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
     preferencias: '',
   })
   const [iaResult, setIaResult] = useState<string | null>(null)
+
+  // Carregar profissionais da clínica
+  useEffect(() => {
+    if (!clinicaId) return
+    supabase.from('profiles').select('id, nome_completo, cor_agenda')
+      .eq('clinica_id', clinicaId).eq('ativo', true)
+      .then(({ data }) => {
+        setProfissionais((data || []).map((p: any) => ({
+          id: p.id, nome: p.nome_completo, cor: p.cor_agenda || '#3b82f6'
+        })))
+      })
+  }, [clinicaId])
 
   // Carregar sessões anteriores
   useEffect(() => {
@@ -146,6 +170,187 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
   const registeredCount = Object.keys(toothMap).length
   const carieCount = Object.values(toothMap).filter(t => t.condition === 'carie').length
   const ausentes = Object.values(toothMap).filter(t => t.condition === 'ausente' || t.condition === 'extracao').length
+  const tratConcluidos = Object.values(toothMap).filter(t => t.status_tratamento === 'concluido').length
+  const tratPendentes = Object.values(toothMap).filter(t => t.condition !== 'higido' && t.condition !== 'ausente' && t.status_tratamento !== 'concluido').length
+
+  // ── Imprimir Odontograma como PDF ──
+  const handlePrintPDF = () => {
+    const pdf = new jsPDF('p', 'mm', 'a4')
+    const w = pdf.internal.pageSize.getWidth()
+    const m = 15
+    let y = 15
+
+    // Header
+    pdf.setFillColor(22, 163, 74)
+    pdf.rect(0, 0, w, 2, 'F')
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(16)
+    pdf.setTextColor(17, 24, 39)
+    pdf.text('Odontograma', m, y + 6)
+    pdf.setFontSize(9)
+    pdf.setTextColor(156, 163, 175)
+    const dp = new Date().toISOString().split('T')[0].split('-')
+    pdf.text(`Data: ${dp[2]}/${dp[1]}/${dp[0]}  |  Paciente ID: ${pacienteId.substring(0, 8)}`, m, y + 12)
+    y += 20
+
+    // Legenda
+    pdf.setFontSize(7)
+    pdf.setFont('helvetica', 'bold')
+    pdf.setTextColor(120, 120, 120)
+    pdf.text('LEGENDA:', m, y)
+    y += 4
+    CONDITIONS.forEach((c, i) => {
+      const col = i % 5
+      const row = Math.floor(i / 5)
+      const cx = m + col * 36
+      const cy = y + row * 5
+      const rgb = hexToRgb(c.color)
+      pdf.setFillColor(rgb.r, rgb.g, rgb.b)
+      pdf.circle(cx + 1.5, cy + 1, 1.5, 'F')
+      pdf.setTextColor(60, 60, 60)
+      pdf.text(c.label, cx + 5, cy + 1.5)
+    })
+    y += 12
+
+    // Separator
+    pdf.setDrawColor(229, 231, 235)
+    pdf.line(m, y, w - m, y)
+    y += 6
+
+    // Dentes registrados
+    const teeth = Object.values(toothMap).sort((a, b) => a.tooth - b.tooth)
+    if (teeth.length === 0) {
+      pdf.setFontSize(10)
+      pdf.setTextColor(150, 150, 150)
+      pdf.text('Nenhum dente registrado.', m, y + 5)
+    } else {
+      pdf.setFontSize(8)
+      pdf.setFont('helvetica', 'bold')
+      pdf.setTextColor(100, 100, 100)
+      pdf.text('DENTE', m, y)
+      pdf.text('CONDIÇÃO', m + 18, y)
+      pdf.text('FACES', m + 55, y)
+      pdf.text('PROCEDIMENTO', m + 75, y)
+      pdf.text('STATUS', m + 130, y)
+      y += 2
+      pdf.setDrawColor(229, 231, 235)
+      pdf.line(m, y, w - m, y)
+      y += 4
+
+      pdf.setFont('helvetica', 'normal')
+      teeth.forEach(t => {
+        if (y > 275) { pdf.addPage(); y = 15 }
+        const cfg = CONDITIONS.find(c => c.value === t.condition)
+        const rgb = hexToRgb(cfg?.color || '#666')
+        pdf.setFillColor(rgb.r, rgb.g, rgb.b)
+        pdf.circle(m + 2, y - 0.5, 1.5, 'F')
+        pdf.setTextColor(17, 24, 39)
+        pdf.setFont('helvetica', 'bold')
+        pdf.text(String(t.tooth), m + 6, y)
+        pdf.setFont('helvetica', 'normal')
+        pdf.setTextColor(60, 60, 60)
+        pdf.text(cfg?.label || '—', m + 18, y)
+        pdf.text(t.faces?.join(',') || '—', m + 55, y)
+        pdf.text(t.procedimento_planejado || '—', m + 75, y)
+        const st = t.status_tratamento === 'concluido' ? 'Concluído' : t.status_tratamento === 'em_andamento' ? 'Em andamento' : 'Pendente'
+        pdf.text(st, m + 130, y)
+        y += 5
+      })
+    }
+
+    // Plano de tratamento
+    if (planoTexto) {
+      y += 6
+      if (y > 250) { pdf.addPage(); y = 15 }
+      pdf.setFont('helvetica', 'bold')
+      pdf.setFontSize(9)
+      pdf.setTextColor(17, 24, 39)
+      pdf.text('PLANO DE TRATAMENTO', m, y)
+      y += 5
+      pdf.setFont('helvetica', 'normal')
+      pdf.setFontSize(8)
+      pdf.setTextColor(75, 85, 99)
+      const lines = pdf.splitTextToSize(planoTexto, w - m * 2)
+      for (const line of lines) {
+        if (y > 280) { pdf.addPage(); y = 15 }
+        pdf.text(line, m, y)
+        y += 4
+      }
+    }
+
+    // Footer
+    pdf.setFontSize(6)
+    pdf.setTextColor(180, 180, 180)
+    pdf.text('Gerado pelo sistema Prontuário Verde', w / 2, 290, { align: 'center' })
+
+    pdf.save(`odontograma_${pacienteId.substring(0, 8)}.pdf`)
+    toast({ title: 'PDF gerado', type: 'success' })
+  }
+
+  // ── Gerar Orçamento do Plano de Tratamento ──
+  const handleGerarOrcamento = async () => {
+    if (!clinicaId || !pacienteId) return
+    const teethComTratamento = Object.values(toothMap).filter(t => t.condition !== 'higido' && t.condition !== 'ausente')
+    if (teethComTratamento.length === 0) {
+      toast({ title: 'Aviso', description: 'Nenhum dente com tratamento para gerar orçamento.', type: 'warning' })
+      return
+    }
+
+    try {
+      // Buscar procedimentos da clínica para preços
+      const { data: procs } = await supabase.from('procedimentos').select('nome, valor_particular').eq('clinica_id', clinicaId).eq('ativo', true)
+      const procMap = new Map((procs || []).map((p: any) => [p.nome.toLowerCase(), p.valor_particular || 0]))
+
+      const itens = teethComTratamento.map(t => {
+        const procNome = t.procedimento_planejado || CONDITIONS.find(c => c.value === t.condition)?.label || 'Procedimento'
+        const preco = procMap.get(procNome.toLowerCase()) || 0
+        return {
+          descricao: `Dente ${t.tooth} — ${procNome}${t.faces?.length ? ` (${t.faces.join(',')})` : ''}`,
+          valor: preco,
+          quantidade: 1,
+        }
+      })
+
+      const total = itens.reduce((s, i) => s + i.valor, 0)
+
+      const { data: orc, error } = await supabase.from('orcamentos').insert({
+        clinica_id: clinicaId,
+        paciente_id: pacienteId,
+        itens,
+        subtotal: total,
+        total,
+        status: 'pendente',
+      } as any).select('id').single()
+
+      if (error) throw error
+
+      // Criar lançamento vinculado
+      await supabase.from('lancamentos').insert({
+        clinica_id: clinicaId,
+        paciente_id: pacienteId,
+        orcamento_id: orc.id,
+        tipo: 'receita',
+        descricao: `Orçamento odontológico — ${itens.length} procedimento(s)`,
+        valor: total,
+        status: 'pendente',
+        categoria: 'procedimento',
+        vencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      } as any)
+
+      toast({ title: 'Orçamento gerado!', description: `${itens.length} itens — R$ ${total.toFixed(2)}. Veja na aba Financeiro.`, type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }
+
+  // ── Dados de comparação ──
+  const getSessionData = (sessionId: string | null) => {
+    if (!sessionId) return null
+    const s = sessions.find((s: any) => s.id === sessionId)
+    if (!s) return null
+    const map = s.mapeamento && typeof s.mapeamento === 'object' ? s.mapeamento : {}
+    return { dentes: map.dentes || {}, profissional: (s.profiles as any)?.nome_completo || '?', data: (s.created_at as string).split('T')[0] }
+  }
 
   const reloadSessions = async () => {
     const { data } = await supabase
@@ -269,13 +474,103 @@ Responda APENAS com JSON válido:
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Dentes Registrados" value={registeredCount} total={32} color="blue" />
-        <KpiCard label="Cáries Detectadas" value={carieCount} color="red" />
-        <KpiCard label="Ausentes/Extração" value={ausentes} color="orange" />
-        <KpiCard label="Saúde Periodontal" value={Object.keys(perioMap).length > 0 ? 'Avaliado' : 'Pendente'} color="green" />
+      {/* KPIs + Ações */}
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <KpiCard label="Registrados" value={registeredCount} total={32} color="blue" />
+          <KpiCard label="Cáries" value={carieCount} color="red" />
+          <KpiCard label="Ausentes" value={ausentes} color="orange" />
+          <KpiCard label="Concluídos" value={tratConcluidos} color="green" />
+          <KpiCard label="Pendentes" value={tratPendentes} color="yellow" />
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+            <Printer className="w-3.5 h-3.5" /> Imprimir PDF
+          </button>
+          <button onClick={handleGerarOrcamento} disabled={registeredCount === 0} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-40">
+            <DollarSign className="w-3.5 h-3.5" /> Gerar Orçamento
+          </button>
+          <button onClick={() => { setCompareMode(!compareMode); setCompareSessionA(null); setCompareSessionB(null) }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", compareMode ? "text-blue-700 bg-blue-50 border-blue-200" : "text-gray-600 bg-white border-gray-200 hover:border-gray-300")}>
+            <GitCompare className="w-3.5 h-3.5" /> {compareMode ? 'Sair da Comparação' : 'Comparar Sessões'}
+          </button>
+        </div>
       </div>
+
+      {/* Comparação de Sessões */}
+      {compareMode && sessions.length >= 2 && (
+        <div className="bg-white rounded-xl border border-blue-200 p-5 space-y-4">
+          <h3 className="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center gap-2">
+            <GitCompare className="w-4 h-4" /> Comparar Sessões
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Sessão A (anterior)</label>
+              <select value={compareSessionA || ''} onChange={e => setCompareSessionA(e.target.value || null)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-xs outline-none">
+                <option value="">Selecionar...</option>
+                {sessions.map((s: any, i: number) => {
+                  const dp = (s.created_at as string).split('T')[0].split('-')
+                  return <option key={s.id} value={s.id}>#{sessions.length - i} — {dp[2]}/{dp[1]}/{dp[0]}</option>
+                })}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Sessão B (recente)</label>
+              <select value={compareSessionB || ''} onChange={e => setCompareSessionB(e.target.value || null)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-xs outline-none">
+                <option value="">Selecionar...</option>
+                {sessions.map((s: any, i: number) => {
+                  const dp = (s.created_at as string).split('T')[0].split('-')
+                  return <option key={s.id} value={s.id}>#{sessions.length - i} — {dp[2]}/{dp[1]}/{dp[0]}</option>
+                })}
+              </select>
+            </div>
+          </div>
+
+          {compareSessionA && compareSessionB && (() => {
+            const a = getSessionData(compareSessionA)
+            const b = getSessionData(compareSessionB)
+            if (!a || !b) return null
+
+            const allTeeth = new Set([...Object.keys(a.dentes), ...Object.keys(b.dentes)])
+            const changes: { tooth: string; antes: string; depois: string }[] = []
+            allTeeth.forEach(t => {
+              const condA = (a.dentes[t] as any)?.condition || '—'
+              const condB = (b.dentes[t] as any)?.condition || '—'
+              if (condA !== condB) changes.push({ tooth: t, antes: condA, depois: condB })
+            })
+
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <span>Sessão A: <b>{Object.keys(a.dentes).length} dentes</b> por {a.profissional}</span>
+                  <span>→</span>
+                  <span>Sessão B: <b>{Object.keys(b.dentes).length} dentes</b> por {b.profissional}</span>
+                </div>
+                {changes.length > 0 ? (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{changes.length} mudança{changes.length > 1 ? 's' : ''} detectada{changes.length > 1 ? 's' : ''}</p>
+                    {changes.map(c => {
+                      const cfgA = CONDITIONS.find(x => x.value === c.antes)
+                      const cfgB = CONDITIONS.find(x => x.value === c.depois)
+                      return (
+                        <div key={c.tooth} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg text-xs">
+                          <span className="font-bold text-gray-900 w-12">Dente {c.tooth}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: `${cfgA?.color || '#999'}20`, color: cfgA?.color || '#999' }}>{cfgA?.label || c.antes}</span>
+                          <span className="text-gray-300">→</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: `${cfgB?.color || '#999'}20`, color: cfgB?.color || '#999' }}>{cfgB?.label || c.depois}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">Nenhuma mudança detectada entre as sessões.</p>
+                )}
+              </div>
+            )
+          })()}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-100">
@@ -452,6 +747,52 @@ Responda APENAS com JSON válido:
                       className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 text-xs outline-none resize-none min-h-[60px]"
                     />
                   </div>
+
+                  {/* Status do tratamento */}
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Status do Tratamento</label>
+                    <div className="flex gap-1">
+                      {([
+                        { v: 'pendente', l: 'Pendente', c: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+                        { v: 'em_andamento', l: 'Em andamento', c: 'bg-blue-100 text-blue-700 border-blue-200' },
+                        { v: 'concluido', l: 'Concluído', c: 'bg-green-100 text-green-700 border-green-200' },
+                      ] as const).map(st => (
+                        <button
+                          key={st.v}
+                          onClick={() => updateToothData(activeTooth, { status_tratamento: st.v })}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-lg text-[9px] font-bold border transition-all",
+                            toothMap[activeTooth]?.status_tratamento === st.v ? st.c : "bg-gray-50 text-gray-400 border-gray-200"
+                          )}
+                        >
+                          {st.l}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Profissional responsável */}
+                  {profissionais.length > 0 && (
+                    <div>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Profissional</label>
+                      <div className="flex flex-wrap gap-1">
+                        {profissionais.map(p => (
+                          <button
+                            key={p.id}
+                            onClick={() => updateToothData(activeTooth, { profissional_cor: p.cor })}
+                            className={cn(
+                              "flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold border transition-all",
+                              toothMap[activeTooth]?.profissional_cor === p.cor ? "border-2 shadow-sm" : "border-gray-200 opacity-60"
+                            )}
+                            style={toothMap[activeTooth]?.profissional_cor === p.cor ? { borderColor: p.cor, color: p.cor } : {}}
+                          >
+                            <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.cor }} />
+                            {p.nome.split(' ')[0]}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {toothMap[activeTooth] && (
                     <button onClick={() => removeTooth(activeTooth)} className="w-full py-2 text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600 flex items-center justify-center gap-2">
@@ -860,6 +1201,7 @@ Responda APENAS com JSON válido:
 
 function ToothButton({ tooth, color, isActive, data, onClick }: { tooth: number; color: string; isActive: boolean; data?: ToothData; onClick: () => void }) {
   const condIcon = data ? CONDITIONS.find(c => c.value === data.condition)?.icon : ''
+  const statusColor = data?.status_tratamento === 'concluido' ? '#22c55e' : data?.status_tratamento === 'em_andamento' ? '#3b82f6' : undefined
   return (
     <button
       onClick={onClick}
@@ -872,6 +1214,14 @@ function ToothButton({ tooth, color, isActive, data, onClick }: { tooth: number;
     >
       <span>{tooth}</span>
       {condIcon && <span className="text-[8px] leading-none">{condIcon}</span>}
+      {/* Indicador de profissional (borda inferior colorida) */}
+      {data?.profissional_cor && (
+        <div className="absolute bottom-0 left-1 right-1 h-1 rounded-b" style={{ backgroundColor: data.profissional_cor }} />
+      )}
+      {/* Indicador de status (dot no canto) */}
+      {statusColor && (
+        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white" style={{ backgroundColor: statusColor }} />
+      )}
     </button>
   )
 }
@@ -882,6 +1232,7 @@ function KpiCard({ label, value, total, color }: { label: string; value: string 
     red: 'bg-red-50 text-red-700 border-red-100',
     orange: 'bg-orange-50 text-orange-700 border-orange-100',
     green: 'bg-green-50 text-green-700 border-green-100',
+    yellow: 'bg-yellow-50 text-yellow-700 border-yellow-100',
   }
   return (
     <div className={cn("p-4 rounded-2xl border", colors[color])}>
@@ -889,4 +1240,11 @@ function KpiCard({ label, value, total, color }: { label: string; value: string 
       <p className="text-[10px] font-bold uppercase tracking-widest mt-1 opacity-60">{label}</p>
     </div>
   )
+}
+
+function hexToRgb(hex: string) {
+  const r = parseInt(hex.slice(1, 3), 16) || 0
+  const g = parseInt(hex.slice(3, 5), 16) || 0
+  const b = parseInt(hex.slice(5, 7), 16) || 0
+  return { r, g, b }
 }
