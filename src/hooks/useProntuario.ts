@@ -242,41 +242,31 @@ export function useProntuario(pacienteId?: string) {
 
       const conteudoTexto = itensJson.map(i => `${i.medicamento} — ${i.dosagem}, ${i.frequencia}, ${i.duracao}`).join('\n')
 
-      // Usar RPC ou insert direto — garantir que itens é JSONB válido
-      const insertPayload: Record<string, unknown> = {
-        clinica_id: clinicaId,
-        paciente_id: pid,
-        profissional_id: profissionalId,
-        itens: itensJson,
-        conteudo: conteudoTexto || 'Prescrição',
-        assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
-        qr_code_token: qrCode,
-        status: 'ativa',
-        validade_dias: 180,
-        updated_at: new Date().toISOString(),
-      }
-
-      console.log('Prescricao insert payload:', JSON.stringify(insertPayload))
-
-      const { data: ret, error } = await supabase
-        .from('prescricoes')
-        .insert(insertPayload as any)
-        .select()
-        .single()
+      const { data: prescId, error } = await supabase.rpc('insert_prescricao', {
+        p_clinica_id: clinicaId,
+        p_paciente_id: pid,
+        p_profissional_id: profissionalId,
+        p_itens: itensJson,
+        p_conteudo: conteudoTexto || 'Prescrição',
+        p_assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
+        p_qr_code_token: qrCode,
+        p_status: 'ativa',
+        p_validade_dias: 180,
+      } as any)
 
       if (error) throw error
 
-      const pRow = ret as any
       const nova: Prescription = {
-        id: pRow.id,
-        pacienteId: pRow.paciente_id,
-        profissionalId: pRow.profissional_id,
-        data: pRow.data,
-        itens: pRow.itens || [],
-        assinada: pRow.assinada,
-        qrCode: pRow.qr_code,
+        id: prescId || crypto.randomUUID(),
+        pacienteId: pid,
+        profissionalId: profissionalId,
+        data: new Date().toISOString().split('T')[0],
+        itens: itensJson as any,
+        assinada: true,
+        qrCode: qrCode,
       }
       setPrescriptions(prev => [nova, ...prev])
+      toast({ title: 'Prescrição salva!', type: 'success' })
       return nova
     } catch (e: any) {
       console.error('Erro ao gerar prescrição:', e.message)
