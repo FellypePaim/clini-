@@ -179,15 +179,19 @@ export function usePatients() {
 
       if (pbErr) throw pbErr
 
-      return (data || []).map((r: any) => ({
-        id: r.id,
-        pacienteId: r.paciente_id,
-        tipo: r.tipo || 'orcamento',
-        valor: r.valor_total || 0,
-        data: r.created_at?.split('T')[0] || '',
-        descricao: r.descricao || 'Orçamento',
-        status: r.status || 'pendente',
-      }))
+      return (data || []).map((r: any) => {
+        const itens = Array.isArray(r.itens) ? r.itens : []
+        const descricao = itens.map((i: any) => i.descricao || i.nome || '').filter(Boolean).join(', ') || 'Orçamento'
+        return {
+          id: r.id,
+          pacienteId: r.paciente_id,
+          tipo: 'orcamento' as const,
+          valor: r.total || r.subtotal || 0,
+          data: r.created_at?.split('T')[0] || '',
+          descricao,
+          status: r.status || 'pendente',
+        }
+      })
     } catch (err: any) {
       console.error('Erro ao buscar financeiro:', err.message)
       return []
@@ -331,10 +335,11 @@ export function usePatients() {
         .insert({
           clinica_id: clinicaId,
           paciente_id: pacienteId,
-          descricao: data.descricao,
-          valor_total: data.valor,
+          profissional_id: null,
+          itens: [{ descricao: data.descricao, valor: data.valor, quantidade: 1 }],
+          subtotal: data.valor,
+          total: data.valor,
           status: 'pendente',
-          tipo: 'orcamento',
         } as any)
       if (pbErr) throw pbErr
       toast({ title: 'Sucesso', description: 'Orçamento criado.', type: 'success' })
