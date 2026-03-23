@@ -151,25 +151,41 @@ Deno.serve(async (req) => {
       }
 
       case 'create_clinic': {
-
-        // Insere apenas colunas reais da tabela clinicas (sem status_plano / plano_id)
+        // Criar clínica
         const { data: newClinic, error: clinicErr } = await supabaseClient
           .from('clinicas')
           .insert({
             nome: pd.nome,
             cnpj: pd.cnpj || null,
             email: pd.email_admin ?? pd.email ?? null,
-            // Guarda plano/status no JSONB configuracoes (nao ha coluna dedicada ainda)
+            telefone: pd.telefone || null,
+            endereco: pd.endereco || null,
             configuracoes: { plano: pd.plano ?? 'Basico', status: 'trial', criado_por_superadmin: true }
           })
           .select()
           .single()
 
-        if (clinicErr) {
-          console.error('Erro insert clinica:', JSON.stringify(clinicErr))
-          throw clinicErr
+        if (clinicErr) throw clinicErr
+
+        // Se email_admin e senha_admin foram fornecidos, criar admin da clínica
+        if (pd.email_admin && pd.senha_admin) {
+          const { data: adminAuth, error: adminAuthErr } = await supabaseClient.auth.admin.createUser({
+            email: pd.email_admin,
+            password: pd.senha_admin,
+            email_confirm: true,
+          })
+          if (!adminAuthErr && adminAuth.user) {
+            await supabaseClient.from('profiles').upsert({
+              id: adminAuth.user.id,
+              nome_completo: pd.nome_admin || 'Administrador',
+              email: pd.email_admin,
+              role: 'admin',
+              clinica_id: newClinic.id,
+              ativo: true,
+            })
+          }
         }
-        
+
         // Log auditoria
         await supabaseClient.from('auditoria_global').insert({
           usuario_id: user?.id,
@@ -233,6 +249,42 @@ Deno.serve(async (req) => {
         result = { users }
         break
       }
+
+      case 'create_user': {
+        const { email, senha, nome, role: userRole, clinica_id, especialidade, conselho } = pd
+        if (!email || !senha || !nome) throw new Error('Campos obrigatórios: email, senha, nome')
+
+        // Criar auth user
+        const { data: authData, error: authErr } = await supabaseClient.auth.admin.createUser({
+          email,
+          password: senha,
+          email_confirm: true,
+        })
+        if (authErr) throw new Error(authErr.message)
+
+        // Criar profile
+        const { error: profileErr } = await supabaseClient
+          .from('profiles')
+          .upsert({
+            id: authData.user.id,
+            nome_completo: nome,
+            email,
+            role: userRole || 'profissional',
+            clinica_id: clinica_id || null,
+            especialidade: especialidade || null,
+            conselho: conselho || null,
+            ativo: !!clinica_id,
+          })
+
+        if (profileErr) {
+          await supabaseClient.auth.admin.deleteUser(authData.user.id)
+          throw new Error(profileErr.message)
+        }
+
+        result = { success: true, user_id: authData.user.id }
+        break
+      }
+
       case 'get_audit_logs': {
         // Avoid foreign table join on profiles that may error on permission
         const { data: logs, error } = await supabaseClient

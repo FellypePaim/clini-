@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { 
+import React, { useEffect, useState, useCallback } from 'react'
+import {
   Search,
   Filter,
   Mail,
@@ -9,7 +9,11 @@ import {
   Building2,
   Unlock,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  Plus,
+  X,
+  Loader2,
+  UserPlus
 } from 'lucide-react'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { useToast } from '../../hooks/useToast'
@@ -17,19 +21,22 @@ import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 
 export function SuperUsuariosPage() {
-  const { getUsers, isLoading } = useSuperAdmin()
+  const { getUsers, createUser, getClinics, isLoading } = useSuperAdmin()
   const { toast } = useToast()
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [clinicas, setClinicas] = useState<any[]>([])
+
+  const handleLoad = useCallback(async () => {
+    const data = await getUsers()
+    setUsuarios(data)
+  }, [getUsers])
 
   useEffect(() => {
-    async function load() {
-      const data = await getUsers()
-      setUsuarios(data)
-    }
-    load()
-  }, [getUsers])
+    handleLoad()
+  }, [handleLoad])
 
   const filteredUsuarios = usuarios.filter(u => {
     const matchSearch = u.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -80,10 +87,15 @@ export function SuperUsuariosPage() {
                 Filtrar SuperAdmins
             </button>
             <button
-               onClick={() => toast({ title: 'Segurança', description: 'A criação de conta SuperAdmin exige execução de script direto no banco por segurança. Utilize o terminal SQL do Supabase.', type: 'info' })}
-               className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl transition-all"
+               onClick={async () => {
+                 const data = await getClinics()
+                 setClinicas(data)
+                 setShowCreateModal(true)
+               }}
+               className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group"
             >
-                CRIAR SUPERADMIN
+                <Plus size={20} className="group-hover:rotate-90 transition-transform" />
+                CRIAR USUÁRIO
             </button>
          </div>
       </div>
@@ -185,6 +197,142 @@ export function SuperUsuariosPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
         </div>
       )}
+
+      {/* Modal Criar Usuário */}
+      {showCreateModal && (
+        <CriarUsuarioModal
+          clinicas={clinicas}
+          onClose={() => setShowCreateModal(false)}
+          onSave={async (formData) => {
+            const result = await createUser(formData)
+            if (result) {
+              setShowCreateModal(false)
+              handleLoad()
+            }
+          }}
+          isLoading={isLoading}
+        />
+      )}
+    </div>
+  )
+}
+
+// ════════════════════════════════════════════════
+// Modal de Criação de Usuário
+// ════════════════════════════════════════════════
+function CriarUsuarioModal({ clinicas, onClose, onSave, isLoading }: {
+  clinicas: any[]
+  onClose: () => void
+  onSave: (data: any) => void
+  isLoading: boolean
+}) {
+  const [form, setForm] = useState({
+    nome: '',
+    email: '',
+    senha: '',
+    role: 'profissional',
+    clinica_id: '',
+    especialidade: '',
+    conselho: '',
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSave(form)
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-slate-900 border border-slate-700/50 rounded-3xl w-full max-w-lg shadow-2xl animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-600/20 flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white">Criar Usuário</h2>
+              <p className="text-xs text-slate-500">Adicionar novo usuário à plataforma</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-slate-800 rounded-xl transition-colors">
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nome completo *</label>
+            <input value={form.nome} onChange={e => setForm({ ...form, nome: e.target.value })} required
+              className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+              placeholder="Nome do usuário" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">E-mail *</label>
+              <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} required
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+                placeholder="email@clinica.com" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Senha *</label>
+              <input type="password" value={form.senha} onChange={e => setForm({ ...form, senha: e.target.value })} required minLength={6}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+                placeholder="Min. 6 caracteres" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Função *</label>
+              <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value })}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm">
+                <option value="admin">Administrador</option>
+                <option value="profissional">Profissional</option>
+                <option value="recepcao">Recepção</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Clínica</label>
+              <select value={form.clinica_id} onChange={e => setForm({ ...form, clinica_id: e.target.value })}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm">
+                <option value="">Sem clínica (pendente)</option>
+                {clinicas.map(c => (
+                  <option key={c.id} value={c.id}>{c.nome}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Especialidade</label>
+              <input value={form.especialidade} onChange={e => setForm({ ...form, especialidade: e.target.value })}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+                placeholder="Ex: Dermatologia" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Conselho</label>
+              <input value={form.conselho} onChange={e => setForm({ ...form, conselho: e.target.value })}
+                className="w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 text-sm"
+                placeholder="CRM/SP 123456" />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button type="button" onClick={onClose}
+              className="px-5 py-2.5 text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all">
+              Cancelar
+            </button>
+            <button type="submit" disabled={isLoading}
+              className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl shadow-lg transition-all disabled:opacity-70 text-sm">
+              {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Criando...</> : <><Plus className="w-4 h-4" /> Criar Usuário</>}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

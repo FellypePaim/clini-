@@ -86,6 +86,24 @@ export function useSuperAdmin() {
     }
   }, [])
 
+  const createUser = useCallback(async (formData: any) => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+        body: { action: 'create_user', data: formData }
+      })
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      toast({ title: 'Sucesso', description: 'Usuário criado com sucesso!', type: 'success' })
+      return data
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
   // 4. Impersonation (Geração de Token)
   const impersonateClinic = useCallback(async (clinicId: string) => {
     setIsLoading(true)
@@ -210,6 +228,7 @@ export function useSuperAdmin() {
     getPlatformStats,
     getClinics,
     createClinic,
+    createUser,
     suspendClinic,
     getUsers,
     impersonateClinic,
