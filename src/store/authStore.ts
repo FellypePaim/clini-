@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase'
 interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  isPendingApproval: boolean
   isLoading: boolean
   error: string | null
   login: (email: string, senha: string) => Promise<boolean>
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       isAuthenticated: false,
+      isPendingApproval: false,
       isLoading: false,
       error: null,
 
@@ -57,11 +59,18 @@ export const useAuthStore = create<AuthState>()(
               criadoEm: data.user.created_at || new Date().toISOString(),
               avatar: profileData?.avatar_url || undefined,
             }
-            set({ user: userParsed, isAuthenticated: true, isLoading: false, error: null })
+            const pendingApproval = !profileData?.clinica_id || !profileData?.ativo
+            set({
+              user: userParsed,
+              isAuthenticated: true,
+              isPendingApproval: pendingApproval,
+              isLoading: false,
+              error: null,
+            })
             return true
           }
         } catch (e: any) {
-          set({ isLoading: false, error: e.message || 'Erro ao realizar login.', isAuthenticated: false, user: null })
+          set({ isLoading: false, error: e.message || 'Erro ao realizar login.', isAuthenticated: false, isPendingApproval: false, user: null })
           return false
         }
 
@@ -70,7 +79,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         await supabase.auth.signOut()
-        set({ user: null, isAuthenticated: false, error: null })
+        set({ user: null, isAuthenticated: false, isPendingApproval: false, error: null })
       },
 
       clearError: () => set({ error: null }),
@@ -80,6 +89,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
+        isPendingApproval: state.isPendingApproval,
       }),
     }
   )

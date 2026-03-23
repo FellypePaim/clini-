@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form'
 import { useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2, UserPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { cn } from '../../lib/utils'
 
@@ -34,6 +35,7 @@ export function LoginPage() {
   const { login, isLoading, error: authError } = useAuthStore()
   const location = useLocation()
   const error = authError || (location.state as any)?.error
+  const successMessage = (location.state as any)?.success
 
   const {
     register,
@@ -119,6 +121,14 @@ export function LoginPage() {
             <p className="text-gray-500 mt-1">Acesse sua conta para continuar</p>
           </div>
 
+          {/* Mensagem de sucesso */}
+          {successMessage && (
+            <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5 mb-2">
+              <Stethoscope className="w-4 h-4 text-green-500 shrink-0" />
+              <p className="text-sm text-green-700">{successMessage}</p>
+            </div>
+          )}
+
           {/* Formulário */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
             {/* E-mail */}
@@ -197,6 +207,16 @@ export function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Botão criar conta */}
+          <div className="mt-6">
+            <Link
+              to="/register"
+              className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 rounded-lg transition-colors"
+            >
+              <UserPlus className="w-4 h-4" /> Criar uma conta
+            </Link>
+          </div>
 
           {/* Demo credentials (apenas em dev) */}
           {DEMO_CREDENTIALS.length > 0 && (

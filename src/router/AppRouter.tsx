@@ -3,6 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { MainLayout } from '../components/layout/MainLayout'
 import { LoginPage } from '../pages/Login/LoginPage'
+import { RegisterPage } from '../pages/Login/RegisterPage'
+import { WaitingApprovalPage } from '../pages/Login/WaitingApprovalPage'
 import { DashboardPage } from '../pages/Dashboard/DashboardPage'
 import { AgendaPage } from '../pages/Agenda/AgendaPage'
 import { PacientesPage } from '../pages/Pacientes/PacientesPage'
@@ -59,8 +61,9 @@ import { OrigemReport } from '../pages/Relatorios/OrigemReport'
 import { OVYVAReport } from '../pages/Relatorios/OVYVAReport'
 // ─── Guard de autenticação ────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, isPendingApproval } = useAuthStore()
   if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (isPendingApproval) return <Navigate to="/aguardando-aprovacao" replace />
   return <>{children}</>
 }
 
@@ -89,7 +92,7 @@ const modulos: { path: string; name: string; icon: string; desc: string }[] = []
 export function AppRouter() {
   return (
     <Routes>
-      {/* Rota de login */}
+      {/* Rotas públicas */}
       <Route
         path="/login"
         element={
@@ -98,6 +101,15 @@ export function AppRouter() {
           </PublicRoute>
         }
       />
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <RegisterPage />
+          </PublicRoute>
+        }
+      />
+      <Route path="/aguardando-aprovacao" element={<WaitingApprovalPage />} />
 
       {/* Rotas protegidas */}
       <Route
