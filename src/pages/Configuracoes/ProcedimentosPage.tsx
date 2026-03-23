@@ -144,14 +144,22 @@ export function ProcedimentosPage() {
 
   const handleSave = async (formData: Omit<Procedimento, 'id' | 'ativo'>) => {
     if (!clinicaId) return
+    // Mapear campos do form para colunas reais do banco
+    const dbData = {
+      nome: formData.nome,
+      categoria: formData.categoria,
+      duracao_minutos: formData.duracao,
+      valor_particular: formData.valor,
+      codigo_tuss: formData.codigo_tuss,
+    }
     if (modal.item) {
       // Update
-      const { error } = await supabase.from('procedimentos').update(formData).eq('id', modal.item.id)
+      const { error } = await supabase.from('procedimentos').update(dbData).eq('id', modal.item.id)
       if (error) { toast({ title: 'Erro', description: error.message, type: 'error' }); return }
       setProcedimentos(prev => prev.map(p => p.id === modal.item!.id ? { ...p, ...formData } : p))
     } else {
       // Insert
-      const { data, error } = await supabase.from('procedimentos').insert({ ...formData, clinica_id: clinicaId, ativo: true }).select().single()
+      const { data, error } = await supabase.from('procedimentos').insert({ ...dbData, clinica_id: clinicaId, ativo: true }).select().single()
       if (error) { toast({ title: 'Erro', description: error.message, type: 'error' }); return }
       if (data) {
         const mapped = {
