@@ -283,14 +283,14 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           <div>
             <label className="modal-label">Valor (R$)</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium">R$</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400 font-medium pointer-events-none">R$</span>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="0,00"
                 {...register('valor')}
-                className="input-base pl-9"
+                className="input-base pl-12"
               />
             </div>
           </div>
