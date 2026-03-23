@@ -413,86 +413,121 @@ export function PatientProfilePage() {
 
         {activeTab === 'anamnese' && (
           <div className="space-y-6">
-          {/* Formulário de edição manual pelo profissional */}
-          <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Anamnese Digital</h3>
-                <p className="text-sm text-gray-400">Edição manual pelo profissional</p>
+            {/* Status da anamnese */}
+            {anamneseHistory.length > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-green-800">Anamnese preenchida pelo paciente</p>
+                  <p className="text-xs text-green-600">{anamneseHistory.length} formulário{anamneseHistory.length > 1 ? 's' : ''} recebido{anamneseHistory.length > 1 ? 's' : ''} via link</p>
+                </div>
               </div>
-              <button className="btn-primary" onClick={handleSaveAnamnesis} disabled={isSavingAnamnesis}>
-                {isSavingAnamnesis ? 'Salvando...' : 'Salvar Alterações'}
-              </button>
-            </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <AnamneseField 
-                   label="Queixa Principal / Histórico Médico" 
-                   value={anamneseForm.historicoMedico} 
-                   onChange={(e) => setAnamneseForm(prev => ({...prev, historicoMedico: e.target.value}))} 
-                   placeholder="Descreva os sintomas relatados..." 
-                />
-                <AnamneseField 
-                   label="Medicamentos em Uso" 
-                   value={anamneseForm.medicamentosEmUso} 
-                   onChange={(e) => setAnamneseForm(prev => ({...prev, medicamentosEmUso: e.target.value}))} 
-                />
-                <AnamneseField 
-                   label="Alergias Conhecidas" 
-                   value={anamneseForm.alergias} 
-                   onChange={(e) => setAnamneseForm(prev => ({...prev, alergias: e.target.value}))} 
-                />
+            {/* Formulário do profissional */}
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                    <ClipboardList className="w-4 h-4 text-green-600" /> Anamnese Clínica
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-0.5">Preenchido pelo profissional durante a consulta</p>
+                </div>
+                <button
+                  className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  onClick={handleSaveAnamnesis}
+                  disabled={isSavingAnamnesis}
+                >
+                  {isSavingAnamnesis ? 'Salvando...' : 'Salvar'}
+                </button>
               </div>
-              <div className="space-y-6">
-                <AnamneseField 
-                   label="Histórico Familiar" 
-                   value={anamneseForm.antecedentesFamiliares} 
-                   onChange={(e) => setAnamneseForm(prev => ({...prev, antecedentesFamiliares: e.target.value}))} 
-                />
-                <div className="bg-gray-50/50 rounded-2xl p-6 border border-gray-100 space-y-5">
-                  <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Estilo de Vida e Hábitos</h4>
-                  <div className="grid grid-cols-1 gap-4">
-                    <AnamneseToggle 
-                       label="Tabagista" 
-                       active={anamneseForm.habitos.fumante} 
-                       onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, fumante: !prev.habitos.fumante}}))} 
+
+              <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Coluna esquerda */}
+                  <div className="space-y-5">
+                    <AnamneseField
+                      label="Queixa Principal / Histórico Médico"
+                      value={anamneseForm.historicoMedico}
+                      onChange={(e) => setAnamneseForm(prev => ({...prev, historicoMedico: e.target.value}))}
+                      placeholder="Descreva os sintomas relatados..."
                     />
-                    <AnamneseToggle 
-                       label="Etilista" 
-                       active={anamneseForm.habitos.etilista} 
-                       onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, etilista: !prev.habitos.etilista}}))} 
+                    <AnamneseField
+                      label="Medicamentos em Uso"
+                      value={anamneseForm.medicamentosEmUso}
+                      onChange={(e) => setAnamneseForm(prev => ({...prev, medicamentosEmUso: e.target.value}))}
+                      placeholder="Ex: Losartana 50mg, Metformina..."
                     />
-                    <div className="space-y-2">
-                      <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Atividade Física</label>
-                      <div className="flex gap-2">
-                        {['Nenhuma', 'Ocasional', 'Regular'].map(l => (
-                          <button 
-                            key={l}
-                            onClick={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, atividadeFisica: l as any}}))}
-                            className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
-                            anamneseForm.habitos.atividadeFisica.toLowerCase() === l.toLowerCase() 
-                              ? "bg-green-100 text-green-700 border-green-200" 
-                              : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
-                          )}>{l}</button>
-                        ))}
+                    <AnamneseField
+                      label="Alergias Conhecidas"
+                      value={anamneseForm.alergias}
+                      onChange={(e) => setAnamneseForm(prev => ({...prev, alergias: e.target.value}))}
+                      placeholder="Separe por vírgula: Dipirona, Penicilina..."
+                    />
+                  </div>
+
+                  {/* Coluna direita */}
+                  <div className="space-y-5">
+                    <AnamneseField
+                      label="Histórico Familiar"
+                      value={anamneseForm.antecedentesFamiliares}
+                      onChange={(e) => setAnamneseForm(prev => ({...prev, antecedentesFamiliares: e.target.value}))}
+                      placeholder="Doenças na família: diabetes, câncer..."
+                    />
+
+                    {/* Hábitos */}
+                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Estilo de Vida</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <AnamneseToggle
+                            label="Tabagista"
+                            active={anamneseForm.habitos.fumante}
+                            onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, fumante: !prev.habitos.fumante}}))}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <AnamneseToggle
+                            label="Etilista"
+                            active={anamneseForm.habitos.etilista}
+                            onToggle={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, etilista: !prev.habitos.etilista}}))}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-medium text-gray-500 mb-2 block">Atividade Física</label>
+                          <div className="flex gap-2">
+                            {['Nenhuma', 'Ocasional', 'Regular'].map(l => (
+                              <button
+                                key={l}
+                                type="button"
+                                onClick={() => setAnamneseForm(prev => ({...prev, habitos: {...prev.habitos, atividadeFisica: l as any}}))}
+                                className={cn(
+                                  "flex-1 px-3 py-2 rounded-lg text-xs font-semibold border transition-all text-center",
+                                  anamneseForm.habitos.atividadeFisica.toLowerCase() === l.toLowerCase()
+                                    ? "bg-green-100 text-green-700 border-green-200"
+                                    : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
+                                )}
+                              >
+                                {l}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Histórico de Respostas do Paciente */}
-          {anamneseHistory.length > 0 && (
-            <AnamneseHistorySection history={anamneseHistory} onDelete={async (anamId: string) => {
-              await deleteAnamnese(anamId)
-              const { data } = await supabase.from('anamneses').select('*').eq('paciente_id', id!).order('created_at', { ascending: false })
-              setAnamneseHistory(data || [])
-            }} />
-          )}
+            {/* Histórico de Respostas do Paciente */}
+            {anamneseHistory.length > 0 && (
+              <AnamneseHistorySection history={anamneseHistory} onDelete={async (anamId: string) => {
+                await deleteAnamnese(anamId)
+                const { data } = await supabase.from('anamneses').select('*').eq('paciente_id', id!).order('created_at', { ascending: false })
+                setAnamneseHistory(data || [])
+              }} />
+            )}
           </div>
         )}
 
