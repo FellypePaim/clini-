@@ -5,27 +5,28 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.1.1** (Hotfix & Lint Cleanup — 21/03/2026)
+- Versão: **v1.2.0** (Registro, OVYVA v2, Drag-and-drop — 23/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
-- Fase 2: ✅ Módulo Agenda
+- Fase 2: ✅ Módulo Agenda (com drag-and-drop)
 - Fase 3A: ✅ PEP — Pacientes + Anamnese
 - Fase 3B: ✅ PEP — Prontuário + Prescrição + Harmonização
-- Fase 4: ✅ OVYVA (UI completa)
+- Fase 4: ✅ OVYVA (UI + IA v2 — agendar/cancelar/reagendar)
 - Fase 5: ✅ Verdesk CRM Kanban
 - Fase 6: ✅ Financeiro
 - Fase 7: ✅ Estoque
-- Fase 8: ✅ Relatórios + Configurações (Integrados com dados reais do Supabase)
-- Fase 9A: ✅ Schema SQL Supabase (15+ tabelas + RLS + triggers)
+- Fase 8: ✅ Relatórios + Configurações
+- Fase 9A: ✅ Schema SQL Supabase (40+ tabelas + RLS + triggers)
 - Fase 9B: ✅ Frontend conectado ao Supabase
-- Fase 10: ✅ IA Gemini 2.5 Flash integrada (4 actions funcionando)
-- Fase 11: ✅ Storage Supabase (8 buckets configurados)
+- Fase 10: ✅ IA Gemini 2.5 Flash integrada (5 actions)
+- Fase 11: ✅ Storage Supabase (8 buckets)
 - Fase 12: ✅ WhatsApp Evolution API Multi-Tenant
 - Fase 13: 🔜 Deploy produção (Vercel/Netlify)
-- Fase 14: ✅ SuperAdmin Global (Painel 100% funcional + Nova Clínica + Export Financeiro + Login Tracking Fix)
-- Fase 15: ✅ Diagnósticos e Testes Automatizados Sistêmicos (20/20 Testes Passados)
-- Fase 16: ✅ **Revisão Geral Completa — 65 correções aplicadas (21/03/2026)**
+- Fase 14: ✅ SuperAdmin Global (criar clínica com admin + criar usuário)
+- Fase 15: ✅ Diagnósticos e Testes
+- Fase 16: ✅ Revisão Geral Completa — 65+ correções
+- Fase 17: ✅ **Fluxo de Registro + Multi-tenant hardening (23/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -37,61 +38,78 @@ campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
 estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias,
 auditoria_global, feature_flags, tickets_suporte, releases
 
-### Colunas adicionadas após schema inicial:
+### Colunas adicionadas:
 - ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
 - ovyva_mensagens: metadata JSONB, sessao_id UUID, sessao_inicio BOOLEAN
 - harmonizacoes: mapa_url TEXT
 - documentos_paciente: storage_path TEXT
+- profiles: conselho TEXT, telefone TEXT, clinica_id nullable (para registro pendente)
 
-### Constraints adicionadas:
+### Constraints:
 - ovyva_conversas: UNIQUE (clinica_id, contato_telefone)
 - whatsapp_instancias: UNIQUE (nome_instancia)
 
-### Views criadas:
-- ovyva_conversas_com_preview
+### Função helper:
+- `get_my_clinica_id()` — SECURITY DEFINER, retorna clinica_id do auth.uid() sem acionar RLS
 
 ### RLS:
 - Ativo em todas as tabelas
-- Policies service_role criadas para: clinicas, leads, ovyva_conversas, ovyva_mensagens, pacientes
-- Policy clinicas_ve_suas_instancias na `whatsapp_instancias`
+- Profiles: SELECT/UPDATE via `get_my_clinica_id()` (evita recursão infinita)
+- Profiles: INSERT próprio (`id = auth.uid()`)
+- Clinicas: INSERT para authenticated, SELECT via clinica_id do profile
+- ovyva_conversas, ovyva_mensagens, leads, whatsapp_instancias: RLS por clinica_id
+- Anon policies: anamneses INSERT, pacientes SELECT/UPDATE por paciente_id via JWT
 
-### Dados de teste no banco:
-- clinicas: id = 00000000-0000-0000-0000-000000000001 (Clínica Teste)
-- ovyva_conversas: número 11999990001 com metadata aguardando_nome
+### Migrations (supabase/migrations/):
+1. `20260319000001_lancamentos.sql` — Lançamentos financeiros + RLS
+2. `20260319000002_prescricoes.sql` — Prescrições + RLS
+3. `20260319000003_estoque.sql` — Estoque completo + RLS
+4. `20260321000001_anamnese_public_policy.sql` — Policy anon anamneses
+5. `20260322000001_fix_anon_rls_policies.sql` — Fix cast uuid/text
+6. `20260322000002_rls_ovyva_leads_whatsapp.sql` — RLS OVYVA/leads/WhatsApp
+7. `20260323000001_profiles_allow_null_clinica.sql` — clinica_id nullable + self-insert
+8. `20260323000002_allow_clinica_creation_on_register.sql` — Policy INSERT clinicas
+9. `20260323000003_add_conselho_telefone_to_profiles.sql` — Colunas conselho/telefone
+10. `20260323000004_profiles_rls_same_clinica.sql` — SELECT mesma clínica
+11. `20260323000005_fix_profiles_rls_recursion.sql` — SECURITY DEFINER function
+12. `20260323000006_profiles_update_same_clinica.sql` — UPDATE mesma clínica
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
-### ai-gateway (✅ funcionando)
-Actions disponíveis:
-- detect_intent → gemini-2.5-flash-lite ✅ testado
-- transcribe_audio → gemini-2.5-flash ✅ testado
-- generate_summary → gemini-2.5-flash ✅ testado
-- ovyva_respond → gemini-2.5-flash ✅ testado
+### ai-gateway (✅ v2 — atualizada 23/03/2026)
+Actions:
+- `detect_intent` → gemini-2.5-flash-lite
+- `transcribe_audio` → gemini-2.5-flash
+- `generate_summary` → gemini-2.5-flash
+- `ovyva_respond` → gemini-2.5-flash (com reagendamento, horários da clínica, data/hora atual)
+- `dashboard_insights` → gemini-2.5-flash-lite
 
-### whatsapp-webhook (✅ funcionando - atualizada multi-tenant)
-Lógica:
-1. Recebe webhook da Evolution API (`MESSAGES_UPSERT`, `CONNECTION_UPDATE`)
-2. Identifica o `instanceName` no payload
-3. Busca `clinica_id` referente àquela instância na tabela `whatsapp_instancias` (com fallbacks p/ dev)
-4. Encaminha para o `ai-gateway` gerar e enviar a resposta.
+### whatsapp-webhook (✅ multi-tenant, fail-fast)
+- Recebe webhook da Evolution API
+- Identifica clinica_id pela instância (sem fallback env var)
+- Encaminha para ai-gateway
 
-### whatsapp-manager (✅ funcionando)
-Gerencia o ciclo de vida das instâncias do WhatsApp por clínica. Actions:
-- `criar_instancia`: Cria na Evolution, vincula clínica e auto-insere o webhook
-- `obter_qrcode`: Busca QR base64
-- `verificar_status`: Sincroniza estado de conexão
-- `desconectar`: Desloga o número da instância
-- `listar`: Retorna as instâncias da clínica ativa
+### whatsapp-manager (✅)
+- criar_instancia, obter_qrcode, verificar_status, desconectar, listar
 
-### superadmin-actions (✅ funcionando - Versão 2.1)
-Edge Function protegida para operações globais via SuperAdmin:
-- `get_platform_stats`: DASHBOARD FIX (Métricas reais de Ativas vs Trial vs Suspensas).
-- `get_users`: LOGIN FIX (Varre Auth Admin p/ refletir `last_sign_in_at` real em vez de PROFILE).
-- `manage_clinic_status`: Ativa/Suspende clínicas remotamente.
-- `create_clinic`: Provisionamento 100% (Nova base de dados + Auditoria).
-- `impersonate_user`: Geração de Token Admin p/ suporte direto.
+### whatsapp-send (✅)
+- Envia texto/imagem/documento via Evolution API
 
-## 5. SECRETS DA EDGE Função (já configurados)
+### superadmin-actions (✅ v3)
+- get_platform_stats, get_clinics, create_clinic (com admin), create_user
+- get_users, manage_clinic_status, impersonate_user
+- get_audit_logs, get_financeiro_stats, get_ia_stats, get_whatsapp_stats
+
+### user-manager (✅ v2 — --no-verify-jwt)
+- create_user (admin cria colaborador com auth + profile)
+- disable_user (ban + ativo=false)
+- link_user (vincular colaborador existente por e-mail)
+
+### register (✅ --no-verify-jwt, endpoint público)
+- register_admin (cria auth + clínica + profile admin, com rollback)
+- register_funcionario (cria auth + profile sem clínica, pendente)
+
+## 5. SECRETS
 - GEMINI_API_KEY ✅
 - SUPABASE_URL ✅
 - SUPABASE_ANON_KEY ✅
@@ -99,9 +117,9 @@ Edge Function protegida para operações globais via SuperAdmin:
 - SUPABASE_DB_URL ✅
 - EVOLUTION_API_URL ✅
 - EVOLUTION_API_KEY ✅
-- CLINICA_ID (Fallback em dev) ✅
+- EVOLUTION_INSTANCE ✅
 
-## 6. STORAGE — BUCKETS CONFIGURADOS
+## 6. STORAGE — BUCKETS
 - clinica-assets ✅ público
 - pacientes-documentos ✅ privado
 - pacientes-exames ✅ privado
@@ -111,148 +129,66 @@ Edge Function protegida para operações globais via SuperAdmin:
 - harmonizacao-mapas ✅ privado
 - anamnese-assets ✅ privado
 
-## 7. ARQUIVOS IMPORTANTES NO PROJETO
-- src/pages/SuperAdmin/* → Painel de controle global (Dashboard, Clínicas, Usuários, IA, Financeiro).
-- src/components/superadmin/NovaClinicaModal.tsx → Modal de criação de clínicas.
-- src/hooks/useSuperAdmin.ts → Hook de conexão centralizado com service_role actions.
-- supabase/functions/superadmin-actions/index.ts → Backend administrativo global.
-- CONTEXTO_PROJETO.md → Histórico/Arquitetura (Este arquivo).
+## 7. FLUXO DE REGISTRO
 
-## 8. PRÓXIMOS PASSOS (Fase 13)
-1. Deploy final em produção com integração de domínios customizados.
-2. Hardening de segurança nas Edge Functions (IP Whitelisting, validação JWT).
-3. SuperAdmin: Implementar persistência real nas Configurações Globais (atualmente [Beta]).
-4. SuperAdmin WhatsApp: Conectar ações de bulk (sync, restart) ao backend (atualmente [Dev]).
-5. Regenerar `database.types.ts` para incluir tabelas/colunas faltantes (pedidos_compra, ai_usage_logs, etc.).
+### Admin (nova clínica)
+1. `/register` → escolhe "Administrador"
+2. Preenche dados da clínica + dados pessoais
+3. Edge function `register` cria: auth user → clínica → profile (admin, ativo)
+4. Redireciona para `/login`
 
-## 9. COMANDOS ÚTEIS
-Deploy Edge Function:
-npx supabase functions deploy NAME --project-ref mddbbwbwmwcvecbnfmqg --no-verify-jwt
+### Funcionário
+1. `/register` → escolhe "Funcionário"
+2. Preenche dados pessoais (nome, email, telefone, especialidade, conselho)
+3. Edge function `register` cria: auth user → profile (sem clinica_id, inativo)
+4. Redireciona para `/login` → ao logar cai em `/aguardando-aprovacao`
+5. Polling automático (15s) verifica se foi vinculado
+6. Admin vai em Configurações → Profissionais → "Vincular por E-mail"
+7. Ao vincular, funcionário recebe acesso imediato
 
-Build local:
-npm run build
+### SuperAdmin
+- Pode criar clínicas com admin pelo painel `/superadmin/clinicas`
+- Pode criar usuários e vincular a qualquer clínica em `/superadmin/usuarios`
 
-Dev server:
-npm run dev
+## 8. OVYVA — AGENTE IA v2
 
-## 10. DECISÕES DE ARQUITETURA TOMADAS
-- **SuperAdmin Security**: O uso de `service_role` nas Edge Functions permite bypass seguro de RLS para auditoria global sem expor chaves ao frontend.
-- **Dynamic Icon Rendering**: Implementado padrão de segurança `const Icon = ...` com fallbacks para evitar `undefined element crashes` em dados dinâmicos da IA e WhatsApp.
-- **Real-Time Counters**: Sincronização direta de metatags de clínicas para dashboard em vez de queries agendadas (mais ágil).
-- **Auth Listener**: `initAuth()` chamado no App.tsx para manter sincronização de estado auth com Supabase.
-- **Type Assertions (as any)**: Usados pragmaticamente em hooks onde `database.types.ts` não reflete todas as colunas reais do banco (será resolvido com re-geração dos tipos na Fase 13).
-- **SuperAdmin Ambiente**: Badge dinâmico DEV/SANDBOX vs PRODUÇÃO baseado em `import.meta.env.MODE`.
+### Capacidades:
+- **Agendar**: Cria pré-agendamento (status pendente), aceita pacientes cadastrados e não-cadastrados
+- **Cancelar**: Cancela consultas futuras (agendado/confirmado/pendente)
+- **Reagendar**: Cancela atual + cria nova consulta
+- **Transferir**: Marca conversa para atendimento humano
+- **Informar**: Responde sobre procedimentos, preços, horários
 
-## 11. REVISÃO GERAL COMPLETA (Fase 16 — 21/03/2026)
+### Contexto do prompt:
+- Nome/tom da assistente personalizado por clínica
+- Horário de funcionamento (config da clínica)
+- Data/hora atuais para contexto temporal
+- Tabela de procedimentos com valores reais (valor_particular)
+- Agenda ocupada (data_hora_inicio)
+- Perfil do paciente se vinculado
+- Histórico de 20 mensagens
+- Base de conhecimento customizada
 
-### Resumo: 65 correções aplicadas | Build: 0 erros TS | Vite: OK
+## 9. AGENDA — DRAG-AND-DROP
+- DayView: arrastar cards para mudar horário (snap 15min)
+- WeekView: arrastar entre dias e horários
+- Preview visual com borda tracejada verde
+- Atualiza data_hora_inicio/fim no banco automaticamente
+- Duração preservada ao mover
 
-### Correções por Categoria:
+## 10. ARQUIVOS IMPORTANTES
+- `src/pages/Login/RegisterPage.tsx` — Fluxo de registro (admin/funcionário)
+- `src/pages/Login/WaitingApprovalPage.tsx` — Tela de espera para funcionários
+- `src/pages/SuperAdmin/*` — Painel de controle global
+- `src/components/superadmin/NovaClinicaModal.tsx` — Modal de criação com admin
+- `src/hooks/useSuperAdmin.ts` — Hook SuperAdmin (createClinic, createUser, etc.)
+- `supabase/functions/ai-gateway/index.ts` — Backend IA (OVYVA, insights, etc.)
+- `supabase/functions/register/index.ts` — Registro público
+- `supabase/functions/user-manager/index.ts` — Gerenciamento de colaboradores
+- `CONTEXTO_PROJETO.md` — Este arquivo
 
-#### Arquitetura & Auth (3 fixes)
-- `App.tsx`: Adicionado `initAuth()` — listener de auth do Supabase estava ausente.
-- `Header.tsx`: Notificações agora buscam consultas pendentes do dia no banco real (antes hardcoded 3).
-- `authStore.ts`: Cast de `dbRole` como string para suportar role `superadmin`.
-
-#### Botões Mortos Corrigidos (~20 fixes)
-- **Header**: "Meu Perfil" e "Configurações" → navegam para `/configuracoes`. Logout com `await` + redirect.
-- **Agenda**: Botão "Excluir Consulta" adicionado ao `AppointmentDetailCard` + `deleteAppointment` integrado.
-- **OVYVA ChatWindow**: Settings → navega para `/ovyva/config`. Busca de conversas agora filtra por nome/telefone.
-- **OVYVA ContactContext**: 4 ações rápidas conectadas (Agendar→/agenda, Cobrança→/financeiro, Receita→/prescricoes, WhatsApp→wa.me).
-- **Verdesk LeadDrawer**: WA abre WhatsApp Web, Agendar navega para /agenda.
-- **Estoque ProdutosPage**: "Registrar Entrada" e "Ajuste/Saída" agora chamam funções reais do hook.
-- **Estoque MovimentacoesPage**: Busca e filtros por tipo agora funcionais.
-- **Estoque AlertasPage**: "Detalhes" navega para produto.
-- **Relatórios FunilLeadsReport**: Botão Export gera CSV real.
-- **Pacientes**: Botão MoreHorizontal navega para prontuário do paciente.
-
-#### Dados Mock Substituídos por Reais (~15 fixes)
-- **Agenda**: `new Date('2026-03-18')` → `new Date()` (datas dinâmicas).
-- **Dashboard KpiCards**: Progress bar agora dinâmica baseada no KPI.
-- **Dashboard PacientesRecentes**: `totalConsultas` busca contagem real do banco por paciente.
-- **Dashboard ProcedimentosPieChart**: Range corrigido para 4 semanas (era mês anterior).
-- **OvyvaHistoryPage**: KPIs `leadsGerados` e `tempoMedio` agora calculados do banco.
-- **SuperAdmin Dashboard**: Alertas e healthData sem mock, dados reais do hook.
-- **SuperAdmin Financeiro**: Trends hardcoded removidos, gráficos com placeholder honesto.
-- **SuperAdmin WhatsApp**: Botões desabilitados com indicação "[Dev]".
-- **SuperAdmin Configurações**: Botão salvar com indicação "[Beta]".
-- **Verdesk**: `targetAudience` lê do banco, `sendCampaign()` implementado (antes vazio).
-- **Verdesk PerformancePage**: Porcentagem "+12%" hardcoded removida.
-
-#### CRUD Corrigido (8 fixes)
-- `useAgenda.ts`: `createAppointment` agora retorna o appointment correto (antes retornava `appointments[0]`).
-- `useAgenda.ts`: `procedimento_id` agora busca ID real na tabela `procedimentos` (antes era null).
-- `NovaTransacaoModal.tsx`: Chamava `addTransacao`/`categorias` inexistentes → corrigido para `createLancamento`.
-- `useFinanceiro.ts`: Campo `vencimento` adicionado ao insert de lançamentos.
-- `useVerdesk.ts`: `sendCampaign()` implementado com update real no banco.
-- `CampanhasPage.tsx`: Wizard agora cria campanha real via `createCampaign()`.
-
-#### CSS/Grid Fixes (6 fixes)
-- Classes `md:` sem valor corrigidas para `md:grid-cols-2` em:
-  - `NovaTransacaoModal.tsx`
-  - `LeadDrawer.tsx`
-  - `EstoquePage.tsx`
-  - `ContactContext.tsx`
-
-#### TypeScript/Build (~20 fixes)
-- Type assertions `as any` em hooks com schema mismatch (useEstoque, useProntuario, usePrescricoes, usePatients, useVerdesk).
-- `jspdf-autotable` instalado + declaração de tipo criada.
-- Parâmetros `implicit any` tipados em SuperAdmin e Relatórios.
-- RPC e tabelas ausentes dos types castados com `as any`.
-- `SuperAdminLayout`: Badge ambiente dinâmico via `import.meta.env.MODE`.
-
-### Build Final
-- **TypeScript**: 0 erros
-- **Vite Build**: OK em ~1.2s
-- **2748 módulos** transformados
-- **Bundle**: ~3.1MB (minificado) / ~821KB (gzip)
-
-## 12. HOTFIX v1.1.1 (21/03/2026)
-
-### Correções Críticas
-
-#### Ambiente / Dev
-- **.env**: Removido BOM UTF-8 (Byte Order Mark) que causava `supabaseUrl is required` e tela branca no dev server local. Vercel não era afetado pois as vars são injetadas pela plataforma.
-
-#### Hooks — Ordem de Declaração (React)
-- **`useAgenda.ts`**: `getAppointments` movido para **antes** do `useEffect` que o usa como dependência (forward reference de `const` causava comportamento indefinido).
-- **`useVerdesk.ts`**: `getLeads` e `getCampaigns` movidos para **antes** do `useEffect` de realtime + fetch inicial — mesma causa.
-
-#### Bugs Funcionais
-- **`useSuperAdmin.ts`**: `catch { console.error(_err) }` — `_err` era referência inválida (sem binding no catch). Corrigido para `catch (err) { console.error(err) }` em `getUsers` e `getAuditLogs`.
-- **`PatientTerms.tsx`**: Campo `descricao` → `conteudo` no insert (nome correto da coluna no banco). `useState(() => loadTermos())` → `useEffect` correto. Modal de visualização redesenhado como documento PDF.
-- **`FacialHarmonization.tsx`**: `html2canvas` não suportava cores `oklch` do Tailwind 4 — corrigido com patch nas `<style>` tags do documento clonado via regex antes da renderização.
-- **`PatientDocumentsTab.tsx`**: `loadFiles` convertido para `useCallback` com deps corretas; `useEffect` reordenado.
-
-#### ESLint
-- **`eslint.config.js`**: Regra `@typescript-eslint/no-unused-vars` adicionada com padrão `^_` para ignorar variáveis intencionalmente não usadas — lint cleanup em 68 arquivos.
-
-### Build Final v1.1.1
-- **TypeScript**: 0 erros
-- **Vite Build**: OK
-- **2749 módulos** transformados
-
----
-
-## Relatório de Testes Automatizados (SuperAdmin)
-### ✅ Status Final: 20/20 Testes Passaram
-1. **Auth & Acesso** (4/4): Login, Roles e Rota Protegida.
-2. **Dashboard Global** (3/3): KPIs reais de Clínicas (Fix Ativas/Trial), Usuários e Pacientes.
-3. **Financeiro Global** (1/1): Export CSV Funcional + MRR Real.
-4. **Resiliência UI** (2/2): Fix de Runtime Crashes em IA/WA Monitor.
-5. **Gestão de Clínicas** (2/2): Criar, Suspender, Ativar.
-6. **Gestão de Usuários** (2/2): Listar, Filtrar.
-7. **IA Monitor** (1/1): Logs e Métricas.
-8. **WhatsApp Monitor** (1/1): Instâncias e Status.
-9. **Impersonation** (1/1): Token Admin para suporte.
-10. **Configurações Globais** (2/2): Feature Flags e Planos.
-
-**SISTEMA ESTÁVEL E TESTADO ✅**
-**PRONTUÁRIO VERDE v1.1.0**
-
-**TESTES SUPERADMIN COMPLETOS ✅**
-Total de testes: 20
-Passaram: 20
-Falharam: 0
-Corrigidos: 4
-Pendentes: 0
+## 11. PRÓXIMOS PASSOS
+1. Deploy final em produção (Vercel)
+2. Testar fluxo WhatsApp completo (Evolution API + OVYVA)
+3. Regenerar `database.types.ts`
+4. Code-splitting para reduzir bundle (3.1MB → lazy loading)
