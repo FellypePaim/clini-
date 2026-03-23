@@ -55,9 +55,11 @@ Deno.serve(async (req) => {
 
     // 1. Identificar Clínica
     const { data: inst, error: instErr } = await supabase.from("whatsapp_instancias").select("clinica_id").eq("nome_instancia", instanceName).single()
-    if (instErr) console.error("Erro ao buscar instância:", instErr.message)
-    const clinica_id = inst?.clinica_id || Deno.env.get("CLINICA_ID")
-    if (!clinica_id) return new Response("clinica not found", { status: 404 })
+    if (instErr || !inst?.clinica_id) {
+      console.error("Instância não encontrada para:", instanceName, instErr?.message)
+      return new Response("clinica not found", { status: 404 })
+    }
+    const clinica_id = inst.clinica_id
 
     // 2. Tratar Áudio ou Imagem
     if (!textContent && message.audioMessage) {

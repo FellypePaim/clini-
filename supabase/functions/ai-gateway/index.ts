@@ -512,6 +512,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
      await supabase
         .from("consultas")
         .update({ status: 'cancelado', observacoes: `[CANCELADO POR OVYVA] Solicitação via WhatsApp.` })
+        .eq("clinica_id", clinica_id)
         .eq("paciente_id", conversa.paciente_id)
         .eq("status", "confirmado")
         .gte("data_consulta", new Date().toISOString().split('T')[0])
