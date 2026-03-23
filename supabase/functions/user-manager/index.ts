@@ -11,29 +11,23 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const reqAuthHeader = req.headers.get("Authorization")
-    if (!reqAuthHeader) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      })
-    }
-
-    // Cliente para verificar o token do usuário
-    const authClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: reqAuthHeader } } }
-    )
-
     // Cliente com service_role para operações admin
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     )
 
-    // Verificar autenticação
-    const { data: { user: requestingUser }, error: authError } = await authClient.auth.getUser()
+    // Extrair e verificar token JWT
+    const authHeader = req.headers.get("Authorization") ?? ""
+    const token = authHeader.replace("Bearer ", "")
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Não autorizado" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      })
+    }
+
+    const { data: { user: requestingUser }, error: authError } = await supabaseAdmin.auth.getUser(token)
     if (authError || !requestingUser) {
       return new Response(JSON.stringify({ error: "Token inválido" }), {
         status: 401,
