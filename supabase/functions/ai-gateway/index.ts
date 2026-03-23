@@ -344,27 +344,30 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .single(),
     supabase
       .from("procedimentos")
-      .select("nome, preco_base, duracao_minutos")
+      .select("id, nome, valor_particular, duracao_minutos")
       .eq("clinica_id", clinica_id)
       .eq("ativo", true),
     supabase
       .from("consultas")
-      .select("data_consulta, hora_consulta, duracao_minutos")
+      .select("data_hora_inicio, duracao_minutos, profissional_id, status")
       .eq("clinica_id", clinica_id)
-      .gte("data_consulta", new Date().toISOString().split('T')[0])
-      .neq("status", "cancelado")
-      .limit(50)
+      .gte("data_hora_inicio", new Date().toISOString().split('T')[0])
+      .in("status", ["agendado", "confirmado", "pendente"])
+      .limit(100)
   ])
 
   const clinicaData = clinicaRes.data
   const procedimentos = procedimentosRes.data || []
   const agendaOcupada = consultasRes.data || []
 
+  const ovyvaConfig = clinicaData?.configuracoes?.ovyva ?? {}
   const config = {
-    nome_assistente: clinicaData?.configuracoes?.ovyva?.nome_assistente ?? "Sofia",
-    tom_voz: clinicaData?.configuracoes?.ovyva?.tom_voz ?? "cordial",
+    nome_assistente: ovyvaConfig.nome_assistente ?? "Sofia",
+    tom_voz: ovyvaConfig.tom_voz ?? "cordial",
     nome_clinica: clinicaData?.nome ?? "Clínica",
-    base_conhecimento: clinicaData?.configuracoes?.ovyva?.base_conhecimento ?? "",
+    base_conhecimento: ovyvaConfig.base_conhecimento ?? "",
+    horario_inicio: ovyvaConfig.horario_inicio ?? "08:00",
+    horario_fim: ovyvaConfig.horario_fim ?? "18:00",
   }
 
   // 6. Montar system prompt
@@ -377,35 +380,48 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
   const nomeContato = perfilPaciente?.nome ?? "paciente"
 
+  // Formatar agenda ocupada de forma legível
+  const agendaFormatada = agendaOcupada.map((c: any) => {
+    const dt = c.data_hora_inicio?.split("T") ?? []
+    return `- ${dt[0] ?? "?"} às ${dt[1]?.substring(0,5) ?? "?"} (${c.duracao_minutos ?? 30}min)`
+  }).join('\n')
+
   const systemPrompt = `
     Você é ${config.nome_assistente}, secretária virtual da clínica "${config.nome_clinica}".
     Tom de atendimento: ${tom[config.tom_voz] ?? "cordial e profissional"}.
     Você está conversando com: ${nomeContato}.
+    ${perfilPaciente?.e_paciente_cadastrado ? `Este paciente é cadastrado na clínica.` : ""}
+    Data e hora atuais: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.
 
     INFORMAÇÕES DA CLÍNICA:
     ${config.base_conhecimento || "Clínica médica e estética."}
 
-    TABELA DE PROCEDIMENTOS DISPONÍVEIS:
-    ${procedimentos.map(p => `- ${p.nome}: R$ ${p.preco_base} (${p.duracao_minutos} min)`).join('\n')}
+    HORÁRIO DE FUNCIONAMENTO: ${config.horario_inicio} às ${config.horario_fim} (segunda a sábado)
+
+    PROCEDIMENTOS DISPONÍVEIS:
+    ${procedimentos.length > 0 ? procedimentos.map((p: any) => `- ${p.nome}: R$ ${p.valor_particular ?? 0} (${p.duracao_minutos} min)`).join('\n') : "Nenhum procedimento cadastrado ainda."}
 
     HORÁRIOS JÁ OCUPADOS (NÃO sugerir estes):
-    ${agendaOcupada.map(c => `- ${c.data_consulta} às ${c.hora_consulta}`).join('\n')}
+    ${agendaFormatada || "Nenhum agendamento encontrado — agenda livre."}
 
     REGRAS OBRIGATÓRIAS:
-    - Responda SEMPRE em português brasileiro
-    - Nunca invente informações sobre procedimentos ou valores
-    - Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
-    - Em emergências médicas, oriente: ligue para SAMU (192)
-    - Seja objetiva — máximo 3 perguntas por mensagem
-    - VISÃO: Você consegue ver imagens e documentos enviados. Se receber uma foto de receita ou exame, analise e descreva os pontos principais ou anote no agendamento.
-    - CANCELAMENTO/REAGENDAMENTO: Se o paciente quiser desmarcar ou mudar a data, use a ação "cancelar" ou "agendar" (com a nova data) no JSON.
-    - PRIORIDADE MÁXIMA: Se o nome do paciente for "paciente" (ou seja, desconhecido), sua PRIMEIRA AÇÃO absoluta é perguntar educadamente qual o nome completo da pessoa. NÃO inicie nenhum procedimento de agendamento, não forneça detalhes complexos, e não confirme horários até que você saiba com quem está falando.
+    1. Responda SEMPRE em português brasileiro
+    2. Nunca invente procedimentos, valores ou horários que não estejam listados acima
+    3. Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
+    4. Em emergências médicas, oriente: ligue para SAMU (192)
+    5. Seja objetiva — máximo 2-3 frases por resposta, direto ao ponto
+    6. Sugira apenas horários DENTRO do horário de funcionamento e que NÃO estejam na lista de ocupados
+    7. Se o paciente quiser DESMARCAR: use ação "cancelar"
+    8. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar" (cancela a atual e agenda a nova)
+    9. Se o paciente quiser AGENDAR: use ação "agendar" com data, hora e procedimento
+    10. VISÃO: Se receber imagem, analise e descreva brevemente
+    11. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome. Não agende sem saber quem é.
 
     Responda APENAS com JSON válido:
     {
       "resposta": "texto para enviar ao paciente via WhatsApp",
       "intencao_detectada": "agendamento|cancelamento|reagendamento|informacao|reclamacao|emergencia|outro",
-      "acao_sugerida": "agendar|cancelar|transferir_humano|aguardar|nenhuma",
+      "acao_sugerida": "agendar|cancelar|reagendar|transferir_humano|aguardar|nenhuma",
       "dados_agendamento": {
         "data": "YYYY-MM-DD ou null",
         "hora": "HH:MM ou null",
@@ -464,59 +480,72 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .eq("id", conversa.id)
   }
 
-  if (resposta.acao_sugerida === "agendar" && conversa.id) {
-    const updatePayload: any = { 
-      estagio: "agendado", 
-      updated_at: new Date().toISOString() 
-    }
-    
-    const procedNome = (resposta.dados_agendamento?.procedimento || "").toLowerCase().trim()
-    const matchProced = procedNome ? procedimentos.find(p => p.nome.toLowerCase().includes(procedNome) || procedNome.includes(p.nome.toLowerCase())) : null
+  // Helper: buscar procedimento por nome
+  const procedNome = (resposta.dados_agendamento?.procedimento || "").toLowerCase().trim()
+  const matchProced = procedNome ? procedimentos.find((p: any) => p.nome.toLowerCase().includes(procedNome) || procedNome.includes(p.nome.toLowerCase())) : null
 
-    if (matchProced) {
-      updatePayload.procedimento_interesse = matchProced.nome
-    } else if (resposta.dados_agendamento?.procedimento) {
-      updatePayload.procedimento_interesse = resposta.dados_agendamento.procedimento
-    }
+  const dataAg = resposta.dados_agendamento?.data
+  const horaAg = resposta.dados_agendamento?.hora
 
-    // Criar pre-agendamento real se tiver data/hora
-    const dataAg = resposta.dados_agendamento?.data
-    const horaAg = resposta.dados_agendamento?.hora
+  // ── AÇÃO: AGENDAR ──
+  if ((resposta.acao_sugerida === "agendar" || resposta.acao_sugerida === "reagendar") && conversa.id) {
+    // Atualizar lead
+    const updatePayload: any = { estagio: "agendado", updated_at: new Date().toISOString() }
+    if (matchProced) updatePayload.procedimento_interesse = matchProced.nome
+    else if (resposta.dados_agendamento?.procedimento) updatePayload.procedimento_interesse = resposta.dados_agendamento.procedimento
 
-    if (dataAg && horaAg && conversa.paciente_id) {
-       await supabase.from("consultas").insert({
-          clinica_id,
-          paciente_id: conversa.paciente_id,
-          profissional_id: resposta.dados_agendamento?.profissional_id || agendaOcupada[0]?.profissional_id || null, // tenta inferir
-          procedimento_id: (matchProced as any)?.id || null,
-          data_consulta: dataAg,
-          hora_consulta: horaAg,
-          status: 'pendente',
-          observacoes: `[PRÉ-AGENDAMENTO OVYVA] Gerado via WhatsApp. Aguardando aprovação humana.`
-       }).then(() => { }).catch((e: unknown) => console.error("Erro ao criar pré-agendamento:", e))
+    await supabase.from("leads").update(updatePayload).eq("conversa_id", conversa.id)
+
+    // Se reagendamento, cancelar consultas futuras deste paciente primeiro
+    if (resposta.acao_sugerida === "reagendar" && conversa.paciente_id) {
+      await supabase.from("consultas")
+        .update({ status: "cancelado", observacoes: "[REAGENDADO POR OVYVA] Paciente solicitou nova data via WhatsApp." })
+        .eq("clinica_id", clinica_id)
+        .eq("paciente_id", conversa.paciente_id)
+        .in("status", ["agendado", "confirmado", "pendente"])
+        .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
+        .limit(1)
     }
 
-    await supabase.from("leads")
-      .update(updatePayload)
-      .eq("conversa_id", conversa.id)
+    // Criar pré-agendamento se tiver data/hora (aceita pacientes vinculados OU não)
+    if (dataAg && horaAg) {
+      const dataHoraInicio = `${dataAg}T${horaAg}:00`
+      const duracao = (matchProced as any)?.duracao_minutos ?? 30
+      const endMinutes = horaAg.split(":").map(Number).reduce((h: number, m: number) => h * 60 + m) + duracao
+      const endH = String(Math.floor(endMinutes / 60)).padStart(2, "0")
+      const endM = String(endMinutes % 60).padStart(2, "0")
+      const dataHoraFim = `${dataAg}T${endH}:${endM}:00`
+
+      await supabase.from("consultas").insert({
+        clinica_id,
+        paciente_id: conversa.paciente_id || null,
+        profissional_id: agendaOcupada[0]?.profissional_id || null,
+        procedimento_id: (matchProced as any)?.id || null,
+        data_hora_inicio: dataHoraInicio,
+        data_hora_fim: dataHoraFim,
+        duracao_minutos: duracao,
+        status: "pendente",
+        observacoes: `[PRÉ-AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp. Aguardando aprovação.`,
+      }).then(() => { }).catch((e: unknown) => console.error("Erro ao criar pré-agendamento:", e))
+    }
   }
 
   // Se detectou interesse em procedimento mas não agendou, apenas atualiza interesse no lead
-  if (resposta.dados_agendamento?.procedimento && !resposta.acao_sugerida.includes("agendar")) {
-     await supabase.from("leads")
+  if (resposta.dados_agendamento?.procedimento && !["agendar", "reagendar"].includes(resposta.acao_sugerida)) {
+    await supabase.from("leads")
       .update({ procedimento_interesse: resposta.dados_agendamento.procedimento })
       .eq("conversa_id", conversa.id)
   }
 
+  // ── AÇÃO: CANCELAR ──
   if (resposta.acao_sugerida === "cancelar" && conversa.paciente_id) {
-     await supabase
-        .from("consultas")
-        .update({ status: 'cancelado', observacoes: `[CANCELADO POR OVYVA] Solicitação via WhatsApp.` })
-        .eq("clinica_id", clinica_id)
-        .eq("paciente_id", conversa.paciente_id)
-        .eq("status", "confirmado")
-        .gte("data_consulta", new Date().toISOString().split('T')[0])
-        .limit(1)
+    await supabase.from("consultas")
+      .update({ status: "cancelado", observacoes: "[CANCELADO POR OVYVA] Paciente solicitou cancelamento via WhatsApp." })
+      .eq("clinica_id", clinica_id)
+      .eq("paciente_id", conversa.paciente_id)
+      .in("status", ["agendado", "confirmado", "pendente"])
+      .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
+      .limit(1)
   }
 
   return {
