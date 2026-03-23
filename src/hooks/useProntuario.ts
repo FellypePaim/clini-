@@ -228,13 +228,19 @@ export function useProntuario(pacienteId?: string) {
     try {
       const qrCode = `${clinicaId}-${pid}-${Date.now()}`
 
-      const itensJson = items.map(i => ({
-        medicamento: i.medicamento,
-        dosagem: i.dosagem,
-        frequencia: i.frequencia,
-        duracao: i.duracao,
+      const itensJson = (items || []).filter(i => i.medicamento?.trim()).map(i => ({
+        medicamento: i.medicamento || '',
+        dosagem: i.dosagem || '',
+        frequencia: i.frequencia || '',
+        duracao: i.duracao || '',
         observacoes: i.observacoes || '',
       }))
+
+      if (itensJson.length === 0) {
+        throw new Error('Adicione pelo menos um medicamento.')
+      }
+
+      const conteudoTexto = itensJson.map(i => `${i.medicamento} — ${i.dosagem}, ${i.frequencia}, ${i.duracao}`).join('\n')
 
       const { data: ret, error } = await supabase
         .from('prescricoes')
@@ -242,8 +248,8 @@ export function useProntuario(pacienteId?: string) {
           clinica_id: clinicaId,
           paciente_id: pid,
           profissional_id: profissionalId,
-          itens: itensJson,
-          conteudo: itensJson.map(i => `${i.medicamento} — ${i.dosagem}, ${i.frequencia}, ${i.duracao}`).join('\n'),
+          itens: JSON.parse(JSON.stringify(itensJson)),
+          conteudo: conteudoTexto || 'Prescrição sem conteúdo',
           assinatura_hash: `${clinicaId}-${pid}-${Date.now()}`,
           qr_code_token: qrCode,
           status: 'ativa',
