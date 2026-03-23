@@ -114,18 +114,6 @@ export function DentalMapping({ pacienteId }: DentalMappingProps) {
     setActiveTooth(tooth)
   }
 
-  const _applyCondition = () => {
-    if (!activeTooth) return
-    setToothMap(prev => ({
-      ...prev,
-      [activeTooth]: {
-        ...prev[activeTooth],
-        tooth: activeTooth,
-        condition: activeCondition,
-      }
-    }))
-  }
-
   const updateToothData = (tooth: number, data: Partial<ToothData>) => {
     setToothMap(prev => ({
       ...prev,
@@ -524,7 +512,13 @@ Responda APENAS com JSON válido:
                 </tr>
               </thead>
               <tbody>
-                {[...QUADRANTS[0].teeth, ...QUADRANTS[1].teeth].map(t => (
+                {[...QUADRANTS[0].teeth, ...QUADRANTS[1].teeth, 0, ...QUADRANTS[3].teeth, ...QUADRANTS[2].teeth].map((t, i) => {
+                  if (t === 0) return (
+                    <tr key={`sep-${i}`} className="h-2 bg-gray-100">
+                      <td colSpan={6} className="text-[9px] text-gray-400 font-bold text-center uppercase tracking-widest py-1">Arcada Inferior</td>
+                    </tr>
+                  )
+                  return (
                   <tr key={t} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                     <td className="py-2 px-2 font-black text-gray-700">{t}</td>
                     <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.profundidade?.[0] || ''} onChange={(e) => updatePerio(t, { profundidade: [parseInt(e.target.value) || 0, perioMap[t]?.profundidade?.[1] || 0] })} /></td>
@@ -539,7 +533,8 @@ Responda APENAS com JSON válido:
                     </td>
                     <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.recessao || ''} onChange={(e) => updatePerio(t, { recessao: parseInt(e.target.value) || 0 })} /></td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
           </div>
@@ -647,7 +642,7 @@ Responda APENAS com JSON válido:
                         {sessions.length - sIdx}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-black">{new Date(s.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                        <p className="text-sm font-black">{(() => { const p = (s.created_at as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}</p>
                         <p className="text-[10px] text-gray-400 font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'}</p>
 
                         {/* Mini badges de condições */}
