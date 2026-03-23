@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
-import { 
-  FileCheck, 
-  Plus, 
-  Send, 
-  Calendar, 
-  User, 
-  CheckCircle, 
-  X, 
-  Download, 
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+import {
+  FileCheck,
+  Plus,
+  Send,
+  Calendar,
+  User,
+  CheckCircle,
+  X,
+  Download,
   Maximize2,
   Lock,
   Stamp,
   ClipboardList,
   Sparkles,
-  Activity
+  Activity,
+  Printer
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { supabase } from '../../lib/supabase'
@@ -39,6 +42,8 @@ export function PatientTerms({ pacienteId }: { pacienteId: string }) {
   const [viewingTermo, setViewingTermo] = useState<any | null>(null)
 
   const [resolvedSignUrl, setResolvedSignUrl] = useState<string | null>(null)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
+  const docRef = useRef<HTMLDivElement>(null)
 
   // Resolver URL assinada de um placeholder "signed:bucket:path"
   const resolveUrl = async (url: string): Promise<string> => {
@@ -215,6 +220,57 @@ Responda APENAS com JSON válido nesta estrutura:
     }
   }
 
+  const handleDownloadPdf = async () => {
+    if (!docRef.current || !viewingTermo) return
+    setIsGeneratingPdf(true)
+    try {
+      const el = docRef.current
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        onclone: (doc: Document) => {
+          doc.querySelectorAll('style').forEach(s => {
+            if (s.textContent?.includes('oklch')) s.textContent = s.textContent.replace(/oklch\([^)]+\)/g, 'transparent')
+          })
+        }
+      })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pdfW = pdf.internal.pageSize.getWidth()
+      const pdfH = (canvas.height * pdfW) / canvas.width
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH)
+      pdf.save(`${(viewingTermo.titulo || 'termo').replace(/\s+/g, '_')}.pdf`)
+    } catch (err: any) {
+      toast({ title: 'Erro', description: 'Falha ao gerar PDF.', type: 'error' })
+    } finally {
+      setIsGeneratingPdf(false)
+    }
+  }
+
+  const handlePrint = () => {
+    if (!docRef.current) return
+    const printContent = docRef.current.innerHTML
+    const printWindow = window.open('', '_blank', 'width=800,height=600')
+    if (!printWindow) return
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>${viewingTermo?.titulo || 'Termo'}</title>
+          <style>
+            body { font-family: system-ui, sans-serif; margin: 0; padding: 20px; }
+            * { box-sizing: border-box; }
+            img { max-height: 120px; object-fit: contain; }
+          </style>
+          <link rel="stylesheet" href="${window.location.origin}/assets/index.css" />
+        </head>
+        <body>${printContent}</body>
+      </html>
+    `)
+    printWindow.document.close()
+    setTimeout(() => { printWindow.print(); printWindow.close() }, 500)
+  }
+
   const clearSig = () => {
     sigPad.current?.clear()
   }
@@ -389,15 +445,16 @@ Responda APENAS com JSON válido nesta estrutura:
                               <Maximize2 className="w-4 h-4" />
                             </button>
                           )}
-                          {/* Download */}
+                          {/* Abrir para baixar PDF */}
                           {st.assinatura_url && (
                             <button
                               onClick={async () => {
                                 const url = await resolveUrl(st.assinatura_url)
-                                window.open(url, '_blank')
+                                setResolvedSignUrl(url)
+                                setViewingTermo(st)
                               }}
                               className="p-2.5 bg-gray-900 text-white rounded-xl hover:scale-110 transition-transform shadow-lg shadow-gray-900/10 inline-flex"
-                              title="Baixar assinatura"
+                              title="Baixar PDF"
                             >
                               <Download className="w-4 h-4" />
                             </button>
@@ -444,12 +501,13 @@ Responda APENAS com JSON válido nesta estrutura:
                   {viewingTermo.assinado_em ? 'Assinado' : 'Pendente'}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                {resolvedSignUrl && (
-                  <a href={resolvedSignUrl} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar">
-                    <Download className="w-4 h-4" />
-                  </a>
-                )}
+              <div className="flex items-center gap-1">
+                <button onClick={handlePrint} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Imprimir">
+                  <Printer className="w-4 h-4" />
+                </button>
+                <button onClick={handleDownloadPdf} disabled={isGeneratingPdf} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar PDF">
+                  {isGeneratingPdf ? <Activity className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                </button>
                 <button onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
                   <X className="w-4 h-4" />
                 </button>
@@ -458,7 +516,7 @@ Responda APENAS com JSON válido nesta estrutura:
 
             {/* Documento */}
             <div className="flex-1 overflow-y-auto p-8 flex justify-center">
-              <div className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '600px' }}>
+              <div ref={docRef} className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '600px' }}>
                 {/* Header do documento */}
                 <div className="border-b-2 border-green-600 p-8 pb-6">
                   <div className="flex items-center justify-between">
