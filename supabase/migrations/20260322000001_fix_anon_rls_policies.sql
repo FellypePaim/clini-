@@ -18,15 +18,21 @@ CREATE POLICY "anon_read_paciente_basico"
 ON pacientes
 FOR SELECT
 TO anon
-USING (id = current_setting('request.jwt.claims', true)::jsonb->>'paciente_id'
-       OR id::text = current_setting('app.current_paciente_id', true));
+USING (
+  id::text = (current_setting('request.jwt.claims', true)::jsonb->>'paciente_id')
+  OR id::text = current_setting('app.current_paciente_id', true)
+);
 
 -- Anon pode atualizar apenas updated_at do paciente específico
 CREATE POLICY "anon_update_paciente_after_anamnese"
 ON pacientes
 FOR UPDATE
 TO anon
-USING (id = current_setting('request.jwt.claims', true)::jsonb->>'paciente_id'
-       OR id::text = current_setting('app.current_paciente_id', true))
-WITH CHECK (id = current_setting('request.jwt.claims', true)::jsonb->>'paciente_id'
-            OR id::text = current_setting('app.current_paciente_id', true));
+USING (
+  id::text = (current_setting('request.jwt.claims', true)::jsonb->>'paciente_id')
+  OR id::text = current_setting('app.current_paciente_id', true)
+)
+WITH CHECK (
+  id::text = (current_setting('request.jwt.claims', true)::jsonb->>'paciente_id')
+  OR id::text = current_setting('app.current_paciente_id', true)
+);
