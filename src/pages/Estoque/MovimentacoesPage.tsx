@@ -19,11 +19,12 @@ import {
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
 
-const TIPO_CONFIG = {
-  'Entrada': { icon: <ArrowDownRight size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50', bgHover: 'hover:bg-emerald-100', textColors: 'text-emerald-700' },
-  'Saída': { icon: <ArrowUpRight size={18} />, color: 'text-red-500', bg: 'bg-red-50', bgHover: 'hover:bg-red-100', textColors: 'text-red-700' },
-  'Ajuste': { icon: <RefreshCw size={18} />, color: 'text-amber-500', bg: 'bg-amber-50', bgHover: 'hover:bg-amber-100', textColors: 'text-amber-700' }
+const TIPO_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg: string; bgHover: string; textColors: string; label: string }> = {
+  'entrada': { icon: <ArrowDownRight size={18} />, color: 'text-emerald-600', bg: 'bg-emerald-50', bgHover: 'hover:bg-emerald-100', textColors: 'text-emerald-700', label: 'Entrada' },
+  'saida': { icon: <ArrowUpRight size={18} />, color: 'text-red-500', bg: 'bg-red-50', bgHover: 'hover:bg-red-100', textColors: 'text-red-700', label: 'Saída' },
+  'ajuste': { icon: <RefreshCw size={18} />, color: 'text-amber-500', bg: 'bg-amber-50', bgHover: 'hover:bg-amber-100', textColors: 'text-amber-700', label: 'Ajuste' },
 }
+const getTipoConfig = (tipo: string) => TIPO_CONFIG[tipo] || TIPO_CONFIG['entrada']
 
 interface NovaRegraForm {
   procedureName: string
@@ -40,7 +41,7 @@ export function MovimentacoesPage() {
   const [novaRegra, setNovaRegra] = useState<NovaRegraForm>({ procedureName: '', productId: '', quantity: 1 })
   const [savingRegra, setSavingRegra] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterType, setFilterType] = useState<'all' | 'Entrada' | 'Saída' | 'Ajuste'>('all')
+  const [filterType, setFilterType] = useState<'all' | 'entrada' | 'saida' | 'ajuste'>('all')
 
   const filteredMovimentos = movimentos.filter(mov => {
     const matchesSearch = searchTerm === '' ||
@@ -115,12 +116,12 @@ export function MovimentacoesPage() {
                 className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === 'all' ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
                 <Calendar size={14} /> Todos
               </button>
-              {(['Entrada', 'Saída', 'Ajuste'] as const).map(tipo => (
+              {([{ key: 'entrada', label: 'Entrada' }, { key: 'saida', label: 'Saída' }, { key: 'ajuste', label: 'Ajuste' }] as const).map(tipo => (
                 <button
-                  key={tipo}
-                  onClick={() => setFilterType(prev => prev === tipo ? 'all' : tipo)}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === tipo ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
-                  <Filter size={14} /> {tipo}
+                  key={tipo.key}
+                  onClick={() => setFilterType(prev => prev === tipo.key ? 'all' : tipo.key as any)}
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === tipo.key ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
+                  <Filter size={14} /> {tipo.label}
                 </button>
               ))}
             </div>
@@ -128,8 +129,8 @@ export function MovimentacoesPage() {
             {/* Feed Chronological */}
             {filteredMovimentos.map(mov => (
               <div key={mov.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
-                <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 border-2 ${TIPO_CONFIG[mov.type].bg} ${TIPO_CONFIG[mov.type].textColors} border-transparent`}>
-                   {TIPO_CONFIG[mov.type].icon}
+                <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 border-2 ${getTipoConfig(mov.type).bg} ${getTipoConfig(mov.type).textColors} border-transparent`}>
+                   {getTipoConfig(mov.type).icon}
                 </div>
                 
                 <div className="flex-1 min-w-0">
@@ -143,8 +144,8 @@ export function MovimentacoesPage() {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-2 mt-1 mb-2">
-                    <Badge className={`text-[10px] uppercase font-black tracking-widest px-2 py-0.5 border ${TIPO_CONFIG[mov.type].bg} ${TIPO_CONFIG[mov.type].textColors}`}>
-                      {mov.type}
+                    <Badge className={`text-[10px] uppercase font-black tracking-widest px-2 py-0.5 border ${getTipoConfig(mov.type).bg} ${getTipoConfig(mov.type).textColors}`}>
+                      {getTipoConfig(mov.type).label}
                     </Badge>
                     <span className="text-sm font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
                       {mov.reason}

@@ -221,6 +221,9 @@ export function useEstoque() {
     if (!clinicaId) return
     const product = products.find(p => p.id === productId)
     if (!product) return
+    if (quantity > product.currentStock) {
+      throw new Error(`Estoque insuficiente. Disponível: ${product.currentStock}`)
+    }
     try {
       const { error: movErr } = await supabase.from('estoque_movimentacoes').insert({
         clinica_id: clinicaId,

@@ -5,6 +5,8 @@ import {
   TrendingDown, AlertTriangle, Info, History, TrendingUp, X, Loader2
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
 import { Badge } from '../../components/ui/Badge'
 import type { Product, ProductCategory } from '../../types/estoque'
 
@@ -34,6 +36,8 @@ const formVazio: ProdutoForm = {
 
 export function ProdutosPage() {
   const { getProducts, createProduct, updateProduct, loadProducts, isLoading, registerEntry, registerExit } = useEstoque()
+  const { user } = useAuthStore()
+  const { toast } = useToast()
   const products = getProducts()
 
   const [searchTerm, setSearchTerm] = useState('')
@@ -41,6 +45,9 @@ export function ProdutosPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [movModal, setMovModal] = useState<{ tipo: 'entrada' | 'saida'; prodId: string } | null>(null)
+  const [movQty, setMovQty] = useState('')
+  const [movMotivo, setMovMotivo] = useState('')
   const [form, setForm] = useState<ProdutoForm>(formVazio)
   const [saving, setSaving] = useState(false)
 
@@ -239,24 +246,12 @@ export function ProdutosPage() {
             <div className="p-6">
               <div className="grid grid-cols-2 gap-3 mb-8">
                 <button
-                  onClick={() => {
-                    const qty = prompt('Quantidade a registrar como entrada:')
-                    if (qty && Number(qty) > 0) {
-                      registerEntry(selectedProduct.id, Number(qty), 'Entrada manual', 'Operador')
-                      setSelectedProduct(null)
-                    }
-                  }}
+                  onClick={() => { setMovModal({ tipo: 'entrada', prodId: selectedProduct.id }); setMovQty(''); setMovMotivo('') }}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors">
                   <TrendingUp size={16} /> Registrar Entrada
                 </button>
                 <button
-                  onClick={() => {
-                    const qty = prompt('Quantidade a registrar como saída/ajuste:')
-                    if (qty && Number(qty) > 0) {
-                      registerExit(selectedProduct.id, Number(qty), 'Ajuste/Saída manual', 'Operador')
-                      setSelectedProduct(null)
-                    }
-                  }}
+                  onClick={() => { setMovModal({ tipo: 'saida', prodId: selectedProduct.id }); setMovQty(''); setMovMotivo('') }}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-700 font-bold text-sm rounded-xl border border-red-200 hover:bg-red-100 transition-colors">
                   <TrendingDown size={16} /> Ajuste / Saída
                 </button>
@@ -368,6 +363,54 @@ export function ProdutosPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Modal Movimentação */}
+      {movModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMovModal(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-fade-in">
+            <div className={`px-6 py-4 border-b ${movModal.tipo === 'entrada' ? 'bg-emerald-50' : 'bg-red-50'}`}>
+              <h3 className="text-sm font-bold text-gray-900">
+                {movModal.tipo === 'entrada' ? 'Registrar Entrada' : 'Registrar Saída/Ajuste'}
+              </h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Quantidade *</label>
+                <input type="number" min="1" value={movQty} onChange={e => setMovQty(e.target.value)} autoFocus
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-green-500/20" placeholder="0" />
+                {movModal.tipo === 'saida' && selectedProduct && Number(movQty) > selectedProduct.currentStock && (
+                  <p className="text-xs text-red-500 mt-1">Estoque atual: {selectedProduct.currentStock}. Quantidade excede o disponível.</p>
+                )}
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Motivo</label>
+                <input type="text" value={movMotivo} onChange={e => setMovMotivo(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none" placeholder="Ex: Compra, uso em procedimento..." />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t flex justify-between">
+              <button onClick={() => setMovModal(null)} className="px-4 py-2 text-sm text-gray-500">Cancelar</button>
+              <button
+                disabled={!movQty || Number(movQty) <= 0 || (movModal.tipo === 'saida' && selectedProduct && Number(movQty) > selectedProduct.currentStock)}
+                onClick={async () => {
+                  const qty = Number(movQty)
+                  if (qty <= 0) return
+                  if (movModal.tipo === 'entrada') {
+                    await registerEntry(movModal.prodId, qty, movMotivo || 'Entrada manual', user?.nome || 'Operador')
+                  } else {
+                    await registerExit(movModal.prodId, qty, movMotivo || 'Saída manual', user?.nome || 'Operador')
+                  }
+                  setMovModal(null)
+                  setSelectedProduct(null)
+                  toast({ title: 'Movimentação registrada', type: 'success' })
+                }}
+                className={`flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white rounded-xl disabled:opacity-40 ${movModal.tipo === 'entrada' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'}`}>
+                Confirmar
+              </button>
+            </div>
           </div>
         </div>
       )}

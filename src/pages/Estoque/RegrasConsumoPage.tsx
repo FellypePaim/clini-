@@ -23,7 +23,7 @@ export function RegrasConsumoPage() {
     if (!clinicaId) return
     setIsLoading(true)
     const { data, error } = await supabase
-      .from('estoque_regras_consumo' as any)
+      .from('procedimento_insumos')
       .select('*')
       .eq('clinica_id', clinicaId)
     
@@ -46,7 +46,7 @@ export function RegrasConsumoPage() {
   useEffect(() => { loadRules() }, [loadRules])
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('estoque_regras_consumo' as any).delete().eq('id', id)
+    const { error } = await supabase.from('procedimento_insumos').delete().eq('id', id)
     if (error) {
       toast({ title: 'Erro', description: error.message, type: 'error' })
       return
@@ -68,7 +68,7 @@ export function RegrasConsumoPage() {
     }
 
     const { data, error } = await supabase
-      .from('estoque_regras_consumo' as any)
+      .from('procedimento_insumos')
       .insert(payload)
       .select()
       .single()
