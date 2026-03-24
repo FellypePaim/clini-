@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import {
   ClipboardList, Plus, X, Loader2, Search,
-  CheckCircle2, XCircle, Shield, Printer, Download, Eye, Send
+  CheckCircle2, XCircle, Shield, Printer, Download, Eye, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import { usePrescricoes } from '../../hooks/usePrescricoes'
@@ -36,6 +36,9 @@ export function PrescricoesPage() {
   const [conteudo, setConteudo] = useState(TEMPLATE)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const PAGE_SIZE = 8
 
   const buscarPacientes = useCallback(async (q: string) => {
     if (!clinicaId || q.length < 2) { setPacienteOpts([]); return }
@@ -201,6 +204,8 @@ export function PrescricoesPage() {
   const filtered = prescricoes.filter(p =>
     !search || p.paciente_nome.toLowerCase().includes(search.toLowerCase())
   )
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   return (
     <div className="flex flex-col h-full bg-slate-50/50">
@@ -234,52 +239,95 @@ export function PrescricoesPage() {
             <button onClick={() => setShowModal(true)} className="mt-3 text-green-600 text-sm font-medium hover:underline">Criar primeira prescrição</button>
           </div>
         ) : (
-          <div className="space-y-3 max-w-4xl mx-auto">
-            {filtered.map(p => (
-              <div key={p.id} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
-                <div className="p-5 flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0 font-bold text-sm">
-                    Rx
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-bold text-slate-800">{p.paciente_nome}</h3>
-                      <span className="text-xs text-slate-400">{fmtDate(p.created_at)}</span>
+          <div className="max-w-4xl mx-auto space-y-4">
+            {/* Contagem */}
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-400">{filtered.length} prescrição(ões){search ? ' encontrada(s)' : ''}</p>
+            </div>
+
+            {/* Lista paginada */}
+            <div className="space-y-3">
+              {paginated.map(p => {
+                const isExpanded = expandedId === p.id
+                return (
+                  <div key={p.id} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                    {/* Header do card — sempre visível */}
+                    <div className="p-4 flex items-center gap-4 cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : p.id)}>
+                      <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0 font-bold text-sm">
+                        Rx
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-slate-800 text-sm">{p.paciente_nome}</h3>
+                          <Badge className={cn("border-none text-[9px] uppercase font-bold",
+                            p.status === 'ativa' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600')}>
+                            {p.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">Dr(a). {p.profissional_nome} · {fmtDate(p.created_at)}</p>
+                      </div>
+                      <ChevronDown className={cn("w-4 h-4 text-slate-300 transition-transform", isExpanded && "rotate-180")} />
                     </div>
-                    <p className="text-xs text-slate-500 mb-2">Dr(a). {p.profissional_nome}</p>
-                    <pre className="text-xs text-slate-600 bg-slate-50 rounded-lg p-3 font-mono whitespace-pre-wrap line-clamp-3 border border-slate-100">{p.conteudo}</pre>
-                  </div>
-                </div>
-                <div className="px-5 pb-4 flex items-center justify-between border-t border-slate-50 pt-3">
-                  <div className="flex items-center gap-3">
-                    <Badge className={cn("border-none text-[10px] uppercase font-bold tracking-widest",
-                      p.status === 'ativa' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600')}>
-                      {p.status === 'ativa' ? <CheckCircle2 size={10} className="inline mr-1" /> : <XCircle size={10} className="inline mr-1" />}
-                      {p.status}
-                    </Badge>
-                    <span className="flex items-center gap-1 text-[9px] font-mono text-slate-300">
-                      <Shield size={10} /> {p.assinatura_hash.substring(0, 16)}...
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => setViewingPresc(p)} className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                      <Eye className="w-3 h-3" /> Ver
-                    </button>
-                    <button onClick={() => handlePrint(p)} className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
-                      <Printer className="w-3 h-3" /> Imprimir
-                    </button>
-                    <button onClick={() => handleDownloadPDF(p)} className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-green-600 hover:bg-green-50 rounded-lg transition-colors">
-                      <Download className="w-3 h-3" /> PDF
-                    </button>
-                    {p.status === 'ativa' && (
-                      <button onClick={() => cancelarPrescricao(p.id)} className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <XCircle className="w-3 h-3" /> Cancelar
-                      </button>
+
+                    {/* Detalhes — expandido */}
+                    {isExpanded && (
+                      <div className="border-t border-slate-100 animate-fade-in">
+                        <div className="p-4 bg-slate-50/50">
+                          <pre className="text-xs text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">{p.conteudo}</pre>
+                        </div>
+                        <div className="px-4 py-3 flex items-center justify-between border-t border-slate-100">
+                          <span className="flex items-center gap-1 text-[9px] font-mono text-slate-300">
+                            <Shield size={10} /> {p.assinatura_hash.substring(0, 20)}...
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => setViewingPresc(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                              <Eye className="w-3 h-3" /> Ver Documento
+                            </button>
+                            <button onClick={() => handlePrint(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                              <Printer className="w-3 h-3" /> Imprimir
+                            </button>
+                            <button onClick={() => handleDownloadPDF(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                              <Download className="w-3 h-3" /> PDF
+                            </button>
+                            {p.status === 'ativa' && (
+                              <button onClick={() => cancelarPrescricao(p.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                <XCircle className="w-3 h-3" /> Cancelar
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
+                )
+              })}
+            </div>
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                <p className="text-xs text-slate-400">
+                  {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} de {filtered.length}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 transition-colors text-slate-500">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                    <button key={n} onClick={() => setPage(n)}
+                      className={cn("w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors",
+                        page === n ? "bg-green-600 text-white" : "border border-slate-200 text-slate-500 hover:bg-slate-50")}>
+                      {n}
+                    </button>
+                  ))}
+                  <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-30 transition-colors text-slate-500">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            ))}
+            )}
           </div>
         )}
       </main>
