@@ -1,66 +1,110 @@
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { MainLayout } from '../components/layout/MainLayout'
+
+// ─── Loading fallback ──────────────────────────────────
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-[60vh]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500" />
+    </div>
+  )
+}
+
+// ─── Helper: lazy com named export ─────────────────────
+function lazyNamed<T extends Record<string, any>>(
+  factory: () => Promise<T>,
+  name: keyof T
+) {
+  return lazy(() => factory().then(m => ({ default: m[name] })))
+}
+
+// ─── Páginas públicas (carregam rápido, manter eager) ──
 import { LoginPage } from '../pages/Login/LoginPage'
 import { RegisterPage } from '../pages/Login/RegisterPage'
 import { WaitingApprovalPage } from '../pages/Login/WaitingApprovalPage'
-import { DashboardPage } from '../pages/Dashboard/DashboardPage'
-import { AgendaPage } from '../pages/Agenda/AgendaPage'
-import { PacientesPage } from '../pages/Pacientes/PacientesPage'
-import { PatientProfilePage } from '../pages/Pacientes/PatientProfilePage'
-import { PublicAnamnesisPage } from '../pages/Public/PublicAnamnesisPage'
-import { OvyvaPage } from '../pages/Ovyva/OvyvaPage'
-import { OvyvaConfigPage } from '../pages/Ovyva/OvyvaConfigPage'
-import { OvyvaHistoryPage } from '../pages/Ovyva/OvyvaHistoryPage'
-import { EmConstrucao } from '../components/ui/EmConstrucao'
-import { VerdeskPage } from '../pages/Verdesk/VerdeskPage'
-import { PerformancePage } from '../pages/Verdesk/PerformancePage'
-import { CampanhasPage } from '../pages/Verdesk/CampanhasPage'
-import { EstoquePage } from '../pages/Estoque/EstoquePage'
-import { ProdutosPage } from '../pages/Estoque/ProdutosPage'
-import { MovimentacoesPage } from '../pages/Estoque/MovimentacoesPage'
-import { AlertasPage } from '../pages/Estoque/AlertasPage'
-import { RelatoriosPage } from '../pages/Relatorios/RelatoriosPage'
-import { ProducaoProfissionalReport } from '../pages/Relatorios/ProducaoProfissionalReport'
-import { FaturamentoReport } from '../pages/Relatorios/FaturamentoReport'
-import { ConfiguracoesLayout } from '../pages/Configuracoes/ConfiguracoesPage'
-import { ClinicaPage } from '../pages/Configuracoes/ClinicaPage'
-import { ProfissionaisPage } from '../pages/Configuracoes/ProfissionaisPage'
-import { ProcedimentosPage } from '../pages/Configuracoes/ProcedimentosPage'
-import { IntegracoesPage } from '../pages/Configuracoes/IntegracoesPage'
-import { NotificacoesPage } from '../pages/Configuracoes/NotificacoesPage'
-import { SegurancaPage } from '../pages/Configuracoes/SegurancaPage'
-import { FinanceiroPage } from '../pages/Financeiro/FinanceiroPage'
-import { PrescricoesPage } from '../pages/Prescricoes/PrescricoesPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
-import { DiagnosticoPage } from '../pages/Dev/DiagnosticoPage'
-import { StorageDiagnosticoPage } from '../pages/Dev/StorageDiagnosticoPage'
-import { SuperAdminLayout } from '../components/superadmin/SuperAdminLayout'
-import { SuperDashboardPage } from '../pages/SuperAdmin/SuperDashboardPage'
-import { SuperClinicasPage } from '../pages/SuperAdmin/SuperClinicasPage'
-import { SuperUsuariosPage } from '../pages/SuperAdmin/SuperUsuariosPage'
-import { SuperSaudePage } from '../pages/SuperAdmin/SuperSaudePage'
-import { SuperFinanceiroPage } from '../pages/SuperAdmin/SuperFinanceiroPage'
-import { SuperIAPage } from '../pages/SuperAdmin/SuperIAPage'
-import { SuperWhatsAppPage } from '../pages/SuperAdmin/SuperWhatsAppPage'
-import { SuperLogsPage } from '../pages/SuperAdmin/SuperLogsPage'
-import { SuperConfiguracoesPage } from '../pages/SuperAdmin/SuperConfiguracoesPage'
-import { SuperSuportePage } from '../pages/SuperAdmin/SuperSuportePage'
-import { SuperAdminDiagnosticoPage } from '../pages/Dev/SuperAdminDiagnosticoPage'
-import { RegrasConsumoPage } from '../pages/Estoque/RegrasConsumoPage'
-import { FunilLeadsReport } from '../pages/Relatorios/FunilLeadsReport'
-import { ProcedimentosReport } from '../pages/Relatorios/ProcedimentosReport'
-import { PacientesReport } from '../pages/Relatorios/PacientesReport'
-import { RetornoReport } from '../pages/Relatorios/RetornoReport'
-import { ConvenioReport } from '../pages/Relatorios/ConvenioReport'
-import { InadimplenciaReport } from '../pages/Relatorios/InadimplenciaReport'
-import { DREReport } from '../pages/Relatorios/DREReport'
-import { CampanhasReport } from '../pages/Relatorios/CampanhasReport'
-import { OrigemReport } from '../pages/Relatorios/OrigemReport'
-import { OVYVAReport } from '../pages/Relatorios/OVYVAReport'
-import { FiscalReport } from '../pages/Relatorios/FiscalReport'
-// ─── Guard de autenticação ────────────────────────────
+
+// ─── Páginas lazy — Core ───────────────────────────────
+const DashboardPage = lazyNamed(() => import('../pages/Dashboard/DashboardPage'), 'DashboardPage')
+const AgendaPage = lazyNamed(() => import('../pages/Agenda/AgendaPage'), 'AgendaPage')
+
+// ─── Páginas lazy — Pacientes ──────────────────────────
+const PacientesPage = lazyNamed(() => import('../pages/Pacientes/PacientesPage'), 'PacientesPage')
+const PatientProfilePage = lazyNamed(() => import('../pages/Pacientes/PatientProfilePage'), 'PatientProfilePage')
+const PublicAnamnesisPage = lazyNamed(() => import('../pages/Public/PublicAnamnesisPage'), 'PublicAnamnesisPage')
+
+// ─── Páginas lazy — OVYVA ──────────────────────────────
+const OvyvaPage = lazyNamed(() => import('../pages/Ovyva/OvyvaPage'), 'OvyvaPage')
+const OvyvaConfigPage = lazyNamed(() => import('../pages/Ovyva/OvyvaConfigPage'), 'OvyvaConfigPage')
+const OvyvaHistoryPage = lazyNamed(() => import('../pages/Ovyva/OvyvaHistoryPage'), 'OvyvaHistoryPage')
+
+// ─── Páginas lazy — Verdesk CRM ────────────────────────
+const VerdeskPage = lazyNamed(() => import('../pages/Verdesk/VerdeskPage'), 'VerdeskPage')
+const PerformancePage = lazyNamed(() => import('../pages/Verdesk/PerformancePage'), 'PerformancePage')
+const CampanhasPage = lazyNamed(() => import('../pages/Verdesk/CampanhasPage'), 'CampanhasPage')
+
+// ─── Páginas lazy — Estoque ────────────────────────────
+const EstoquePage = lazyNamed(() => import('../pages/Estoque/EstoquePage'), 'EstoquePage')
+const ProdutosPage = lazyNamed(() => import('../pages/Estoque/ProdutosPage'), 'ProdutosPage')
+const MovimentacoesPage = lazyNamed(() => import('../pages/Estoque/MovimentacoesPage'), 'MovimentacoesPage')
+const AlertasPage = lazyNamed(() => import('../pages/Estoque/AlertasPage'), 'AlertasPage')
+const RegrasConsumoPage = lazyNamed(() => import('../pages/Estoque/RegrasConsumoPage'), 'RegrasConsumoPage')
+
+// ─── Páginas lazy — Relatórios ─────────────────────────
+const RelatoriosPage = lazyNamed(() => import('../pages/Relatorios/RelatoriosPage'), 'RelatoriosPage')
+const ProducaoProfissionalReport = lazyNamed(() => import('../pages/Relatorios/ProducaoProfissionalReport'), 'ProducaoProfissionalReport')
+const FaturamentoReport = lazyNamed(() => import('../pages/Relatorios/FaturamentoReport'), 'FaturamentoReport')
+const FunilLeadsReport = lazyNamed(() => import('../pages/Relatorios/FunilLeadsReport'), 'FunilLeadsReport')
+const ProcedimentosReport = lazyNamed(() => import('../pages/Relatorios/ProcedimentosReport'), 'ProcedimentosReport')
+const PacientesReport = lazyNamed(() => import('../pages/Relatorios/PacientesReport'), 'PacientesReport')
+const RetornoReport = lazyNamed(() => import('../pages/Relatorios/RetornoReport'), 'RetornoReport')
+const ConvenioReport = lazyNamed(() => import('../pages/Relatorios/ConvenioReport'), 'ConvenioReport')
+const InadimplenciaReport = lazyNamed(() => import('../pages/Relatorios/InadimplenciaReport'), 'InadimplenciaReport')
+const DREReport = lazyNamed(() => import('../pages/Relatorios/DREReport'), 'DREReport')
+const CampanhasReport = lazyNamed(() => import('../pages/Relatorios/CampanhasReport'), 'CampanhasReport')
+const OrigemReport = lazyNamed(() => import('../pages/Relatorios/OrigemReport'), 'OrigemReport')
+const OVYVAReport = lazyNamed(() => import('../pages/Relatorios/OVYVAReport'), 'OVYVAReport')
+const FiscalReport = lazyNamed(() => import('../pages/Relatorios/FiscalReport'), 'FiscalReport')
+
+// ─── Páginas lazy — Financeiro ─────────────────────────
+const FinanceiroPage = lazyNamed(() => import('../pages/Financeiro/FinanceiroPage'), 'FinanceiroPage')
+
+// ─── Páginas lazy — Prescrições ────────────────────────
+const PrescricoesPage = lazyNamed(() => import('../pages/Prescricoes/PrescricoesPage'), 'PrescricoesPage')
+
+// ─── Páginas lazy — Configurações ──────────────────────
+const ConfiguracoesLayout = lazyNamed(() => import('../pages/Configuracoes/ConfiguracoesPage'), 'ConfiguracoesLayout')
+const ClinicaPage = lazyNamed(() => import('../pages/Configuracoes/ClinicaPage'), 'ClinicaPage')
+const ProfissionaisPage = lazyNamed(() => import('../pages/Configuracoes/ProfissionaisPage'), 'ProfissionaisPage')
+const ProcedimentosPage = lazyNamed(() => import('../pages/Configuracoes/ProcedimentosPage'), 'ProcedimentosPage')
+const IntegracoesPage = lazyNamed(() => import('../pages/Configuracoes/IntegracoesPage'), 'IntegracoesPage')
+const NotificacoesPage = lazyNamed(() => import('../pages/Configuracoes/NotificacoesPage'), 'NotificacoesPage')
+const SegurancaPage = lazyNamed(() => import('../pages/Configuracoes/SegurancaPage'), 'SegurancaPage')
+
+// ─── Páginas lazy — SuperAdmin ─────────────────────────
+const SuperAdminLayout = lazyNamed(() => import('../components/superadmin/SuperAdminLayout'), 'SuperAdminLayout')
+const SuperDashboardPage = lazyNamed(() => import('../pages/SuperAdmin/SuperDashboardPage'), 'SuperDashboardPage')
+const SuperClinicasPage = lazyNamed(() => import('../pages/SuperAdmin/SuperClinicasPage'), 'SuperClinicasPage')
+const SuperUsuariosPage = lazyNamed(() => import('../pages/SuperAdmin/SuperUsuariosPage'), 'SuperUsuariosPage')
+const SuperSaudePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSaudePage'), 'SuperSaudePage')
+const SuperFinanceiroPage = lazyNamed(() => import('../pages/SuperAdmin/SuperFinanceiroPage'), 'SuperFinanceiroPage')
+const SuperIAPage = lazyNamed(() => import('../pages/SuperAdmin/SuperIAPage'), 'SuperIAPage')
+const SuperWhatsAppPage = lazyNamed(() => import('../pages/SuperAdmin/SuperWhatsAppPage'), 'SuperWhatsAppPage')
+const SuperLogsPage = lazyNamed(() => import('../pages/SuperAdmin/SuperLogsPage'), 'SuperLogsPage')
+const SuperConfiguracoesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperConfiguracoesPage'), 'SuperConfiguracoesPage')
+const SuperSuportePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSuportePage'), 'SuperSuportePage')
+
+// ─── Páginas lazy — Dev ────────────────────────────────
+const DiagnosticoPage = lazyNamed(() => import('../pages/Dev/DiagnosticoPage'), 'DiagnosticoPage')
+const StorageDiagnosticoPage = lazyNamed(() => import('../pages/Dev/StorageDiagnosticoPage'), 'StorageDiagnosticoPage')
+const SuperAdminDiagnosticoPage = lazyNamed(() => import('../pages/Dev/SuperAdminDiagnosticoPage'), 'SuperAdminDiagnosticoPage')
+
+// ─── UI ────────────────────────────────────────────────
+import { EmConstrucao } from '../components/ui/EmConstrucao'
+
+// ─── Guard de autenticação ─────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isPendingApproval } = useAuthStore()
   if (!isAuthenticated) return <Navigate to="/login" replace />
@@ -78,7 +122,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// ─── Guard de SuperAdmin ──────────────────────────────
+// ─── Guard de SuperAdmin ───────────────────────────────
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore()
   if (!isAuthenticated || user?.role !== 'superadmin') {
@@ -87,143 +131,145 @@ function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-// ─── Módulos "Em Construção" ──────────────────────────
+// ─── Módulos "Em Construção" ───────────────────────────
 const modulos: { path: string; name: string; icon: string; desc: string }[] = []
 
 export function AppRouter() {
   return (
-    <Routes>
-      {/* Rotas públicas */}
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        }
-      />
-      <Route path="/aguardando-aprovacao" element={<WaitingApprovalPage />} />
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Rotas públicas */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          }
+        />
+        <Route path="/aguardando-aprovacao" element={<WaitingApprovalPage />} />
 
-      {/* Rotas protegidas */}
-      <Route
-        element={
-          <RequireAuth>
-            <MainLayout />
-          </RequireAuth>
-        }
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/agenda" element={<AgendaPage />} />
-        
-        {/* Módulo Pacientes / PEP */}
-        <Route path="/pacientes" element={<PacientesPage />} />
-        <Route path="/pacientes/:id" element={<PatientProfilePage />} />
+        {/* Rotas protegidas */}
+        <Route
+          element={
+            <RequireAuth>
+              <MainLayout />
+            </RequireAuth>
+          }
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/agenda" element={<AgendaPage />} />
 
-        {/* Módulo OVYVA */}
-        <Route path="/ovyva" element={<OvyvaPage />} />
-        <Route path="/ovyva/configuracoes" element={<OvyvaConfigPage />} />
-        <Route path="/ovyva/historico" element={<OvyvaHistoryPage />} />
+          {/* Módulo Pacientes / PEP */}
+          <Route path="/pacientes" element={<PacientesPage />} />
+          <Route path="/pacientes/:id" element={<PatientProfilePage />} />
 
-        {/* Módulo Verdesk CRM */}
-        <Route path="/verdesk" element={<VerdeskPage />} />
-        <Route path="/verdesk/performance" element={<PerformancePage />} />
-        <Route path="/verdesk/campanhas" element={<CampanhasPage />} />
+          {/* Módulo OVYVA */}
+          <Route path="/ovyva" element={<OvyvaPage />} />
+          <Route path="/ovyva/configuracoes" element={<OvyvaConfigPage />} />
+          <Route path="/ovyva/historico" element={<OvyvaHistoryPage />} />
 
-        {/* Módulo Estoque */}
-        <Route path="/estoque" element={<EstoquePage />} />
-        <Route path="/estoque/produtos" element={<ProdutosPage />} />
-        <Route path="/estoque/movimentacoes" element={<MovimentacoesPage />} />
-        <Route path="/estoque/alertas" element={<AlertasPage />} />
-        <Route path="/estoque/regras" element={<RegrasConsumoPage />} />
+          {/* Módulo Verdesk CRM */}
+          <Route path="/verdesk" element={<VerdeskPage />} />
+          <Route path="/verdesk/performance" element={<PerformancePage />} />
+          <Route path="/verdesk/campanhas" element={<CampanhasPage />} />
 
-        {/* Módulo Relatórios */}
-        <Route path="/relatorios" element={<RelatoriosPage />} />
-        <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
-        <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
-        <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
-        <Route path="/relatorios/procedimentos" element={<ProcedimentosReport />} />
-        <Route path="/relatorios/pacientes" element={<PacientesReport />} />
-        <Route path="/relatorios/retorno" element={<RetornoReport />} />
-        <Route path="/relatorios/convenios" element={<ConvenioReport />} />
-        <Route path="/relatorios/inadimplencia" element={<InadimplenciaReport />} />
-        <Route path="/relatorios/dre" element={<DREReport />} />
-        <Route path="/relatorios/campanhas" element={<CampanhasReport />} />
-        <Route path="/relatorios/origem" element={<OrigemReport />} />
-        <Route path="/relatorios/ovyva" element={<OVYVAReport />} />
-        <Route path="/relatorios/fiscal" element={<FiscalReport />} />
+          {/* Módulo Estoque */}
+          <Route path="/estoque" element={<EstoquePage />} />
+          <Route path="/estoque/produtos" element={<ProdutosPage />} />
+          <Route path="/estoque/movimentacoes" element={<MovimentacoesPage />} />
+          <Route path="/estoque/alertas" element={<AlertasPage />} />
+          <Route path="/estoque/regras" element={<RegrasConsumoPage />} />
 
-        {/* Módulo Financeiro */}
-        <Route path="/financeiro" element={<FinanceiroPage />} />
+          {/* Módulo Relatórios */}
+          <Route path="/relatorios" element={<RelatoriosPage />} />
+          <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
+          <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
+          <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
+          <Route path="/relatorios/procedimentos" element={<ProcedimentosReport />} />
+          <Route path="/relatorios/pacientes" element={<PacientesReport />} />
+          <Route path="/relatorios/retorno" element={<RetornoReport />} />
+          <Route path="/relatorios/convenios" element={<ConvenioReport />} />
+          <Route path="/relatorios/inadimplencia" element={<InadimplenciaReport />} />
+          <Route path="/relatorios/dre" element={<DREReport />} />
+          <Route path="/relatorios/campanhas" element={<CampanhasReport />} />
+          <Route path="/relatorios/origem" element={<OrigemReport />} />
+          <Route path="/relatorios/ovyva" element={<OVYVAReport />} />
+          <Route path="/relatorios/fiscal" element={<FiscalReport />} />
 
-        {/* Módulo Prescrições */}
-        <Route path="/prescricoes" element={<PrescricoesPage />} />
+          {/* Módulo Financeiro */}
+          <Route path="/financeiro" element={<FinanceiroPage />} />
 
-        {/* Módulo Configurações */}
-        <Route path="/configuracoes" element={<ConfiguracoesLayout />}>
-           <Route path="clinica" element={<ClinicaPage />} />
-           <Route path="profissionais" element={<ProfissionaisPage />} />
-           <Route path="procedimentos" element={<ProcedimentosPage />} />
-           <Route path="integracoes" element={<IntegracoesPage />} />
-           <Route path="notificacoes" element={<NotificacoesPage />} />
-           <Route path="seguranca" element={<SegurancaPage />} />
-           <Route index element={<Navigate to="/configuracoes/clinica" replace />} />
+          {/* Módulo Prescrições */}
+          <Route path="/prescricoes" element={<PrescricoesPage />} />
+
+          {/* Módulo Configurações */}
+          <Route path="/configuracoes" element={<ConfiguracoesLayout />}>
+             <Route path="clinica" element={<ClinicaPage />} />
+             <Route path="profissionais" element={<ProfissionaisPage />} />
+             <Route path="procedimentos" element={<ProcedimentosPage />} />
+             <Route path="integracoes" element={<IntegracoesPage />} />
+             <Route path="notificacoes" element={<NotificacoesPage />} />
+             <Route path="seguranca" element={<SegurancaPage />} />
+             <Route index element={<Navigate to="/configuracoes/clinica" replace />} />
+          </Route>
+
+          {/* Módulos em construção */}
+          {modulos.map(({ path, name, icon, desc }) => (
+            <Route
+              key={path}
+              path={`/${path}`}
+              element={<EmConstrucao moduleName={name} iconName={icon} description={desc} eta="Fase 2" />}
+            />
+          ))}
+
+          {/* Diagnóstico DEV */}
+          {import.meta.env.DEV && (
+            <>
+              <Route path="/dev/diagnostico" element={<DiagnosticoPage />} />
+              <Route path="/dev/storage-diagnostico" element={<StorageDiagnosticoPage />} />
+              <Route path="/dev/superadmin-diagnostico" element={<SuperAdminDiagnosticoPage />} />
+            </>
+          )}
         </Route>
 
-        {/* Módulos em construção */}
-        {modulos.map(({ path, name, icon, desc }) => (
-          <Route
-            key={path}
-            path={`/${path}`}
-            element={<EmConstrucao moduleName={name} iconName={icon} description={desc} eta="Fase 2" />}
-          />
-        ))}
+        {/* Rota pública de Anamnese */}
+        <Route path="/anamnese/:token" element={<PublicAnamnesisPage />} />
 
-        {/* Diagnóstico DEV */}
-        {import.meta.env.DEV && (
-          <>
-            <Route path="/dev/diagnostico" element={<DiagnosticoPage />} />
-            <Route path="/dev/storage-diagnostico" element={<StorageDiagnosticoPage />} />
-            <Route path="/dev/superadmin-diagnostico" element={<SuperAdminDiagnosticoPage />} />
-          </>
-        )}
-      </Route>
+        {/* Catch-all 404 */}
+        <Route path="*" element={<NotFoundPage />} />
 
-      {/* Rota pública de Anamnese */}
-      <Route path="/anamnese/:token" element={<PublicAnamnesisPage />} />
-
-      {/* Catch-all 404 */}
-      <Route path="*" element={<NotFoundPage />} />
-
-      {/* Rotas de SuperAdmin */}
-      <Route
-        path="/superadmin"
-        element={
-          <RequireSuperAdmin>
-            <SuperAdminLayout />
-          </RequireSuperAdmin>
-        }
-      >
-        <Route index element={<SuperDashboardPage />} />
-        <Route path="clinicas" element={<SuperClinicasPage />} />
-        <Route path="usuarios" element={<SuperUsuariosPage />} />
-        <Route path="saude" element={<SuperSaudePage />} />
-        <Route path="financeiro" element={<SuperFinanceiroPage />} />
-        <Route path="ia" element={<SuperIAPage />} />
-        <Route path="whatsapp" element={<SuperWhatsAppPage />} />
-        <Route path="logs" element={<SuperLogsPage />} />
-        <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
-        <Route path="suporte" element={<SuperSuportePage />} />
-        <Route path="releases" element={<SuperSuportePage />} />
-      </Route>
-    </Routes>
+        {/* Rotas de SuperAdmin */}
+        <Route
+          path="/superadmin"
+          element={
+            <RequireSuperAdmin>
+              <SuperAdminLayout />
+            </RequireSuperAdmin>
+          }
+        >
+          <Route index element={<SuperDashboardPage />} />
+          <Route path="clinicas" element={<SuperClinicasPage />} />
+          <Route path="usuarios" element={<SuperUsuariosPage />} />
+          <Route path="saude" element={<SuperSaudePage />} />
+          <Route path="financeiro" element={<SuperFinanceiroPage />} />
+          <Route path="ia" element={<SuperIAPage />} />
+          <Route path="whatsapp" element={<SuperWhatsAppPage />} />
+          <Route path="logs" element={<SuperLogsPage />} />
+          <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
+          <Route path="suporte" element={<SuperSuportePage />} />
+          <Route path="releases" element={<SuperSuportePage />} />
+        </Route>
+      </Routes>
+    </Suspense>
   )
 }

@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.2.0** (Registro, OVYVA v2, Drag-and-drop — 23/03/2026)
+- Versão: **v1.3.0** (Types sync, ai_usage_logs, Code-splitting — 24/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -27,6 +27,7 @@
 - Fase 15: ✅ Diagnósticos e Testes
 - Fase 16: ✅ Revisão Geral Completa — 65+ correções
 - Fase 17: ✅ **Fluxo de Registro + Multi-tenant hardening (23/03/2026)**
+- Fase 18: ✅ **Types sync + ai_usage_logs + Code-splitting (24/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -41,7 +42,7 @@ auditoria_global, feature_flags, tickets_suporte, releases
 ### Colunas adicionadas:
 - ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
 - ovyva_mensagens: metadata JSONB, sessao_id UUID, sessao_inicio BOOLEAN
-- harmonizacoes: mapa_url TEXT
+- harmonizacoes: mapeamento JSONB (dados do mapa facial)
 - documentos_paciente: storage_path TEXT
 - profiles: conselho TEXT, telefone TEXT, clinica_id nullable (para registro pendente)
 
@@ -73,6 +74,7 @@ auditoria_global, feature_flags, tickets_suporte, releases
 10. `20260323000004_profiles_rls_same_clinica.sql` — SELECT mesma clínica
 11. `20260323000005_fix_profiles_rls_recursion.sql` — SECURITY DEFINER function
 12. `20260323000006_profiles_update_same_clinica.sql` — UPDATE mesma clínica
+13. `20260324000001_ai_usage_logs.sql` — Tabela ai_usage_logs + RLS
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
@@ -187,8 +189,12 @@ Actions:
 - `supabase/functions/user-manager/index.ts` — Gerenciamento de colaboradores
 - `CONTEXTO_PROJETO.md` — Este arquivo
 
-## 11. PRÓXIMOS PASSOS
+## 11. CODE-SPLITTING
+- Todas as 57+ páginas usam `React.lazy()` + `Suspense`
+- Bundle inicial: 3.1MB → **562KB** (redução de 82%)
+- ~60 chunks lazy: relatórios, SuperAdmin, jsPDF, recharts carregam sob demanda
+- Helper `lazyNamed()` para named exports em `src/router/AppRouter.tsx`
+
+## 12. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
 2. Testar fluxo WhatsApp completo (Evolution API + OVYVA)
-3. Regenerar `database.types.ts`
-4. Code-splitting para reduzir bundle (3.1MB → lazy loading)
