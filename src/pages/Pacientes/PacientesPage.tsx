@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Search, Filter, ChevronLeft, ChevronRight, MoreHorizontal, User, X, Upload, Loader2, FileText, CheckCircle } from 'lucide-react'
+import { Plus, Search, Filter, ChevronLeft, ChevronRight, User, X, Upload, Loader2, FileText, CheckCircle, Users, UserPlus, CalendarClock, Phone, MessageCircle, Calendar } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
@@ -29,6 +29,36 @@ const formVazio: NovoPatienteForm = {
   convenio: '',
 }
 
+// ── Helpers ──────────────────────────────────────────────
+function formatPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  return phone
+}
+
+function formatCPF(cpf: string): string {
+  const digits = cpf.replace(/\D/g, '')
+  if (digits.length === 11) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+  return cpf
+}
+
+function calcAge(dateStr: string): number | null {
+  if (!dateStr) return null
+  const birth = new Date(dateStr + 'T00:00')
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const m = today.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--
+  return age
+}
+
+function isThisMonth(dateStr: string): boolean {
+  const d = new Date(dateStr)
+  const now = new Date()
+  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+}
+
 export function PacientesPage() {
   const navigate = useNavigate()
   const { patients, getPatients, createPatient, isLoading } = usePatients()
@@ -47,18 +77,38 @@ export function PacientesPage() {
     getPatients()
   }, [getPatients])
 
-  // ── Filtragem dos dados ──────────────────────────────
+  // ── KPIs ───────────────────────────────────────────────
+  const kpis = useMemo(() => {
+    const total = patients.length
+    const thisMonth = patients.filter(p => isThisMonth(p.criadoEm)).length
+    const withAppointment = patients.filter(p => p.ultimaConsulta).length
+    const withoutReturn = patients.filter(p => {
+      if (!p.ultimaConsulta) return false
+      const days = Math.floor((Date.now() - new Date(p.ultimaConsulta).getTime()) / (1000 * 3600 * 24))
+      return days > 90
+    }).length
+    return { total, thisMonth, withAppointment, withoutReturn }
+  }, [patients])
+
+  // ── Filtragem ──────────────────────────────────────────
   const filteredPatients = useMemo(() => {
     return patients.filter(p => {
-      const matchSearch = p.nome.toLowerCase().includes(search.toLowerCase()) ||
-                          p.cpf.includes(search) ||
-                          p.contato.telefone.includes(search)
+      const q = search.toLowerCase()
+      const matchSearch = !q ||
+        p.nome.toLowerCase().includes(q) ||
+        p.cpf?.includes(search) ||
+        p.contato?.telefone?.includes(search)
       const matchConvenio = filterConvenio === 'todos' || p.convenio === filterConvenio
       return matchSearch && matchConvenio
     })
   }, [patients, search, filterConvenio])
 
-  // ── Paginação ─────────────────────────────────────────
+  // ── Convênios únicos ───────────────────────────────────
+  const convenios = useMemo(() => {
+    return Array.from(new Set(patients.map(p => p.convenio).filter(Boolean)))
+  }, [patients])
+
+  // ── Paginação ──────────────────────────────────────────
   const totalPages = Math.ceil(filteredPatients.length / PAGE_SIZE)
   const paginatedPatients = filteredPatients.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -93,12 +143,15 @@ export function PacientesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
+    <div className="flex flex-col gap-5 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
-          <p className="text-sm text-gray-500">Gestão e prontuário completo dos seus pacientes</p>
+          <p className="text-sm text-gray-500">
+            {filteredPatients.length} paciente{filteredPatients.length !== 1 ? 's' : ''}
+            {search && ` encontrado${filteredPatients.length !== 1 ? 's' : ''}`}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" onClick={() => setShowImportModal(true)}>
@@ -107,6 +160,54 @@ export function PacientesPage() {
           <button className="btn-primary" onClick={() => setShowModal(true)}>
             <Plus className="w-5 h-5" /> Novo Paciente
           </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{kpis.total}</p>
+              <p className="text-xs text-gray-500">Total de pacientes</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{kpis.thisMonth}</p>
+              <p className="text-xs text-gray-500">Novos este mês</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+              <CalendarClock className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{kpis.withAppointment}</p>
+              <p className="text-xs text-gray-500">Com consultas</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
+              <CalendarClock className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{kpis.withoutReturn}</p>
+              <p className="text-xs text-gray-500">Sem retorno (+90d)</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -125,7 +226,7 @@ export function PacientesPage() {
 
         <div className="flex items-center gap-3">
           <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-100">
-            {['todos', ...Array.from(new Set(patients.map(p => p.convenio).filter(Boolean)))].map(c => (
+            {['todos', ...convenios].map(c => (
               <button
                 key={c}
                 onClick={() => { setFilterConvenio(c); setCurrentPage(1); }}
@@ -156,80 +257,132 @@ export function PacientesPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-gray-50/50 text-xs font-semibold text-gray-500 tracking-wider">
-                <th className="px-6 py-4">Paciente</th>
-                <th className="px-6 py-4">CPF / Nascimento</th>
-                <th className="px-6 py-4">Contato</th>
-                <th className="px-6 py-4">Convênio</th>
-                <th className="px-6 py-4">Última Consulta</th>
-                <th className="px-6 py-4 text-center">Ações</th>
+                <th className="px-5 py-3">Paciente</th>
+                <th className="px-5 py-3">Contato</th>
+                <th className="px-5 py-3">Convênio</th>
+                <th className="px-5 py-3">Última Consulta</th>
+                <th className="px-5 py-3 text-center">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {paginatedPatients.length > 0 ? (
-                paginatedPatients.map(p => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-gray-50/50 cursor-pointer transition-colors group"
-                    onClick={() => handlePatientClick(p.id)}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar nome={p.nome} />
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900 group-hover:text-green-600 transition-colors">{p.nome}</p>
-                          <p className="text-[11px] text-gray-400">Desde {new Date(p.criadoEm).toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        <p className="text-gray-700">{p.cpf}</p>
-                        <p className="text-gray-400 text-xs">{p.dataNascimento ? new Date(p.dataNascimento + 'T00:00').toLocaleDateString() : '—'}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm">
-                        <p className="text-gray-700">{p.contato.telefone}</p>
-                        <p className="text-gray-400 text-xs font-medium">{p.contato.email || '-'}</p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge
-                        variant={p.convenio === 'Particular' ? 'gray' : 'green'}
-                        className={cn(
-                          p.convenio === 'Unimed' && 'bg-green-50 text-green-700 border-green-100 hover:bg-green-100',
-                          p.convenio === 'Bradesco Saúde' && 'bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100'
-                        )}
-                      >
-                        {p.convenio || 'Particular'}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm text-gray-600">
-                        {p.ultimaConsulta ? (
-                          <div className="flex flex-col">
-                            <span>{new Date(p.ultimaConsulta).toLocaleDateString()}</span>
-                            <span className="text-[10px] text-gray-400 font-medium">
-                              Há {Math.floor((new Date().getTime() - new Date(p.ultimaConsulta).getTime()) / (1000 * 3600 * 24))} dias
-                            </span>
+                paginatedPatients.map(p => {
+                  const age = calcAge(p.dataNascimento)
+                  const phone = p.contato?.telefone
+                  const lastDays = p.ultimaConsulta
+                    ? Math.floor((Date.now() - new Date(p.ultimaConsulta).getTime()) / (1000 * 3600 * 24))
+                    : null
+
+                  return (
+                    <tr
+                      key={p.id}
+                      className="hover:bg-gray-50/50 cursor-pointer transition-colors group"
+                      onClick={() => handlePatientClick(p.id)}
+                    >
+                      {/* Paciente — nome, idade, CPF */}
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <Avatar nome={p.nome} />
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-gray-900 group-hover:text-green-600 transition-colors truncate">
+                              {p.nome}
+                            </p>
+                            <p className="text-[11px] text-gray-400">
+                              {age !== null ? `${age} anos` : ''}
+                              {age !== null && p.cpf ? ' · ' : ''}
+                              {p.cpf ? formatCPF(p.cpf) : ''}
+                              {!age && !p.cpf ? `Desde ${new Date(p.criadoEm).toLocaleDateString()}` : ''}
+                            </p>
                           </div>
-                        ) : '—'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => navigate(`/pacientes/${p.id}`)}
-                        className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
-                        title="Ver prontuário"
-                      >
-                        <MoreHorizontal className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                        </div>
+                      </td>
+
+                      {/* Contato — telefone formatado + email */}
+                      <td className="px-5 py-3.5">
+                        <div className="text-sm">
+                          {phone ? (
+                            <p className="text-gray-700 flex items-center gap-1.5">
+                              <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                              {formatPhone(phone)}
+                            </p>
+                          ) : (
+                            <p className="text-gray-400 text-xs">Sem telefone</p>
+                          )}
+                          {p.contato?.email && (
+                            <p className="text-gray-400 text-xs truncate max-w-[200px]">{p.contato.email}</p>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Convênio */}
+                      <td className="px-5 py-3.5">
+                        <Badge
+                          variant={p.convenio === 'Particular' || !p.convenio ? 'gray' : 'green'}
+                          className={cn(
+                            p.convenio === 'Unimed' && 'bg-green-50 text-green-700 border-green-100',
+                            p.convenio === 'Bradesco Saúde' && 'bg-blue-50 text-blue-700 border-blue-100'
+                          )}
+                        >
+                          {p.convenio || 'Particular'}
+                        </Badge>
+                      </td>
+
+                      {/* Última Consulta */}
+                      <td className="px-5 py-3.5">
+                        <div className="text-sm text-gray-600">
+                          {p.ultimaConsulta ? (
+                            <div className="flex flex-col">
+                              <span>{new Date(p.ultimaConsulta).toLocaleDateString()}</span>
+                              <span className={cn(
+                                'text-[10px] font-medium',
+                                lastDays !== null && lastDays > 90 ? 'text-amber-500' : 'text-gray-400'
+                              )}>
+                                Há {lastDays} dia{lastDays !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-xs">Nenhuma</span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Ações rápidas */}
+                      <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-center gap-1">
+                          {phone && (
+                            <a
+                              href={`https://wa.me/55${phone.replace(/\D/g, '')}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
+                              title="WhatsApp"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                            </a>
+                          )}
+                          <button
+                            onClick={() => navigate(`/agenda?paciente=${p.id}`)}
+                            className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"
+                            title="Agendar consulta"
+                          >
+                            <Calendar className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/pacientes/${p.id}`)}
+                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
+                            title="Ver prontuário"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-20 text-center">
+                  <td colSpan={5} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <User className="w-12 h-12 text-gray-200" />
                       <p className="text-gray-500 font-medium">Nenhum paciente encontrado.</p>
@@ -245,10 +398,15 @@ export function PacientesPage() {
         </div>
         )}
 
-        {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-            <p>Mostrando <b>{(currentPage - 1) * PAGE_SIZE + 1} a {Math.min(currentPage * PAGE_SIZE, filteredPatients.length)}</b> de <b>{filteredPatients.length}</b> pacientes</p>
+        {/* Paginação — sempre visível */}
+        <div className="px-5 py-3 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+          <p>
+            {filteredPatients.length > 0
+              ? <>Mostrando <b>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredPatients.length)}</b> de <b>{filteredPatients.length}</b> paciente{filteredPatients.length !== 1 ? 's' : ''}</>
+              : 'Nenhum resultado'
+            }
+          </p>
+          {totalPages > 1 && (
             <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
@@ -258,7 +416,7 @@ export function PacientesPage() {
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <div className="flex items-center px-4 font-semibold text-gray-900">
-                Página {currentPage} de {totalPages}
+                {currentPage} / {totalPages}
               </div>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
@@ -268,8 +426,8 @@ export function PacientesPage() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* ── Modal Novo Paciente ────────────────────────────────────────── */}

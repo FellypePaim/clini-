@@ -159,7 +159,7 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
             </>
           )}
           <p className="text-[10px] text-gray-300 text-center w-full">
-            v1.0.0 · Prontuário Verde
+            v1.3.0 · Prontuário Verde
           </p>
         </div>
       )}
