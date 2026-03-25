@@ -28,6 +28,7 @@
 - Fase 16: ✅ Revisão Geral Completa — 65+ correções
 - Fase 17: ✅ **Fluxo de Registro + Multi-tenant hardening (23/03/2026)**
 - Fase 18: ✅ **Types sync + ai_usage_logs + Code-splitting (24/03/2026)**
+- Fase 19: ✅ **Gestão de Ausências de Profissionais (25/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -75,6 +76,7 @@ auditoria_global, feature_flags, tickets_suporte, releases
 11. `20260323000005_fix_profiles_rls_recursion.sql` — SECURITY DEFINER function
 12. `20260323000006_profiles_update_same_clinica.sql` — UPDATE mesma clínica
 13. `20260324000001_ai_usage_logs.sql` — Tabela ai_usage_logs + RLS
+14. `20260325000001_profissional_ausencias.sql` — Tabela ausências/folgas + RLS
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
