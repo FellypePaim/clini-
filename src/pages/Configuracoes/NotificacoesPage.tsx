@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Bell, Smartphone, Zap, Loader2, Clock } from 'lucide-react'
+import { Bell, Smartphone, Zap, Loader2, Clock, CheckCircle2 } from 'lucide-react'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
@@ -39,6 +39,7 @@ export function NotificacoesPage() {
 
   const [config, setConfig] = useState<NotifConfig>(defaultConfig)
   const [isLoading, setIsLoading] = useState(true)
+  const [lastSaved, setLastSaved] = useState<number | null>(null)
 
   const loadConfig = useCallback(async () => {
     if (!clinicaId) return
@@ -69,7 +70,7 @@ export function NotificacoesPage() {
     if (error) {
       toast({ title: 'Erro', description: error.message, type: 'error' })
     } else {
-      toast({ title: 'Salvo', description: 'Configuração atualizada.', type: 'success' })
+      setLastSaved(Date.now())
     }
   }
 
@@ -98,7 +99,14 @@ export function NotificacoesPage() {
           <Bell className="text-indigo-600" />
           Notificações e Comunicação
         </h2>
-        <p className="text-sm font-medium text-slate-500 mt-1">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
+        <div className="flex items-center gap-3 mt-1">
+          <p className="text-sm font-medium text-slate-500">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
+          {lastSaved && (Date.now() - lastSaved) < 3000 && (
+            <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 animate-fade-in">
+              <CheckCircle2 size={12} /> Salvo
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="p-8 space-y-8">

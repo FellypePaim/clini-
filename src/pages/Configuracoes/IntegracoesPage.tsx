@@ -21,17 +21,21 @@ export function IntegracoesPage() {
   const loadData = useCallback(async () => {
     if (!clinicaId) return
 
-    const { data: instancias } = await supabase
-      .from('whatsapp_instancias')
-      .select('status, numero' as any)
-      .eq('clinica_id', clinicaId)
-      .eq('status', 'conectado')
-      .limit(1)
+    try {
+      const { data: instancias } = await supabase
+        .from('whatsapp_instancias')
+        .select('status, nome_instancia')
+        .eq('clinica_id', clinicaId)
+        .eq('status', 'conectado')
+        .limit(1)
 
-    if (instancias && instancias.length > 0) {
-      setWhatsappStatus('conectado')
-      setWhatsappNumero((instancias[0] as any).numero || '')
-    } else {
+      if (instancias && instancias.length > 0) {
+        setWhatsappStatus('conectado')
+        setWhatsappNumero((instancias[0] as any).nome_instancia || '')
+      } else {
+        setWhatsappStatus('desconectado')
+      }
+    } catch {
       setWhatsappStatus('desconectado')
     }
   }, [clinicaId])
