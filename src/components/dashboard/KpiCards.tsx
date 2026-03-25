@@ -64,11 +64,11 @@ export function KpiCards() {
       supabase.from('pacientes').select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId).gte('created_at', mesAnterior).lt('created_at', fimMesAnterior),
       supabase.from('lancamentos').select('valor')
-        .eq('clinica_id', clinicaId).eq('tipo', 'receita').eq('status', 'pago').gte('data', mesAtual.split('T')[0]),
+        .eq('clinica_id', clinicaId).eq('tipo', 'receita').eq('status', 'pago').gte('data_competencia', mesAtual.split('T')[0]),
       supabase.from('consultas').select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId).gte('data_hora_inicio', mesAtual),
       supabase.from('consultas').select('*', { count: 'exact', head: true })
-        .eq('clinica_id', clinicaId).in('status', ['finalizado', 'concluido']).gte('data_hora_inicio', mesAtual),
+        .eq('clinica_id', clinicaId).eq('status', 'finalizado').gte('data_hora_inicio', mesAtual),
     ])
 
     const consultasHoje = consultasRes.count ?? 0

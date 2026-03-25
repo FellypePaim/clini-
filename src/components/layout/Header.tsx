@@ -116,16 +116,17 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
           })
         }
 
-        // 2. Consultas pendentes de aprovação (OVYVA)
+        // 2. Pré-agendamentos OVYVA (status agendado + observações com marcador)
         if (config.sistema_consulta_pendente !== false) {
-          const { data: pendentes, count: pendenteCount } = await supabase
+          const { data: pendentes } = await supabase
             .from('consultas')
-            .select('id, data_hora_inicio', { count: 'exact' })
+            .select('id, data_hora_inicio, observacoes')
             .eq('clinica_id', clinicaId)
-            .eq('status', 'pendente')
-            .limit(1)
+            .eq('status', 'agendado')
+            .ilike('observacoes', '%PRÉ-AGENDAMENTO OVYVA%')
 
-          if (pendenteCount && pendenteCount > 0) {
+          const pendenteCount = pendentes?.length ?? 0
+          if (pendenteCount > 0) {
             newAlerts.push({
               id: 'consultas_pendentes',
               type: 'consulta_pendente',
@@ -165,15 +166,15 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         if (config.sistema_estoque_baixo !== false) {
           const { data: produtosBaixos } = await supabase
             .from('produtos_estoque')
-            .select('id, nome, quantidade_atual, estoque_minimo')
+            .select('id, nome, estoque_atual, estoque_minimo')
             .eq('clinica_id', clinicaId)
 
           const criticos = (produtosBaixos ?? []).filter(
-            (p: any) => (p.quantidade_atual ?? 0) < (p.estoque_minimo ?? 0)
+            (p: any) => (p.estoque_atual ?? 0) < (p.estoque_minimo ?? 0)
           )
 
           if (criticos.length > 0) {
-            const zerados = criticos.filter((p: any) => (p.quantidade_atual ?? 0) === 0).length
+            const zerados = criticos.filter((p: any) => (p.estoque_atual ?? 0) === 0).length
             newAlerts.push({
               id: 'estoque_baixo',
               type: 'estoque_baixo',
