@@ -18,6 +18,7 @@ export function usePatients() {
     setIsLoading(true)
     setError(null)
     try {
+      // 1. Buscar pacientes
       const { data, error: pbErr } = await supabase
         .from('pacientes')
         .select('*')
@@ -26,24 +27,47 @@ export function usePatients() {
 
       if (pbErr) throw pbErr
 
-      const mapped: Patient[] = (data || []).map(r => ({
-        id: r.id,
-        nome: r.nome_completo,
-        dataNascimento: r.data_nascimento || '',
-        cpf: r.cpf || '',
-        sexo: (r.genero as any) || 'outro',
-        convenio: r.convenio || '',
-        numeroConvenio: r.numero_convenio || '',
-        endereco: (r.endereco as any) || { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
-        contato: {
-          telefone: r.whatsapp || r.telefone || '',
-          email: r.email || ''
-        },
-        ativo: r.ativo ?? true,
-        criadoEm: r.created_at || '',
-        ultimaConsulta: (r as any).ultima_consulta || undefined,
-        totalConsultas: (r as any).total_consultas || 0,
-      }))
+      // 2. Buscar última consulta e total por paciente (concluídas ou não)
+      const { data: consultasData } = await supabase
+        .from('consultas')
+        .select('paciente_id, data_hora_inicio')
+        .eq('clinica_id', clinicaId)
+        .order('data_hora_inicio', { ascending: false })
+
+      // Agrupar: última consulta + total por paciente_id
+      const consultasMap = new Map<string, { ultima: string; total: number }>()
+      for (const c of consultasData || []) {
+        const pid = c.paciente_id
+        if (!pid) continue
+        const entry = consultasMap.get(pid)
+        if (entry) {
+          entry.total++
+        } else {
+          consultasMap.set(pid, { ultima: c.data_hora_inicio || '', total: 1 })
+        }
+      }
+
+      const mapped: Patient[] = (data || []).map(r => {
+        const stats = consultasMap.get(r.id)
+        return {
+          id: r.id,
+          nome: r.nome_completo,
+          dataNascimento: r.data_nascimento || '',
+          cpf: r.cpf || '',
+          sexo: (r.genero as any) || 'outro',
+          convenio: r.convenio || '',
+          numeroConvenio: r.numero_convenio || '',
+          endereco: (r.endereco as any) || { cep: '', logradouro: '', numero: '', bairro: '', cidade: '', estado: '' },
+          contato: {
+            telefone: r.whatsapp || r.telefone || '',
+            email: r.email || ''
+          },
+          ativo: r.ativo ?? true,
+          criadoEm: r.created_at || '',
+          ultimaConsulta: stats?.ultima || undefined,
+          totalConsultas: stats?.total || 0,
+        }
+      })
 
       setPatients(mapped)
       return mapped
