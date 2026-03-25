@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.3.0** (Types sync, ai_usage_logs, Code-splitting — 24/03/2026)
+- Versão: **v1.4.0** (Ausências, UX fixes, Alertas sistema — 25/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -38,7 +38,8 @@ procedimentos, consultas, evolucoes, prescricoes, termos_consentimento,
 harmonizacoes, ovyva_conversas, ovyva_mensagens, leads, leads_historico,
 campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
 estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias,
-auditoria_global, feature_flags, tickets_suporte, releases
+auditoria_global, feature_flags, tickets_suporte, releases,
+profissional_ausencias, notificacoes_fila
 
 ### Colunas adicionadas:
 - ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
@@ -80,12 +81,12 @@ auditoria_global, feature_flags, tickets_suporte, releases
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
-### ai-gateway (✅ v2 — atualizada 23/03/2026)
+### ai-gateway (✅ v3 — atualizada 25/03/2026)
 Actions:
 - `detect_intent` → gemini-2.5-flash-lite
 - `transcribe_audio` → gemini-2.5-flash
 - `generate_summary` → gemini-2.5-flash
-- `ovyva_respond` → gemini-2.5-flash (com reagendamento, horários da clínica, data/hora atual)
+- `ovyva_respond` → gemini-2.5-flash (com reagendamento, horários, ausências profissionais)
 - `dashboard_insights` → gemini-2.5-flash-lite
 
 ### whatsapp-webhook (✅ multi-tenant, fail-fast)
@@ -169,6 +170,7 @@ Actions:
 - Data/hora atuais para contexto temporal
 - Tabela de procedimentos com valores reais (valor_particular)
 - Agenda ocupada (data_hora_inicio)
+- **Ausências de profissionais** (não sugere horários em dias de folga)
 - Perfil do paciente se vinculado
 - Histórico de 20 mensagens
 - Base de conhecimento customizada
@@ -180,7 +182,22 @@ Actions:
 - Atualiza data_hora_inicio/fim no banco automaticamente
 - Duração preservada ao mover
 
-## 10. ARQUIVOS IMPORTANTES
+## 10. GESTÃO DE AUSÊNCIAS
+- Tabela `profissional_ausencias`: data_inicio, data_fim, tipo (folga/atestado/férias/outro), motivo
+- Modal em Configurações > Profissionais com detecção de conflitos
+- 3 opções ao conflitar: cancelar + notificar WhatsApp / cancelar sem notificar / apenas marcar folga
+- Bloqueio visual na Agenda (DayView + WeekView) — overlay "Profissional ausente"
+- OVYVA respeita ausências automaticamente (não sugere horários)
+- Notificação enfileirada em `notificacoes_fila` tipo `cancelamento_ausencia`
+
+## 11. ALERTAS DO SISTEMA (SINO)
+- Consultas agendadas hoje
+- Pré-agendamentos OVYVA pendentes (respeita toggle `sistema_consulta_pendente`)
+- Novos leads 24h (respeita toggle `sistema_novo_lead`)
+- Estoque crítico (respeita toggle `sistema_estoque_baixo`)
+- Badge vermelho com contador, dropdown clicável, auto-refresh 2min
+
+## 12. ARQUIVOS IMPORTANTES
 - `src/pages/Login/RegisterPage.tsx` — Fluxo de registro (admin/funcionário)
 - `src/pages/Login/WaitingApprovalPage.tsx` — Tela de espera para funcionários
 - `src/pages/SuperAdmin/*` — Painel de controle global
@@ -189,14 +206,16 @@ Actions:
 - `supabase/functions/ai-gateway/index.ts` — Backend IA (OVYVA, insights, etc.)
 - `supabase/functions/register/index.ts` — Registro público
 - `supabase/functions/user-manager/index.ts` — Gerenciamento de colaboradores
+- `src/hooks/useAusencias.ts` — CRUD ausências + conflitos + notificação
+- `src/components/configuracoes/AusenciasModal.tsx` — Modal de gestão de folgas
 - `CONTEXTO_PROJETO.md` — Este arquivo
 
-## 11. CODE-SPLITTING
+## 13. CODE-SPLITTING
 - Todas as 57+ páginas usam `React.lazy()` + `Suspense`
 - Bundle inicial: 3.1MB → **562KB** (redução de 82%)
 - ~60 chunks lazy: relatórios, SuperAdmin, jsPDF, recharts carregam sob demanda
 - Helper `lazyNamed()` para named exports em `src/router/AppRouter.tsx`
 
-## 12. PRÓXIMOS PASSOS
+## 14. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
 2. Testar fluxo WhatsApp completo (Evolution API + OVYVA)
