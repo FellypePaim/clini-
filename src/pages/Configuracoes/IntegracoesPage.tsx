@@ -24,14 +24,14 @@ export function IntegracoesPage() {
     try {
       const { data: instancias } = await supabase
         .from('whatsapp_instancias')
-        .select('status, nome_instancia')
+        .select('nome_instancia, ativo')
         .eq('clinica_id', clinicaId)
-        .eq('status', 'conectado')
+        .eq('ativo', true)
         .limit(1)
 
       if (instancias && instancias.length > 0) {
         setWhatsappStatus('conectado')
-        setWhatsappNumero((instancias[0] as any).nome_instancia || '')
+        setWhatsappNumero(instancias[0].nome_instancia || '')
       } else {
         setWhatsappStatus('desconectado')
       }
