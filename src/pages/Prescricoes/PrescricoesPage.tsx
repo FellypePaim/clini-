@@ -36,6 +36,8 @@ export function PrescricoesPage() {
   const [conteudo, setConteudo] = useState(TEMPLATE)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState<'todos' | 'ativa' | 'cancelada'>('todos')
+  const [filterPeriod, setFilterPeriod] = useState<'todos' | '7d' | '30d' | '90d'>('todos')
   const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const PAGE_SIZE = 8
@@ -201,9 +203,15 @@ export function PrescricoesPage() {
     setTimeout(() => win.print(), 600)
   }
 
-  const filtered = prescricoes.filter(p =>
-    !search || p.paciente_nome.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = prescricoes.filter(p => {
+    const matchSearch = !search || p.paciente_nome.toLowerCase().includes(search.toLowerCase())
+    const matchStatus = filterStatus === 'todos' || p.status === filterStatus
+    const matchPeriod = filterPeriod === 'todos' || (() => {
+      const days = { '7d': 7, '30d': 30, '90d': 90 }[filterPeriod] || 0
+      return (Date.now() - new Date(p.created_at).getTime()) < days * 86400000
+    })()
+    return matchSearch && matchStatus && matchPeriod
+  })
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
@@ -222,10 +230,28 @@ export function PrescricoesPage() {
             <Plus size={18} /> Nova Prescrição
           </button>
         </div>
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-          <input type="text" placeholder="Buscar por paciente..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20" />
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[220px] max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input type="text" placeholder="Buscar por paciente..." value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20" />
+          </div>
+          <div className="flex items-center bg-slate-50 rounded-lg p-1 border border-slate-100">
+            {(['todos', 'ativa', 'cancelada'] as const).map(s => (
+              <button key={s} onClick={() => { setFilterStatus(s); setPage(1) }}
+                className={cn('px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize',
+                  filterStatus === s ? 'bg-white text-green-700 shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-700')}>
+                {s === 'todos' ? 'Todas' : s === 'ativa' ? 'Ativas' : 'Canceladas'}
+              </button>
+            ))}
+          </div>
+          <select value={filterPeriod} onChange={e => { setFilterPeriod(e.target.value as any); setPage(1) }}
+            className="px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20">
+            <option value="todos">Qualquer data</option>
+            <option value="7d">Últimos 7 dias</option>
+            <option value="30d">Últimos 30 dias</option>
+            <option value="90d">Últimos 90 dias</option>
+          </select>
         </div>
       </header>
 
@@ -249,6 +275,13 @@ export function PrescricoesPage() {
             <div className="space-y-3">
               {paginated.map(p => {
                 const isExpanded = expandedId === p.id
+                // Extrair preview: primeira linha que não seja "Rx" e não seja vazia
+                const previewLine = p.conteudo
+                  ?.split('\n')
+                  .map((l: string) => l.trim())
+                  .find((l: string) => l && l !== 'Rx' && !l.startsWith('Observações')) || ''
+                const previewText = previewLine.length > 60 ? previewLine.slice(0, 60) + '...' : previewLine
+
                 return (
                   <div key={p.id} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                     {/* Header do card — sempre visível */}
@@ -265,8 +298,11 @@ export function PrescricoesPage() {
                           </Badge>
                         </div>
                         <p className="text-xs text-slate-400 mt-0.5">Dr(a). {p.profissional_nome} · {fmtDate(p.created_at)}</p>
+                        {previewText && !isExpanded && (
+                          <p className="text-[11px] text-slate-500 mt-1 truncate">{previewText}</p>
+                        )}
                       </div>
-                      <ChevronDown className={cn("w-4 h-4 text-slate-300 transition-transform", isExpanded && "rotate-180")} />
+                      <ChevronDown className={cn("w-4 h-4 text-slate-300 transition-transform shrink-0", isExpanded && "rotate-180")} />
                     </div>
 
                     {/* Detalhes — expandido */}
@@ -276,8 +312,8 @@ export function PrescricoesPage() {
                           <pre className="text-xs text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">{p.conteudo}</pre>
                         </div>
                         <div className="px-4 py-3 flex items-center justify-between border-t border-slate-100">
-                          <span className="flex items-center gap-1 text-[9px] font-mono text-slate-300">
-                            <Shield size={10} /> {p.assinatura_hash.substring(0, 20)}...
+                          <span className="flex items-center gap-1.5 text-[10px] text-green-600 font-medium">
+                            <CheckCircle2 size={12} /> Assinada digitalmente
                           </span>
                           <div className="flex items-center gap-1">
                             <button onClick={() => setViewingPresc(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
