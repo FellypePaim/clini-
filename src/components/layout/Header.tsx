@@ -18,6 +18,10 @@ import {
   ClipboardList,
   BarChart3,
   Menu,
+  UserPlus,
+  CalendarClock,
+  PackageX,
+  X,
 } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
 import { supabase } from '../../lib/supabase'
@@ -44,6 +48,17 @@ const ROLE_LABELS = {
   superadmin:    'SuperAdmin',
 }
 
+interface SystemAlert {
+  id: string
+  type: 'lead' | 'consulta_pendente' | 'estoque_baixo' | 'consulta_hoje'
+  title: string
+  description: string
+  icon: React.ElementType
+  color: string
+  link: string
+  time?: string
+}
+
 interface HeaderProps {
   sidebarWidth?: number
   onMenuClick?: () => void
@@ -54,30 +69,139 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const [showUserMenu, setShowUserMenu] = React.useState(false)
-  const [notifications, setNotifications] = React.useState(0)
+  const [showNotifications, setShowNotifications] = React.useState(false)
+  const [alerts, setAlerts] = React.useState<SystemAlert[]>([])
+  const [dismissedIds, setDismissedIds] = React.useState<Set<string>>(new Set())
 
-  // Carregar contagem de notificações reais (consultas pendentes hoje)
+  // ── Carregar alertas de sistema ───────────────────────
   React.useEffect(() => {
     if (!user?.clinicaId) return
-    const loadNotifications = async () => {
+
+    const loadAlerts = async () => {
+      const newAlerts: SystemAlert[] = []
+      const clinicaId = user.clinicaId
+
       try {
+        // Buscar config de notificações da clínica
+        const { data: clinica } = await supabase
+          .from('clinicas')
+          .select('configuracoes')
+          .eq('id', clinicaId)
+          .single()
+
+        const config = (clinica?.configuracoes as any)?.notificacoes ?? {}
+
         const hoje = new Date()
         const pad = (n: number) => String(n).padStart(2, '0')
         const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`
-        const inicioHoje = `${hojeStr}T00:00:00`
-        const fimHoje = `${hojeStr}T23:59:59`
-        const { count, error } = await supabase
+
+        // 1. Consultas agendadas hoje (sempre ativo)
+        const { count: consultasHoje } = await supabase
           .from('consultas')
           .select('*', { count: 'exact', head: true })
-          .eq('clinica_id', user.clinicaId)
+          .eq('clinica_id', clinicaId)
           .eq('status', 'agendado')
-          .gte('data_hora_inicio', inicioHoje)
-          .lt('data_hora_inicio', fimHoje)
-        if (!error) setNotifications(count ?? 0)
-      } catch { /* silently ignore notification load errors */ }
+          .gte('data_hora_inicio', `${hojeStr}T00:00:00`)
+          .lt('data_hora_inicio', `${hojeStr}T23:59:59`)
+
+        if (consultasHoje && consultasHoje > 0) {
+          newAlerts.push({
+            id: 'consultas_hoje',
+            type: 'consulta_hoje',
+            title: `${consultasHoje} consulta${consultasHoje > 1 ? 's' : ''} hoje`,
+            description: 'Agendadas para hoje, aguardando atendimento',
+            icon: Calendar,
+            color: 'text-blue-600 bg-blue-50',
+            link: '/agenda',
+          })
+        }
+
+        // 2. Consultas pendentes de aprovação (OVYVA)
+        if (config.sistema_consulta_pendente !== false) {
+          const { data: pendentes, count: pendenteCount } = await supabase
+            .from('consultas')
+            .select('id, data_hora_inicio', { count: 'exact' })
+            .eq('clinica_id', clinicaId)
+            .eq('status', 'pendente')
+            .limit(1)
+
+          if (pendenteCount && pendenteCount > 0) {
+            newAlerts.push({
+              id: 'consultas_pendentes',
+              type: 'consulta_pendente',
+              title: `${pendenteCount} pré-agendamento${pendenteCount > 1 ? 's' : ''}`,
+              description: 'Criados pela OVYVA, aguardando aprovação',
+              icon: CalendarClock,
+              color: 'text-amber-600 bg-amber-50',
+              link: '/agenda',
+              time: pendentes?.[0]?.data_hora_inicio ? new Date(pendentes[0].data_hora_inicio).toLocaleDateString() : undefined,
+            })
+          }
+        }
+
+        // 3. Novos leads (últimas 24h)
+        if (config.sistema_novo_lead !== false) {
+          const ontem = new Date(Date.now() - 86400000).toISOString()
+          const { count: leadsCount } = await supabase
+            .from('leads')
+            .select('*', { count: 'exact', head: true })
+            .eq('clinica_id', clinicaId)
+            .gte('created_at', ontem)
+
+          if (leadsCount && leadsCount > 0) {
+            newAlerts.push({
+              id: 'novos_leads',
+              type: 'lead',
+              title: `${leadsCount} novo${leadsCount > 1 ? 's' : ''} lead${leadsCount > 1 ? 's' : ''}`,
+              description: 'Contatos recebidos nas últimas 24h',
+              icon: UserPlus,
+              color: 'text-green-600 bg-green-50',
+              link: '/verdesk',
+            })
+          }
+        }
+
+        // 4. Estoque abaixo do mínimo
+        if (config.sistema_estoque_baixo !== false) {
+          const { data: produtosBaixos } = await supabase
+            .from('produtos_estoque')
+            .select('id, nome, quantidade_atual, estoque_minimo')
+            .eq('clinica_id', clinicaId)
+
+          const criticos = (produtosBaixos ?? []).filter(
+            (p: any) => (p.quantidade_atual ?? 0) < (p.estoque_minimo ?? 0)
+          )
+
+          if (criticos.length > 0) {
+            const zerados = criticos.filter((p: any) => (p.quantidade_atual ?? 0) === 0).length
+            newAlerts.push({
+              id: 'estoque_baixo',
+              type: 'estoque_baixo',
+              title: `${criticos.length} produto${criticos.length > 1 ? 's' : ''} em estoque crítico`,
+              description: zerados > 0 ? `${zerados} zerado${zerados > 1 ? 's' : ''}` : 'Abaixo do mínimo configurado',
+              icon: PackageX,
+              color: 'text-red-600 bg-red-50',
+              link: '/estoque/alertas',
+            })
+          }
+        }
+
+        setAlerts(newAlerts)
+      } catch { /* silently ignore */ }
     }
-    loadNotifications()
+
+    loadAlerts()
+    // Recarregar a cada 2 min
+    const interval = setInterval(loadAlerts, 120000)
+    return () => clearInterval(interval)
   }, [user?.clinicaId])
+
+  const visibleAlerts = alerts.filter(a => !dismissedIds.has(a.id))
+  const alertCount = visibleAlerts.length
+
+  const dismiss = (id: string) => {
+    setDismissedIds(prev => new Set(prev).add(id))
+  }
 
   const currentRoute = Object.entries(ROUTE_INFO).find(([path]) =>
     location.pathname.startsWith(path)
@@ -94,7 +218,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
     >
       <div className="flex items-center gap-2 text-sm flex-1">
         {onMenuClick && (
-          <button 
+          <button
             onClick={onMenuClick}
             className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
           >
@@ -116,8 +240,8 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         {/* Busca rápida */}
         <button
           id="header-search"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 
-                     text-gray-500 text-sm hover:border-green-300 hover:text-green-700 
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200
+                     text-gray-500 text-sm hover:border-green-300 hover:text-green-700
                      transition-all duration-150 hidden sm:flex"
         >
           <Search className="w-3.5 h-3.5" />
@@ -126,23 +250,88 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         </button>
 
         {/* Notificações */}
-        <button
-          id="header-notifications"
-          className="relative w-9 h-9 flex items-center justify-center rounded-lg 
-                     hover:bg-gray-100 transition-colors text-gray-500"
-        >
-          <Bell className="w-4.5 h-4.5 w-[18px] h-[18px]" />
-          {notifications > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-500 rounded-full animate-pulse-green" />
+        <div className="relative">
+          <button
+            id="header-notifications"
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative w-9 h-9 flex items-center justify-center rounded-lg
+                       hover:bg-gray-100 transition-colors text-gray-500"
+          >
+            <Bell className="w-[18px] h-[18px]" />
+            {alertCount > 0 && (
+              <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center text-[9px] font-bold text-white px-1">
+                {alertCount}
+              </span>
+            )}
+          </button>
+
+          {/* Dropdown de alertas */}
+          {showNotifications && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+              <div className="absolute right-0 top-12 w-80 bg-white border border-gray-100 rounded-xl z-50 shadow-xl shadow-gray-200/50 animate-fade-in overflow-hidden">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-gray-800">Alertas do Sistema</h3>
+                  {alertCount > 0 && (
+                    <span className="text-[10px] font-bold text-white bg-red-500 rounded-full px-2 py-0.5">
+                      {alertCount}
+                    </span>
+                  )}
+                </div>
+
+                <div className="max-h-80 overflow-y-auto">
+                  {visibleAlerts.length === 0 ? (
+                    <div className="px-4 py-8 text-center">
+                      <Bell className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                      <p className="text-sm text-gray-400 font-medium">Nenhum alerta no momento</p>
+                      <p className="text-xs text-gray-300 mt-1">Tudo está funcionando normalmente</p>
+                    </div>
+                  ) : (
+                    visibleAlerts.map(alert => (
+                      <div key={alert.id}
+                        className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50/50 transition-colors flex items-start gap-3 group"
+                      >
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alert.color}`}>
+                          <alert.icon className="w-4 h-4" />
+                        </div>
+                        <div
+                          className="flex-1 min-w-0 cursor-pointer"
+                          onClick={() => { navigate(alert.link); setShowNotifications(false) }}
+                        >
+                          <p className="text-sm font-semibold text-gray-800">{alert.title}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{alert.description}</p>
+                        </div>
+                        <button
+                          onClick={() => dismiss(alert.id)}
+                          className="p-1 text-gray-300 hover:text-gray-500 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          title="Dispensar"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
+                  <button
+                    onClick={() => { navigate('/configuracoes/notificacoes'); setShowNotifications(false) }}
+                    className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    Configurar notificações
+                  </button>
+                </div>
+              </div>
+            </>
           )}
-        </button>
+        </div>
 
         {/* Avatar + menu do usuário */}
         <div className="relative ml-1">
           <button
             id="header-user-menu"
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl 
+            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl
                        hover:bg-gray-50 transition-colors cursor-pointer border border-transparent
                        hover:border-gray-200"
           >
@@ -193,7 +382,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                   <button
                     id="header-logout"
                     onClick={async () => { await logout(); navigate('/login') }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600
                                hover:bg-red-50 transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
