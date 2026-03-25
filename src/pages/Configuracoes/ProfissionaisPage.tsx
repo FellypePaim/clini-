@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { Plus, Edit2, Check, X, UserCog, BriefcaseMedical, Loader2, Mail, Link as LinkIcon } from 'lucide-react'
+import { Plus, Edit2, Check, X, UserCog, BriefcaseMedical, Loader2, Mail, Link as LinkIcon, CalendarOff } from 'lucide-react'
+import { AusenciasModal } from '../../components/configuracoes/AusenciasModal'
 import { Badge } from '../../components/ui/Badge'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
@@ -72,6 +73,7 @@ export function ProfissionaisPage() {
   const [linking, setLinking] = useState(false)
   const [editingProf, setEditingProf] = useState<Profissional | null>(null)
   const [editForm, setEditForm] = useState({ nome_completo: '', especialidade: '', conselho: '', role: '' })
+  const [ausenciaProf, setAusenciaProf] = useState<Profissional | null>(null)
 
   const loadProfissionais = useCallback(async () => {
     if (!clinicaId) return
@@ -303,6 +305,9 @@ export function ProfissionaisPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4 text-right">
+                    <button onClick={() => setAusenciaProf(prof)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Folgas e Ausências">
+                      <CalendarOff size={16} />
+                    </button>
                     <button onClick={() => openEditModal(prof)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
                       <Edit2 size={16} />
                     </button>
@@ -498,6 +503,13 @@ export function ProfissionaisPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {ausenciaProf && (
+        <AusenciasModal
+          profissional={ausenciaProf}
+          onClose={() => setAusenciaProf(null)}
+        />
       )}
     </div>
   )
