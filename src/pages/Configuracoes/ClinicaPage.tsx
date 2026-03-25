@@ -102,7 +102,7 @@ export function ClinicaPage() {
           const loaded: ClinicaForm = {
             nome: c.nome ?? '',
             cnpj: c.cnpj ?? '',
-            cro: c.cro ?? '',
+            cro: c.crm_cro ?? '',
             cep: c.endereco?.cep ?? '',
             logradouro: c.endereco?.logradouro ?? '',
             numero: c.endereco?.numero ?? '',
@@ -194,7 +194,7 @@ export function ClinicaPage() {
         .update({
           nome: form.nome,
           cnpj: form.cnpj.replace(/\D/g, ''),
-          cro: form.cro,
+          crm_cro: form.cro,
           telefone: form.telefone.replace(/\D/g, ''),
           whatsapp: form.whatsapp.replace(/\D/g, ''),
           email: form.email,
