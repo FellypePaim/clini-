@@ -127,6 +127,25 @@ export function MovimentacoesPage() {
             </div>
 
             {/* Feed Chronological */}
+            {filteredMovimentos.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-slate-200 shadow-sm">
+                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                  <ArrowDownRight size={28} className="text-slate-400" />
+                </div>
+                <h3 className="text-base font-bold text-slate-700 mb-1">Nenhuma movimentação registrada</h3>
+                <p className="text-sm text-slate-400 max-w-sm">
+                  {products.length === 0
+                    ? 'Cadastre produtos no Catálogo primeiro. Depois, entradas e saídas aparecerão aqui automaticamente.'
+                    : 'Registre entradas e saídas pelo Catálogo de Produtos. O histórico completo aparecerá aqui.'}
+                </p>
+                {products.length === 0 && (
+                  <Link to="/estoque/produtos"
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-all mt-4">
+                    <PackageCheck size={16} /> Ir para o Catálogo
+                  </Link>
+                )}
+              </div>
+            )}
             {filteredMovimentos.map(mov => (
               <div key={mov.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
                 <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 border-2 ${getTipoConfig(mov.type).bg} ${getTipoConfig(mov.type).textColors} border-transparent`}>

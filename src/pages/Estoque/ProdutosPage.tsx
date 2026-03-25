@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ArrowLeft, Plus, Search, Edit2,
+  ArrowLeft, Plus, Search, Edit2, Package,
   TrendingDown, AlertTriangle, Info, History, TrendingUp, X, Loader2
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
@@ -134,13 +134,13 @@ export function ProdutosPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                <th className="px-6 py-4">Produto</th>
-                <th className="px-6 py-4">Categoria</th>
-                <th className="px-6 py-4">Estoque Atual</th>
-                <th className="px-6 py-4 hidden md:table-cell">Mínimo</th>
-                <th className="px-6 py-4 hidden lg:table-cell">Custo Unitário</th>
-                <th className="px-6 py-4 text-center">Status</th>
-                <th className="px-6 py-4 text-right">Ações</th>
+                <th className="px-5 py-3">Produto</th>
+                <th className="px-5 py-3">Categoria</th>
+                <th className="px-5 py-3">Estoque</th>
+                <th className="px-5 py-3 hidden md:table-cell">Mín.</th>
+                <th className="px-5 py-3 hidden lg:table-cell">Custo Un.</th>
+                <th className="px-5 py-3 text-center">Status</th>
+                <th className="px-5 py-3 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -196,10 +196,24 @@ export function ProdutosPage() {
               ))}
               {filteredProducts.length === 0 && !isLoading && (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
-                    {products.length === 0
-                      ? 'Nenhum produto cadastrado ainda.'
-                      : 'Nenhum produto encontrado com os filtros atuais.'}
+                  <td colSpan={7} className="px-6 py-16 text-center">
+                    {products.length === 0 ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center">
+                          <Package size={28} className="text-indigo-400" />
+                        </div>
+                        <div>
+                          <p className="text-slate-700 font-semibold mb-1">Nenhum produto cadastrado</p>
+                          <p className="text-sm text-slate-400 max-w-sm mx-auto">Cadastre materiais, insumos e medicamentos para controlar quantidades, custos e validades.</p>
+                        </div>
+                        <button onClick={openNew}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100 mt-2">
+                          <Plus size={16} /> Cadastrar primeiro produto
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-slate-500">Nenhum produto encontrado com os filtros atuais.</p>
+                    )}
                   </td>
                 </tr>
               )}

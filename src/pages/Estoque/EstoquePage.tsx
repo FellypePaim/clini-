@@ -7,7 +7,8 @@ import {
   Calendar,
   ArrowRight,
   TrendingDown,
-  Warehouse
+  Warehouse,
+  Plus
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
 import { Badge } from '../../components/ui/Badge'
@@ -130,8 +131,8 @@ export function EstoquePage() {
       </header>
 
       <main className="p-6">
-        
-        {alerts.length > 0 && (
+
+        {alerts.length > 0 ? (
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -142,7 +143,7 @@ export function EstoquePage() {
                 Ver todos os alertas <ArrowRight size={16} />
               </Link>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {alerts.slice(0, 3).map((product) => (
                 <div key={product.id} className={`p-4 rounded-xl border ${product.currentStock === 0 ? 'bg-red-50 border-red-200' : 'bg-orange-50 border-orange-200'}`}>
@@ -168,6 +169,23 @@ export function EstoquePage() {
                 </div>
               ))}
             </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-4">
+              <Package size={32} className="text-indigo-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 mb-1">Estoque vazio</h3>
+            <p className="text-sm text-slate-500 max-w-md mb-6">
+              Comece cadastrando seus produtos, materiais e insumos no catálogo. Depois você poderá controlar entradas, saídas e receber alertas de reposição.
+            </p>
+            <Link
+              to="/estoque/produtos"
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-md shadow-indigo-100"
+            >
+              <Plus size={18} />
+              Cadastrar primeiro produto
+            </Link>
           </div>
         )}
 
