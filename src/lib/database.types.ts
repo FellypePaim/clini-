@@ -1814,6 +1814,56 @@ export type Database = {
           },
         ]
       }
+      profissional_ausencias: {
+        Row: {
+          clinica_id: string
+          consultas_canceladas: number
+          created_at: string | null
+          created_by: string | null
+          data_fim: string
+          data_inicio: string
+          id: string
+          motivo: string | null
+          notificou_pacientes: boolean
+          profissional_id: string
+          tipo: string
+        }
+        Insert: {
+          clinica_id: string
+          consultas_canceladas?: number
+          created_at?: string | null
+          created_by?: string | null
+          data_fim: string
+          data_inicio: string
+          id?: string
+          motivo?: string | null
+          notificou_pacientes?: boolean
+          profissional_id: string
+          tipo?: string
+        }
+        Update: {
+          clinica_id?: string
+          consultas_canceladas?: number
+          created_at?: string | null
+          created_by?: string | null
+          data_fim?: string
+          data_inicio?: string
+          id?: string
+          motivo?: string | null
+          notificou_pacientes?: boolean
+          profissional_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_ausencias_clinica_id_fkey"
+            columns: ["clinica_id"]
+            isOneToOne: false
+            referencedRelation: "clinicas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       releases: {
         Row: {
           autor_id: string | null
