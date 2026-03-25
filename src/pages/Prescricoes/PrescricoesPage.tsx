@@ -1,7 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import {
   ClipboardList, Plus, X, Loader2, Search,
-  CheckCircle2, XCircle, Shield, Printer, Download, Eye, ChevronDown, ChevronLeft, ChevronRight
+  CheckCircle2, XCircle, Shield, Printer, Download, Eye, ChevronDown, ChevronLeft, ChevronRight,
+  Pencil, Trash2
 } from 'lucide-react'
 import jsPDF from 'jspdf'
 import { usePrescricoes } from '../../hooks/usePrescricoes'
@@ -24,7 +25,7 @@ Observações:`
 function fmtDate(d: string) { const p = d?.split('T')?.[0]?.split('-'); return p?.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : '—' }
 
 export function PrescricoesPage() {
-  const { prescricoes, isLoading, createPrescricao, cancelarPrescricao } = usePrescricoes()
+  const { prescricoes, isLoading, createPrescricao, cancelarPrescricao, updatePrescricao, deletePrescricao } = usePrescricoes()
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
 
@@ -40,6 +41,10 @@ export function PrescricoesPage() {
   const [filterPeriod, setFilterPeriod] = useState<'todos' | '7d' | '30d' | '90d'>('todos')
   const [page, setPage] = useState(1)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingPresc, setEditingPresc] = useState<typeof prescricoes[0] | null>(null)
+  const [editConteudo, setEditConteudo] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const PAGE_SIZE = 8
 
   const buscarPacientes = useCallback(async (q: string) => {
@@ -326,10 +331,18 @@ export function PrescricoesPage() {
                               <Download className="w-3 h-3" /> PDF
                             </button>
                             {p.status === 'ativa' && (
-                              <button onClick={() => cancelarPrescricao(p.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                <XCircle className="w-3 h-3" /> Cancelar
-                              </button>
+                              <>
+                                <button onClick={() => { setEditingPresc(p); setEditConteudo(p.conteudo) }} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+                                  <Pencil className="w-3 h-3" /> Editar
+                                </button>
+                                <button onClick={() => cancelarPrescricao(p.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                                  <XCircle className="w-3 h-3" /> Cancelar
+                                </button>
+                              </>
                             )}
+                            <button onClick={() => setDeleteConfirm(p.id)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-gray-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors">
+                              <Trash2 className="w-3 h-3" /> Excluir
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -367,6 +380,79 @@ export function PrescricoesPage() {
           </div>
         )}
       </main>
+
+      {/* Modal Editar Prescrição */}
+      {editingPresc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Pencil className="w-5 h-5 text-amber-500" /> Editar Prescrição
+              </h2>
+              <button onClick={() => setEditingPresc(null)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500" /></button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="bg-slate-50 rounded-lg p-3 text-sm">
+                <span className="text-xs font-bold text-slate-400 uppercase">Paciente:</span>
+                <span className="ml-2 font-semibold text-slate-700">{editingPresc.paciente_nome}</span>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Conteúdo da Prescrição</label>
+                <textarea rows={12} className="w-full p-3 text-sm font-mono border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
+                  value={editConteudo} onChange={e => setEditConteudo(e.target.value)} />
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
+                <Shield size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 font-medium">Ao salvar, a prescrição será reassinada digitalmente com novo hash.</p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setEditingPresc(null)} className="flex-1 px-4 py-2.5 font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
+                <button disabled={editSaving || !editConteudo.trim()}
+                  onClick={async () => {
+                    setEditSaving(true)
+                    await updatePrescricao(editingPresc.id, editConteudo)
+                    setEditSaving(false)
+                    setEditingPresc(null)
+                    setExpandedId(null)
+                  }}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition-colors disabled:opacity-50">
+                  {editSaving ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
+                  {editSaving ? 'Salvando...' : 'Salvar e Reassinar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Confirmar Exclusão */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm animate-fade-in">
+            <div className="p-6 text-center">
+              <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={28} className="text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Excluir prescrição?</h3>
+              <p className="text-sm text-gray-500">Esta ação é irreversível. A prescrição será removida permanentemente do sistema.</p>
+            </div>
+            <div className="px-6 pb-6 flex gap-3">
+              <button onClick={() => setDeleteConfirm(null)}
+                className="flex-1 px-4 py-2.5 font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                Cancelar
+              </button>
+              <button onClick={async () => {
+                  await deletePrescricao(deleteConfirm)
+                  setDeleteConfirm(null)
+                  setExpandedId(null)
+                }}
+                className="flex-1 px-4 py-2.5 font-semibold text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors">
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Visualizar Prescrição */}
       {viewingPresc && (

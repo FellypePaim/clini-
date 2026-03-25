@@ -119,5 +119,33 @@ export function usePrescricoes() {
     }
   }, [clinicaId, toast])
 
-  return { prescricoes, isLoading, loadPrescricoes, createPrescricao, cancelarPrescricao }
+  const updatePrescricao = useCallback(async (id: string, conteudo: string) => {
+    if (!clinicaId) return
+    try {
+      const assinatura_hash = btoa(`${user?.id}:${Date.now()}:${clinicaId}`)
+      const itensArr = [{ medicamento: 'Prescrição livre', dosagem: '', frequencia: '', duracao: '', observacoes: conteudo }]
+      const { error } = await supabase.from('prescricoes')
+        .update({ conteudo, itens: itensArr, assinatura_hash, updated_at: new Date().toISOString() } as any)
+        .eq('id', id).eq('clinica_id', clinicaId)
+      if (error) throw error
+      await loadPrescricoes()
+      toast({ title: 'Atualizada', description: 'Prescrição editada e reassinada.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }, [clinicaId, user?.id, loadPrescricoes, toast])
+
+  const deletePrescricao = useCallback(async (id: string) => {
+    if (!clinicaId) return
+    try {
+      const { error } = await supabase.from('prescricoes').delete().eq('id', id).eq('clinica_id', clinicaId)
+      if (error) throw error
+      setPrescricoes(prev => prev.filter(p => p.id !== id))
+      toast({ title: 'Excluída', description: 'Prescrição removida permanentemente.', type: 'info' })
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, type: 'error' })
+    }
+  }, [clinicaId, toast])
+
+  return { prescricoes, isLoading, loadPrescricoes, createPrescricao, cancelarPrescricao, updatePrescricao, deletePrescricao }
 }
