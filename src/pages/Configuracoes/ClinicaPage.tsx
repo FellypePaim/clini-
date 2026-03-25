@@ -332,7 +332,7 @@ export function ClinicaPage() {
             <div>
               <label className="block text-sm font-bold text-slate-700 mb-2">CEP</label>
               <div className="relative">
-                <input type="text" value={form.cep} onChange={e => handleCepChange(e.target.value)}
+                <input type="text" value={maskCEP(form.cep)} onChange={e => handleCepChange(e.target.value)}
                   className={INPUT} placeholder="00000-000" />
                 {cepLoading && <Loader2 size={16} className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-indigo-400" />}
               </div>
