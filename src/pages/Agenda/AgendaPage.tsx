@@ -45,7 +45,7 @@ export function AgendaPage() {
   const [modalInitialHour, setModalInitialHour]   = useState<string>()
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
 
-  const { appointments, createAppointment, updateAppointment, deleteAppointment } = useAgenda()
+  const { appointments, ausencias, createAppointment, updateAppointment, deleteAppointment } = useAgenda()
 
   // ── Lista de profissionais únicos (derivada dos agendamentos) ──
   const profissionaisUnicos = useMemo(() => {
@@ -224,6 +224,7 @@ export function AgendaPage() {
             <DayView
               date={date}
               appointments={visibleAppointments}
+              ausencias={ausencias}
               onCardClick={handleCardClick}
               onSlotClick={(h) => handleSlotClick(toDateStr(date), h)}
               onStatusChange={handleStatusChange}
@@ -235,6 +236,7 @@ export function AgendaPage() {
             <WeekView
               currentDate={date}
               appointments={visibleAppointments}
+              ausencias={ausencias}
               onCardClick={handleCardClick}
               onSlotClick={handleSlotClick}
               onStatusChange={handleStatusChange}

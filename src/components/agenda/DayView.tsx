@@ -20,13 +20,14 @@ function minutesToTime(min: number): string {
 interface DayViewProps {
   date: Date
   appointments: AgendaAppointment[]
+  ausencias?: Array<{ profissional_id: string; data_inicio: string; data_fim: string; tipo: string }>
   onCardClick: (apt: AgendaAppointment) => void
   onSlotClick: (hour: number) => void
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onDrop?: (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => void
 }
 
-export function DayView({ date, appointments, onCardClick, onSlotClick, onStatusChange, onDrop }: DayViewProps) {
+export function DayView({ date, appointments, ausencias, onCardClick, onSlotClick, onStatusChange, onDrop }: DayViewProps) {
   const nowLineRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const isToday = date.toDateString() === new Date().toDateString()
@@ -210,6 +211,18 @@ export function DayView({ date, appointments, onCardClick, onSlotClick, onStatus
               />
             </div>
           ))}
+
+          {/* Overlay de ausência */}
+          {ausencias?.filter(a => {
+            const d = dateStr
+            return a.data_inicio <= d && a.data_fim >= d
+          }).length! > 0 && (
+            <div className="absolute inset-x-0 top-0 bottom-0 bg-slate-200/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
+              <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+                Profissional ausente
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

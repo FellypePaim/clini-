@@ -48,13 +48,14 @@ function getCardStyle(apt: AgendaAppointment): React.CSSProperties {
 interface WeekViewProps {
   currentDate: Date
   appointments: AgendaAppointment[]
+  ausencias?: Array<{ profissional_id: string; data_inicio: string; data_fim: string; tipo: string }>
   onCardClick: (apt: AgendaAppointment) => void
   onSlotClick: (date: string, hour: number) => void
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onDrop?: (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => void
 }
 
-export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, onStatusChange, onDrop }: WeekViewProps) {
+export function WeekView({ currentDate, appointments, ausencias, onCardClick, onSlotClick, onStatusChange, onDrop }: WeekViewProps) {
   const today      = new Date()
   const weekDays   = getWeekDays(currentDate)
   const totalHeight = HOURS.length * SLOT_HEIGHT
@@ -234,6 +235,17 @@ export function WeekView({ currentDate, appointments, onCardClick, onSlotClick, 
                   />
                 </div>
               ))}
+
+              {/* Overlay de ausência */}
+              {ausencias?.filter(a =>
+                a.data_inicio <= dateStr && a.data_fim >= dateStr
+              ).length! > 0 && (
+                <div className="absolute inset-x-0 top-0 bottom-0 bg-slate-200/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
+                  <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+                    Ausente
+                  </span>
+                </div>
+              )}
             </div>
           )
         })}

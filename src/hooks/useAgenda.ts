@@ -6,6 +6,7 @@ import { useToast } from './useToast'
 
 export function useAgenda() {
   const [appointments, setAppointments] = useState<AgendaAppointment[]>([])
+  const [ausencias, setAusencias] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -89,11 +90,33 @@ export function useAgenda() {
     [clinicaId, toast]
   )
 
+  // ── Buscar ausências de profissionais ────────────────────────────────────
+  const loadAusencias = useCallback(async (startDate: string, endDate: string) => {
+    if (!clinicaId) return
+    try {
+      const { data } = await supabase
+        .from('profissional_ausencias')
+        .select('profissional_id, data_inicio, data_fim, tipo')
+        .eq('clinica_id', clinicaId)
+        .lte('data_inicio', endDate)
+        .gte('data_fim', startDate)
+      setAusencias(data ?? [])
+    } catch { /* silent */ }
+  }, [clinicaId])
+
   // ── INIT REALTIME E FETCH INICIAL ───────────────────────────────────────────
   useEffect(() => {
     if (!clinicaId) return
 
     getAppointments()
+
+    // Carregar ausências para um range amplo (3 meses)
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const end = new Date(now.getFullYear(), now.getMonth() + 2, 0)
+    const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`
+    const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`
+    loadAusencias(startStr, endStr)
 
     const channel = supabase.channel('agenda_changes')
       .on(
@@ -113,7 +136,7 @@ export function useAgenda() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [clinicaId, getAppointments])
+  }, [clinicaId, getAppointments, loadAusencias])
 
   // ── Criar consulta ────────────────────────────────────────────────────
   const createAppointment = useCallback(
@@ -283,9 +306,11 @@ export function useAgenda() {
 
   return {
     appointments,
+    ausencias,
     isLoading,
     error,
     getAppointments,
+    loadAusencias,
     createAppointment,
     updateAppointment,
     deleteAppointment,
