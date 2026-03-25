@@ -336,7 +336,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   }
 
   // 5. Buscar configuração da clínica, procedimentos e agenda básica
-  const [clinicaRes, procedimentosRes, consultasRes] = await Promise.all([
+  const [clinicaRes, procedimentosRes, consultasRes, ausenciasRes] = await Promise.all([
     supabase
       .from("clinicas")
       .select("nome, configuracoes")
@@ -353,7 +353,12 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .eq("clinica_id", clinica_id)
       .gte("data_hora_inicio", new Date().toISOString().split('T')[0])
       .in("status", ["agendado", "confirmado"])
-      .limit(100)
+      .limit(100),
+    supabase
+      .from("profissional_ausencias")
+      .select("profissional_id, data_inicio, data_fim")
+      .eq("clinica_id", clinica_id)
+      .gte("data_fim", new Date().toISOString().split('T')[0])
   ])
 
   const clinicaData = clinicaRes.data
@@ -386,6 +391,11 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     return `- ${dt[0] ?? "?"} às ${dt[1]?.substring(0,5) ?? "?"} (${c.duracao_minutos ?? 30}min)`
   }).join('\n')
 
+  const ausenciasData = ausenciasRes.data || []
+  const ausenciasFormatadas = ausenciasData.map((a: any) =>
+    `- Profissional ausente de ${a.data_inicio} a ${a.data_fim}`
+  ).join('\n')
+
   const systemPrompt = `
     Você é ${config.nome_assistente}, secretária virtual da clínica "${config.nome_clinica}".
     Tom de atendimento: ${tom[config.tom_voz] ?? "cordial e profissional"}.
@@ -403,6 +413,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
     HORÁRIOS JÁ OCUPADOS (NÃO sugerir estes):
     ${agendaFormatada || "Nenhum agendamento encontrado — agenda livre."}
+    ${ausenciasFormatadas ? `\n\nPROFISSIONAIS AUSENTES (NÃO agende nesses dias):\n${ausenciasFormatadas}` : ''}
 
     REGRAS OBRIGATÓRIAS:
     1. Responda SEMPRE em português brasileiro
