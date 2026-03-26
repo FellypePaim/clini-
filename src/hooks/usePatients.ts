@@ -137,7 +137,7 @@ export function usePatients() {
         .select('*, profiles:profissional_id(nome_completo)')
         .eq('paciente_id', id)
         .eq('clinica_id', clinicaId)
-        .order('data_hora', { ascending: false })
+        .order('data_hora_inicio', { ascending: false })
 
       if (pbErr) throw pbErr
 
@@ -147,8 +147,8 @@ export function usePatients() {
         pacienteNome: '',
         profissionalId: r.profissional_id,
         profissionalNome: r.profiles?.nome_completo || '',
-        data: r.data_hora?.split('T')[0] || '',
-        horaInicio: r.data_hora ? (r.data_hora as string).split('T')[1]?.substring(0, 5) ?? '' : '',
+        data: r.data_hora_inicio?.split('T')[0] || '',
+        horaInicio: r.data_hora_inicio ? (r.data_hora_inicio as string).split('T')[1]?.substring(0, 5) ?? '' : '',
         horaFim: '',
         procedimento: r.procedimento || 'consulta',
         status: r.status || 'concluido',
