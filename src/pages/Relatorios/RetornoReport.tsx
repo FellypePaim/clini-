@@ -11,7 +11,7 @@ import { cn } from '../../lib/utils'
 
 interface Consulta {
   id: string
-  data: string
+  data_hora_inicio: string
   paciente_id: string
 }
 
@@ -76,10 +76,10 @@ export function RetornoReport() {
       // Buscar consultas no período para calcular total_consultas e ultima_consulta
       const { data: consultasData, error: consError } = await supabase
         .from('consultas' as any)
-        .select('id, data, paciente_id')
+        .select('id, data_hora_inicio, paciente_id')
         .eq('clinica_id', clinicaId)
-        .gte('data', inicioStr)
-        .lte('data', fimStr + 'T23:59:59')
+        .gte('data_hora_inicio', inicioStr)
+        .lte('data_hora_inicio', fimStr + 'T23:59:59')
 
       if (consError) throw consError
 
@@ -92,7 +92,7 @@ export function RetornoReport() {
           consultasPorPaciente[c.paciente_id] = { total: 0, ultima: null }
         }
         consultasPorPaciente[c.paciente_id].total += 1
-        const dataConsulta = c.data
+        const dataConsulta = c.data_hora_inicio
         if (!consultasPorPaciente[c.paciente_id].ultima || dataConsulta > consultasPorPaciente[c.paciente_id].ultima!) {
           consultasPorPaciente[c.paciente_id].ultima = dataConsulta
         }
