@@ -9,6 +9,12 @@ import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 import { cn } from '../../lib/utils'
 
+interface Consulta {
+  id: string
+  data: string
+  paciente_id: string
+}
+
 interface Paciente {
   id: string
   nome_completo: string
@@ -59,23 +65,52 @@ export function RetornoReport() {
     const fimStr = fim.toISOString().split('T')[0]
 
     try {
-      const { data, error } = await supabase
+      // Buscar pacientes básicos
+      const { data: pacientesData, error: pacError } = await supabase
         .from('pacientes' as any)
-        .select('id, nome_completo, total_consultas, ultima_consulta, convenio')
+        .select('id, nome_completo, convenio')
         .eq('clinica_id', clinicaId)
-        .gte('created_at', inicioStr)
-        .lte('created_at', fimStr + 'T23:59:59')
-        .order('total_consultas', { ascending: false })
 
-      if (error) throw error
+      if (pacError) throw pacError
 
-      setPacientes((data as any[] || []).map((p: any) => ({
-        id: p.id,
-        nome_completo: p.nome_completo || '—',
-        total_consultas: Number(p.total_consultas) || 0,
-        ultima_consulta: p.ultima_consulta || null,
-        convenio: p.convenio || null,
-      })))
+      // Buscar consultas no período para calcular total_consultas e ultima_consulta
+      const { data: consultasData, error: consError } = await supabase
+        .from('consultas' as any)
+        .select('id, data, paciente_id')
+        .eq('clinica_id', clinicaId)
+        .gte('data', inicioStr)
+        .lte('data', fimStr + 'T23:59:59')
+
+      if (consError) throw consError
+
+      const consultas = (consultasData as any[] || []) as Consulta[]
+
+      // Agrupar consultas por paciente
+      const consultasPorPaciente: Record<string, { total: number; ultima: string | null }> = {}
+      consultas.forEach((c) => {
+        if (!consultasPorPaciente[c.paciente_id]) {
+          consultasPorPaciente[c.paciente_id] = { total: 0, ultima: null }
+        }
+        consultasPorPaciente[c.paciente_id].total += 1
+        const dataConsulta = c.data
+        if (!consultasPorPaciente[c.paciente_id].ultima || dataConsulta > consultasPorPaciente[c.paciente_id].ultima!) {
+          consultasPorPaciente[c.paciente_id].ultima = dataConsulta
+        }
+      })
+
+      // Montar lista de pacientes com consultas no período
+      const result: Paciente[] = (pacientesData as any[] || [])
+        .filter((p: any) => consultasPorPaciente[p.id])
+        .map((p: any) => ({
+          id: p.id,
+          nome_completo: p.nome_completo || '—',
+          total_consultas: consultasPorPaciente[p.id]?.total || 0,
+          ultima_consulta: consultasPorPaciente[p.id]?.ultima || null,
+          convenio: p.convenio || null,
+        }))
+        .sort((a: Paciente, b: Paciente) => b.total_consultas - a.total_consultas)
+
+      setPacientes(result)
     } finally {
       setIsLoading(false)
     }

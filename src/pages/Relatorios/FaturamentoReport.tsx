@@ -68,8 +68,7 @@ export function FaturamentoReport() {
       const { data, error } = await supabase
         .from('transacoes' as any)
         .select(`
-          id, data_consolidacao, descricao, valor, tipo_transacao, status,
-          financeiro_categorias (nome),
+          id, data_consolidacao, descricao, valor, tipo, status, categoria_id,
           pacientes (nome_completo),
           profiles:profissional_id (nome_completo)
         `)
@@ -85,8 +84,8 @@ export function FaturamentoReport() {
         data_consolidacao: l.data_consolidacao,
         descricao: l.descricao || '—',
         valor: Number(l.valor) || 0,
-        tipo: l.tipo_transacao,
-        categoria: l.financeiro_categorias?.nome || 'Geral',
+        tipo: l.tipo,
+        categoria: l.categoria_id || 'Geral',
         paciente_nome: l.pacientes?.nome_completo ?? null,
         profissional_nome: l.profiles?.nome_completo ?? null,
         status: l.status

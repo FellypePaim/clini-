@@ -11,7 +11,7 @@ import { cn } from '../../lib/utils'
 
 interface LancamentoConvenio {
   id: string
-  data_consolidacao: string
+  data_competencia: string
   descricao: string
   valor: number
   categoria: string
@@ -66,12 +66,12 @@ export function ConvenioReport() {
       const [lancRes, pacRes] = await Promise.all([
         supabase
           .from('lancamentos' as any)
-          .select('id, data_consolidacao, descricao, valor, categoria, status')
+          .select('id, data_competencia, descricao, valor, categoria, status')
           .eq('clinica_id', clinicaId)
           .eq('tipo', 'receita')
-          .gte('data_consolidacao', inicioStr)
-          .lte('data_consolidacao', fimStr)
-          .order('data_consolidacao', { ascending: false }),
+          .gte('data_competencia', inicioStr)
+          .lte('data_competencia', fimStr)
+          .order('data_competencia', { ascending: false }),
 
         supabase
           .from('pacientes' as any)
@@ -83,7 +83,7 @@ export function ConvenioReport() {
 
       const mapped: LancamentoConvenio[] = (lancRes.data as any[] || []).map((l: any) => ({
         id: l.id,
-        data_consolidacao: l.data_consolidacao,
+        data_competencia: l.data_competencia,
         descricao: l.descricao || '—',
         valor: Number(l.valor) || 0,
         categoria: l.categoria || 'Geral',

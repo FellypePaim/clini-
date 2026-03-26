@@ -134,7 +134,7 @@ export function usePatients() {
     try {
       const { data, error: pbErr } = await supabase
         .from('consultas')
-        .select('*, profiles(nome_completo)')
+        .select('*, profiles:profissional_id(nome_completo)')
         .eq('paciente_id', id)
         .eq('clinica_id', clinicaId)
         .order('data_hora', { ascending: false })
@@ -174,7 +174,6 @@ export function usePatients() {
         .from('documentos_paciente')
         .select('*')
         .eq('paciente_id', id)
-        .eq('clinica_id', clinicaId)
         .order('created_at', { ascending: false })
 
       if (pbErr) throw pbErr

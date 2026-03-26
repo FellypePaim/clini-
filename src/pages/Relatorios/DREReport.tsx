@@ -11,7 +11,7 @@ import { cn } from '../../lib/utils'
 
 interface Lancamento {
   id: string
-  data_consolidacao: string
+  data_competencia: string
   descricao: string
   valor: number
   tipo: 'receita' | 'despesa'
@@ -63,7 +63,7 @@ function agruparPorSemana(lancamentos: Lancamento[]): EvolucaoPeriodo[] {
   const semanaMap: Record<string, { receita: number; despesa: number }> = {}
 
   lancamentos.forEach(l => {
-    const date = new Date(l.data_consolidacao + 'T00:00')
+    const date = new Date(l.data_competencia + 'T00:00')
     const startOfWeek = new Date(date)
     startOfWeek.setDate(date.getDate() - date.getDay())
     const label = startOfWeek.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
@@ -96,18 +96,18 @@ export function DREReport() {
     try {
       const { data, error } = await supabase
         .from('lancamentos' as any)
-        .select('id, data_consolidacao, descricao, valor, tipo, categoria, status')
+        .select('id, data_competencia, descricao, valor, tipo, categoria, status')
         .eq('clinica_id', clinicaId)
-        .gte('data_consolidacao', inicioStr)
-        .lte('data_consolidacao', fimStr)
-        .order('data_consolidacao', { ascending: true })
+        .gte('data_competencia', inicioStr)
+        .lte('data_competencia', fimStr)
+        .order('data_competencia', { ascending: true })
 
       if (error) throw error
 
       setLancamentos(
         (data as any[] || []).map((l: any) => ({
           id: l.id,
-          data_consolidacao: l.data_consolidacao,
+          data_competencia: l.data_competencia,
           descricao: l.descricao || '—',
           valor: Number(l.valor) || 0,
           tipo: l.tipo,
