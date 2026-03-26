@@ -103,7 +103,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
   // Carregar estoque de produtos
   useEffect(() => {
     if (!clinicaId) return
-    supabase.from('produtos_estoque').select('id, nome, quantidade_atual, preco_custo')
+    supabase.from('produtos_estoque').select('id, nome, estoque_atual, custo_unitario')
       .eq('clinica_id', clinicaId).eq('ativo', true)
       .then(({ data }) => setEstoqueProdutos(data || []))
   }, [clinicaId])
