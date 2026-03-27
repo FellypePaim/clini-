@@ -215,11 +215,14 @@ Deno.serve(async (req) => {
           .eq('id', targetId)
         if (sErr) throw new Error(`Falha ao atualizar: ${sErr.message}`)
 
-        await db.from('auditoria_global').insert({
-          usuario_id: user.id, clinica_id: targetId,
-          acao: pd.suspender ? 'SUSPEND_CLINIC' : 'REACTIVATE_CLINIC',
-          recurso: 'clinicas', recurso_id: targetId, resultado: 'sucesso',
-        }).catch(() => {})
+        // Log de auditoria (não bloqueia a operação se falhar)
+        try {
+          await db.from('auditoria_global').insert({
+            usuario_id: user.id, clinica_id: targetId,
+            acao: pd.suspender ? 'SUSPEND_CLINIC' : 'REACTIVATE_CLINIC',
+            recurso: 'clinicas', recurso_id: targetId, resultado: 'sucesso',
+          })
+        } catch { /* ignore audit errors */ }
 
         return ok({ success: true, status: novoStatus })
       }
