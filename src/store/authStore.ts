@@ -109,10 +109,17 @@ export const usePermissions = () => {
 }
 
 // ─── Setup Auth Listener ────────────────────────────────
+let authListenerSetup = false
+
 export function initAuth() {
-  supabase.auth.onAuthStateChange(async (event) => {
+  if (authListenerSetup) return          // evita listeners duplicados (React StrictMode)
+  authListenerSetup = true
+
+  supabase.auth.onAuthStateChange((event) => {
     if (event === 'SIGNED_OUT') {
-      useAuthStore.getState().logout()
+      // Limpa o state diretamente — NÃO chama logout() para evitar loop infinito
+      // (logout → signOut → SIGNED_OUT → logout → signOut → ...)
+      useAuthStore.setState({ user: null, isAuthenticated: false, isPendingApproval: false, error: null })
     }
   })
 }
