@@ -95,6 +95,7 @@ const SuperWhatsAppPage = lazyNamed(() => import('../pages/SuperAdmin/SuperWhats
 const SuperLogsPage = lazyNamed(() => import('../pages/SuperAdmin/SuperLogsPage'), 'SuperLogsPage')
 const SuperConfiguracoesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperConfiguracoesPage'), 'SuperConfiguracoesPage')
 const SuperSuportePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSuportePage'), 'SuperSuportePage')
+const SuperReleasesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperReleasesPage'), 'SuperReleasesPage')
 
 // ─── Páginas lazy — Dev ────────────────────────────────
 const DiagnosticoPage = lazyNamed(() => import('../pages/Dev/DiagnosticoPage'), 'DiagnosticoPage')
@@ -267,7 +268,7 @@ export function AppRouter() {
           <Route path="logs" element={<SuperLogsPage />} />
           <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
           <Route path="suporte" element={<SuperSuportePage />} />
-          <Route path="releases" element={<SuperSuportePage />} />
+          <Route path="releases" element={<SuperReleasesPage />} />
         </Route>
       </Routes>
     </Suspense>
