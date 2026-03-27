@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.4.0** (Ausências, UX fixes, Alertas sistema — 25/03/2026)
+- Versão: **v1.5.0** (SuperAdmin v2 — 100% real, Suporte com chat — 27/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -29,6 +29,7 @@
 - Fase 17: ✅ **Fluxo de Registro + Multi-tenant hardening (23/03/2026)**
 - Fase 18: ✅ **Types sync + ai_usage_logs + Code-splitting (24/03/2026)**
 - Fase 19: ✅ **Gestão de Ausências de Profissionais (25/03/2026)**
+- Fase 20: ✅ **SuperAdmin v2 — 100% dados reais, sem hardcode (27/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -100,10 +101,15 @@ Actions:
 ### whatsapp-send (✅)
 - Envia texto/imagem/documento via Evolution API
 
-### superadmin-actions (✅ v3)
-- get_platform_stats, get_clinics, create_clinic (com admin), create_user
-- get_users, manage_clinic_status, impersonate_user
-- get_audit_logs, get_financeiro_stats, get_ia_stats, get_whatsapp_stats
+### superadmin-actions (✅ v4 — reescrita 27/03/2026)
+6 abas 100% funcionais, 0 dados fictícios:
+- get_dashboard — KPIs globais, gráfico 7d, AI usage, últimas clínicas
+- get_clinics — lista enriquecida (users, pacientes, consultas, leads, WhatsApp)
+- create_clinic, suspend_clinic, delete_clinic, impersonate_clinic
+- get_users, create_user, update_user (role, ativo, clinica_id)
+- get_financeiro — MRR/ARR/LTV baseado no plano (não status), receita real
+- get_audit_logs — auditoria global
+- get_suporte, create_ticket, update_ticket, get_ticket_messages, send_ticket_message
 
 ### user-manager (✅ v2 — --no-verify-jwt)
 - create_user (admin cria colaborador com auth + profile)
@@ -151,9 +157,13 @@ Actions:
 6. Admin vai em Configurações → Profissionais → "Vincular por E-mail"
 7. Ao vincular, funcionário recebe acesso imediato
 
-### SuperAdmin
-- Pode criar clínicas com admin pelo painel `/superadmin/clinicas`
-- Pode criar usuários e vincular a qualquer clínica em `/superadmin/usuarios`
+### SuperAdmin (v2 — 6 abas, 100% real)
+- `/superadmin` — Dashboard com KPIs globais, gráfico consultas 7d, AI usage
+- `/superadmin/clinicas` — CRUD clínicas, contagens reais, suspender/reativar/deletar
+- `/superadmin/usuarios` — Gerenciar todos os users (toggle ativo, alterar role, mover clínica)
+- `/superadmin/financeiro` — MRR/ARR/LTV baseado no plano, receita real de lançamentos
+- `/superadmin/logs` — Auditoria global com filtros e export CSV
+- `/superadmin/suporte` — Two-panel chat: tickets + mensagens em tempo real
 
 ## 8. OVYVA — AGENTE IA v2
 
@@ -216,6 +226,16 @@ Actions:
 - ~60 chunks lazy: relatórios, SuperAdmin, jsPDF, recharts carregam sob demanda
 - Helper `lazyNamed()` para named exports em `src/router/AppRouter.tsx`
 
-## 14. PRÓXIMOS PASSOS
+## 14. SISTEMA DE SUPORTE
+- Tabelas: `tickets_suporte` (assunto, descricao, status, prioridade, clinica_id) + `tickets_mensagens` (conteudo, autor_id, e_superadmin)
+- SuperAdmin: two-panel chat — lista tickets + conversa em tempo real
+- Status: aberto → em_andamento → resolvido → fechado
+- Prioridade: baixa, media, alta, critica
+- Mensagens diferenciadas por remetente (superadmin=roxo direita, clínica=cinza esquerda)
+- Chat desabilitado em tickets fechados/resolvidos
+
+## 15. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
 2. Testar fluxo WhatsApp completo (Evolution API + OVYVA)
+3. UI para clínicas abrirem tickets de suporte (lado do admin da clínica)
+4. Busca Global (Ctrl+K)
