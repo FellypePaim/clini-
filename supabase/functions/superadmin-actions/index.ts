@@ -5,459 +5,371 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function ok(data: unknown) {
+  return new Response(JSON.stringify(data), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status: 200,
+  })
+}
+
+function err(msg: string, status = 400) {
+  return new Response(JSON.stringify({ error: msg }), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status,
+  })
+}
+
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    const reqAuthHeader = req.headers.get('Authorization');
+    // ── Auth ──────────────────────────────────────────────
+    const authHeader = req.headers.get('Authorization')
     const authClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: reqAuthHeader! } } }
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: authHeader! } } }
+    )
+    const db = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    const { data: { user }, error: authErr } = await authClient.auth.getUser()
+    if (authErr || !user) return err('Não autorizado', 401)
 
-    // 1. Verificar se o usuário está autenticado
-    const { data: { user }, error: authError } = await authClient.auth.getUser()
+    const { data: profile } = await db.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role !== 'superadmin') return err('Acesso negado', 403)
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Não autorizado' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
-      })
+    const body = await req.json().catch(() => { throw new Error('JSON inválido') })
+    const { action, clinicId, payload, data: bodyData } = body
+    const pd = payload ?? bodyData ?? {}
+
+    // ── Helpers ──────────────────────────────────────────
+    const count = async (table: string, filter?: { col: string; val: string }) => {
+      let q = db.from(table).select('*', { count: 'exact', head: true })
+      if (filter) q = q.eq(filter.col, filter.val)
+      const { count: c } = await q
+      return c ?? 0
     }
 
-    // 2. Verificar se o usuário é superadmin
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
+    const today = new Date().toISOString().split('T')[0]
 
-    if (profile?.role !== 'superadmin') {
-      return new Response(JSON.stringify({ error: 'Acesso negado: requer permissão de superadmin' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 403,
-      })
-    }
-
-    let body;
-    try {
-      body = await req.json()
-
-    } catch (e) {
-      console.error('Error parsing JSON:', e)
-      throw new Error('Corpo da requisição inválido.')
-    }
-
-    const { action, clinicId, payload, data } = body
-    // payload is the preferred field; data is kept for backwards compat
-    const pd = payload ?? data ?? {}
-
-    // 2. Roteamento de Ações Administrative
-    let result = null
-
+    // ── Actions ──────────────────────────────────────────
     switch (action) {
-      case 'get_platform_stats': {
-        let totalClinics = 0, activeClinics = 0, totalUsers = 0, totalPatients = 0, appointmentsToday = 0
-        let recentClinics = []
 
-        try {
-          const { count } = await supabaseClient.from('clinicas').select('*', { count: 'exact', head: true })
-          totalClinics = count || 0
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // DASHBOARD — Stats globais reais
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'get_dashboard': {
+        // Contagens paralelas
+        const [
+          totalClinicas, totalUsers, totalPacientes, consultasHoje, totalConsultas,
+          totalLeads, totalPrescricoes, totalEvolucoes
+        ] = await Promise.all([
+          count('clinicas'),
+          count('profiles'),
+          count('pacientes'),
+          db.from('consultas').select('*', { count: 'exact', head: true }).gte('data_hora_inicio', `${today}T00:00:00`).lte('data_hora_inicio', `${today}T23:59:59`).then(r => r.count ?? 0),
+          count('consultas'),
+          count('leads'),
+          count('prescricoes'),
+          count('evolucoes'),
+        ])
 
-        } catch (e) { console.error('Error clinicas count:', e) }
+        // Clínicas com status
+        const { data: clinicas } = await db.from('clinicas').select('id, nome, configuracoes, created_at').order('created_at', { ascending: false })
+        const ativas = clinicas?.filter((c: any) => c.configuracoes?.status === 'ativo').length ?? 0
+        const trial = clinicas?.filter((c: any) => !c.configuracoes?.status || c.configuracoes?.status === 'trial').length ?? 0
+        const suspensas = clinicas?.filter((c: any) => c.configuracoes?.status === 'suspensa').length ?? 0
 
-        try {
-          const { data: cData } = await supabaseClient.from('clinicas').select('configuracoes')
-          activeClinics = cData?.filter((c: any) => c.configuracoes?.status === 'ativo').length || 0
-          const trialClinics = cData?.filter((c: any) => c.configuracoes?.status === 'trial').length || 0
-          const suspendedClinics = cData?.filter((c: any) => c.configuracoes?.status === 'suspensa').length || 0
-          
-        } catch (e) { console.error('Error active clinicas:', e) }
+        // AI usage real
+        const { data: aiLogs } = await db.from('ai_usage_logs').select('custo_estimado, tokens_entrada, tokens_saida')
+        const aiCalls = aiLogs?.length ?? 0
+        const aiCost = aiLogs?.reduce((s: number, l: any) => s + (l.custo_estimado ?? 0), 0) ?? 0
+        const aiTokens = aiLogs?.reduce((s: number, l: any) => s + (l.tokens_entrada ?? 0) + (l.tokens_saida ?? 0), 0) ?? 0
 
-        try {
-          const { count } = await supabaseClient.from('profiles').select('*', { count: 'exact', head: true })
-          totalUsers = count || 0
-
-        } catch (e) { console.error('Error users count:', e) }
-
-        try {
-          const { count } = await supabaseClient.from('pacientes').select('*', { count: 'exact', head: true })
-          totalPatients = count || 0
-        } catch (e) { console.error('Error patients count:', e) }
-
-        try {
-          const today = new Date().toISOString().split('T')[0]
-          const { count } = await supabaseClient.from('consultas').select('*', { count: 'exact', head: true }).gte('data_hora_inicio', `${today}T00:00:00`)
-          appointmentsToday = count || 0
-        } catch (e) { console.error('Error appointments count:', e) }
-
-        try {
-          const { data } = await supabaseClient.from('clinicas').select('id, nome, created_at').order('created_at', { ascending: false }).limit(5)
-          recentClinics = data || []
-        } catch (e) { console.error('Error recent clinics:', e) }
-
-        try {
-          const { data: cData } = await supabaseClient.from('clinicas').select('configuracoes')
-          activeClinics = cData?.filter((c: any) => c.configuracoes?.status === 'ativo').length || 0
-          const trialClinics = cData?.filter((c: any) => c.configuracoes?.status === 'trial').length || 0
-          const suspendedClinics = cData?.filter((c: any) => c.configuracoes?.status === 'suspensa').length || 0
-
-          // Buscar dados reais de uso de IA
-          let aiCalls = 0, aiCost = 0, aiTokens = 0
-          try {
-            const { data: aiLogs } = await supabaseClient.from('ai_usage_logs').select('custo_estimado, tokens_entrada, tokens_saida')
-            if (aiLogs) {
-              aiCalls = aiLogs.length
-              aiCost = aiLogs.reduce((s: number, l: any) => s + (l.custo_estimado ?? 0), 0)
-              aiTokens = aiLogs.reduce((s: number, l: any) => s + (l.tokens_entrada ?? 0) + (l.tokens_saida ?? 0), 0)
-            }
-          } catch { /* ai_usage_logs may not exist yet */ }
-
-          result = {
-            clinics: { active: activeClinics, trial: trialClinics, suspended: suspendedClinics, total: totalClinics },
-            users: { active: totalUsers, total: totalUsers },
-            patientBase: totalPatients,
-            appointmentsToday: appointmentsToday,
-            aiUsage: { calls: aiCalls, cost: Number(aiCost.toFixed(4)), tokens: aiTokens, voiceMin: 0 },
-            uptime: 99.99,
-            mrr: activeClinics * 199,
-            recentClinicsData: recentClinics
-          }
-        } catch (e) {
-          result = { clinics: { active: activeClinics, trial: 0, suspended: 0, total: totalClinics }, /* ...fallback... */ }
+        // Consultas últimos 7 dias (para gráfico)
+        const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+        const { data: consultasWeek } = await db.from('consultas').select('data_hora_inicio').gte('data_hora_inicio', `${sevenDaysAgo}T00:00:00`).order('data_hora_inicio')
+        const consultasPorDia: Record<string, number> = {}
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(Date.now() - i * 86400000).toISOString().split('T')[0]
+          consultasPorDia[d] = 0
         }
-        break
+        consultasWeek?.forEach((c: any) => {
+          const d = c.data_hora_inicio?.split('T')[0]
+          if (d && consultasPorDia[d] !== undefined) consultasPorDia[d]++
+        })
+
+        // Últimas 5 clínicas criadas
+        const recentClinicas = clinicas?.slice(0, 5).map((c: any) => ({
+          id: c.id, nome: c.nome, created_at: c.created_at,
+          status: c.configuracoes?.status || 'trial',
+        })) ?? []
+
+        // MRR
+        const precoBasico = 197
+        const mrr = ativas * precoBasico
+
+        return ok({
+          clinicas: { total: totalClinicas, ativas, trial, suspensas },
+          usuarios: totalUsers,
+          pacientes: totalPacientes,
+          consultas: { hoje: consultasHoje, total: totalConsultas, porDia: consultasPorDia },
+          leads: totalLeads,
+          prescricoes: totalPrescricoes,
+          evolucoes: totalEvolucoes,
+          ai: { calls: aiCalls, cost: Number(aiCost.toFixed(4)), tokens: aiTokens },
+          mrr,
+          recentClinicas,
+        })
       }
 
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CLÍNICAS — Lista enriquecida
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'get_clinics': {
-        const { data, error } = await supabaseClient.from('clinicas').select('*').order('nome', { ascending: true })
-        if (error) {
-          console.error('Error fetch clinics:', error)
-          throw error
-        }
+        const { data: clinicas, error: cErr } = await db.from('clinicas').select('*').order('created_at', { ascending: false })
+        if (cErr) throw cErr
 
-        // Enriquecer cada clínica com contagens reais
-        const enriched = await Promise.all((data || []).map(async (c: any) => {
-          const [usersRes, appointmentsRes, patientsRes] = await Promise.all([
-            supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
-            supabaseClient.from('consultas').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
-            supabaseClient.from('pacientes').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
+        const enriched = await Promise.all((clinicas ?? []).map(async (c: any) => {
+          const [users, pacientes, consultas, leads, whatsapp] = await Promise.all([
+            count('profiles', { col: 'clinica_id', val: c.id }),
+            count('pacientes', { col: 'clinica_id', val: c.id }),
+            count('consultas', { col: 'clinica_id', val: c.id }),
+            count('leads', { col: 'clinica_id', val: c.id }),
+            db.from('whatsapp_instancias').select('status_conexao').eq('clinica_id', c.id).then(r => ({
+              total: r.data?.length ?? 0,
+              online: r.data?.filter((i: any) => i.status_conexao === 'open').length ?? 0,
+            })),
           ])
           return {
-            ...c,
-            user_count: usersRes.count ?? 0,
-            appointment_count: appointmentsRes.count ?? 0,
-            patient_count: patientsRes.count ?? 0,
-            status_plano: c.configuracoes?.status || 'trial',
-            plano_nome: c.configuracoes?.plano || 'Trial',
+            id: c.id, nome: c.nome, cnpj: c.cnpj, email: c.email, telefone: c.telefone,
+            logo_url: c.logo_url, created_at: c.created_at,
+            status: c.configuracoes?.status || 'trial',
+            plano: c.configuracoes?.plano || 'Trial',
+            users, pacientes, consultas, leads,
+            whatsapp,
           }
         }))
 
-        result = enriched
-        break
+        return ok(enriched)
       }
 
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CLÍNICA — Criar
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'create_clinic': {
-        // Criar clínica
-        const { data: newClinic, error: clinicErr } = await supabaseClient
+        const { data: newClinic, error: clinicErr } = await db
           .from('clinicas')
           .insert({
-            nome: pd.nome,
-            cnpj: pd.cnpj || null,
+            nome: pd.nome, cnpj: pd.cnpj || null,
             email: pd.email_admin ?? pd.email ?? null,
             telefone: pd.telefone || null,
-            endereco: pd.endereco || null,
-            configuracoes: { plano: pd.plano ?? 'Basico', status: 'trial', criado_por_superadmin: true }
+            configuracoes: { plano: pd.plano ?? 'Trial', status: 'trial', criado_por_superadmin: true }
           })
-          .select()
-          .single()
-
+          .select().single()
         if (clinicErr) throw clinicErr
 
-        // Se email_admin e senha_admin foram fornecidos, criar admin da clínica
         if (pd.email_admin && pd.senha_admin) {
-          const { data: adminAuth, error: adminAuthErr } = await supabaseClient.auth.admin.createUser({
-            email: pd.email_admin,
-            password: pd.senha_admin,
-            email_confirm: true,
+          const { data: adminAuth, error: adminErr } = await db.auth.admin.createUser({
+            email: pd.email_admin, password: pd.senha_admin, email_confirm: true,
           })
-          if (!adminAuthErr && adminAuth.user) {
-            await supabaseClient.from('profiles').upsert({
-              id: adminAuth.user.id,
-              nome_completo: pd.nome_admin || 'Administrador',
-              email: pd.email_admin,
-              role: 'admin',
-              clinica_id: newClinic.id,
-              ativo: true,
+          if (!adminErr && adminAuth.user) {
+            await db.from('profiles').upsert({
+              id: adminAuth.user.id, nome_completo: pd.nome_admin || 'Administrador',
+              email: pd.email_admin, role: 'admin', clinica_id: newClinic.id, ativo: true,
             })
           }
         }
 
-        // Log auditoria
-        await supabaseClient.from('auditoria_global').insert({
-          usuario_id: user?.id,
-          clinica_id: newClinic.id,
-          acao: 'CREATE_CLINIC',
-          recurso: 'clinicas',
-          recurso_id: newClinic.id,
-          resultado: 'sucesso',
-          dados_depois: newClinic
-        }).then(() => {}).catch(console.error)
+        await db.from('auditoria_global').insert({
+          usuario_id: user.id, clinica_id: newClinic.id, acao: 'CREATE_CLINIC',
+          recurso: 'clinicas', recurso_id: newClinic.id, resultado: 'sucesso', dados_depois: newClinic,
+        }).catch(() => {})
 
-        result = { clinica: newClinic }
-        break
+        return ok({ clinica: newClinic })
       }
 
-      case 'impersonate_clinic': {
-        const targetClinicId = clinicId ?? pd.clinicaId
-        if (!targetClinicId) throw new Error('clinicaId obrigatório')
-        // Log impersonation attempt
-        await supabaseClient.from('auditoria_global').insert({
-          usuario_id: user?.id,
-          clinica_id: targetClinicId,
-          acao: 'IMPERSONATE_CLINIC',
-          recurso: 'clinicas',
-          recurso_id: targetClinicId,
-          resultado: 'sucesso'
-        }).then(() => {}).catch(console.error)
-        
-        result = { 
-          token: btoa(`${targetClinicId}-${Date.now()}`),
-          expires: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
-        }
-        break
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CLÍNICA — Suspender / Reativar
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'suspend_clinic': {
+        const targetId = clinicId ?? pd.clinicaId
+        if (!targetId) throw new Error('clinicaId obrigatório')
+
+        // Buscar configuracoes atuais para não sobrescrever
+        const { data: current } = await db.from('clinicas').select('configuracoes').eq('id', targetId).single()
+        const novoStatus = pd.suspender ? 'suspensa' : 'ativo'
+        const { error: sErr } = await db.from('clinicas')
+          .update({ configuracoes: { ...(current?.configuracoes ?? {}), status: novoStatus, motivo_suspensao: pd.motivo || null } })
+          .eq('id', targetId)
+        if (sErr) throw sErr
+
+        await db.from('auditoria_global').insert({
+          usuario_id: user.id, clinica_id: targetId,
+          acao: pd.suspender ? 'SUSPEND_CLINIC' : 'REACTIVATE_CLINIC',
+          recurso: 'clinicas', recurso_id: targetId, resultado: 'sucesso',
+        }).catch(() => {})
+
+        return ok({ success: true, status: novoStatus })
       }
 
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CLÍNICA — Deletar
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'delete_clinic': {
+        const targetId = clinicId ?? pd.clinicaId
+        if (!targetId) throw new Error('clinicaId obrigatório')
+        await db.from('auditoria_global').delete().eq('clinica_id', targetId)
+        await db.from('profiles').delete().eq('clinica_id', targetId)
+        const { error: delErr } = await db.from('clinicas').delete().eq('id', targetId)
+        if (delErr) throw delErr
+        return ok({ success: true })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // USUÁRIOS — Lista com auth metadata
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'get_users': {
-        // Fetch profiles
-        const { data: profiles, error: profError } = await supabaseClient
-          .from('profiles')
+        const { data: profiles, error: pErr } = await db.from('profiles')
           .select('*, clinicas(nome)')
           .order('created_at', { ascending: false })
-        if (profError) throw profError
+        if (pErr) throw pErr
 
-        // Fetch auth users to get last_sign_in_at
-        const { data: authData, error: authError } = await supabaseClient.auth.admin.listUsers()
-        
-        let users = profiles || []
-        
-        if (!authError && authData?.users) {
-           const authMap = new Map()
-           authData.users.forEach((au: any) => {
-              authMap.set(au.id, au.last_sign_in_at)
-           })
-           
-           users = users.map((p: any) => ({
-             ...p,
-             last_login: authMap.get(p.id) || null
-           }))
-        }
+        const { data: authData } = await db.auth.admin.listUsers()
+        const authMap = new Map<string, { last_sign_in_at: string | null; created_at: string }>()
+        authData?.users?.forEach((au: any) => {
+          authMap.set(au.id, { last_sign_in_at: au.last_sign_in_at, created_at: au.created_at })
+        })
 
-        result = { users }
-        break
+        const users = (profiles ?? []).map((p: any) => ({
+          ...p,
+          last_login: authMap.get(p.id)?.last_sign_in_at || null,
+          auth_created: authMap.get(p.id)?.created_at || null,
+        }))
+
+        return ok({ users })
       }
 
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // USUÁRIO — Criar
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'create_user': {
         const { email, senha, nome, role: userRole, clinica_id, especialidade, conselho } = pd
         if (!email || !senha || !nome) throw new Error('Campos obrigatórios: email, senha, nome')
 
-        // Criar auth user
-        const { data: authData, error: authErr } = await supabaseClient.auth.admin.createUser({
-          email,
-          password: senha,
-          email_confirm: true,
+        const { data: authData, error: authErr2 } = await db.auth.admin.createUser({
+          email, password: senha, email_confirm: true,
         })
-        if (authErr) throw new Error(authErr.message)
+        if (authErr2) throw new Error(authErr2.message)
 
-        // Criar profile
-        const { error: profileErr } = await supabaseClient
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
-            nome_completo: nome,
-            email,
-            role: userRole || 'profissional',
-            clinica_id: clinica_id || null,
-            especialidade: especialidade || null,
-            conselho: conselho || null,
-            ativo: !!clinica_id,
-          })
-
+        const { error: profileErr } = await db.from('profiles').upsert({
+          id: authData.user.id, nome_completo: nome, email,
+          role: userRole || 'profissional', clinica_id: clinica_id || null,
+          especialidade: especialidade || null, conselho: conselho || null,
+          ativo: !!clinica_id,
+        })
         if (profileErr) {
-          await supabaseClient.auth.admin.deleteUser(authData.user.id)
+          await db.auth.admin.deleteUser(authData.user.id)
           throw new Error(profileErr.message)
         }
 
-        result = { success: true, user_id: authData.user.id }
-        break
+        return ok({ success: true, user_id: authData.user.id })
       }
 
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // FINANCEIRO — Métricas reais
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'get_financeiro': {
+        const { data: clinicas } = await db.from('clinicas').select('id, nome, configuracoes, created_at')
+        const precoBasico = 197
+        const ativas = clinicas?.filter((c: any) => c.configuracoes?.status === 'ativo') ?? []
+        const trials = clinicas?.filter((c: any) => !c.configuracoes?.status || c.configuracoes?.status === 'trial') ?? []
+        const suspensas = clinicas?.filter((c: any) => c.configuracoes?.status === 'suspensa') ?? []
+
+        const mrr = ativas.length * precoBasico
+        const ltv = ativas.length > 0 ? precoBasico * 12 : 0 // 12 meses de retenção média
+
+        // Receita real das clínicas (transações de todas as clínicas)
+        const { data: transacoes } = await db.from('lancamentos').select('valor, tipo, status, clinica_id')
+          .eq('tipo', 'receita').eq('status', 'pago')
+        const receitaTotal = transacoes?.reduce((s: number, t: any) => s + (t.valor ?? 0), 0) ?? 0
+
+        return ok({
+          mrr, arr: mrr * 12, ltv, churn: 0,
+          receitaClinicas: receitaTotal,
+          planos: [
+            { nome: 'Ativo', valor: precoBasico, count: ativas.length },
+            { nome: 'Trial', valor: 0, count: trials.length },
+            { nome: 'Suspensa', valor: 0, count: suspensas.length },
+          ],
+          clinicas: (clinicas ?? []).map((c: any) => ({
+            id: c.id, nome: c.nome, created_at: c.created_at,
+            status: c.configuracoes?.status || 'trial',
+            plano: c.configuracoes?.plano || 'Trial',
+          })),
+        })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // LOGS — Auditoria global
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'get_audit_logs': {
-        // Avoid foreign table join on profiles that may error on permission
-        const { data: logs, error } = await supabaseClient
-          .from('auditoria_global')
+        const limit = pd.limit ?? 200
+        const { data: logs, error: lErr } = await db.from('auditoria_global')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(100)
-        if (error) throw error
-        result = { logs: logs || [] }
-        break
+          .limit(limit)
+        if (lErr) throw lErr
+        return ok({ logs: logs ?? [] })
       }
-      case 'get_financeiro_stats': {
-        const { data: clinicas } = await supabaseClient.from('clinicas').select('id, nome, configuracoes, created_at')
-        const activeClinics = clinicas?.filter((c: any) => c.configuracoes?.status === 'ativo').length || 0
-        const trialClinics = clinicas?.filter((c: any) => c.configuracoes?.status !== 'ativo').length || clinicas?.length || 0
-        const totalClinics = clinicas?.length || 0
-        const precoBasico = 197
-        const mrr = activeClinics * precoBasico
-        // LTV = MRR por clínica * tempo médio retenção (calculado real, 0 se sem dados)
-        const ltv = activeClinics > 0 ? mrr / activeClinics * 12 : 0
-        // Churn = 0% real (nenhuma clínica cancelou ainda)
-        const churn = 0
 
-        result = {
-          mrr,
-          arr: mrr * 12,
-          churn,
-          ltv,
-          planos: [
-            { nome: 'Básico', valor: String(precoBasico), clinicas: activeClinics, cor: 'bg-slate-500' },
-            { nome: 'Trial', valor: '0', clinicas: trialClinics, cor: 'bg-purple-500' },
-          ],
-          recentes: clinicas?.slice(0, 10).map((c: any) => ({
-            id: c.id,
-            clinica: c.nome,
-            data: new Date(c.created_at).toLocaleDateString(),
-            valor: c.configuracoes?.status === 'ativo' ? `${precoBasico},00` : '0,00',
-            status: c.configuracoes?.status ?? 'trial',
-            plano: c.configuracoes?.plano ?? 'Trial'
-          })) || []
-        }
-        break
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // SUPORTE — Tickets reais
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'get_suporte': {
+        const { data: tickets } = await db.from('tickets_suporte')
+          .select('*, clinicas(nome)')
+          .order('created_at', { ascending: false })
+
+        const { data: mensagens } = await db.from('tickets_mensagens')
+          .select('ticket_id, id')
+
+        // Contar mensagens por ticket
+        const msgCount: Record<string, number> = {}
+        mensagens?.forEach((m: any) => {
+          msgCount[m.ticket_id] = (msgCount[m.ticket_id] ?? 0) + 1
+        })
+
+        const enriched = (tickets ?? []).map((t: any) => ({
+          ...t,
+          clinica_nome: t.clinicas?.nome ?? 'Sem clínica',
+          total_mensagens: msgCount[t.id] ?? 0,
+        }))
+
+        return ok({ tickets: enriched })
       }
-      case 'get_ia_stats': {
-        const { data: logs } = await supabaseClient.from('ai_usage_logs').select('*, clinicas(nome)').order('created_at', { ascending: false }).limit(50)
-        const totalCalls = logs?.length || 0
-        const totalCost = totalCalls * 0.003
-        
-        result = {
-          calls: totalCalls,
-          cost: totalCost,
-          recentLogs: logs || [],
-          models: [
-            { nome: 'gemini-2.5-flash', calls: totalCalls, cost: totalCost }
-          ]
-        }
-        break
-      }
-      case 'get_whatsapp_stats': {
-        try {
-          const { data: instancias, error } = await supabaseClient.from('whatsapp_instancias').select('*, clinicas(nome)')
-          if (error) throw error
-          const conected = instancias?.filter(i => i.status_conexao === 'open').length || 0
-          
-          result = {
-            total: instancias?.length || 0,
-            conected,
-            disconnected: (instancias?.length || 0) - conected,
-            instancias: instancias || []
-          }
-        } catch (e: any) {
-          console.error(e)
-          result = { total: 0, conected: 0, disconnected: 0, instancias: [] }
-        }
-        break
-      }
-      case 'suspend_clinic': {
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // IMPERSONATE
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'impersonate_clinic': {
         const targetId = clinicId ?? pd.clinicaId
-        if (!targetId) throw new Error('clinicaId obrigatório para suspender')
-        // Guarda status no JSONB configuracoes já que não há coluna status_plano
-        const novoStatus = pd.suspender ? 'suspensa' : 'ativo'
-        const { error: suspErr } = await supabaseClient
-          .from('clinicas')
-          .update({ configuracoes: { status: novoStatus, motivo_suspensao: pd.motivo } } as any)
-          .eq('id', targetId)
-        if (suspErr) throw suspErr
-        // Registrar na auditoria
-        await supabaseClient.from('auditoria_global').insert({
-          usuario_id: user?.id,
-          clinica_id: targetId,
-          acao: pd.suspender ? 'SUSPEND_CLINIC' : 'REACTIVATE_CLINIC',
-          recurso: 'clinicas',
-          recurso_id: targetId,
-          resultado: 'sucesso'
-        }).then(() => {}).catch(console.error)
-        result = { success: true, status: novoStatus }
-        break
-      }
-
-      case 'get_suporte_tickets': {
-        try {
-          const { data: tickets, error } = await supabaseClient
-            .from('tickets_suporte')
-            .select('*')
-            .order('created_at', { ascending: false })
-          if (error) throw error
-          result = { tickets: tickets || [] }
-        } catch (e: any) {
-          console.error(e)
-          result = { tickets: [] }
-        }
-        break
-      }
-      case 'get_saude_stats': {
-        try {
-          // Fetch real errors from audit log to map to error logs
-          const { data: errors } = await supabaseClient
-            .from('auditoria_global')
-            .select('*, clinicas(nome)')
-            .eq('resultado', 'erro')
-            .order('created_at', { ascending: false })
-            .limit(10)
-
-          result = {
-            errors: errors || [],
-            dbStatus: 'Operacional'
-          }
-        } catch (e: any) {
-          result = { errors: [], dbStatus: 'Degradado' }
-        }
-        break
-      }
-
-      case 'delete_clinic': {
-        const targetId = clinicId ?? pd.clinicaId
-        if (!targetId) throw new Error('clinicaId obrigatório para deletar')
-        // Limpa dependencias em ordem (service_role nao precisa de cascade manual)
-        await supabaseClient.from('auditoria_global').delete().eq('clinica_id', targetId)
-        await supabaseClient.from('profiles').delete().eq('clinica_id', targetId)
-        const { error: delErr } = await supabaseClient.from('clinicas').delete().eq('id', targetId)
-        if (delErr) throw delErr
-        result = { success: true }
-        break
+        if (!targetId) throw new Error('clinicaId obrigatório')
+        await db.from('auditoria_global').insert({
+          usuario_id: user.id, clinica_id: targetId,
+          acao: 'IMPERSONATE_CLINIC', recurso: 'clinicas',
+          recurso_id: targetId, resultado: 'sucesso',
+        }).catch(() => {})
+        return ok({ token: btoa(`${targetId}-${Date.now()}`), expires: new Date(Date.now() + 7200000).toISOString() })
       }
 
       default:
         throw new Error(`Ação não suportada: ${action}`)
     }
-
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    })
-
   } catch (error) {
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
-    })
+    return err((error as Error).message)
   }
 })

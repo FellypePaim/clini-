@@ -2,241 +2,144 @@ import { useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useToast } from './useToast'
 
+async function invoke(action: string, extra?: Record<string, unknown>) {
+  const { data, error } = await supabase.functions.invoke('superadmin-actions', {
+    body: { action, ...extra },
+  })
+  if (error) throw error
+  return data
+}
+
 export function useSuperAdmin() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
 
-  // 1. Dashboards & Stats
-  const getPlatformStats = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_platform_stats' }
-      })
-      if (error) throw error
-      return data
-    } catch (err: any) {
-      console.error('SuperAdmin Stats Error:', err)
-      return null
-    } finally {
-      setIsLoading(false)
+  const wrap = useCallback(<T,>(fn: () => Promise<T>, fallback: T) => {
+    return async () => {
+      setIsLoading(true)
+      try { return await fn() }
+      catch (e: any) { console.error(e); return fallback }
+      finally { setIsLoading(false) }
     }
   }, [])
 
-  // 2. Clínicas
+  // Dashboard
+  const getDashboard = useCallback(async () => {
+    setIsLoading(true)
+    try { return await invoke('get_dashboard') }
+    catch (e: any) { console.error('Dashboard Error:', e); return null }
+    finally { setIsLoading(false) }
+  }, [])
+
+  // Clínicas
   const getClinics = useCallback(async () => {
     setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_clinics' }
-      })
-      if (error) throw error
-      return data || []
-    } catch (err: any) {
-      console.error('SuperAdmin Clinics Error:', err)
-      return []
-    } finally {
-      setIsLoading(false)
-    }
+    try { return await invoke('get_clinics') ?? [] }
+    catch (e: any) { console.error('Clinics Error:', e); return [] }
+    finally { setIsLoading(false) }
   }, [])
 
   const createClinic = useCallback(async (formData: any) => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'create_clinic', data: formData }
-      })
-      if (error) throw error
-      toast({ title: 'Sucesso', description: 'Clínica criada com sucesso!', type: 'success' })
+      const data = await invoke('create_clinic', { payload: formData })
+      toast({ title: 'Sucesso', description: 'Clínica criada!', type: 'success' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
       return null
-    } finally {
-      setIsLoading(false)
-    }
+    } finally { setIsLoading(false) }
   }, [toast])
 
   const suspendClinic = useCallback(async (id: string, reason: string) => {
     try {
-      const { error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'suspend_clinic', clinicId: id, payload: { suspender: true, motivo: reason } }
-      })
-      if (error) throw error
-      toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado com sucesso.', type: 'success' })
+      await invoke('suspend_clinic', { clinicId: id, payload: { suspender: true, motivo: reason } })
+      toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado.', type: 'success' })
     } catch {
-      toast({ title: 'Erro', description: 'Erro ao suspender clínica.', type: 'error' })
+      toast({ title: 'Erro', description: 'Falha ao suspender.', type: 'error' })
     }
   }, [toast])
 
-  // 3. Usuários Globais
-  const getUsers = useCallback(async () => {
+  const reactivateClinic = useCallback(async (id: string) => {
+    try {
+      await invoke('suspend_clinic', { clinicId: id, payload: { suspender: false } })
+      toast({ title: 'Clínica Reativada', description: 'Acesso restaurado.', type: 'success' })
+    } catch {
+      toast({ title: 'Erro', description: 'Falha ao reativar.', type: 'error' })
+    }
+  }, [toast])
+
+  const deleteClinic = useCallback(async (id: string) => {
+    try {
+      await invoke('delete_clinic', { clinicId: id })
+      toast({ title: 'Clínica Deletada', description: 'Dados removidos.', type: 'success' })
+    } catch {
+      toast({ title: 'Erro', description: 'Falha ao deletar.', type: 'error' })
+    }
+  }, [toast])
+
+  const impersonateClinic = useCallback(async (clinicId: string) => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_users' }
-      })
-      if (error) throw error
-      return data?.users || []
-    } catch (err) {
-      console.error(err)
-      return []
-    } finally {
-      setIsLoading(false)
-    }
+      await invoke('impersonate_clinic', { clinicId })
+      toast({ title: 'Impersonação', description: 'Token gerado.', type: 'info' })
+    } catch {
+      toast({ title: 'Erro', description: 'Falha na impersonação.', type: 'error' })
+    } finally { setIsLoading(false) }
+  }, [toast])
+
+  // Usuários
+  const getUsers = useCallback(async () => {
+    setIsLoading(true)
+    try { const d = await invoke('get_users'); return d?.users ?? [] }
+    catch (e: any) { console.error('Users Error:', e); return [] }
+    finally { setIsLoading(false) }
   }, [])
 
   const createUser = useCallback(async (formData: any) => {
     setIsLoading(true)
     try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'create_user', data: formData }
-      })
-      if (error) throw error
+      const data = await invoke('create_user', { payload: formData })
       if (data?.error) throw new Error(data.error)
-      toast({ title: 'Sucesso', description: 'Usuário criado com sucesso!', type: 'success' })
+      toast({ title: 'Sucesso', description: 'Usuário criado!', type: 'success' })
       return data
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, type: 'error' })
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
       return null
-    } finally {
-      setIsLoading(false)
-    }
+    } finally { setIsLoading(false) }
   }, [toast])
 
-  // 4. Impersonation (Geração de Token)
-  const impersonateClinic = useCallback(async (clinicId: string) => {
+  // Financeiro
+  const getFinanceiro = useCallback(async () => {
     setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'impersonate_clinic', clinicId }
-      })
-      if (error) throw error
-      
-      const currentToken = localStorage.getItem('prontuario-verde-auth-token')
-      sessionStorage.setItem('impersonation-back-token', currentToken || '')
-      sessionStorage.setItem('impersonation-token', data.token)
-      sessionStorage.setItem('impersonation-clinic', clinicId)
+    try { return await invoke('get_financeiro') }
+    catch (e: any) { console.error('Financeiro Error:', e); return null }
+    finally { setIsLoading(false) }
+  }, [])
 
-      window.open(`/dashboard?impersonate=1&clinic=${clinicId}`, '_blank')
-    } catch {
-      toast({ title: 'Erro', description: 'Não foi possível impersonar.', type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }, [toast])
-
-  // 5. Audit Logs
+  // Logs
   const getAuditLogs = useCallback(async (filters?: any) => {
     setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_audit_logs', filters }
-      })
-      if (error) throw error
-      return data?.logs || []
-    } catch (err) {
-      console.error(err)
-      return []
-    } finally {
-      setIsLoading(false)
-    }
+    try { const d = await invoke('get_audit_logs', { payload: filters }); return d?.logs ?? [] }
+    catch (e: any) { console.error('Logs Error:', e); return [] }
+    finally { setIsLoading(false) }
   }, [])
 
-  // 6. Financeiro Stats
-  const getFinanceiroStats = useCallback(async () => {
+  // Suporte
+  const getSuporte = useCallback(async () => {
     setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_financeiro_stats' }
-      })
-      if (error) throw error
-      return data || null
-    } catch {
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // 7. IA Stats
-  const getIaStats = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_ia_stats' }
-      })
-      if (error) throw error
-      return data || null
-    } catch {
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // 8. WhatsApp Stats
-  const getWhatsAppStats = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_whatsapp_stats' }
-      })
-      if (error) throw error
-      return data || null
-    } catch {
-      return null
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // 9. Suporte Tickets
-  const getSuporteTickets = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_suporte_tickets' }
-      })
-      if (error) throw error
-      return data?.tickets || []
-    } catch {
-      return []
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // 10. Saude Stats
-  const getSaudeStats = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('superadmin-actions', {
-        body: { action: 'get_saude_stats' }
-      })
-      if (error) throw error
-      return data || null
-    } catch {
-      return null
-    } finally {
-      setIsLoading(false)
-    }
+    try { const d = await invoke('get_suporte'); return d?.tickets ?? [] }
+    catch (e: any) { console.error('Suporte Error:', e); return [] }
+    finally { setIsLoading(false) }
   }, [])
 
   return {
     isLoading,
-    getPlatformStats,
-    getClinics,
-    createClinic,
-    createUser,
-    suspendClinic,
-    getUsers,
-    impersonateClinic,
+    getDashboard,
+    getClinics, createClinic, suspendClinic, reactivateClinic, deleteClinic, impersonateClinic,
+    getUsers, createUser,
+    getFinanceiro,
     getAuditLogs,
-    getFinanceiroStats,
-    getIaStats,
-    getWhatsAppStats,
-    getSuporteTickets,
-    getSaudeStats
+    getSuporte,
   }
 }

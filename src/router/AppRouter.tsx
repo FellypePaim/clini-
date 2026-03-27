@@ -88,14 +88,9 @@ const SuperAdminLayout = lazyNamed(() => import('../components/superadmin/SuperA
 const SuperDashboardPage = lazyNamed(() => import('../pages/SuperAdmin/SuperDashboardPage'), 'SuperDashboardPage')
 const SuperClinicasPage = lazyNamed(() => import('../pages/SuperAdmin/SuperClinicasPage'), 'SuperClinicasPage')
 const SuperUsuariosPage = lazyNamed(() => import('../pages/SuperAdmin/SuperUsuariosPage'), 'SuperUsuariosPage')
-const SuperSaudePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSaudePage'), 'SuperSaudePage')
 const SuperFinanceiroPage = lazyNamed(() => import('../pages/SuperAdmin/SuperFinanceiroPage'), 'SuperFinanceiroPage')
-const SuperIAPage = lazyNamed(() => import('../pages/SuperAdmin/SuperIAPage'), 'SuperIAPage')
-const SuperWhatsAppPage = lazyNamed(() => import('../pages/SuperAdmin/SuperWhatsAppPage'), 'SuperWhatsAppPage')
 const SuperLogsPage = lazyNamed(() => import('../pages/SuperAdmin/SuperLogsPage'), 'SuperLogsPage')
-const SuperConfiguracoesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperConfiguracoesPage'), 'SuperConfiguracoesPage')
 const SuperSuportePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSuportePage'), 'SuperSuportePage')
-const SuperReleasesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperReleasesPage'), 'SuperReleasesPage')
 
 // ─── Páginas lazy — Dev ────────────────────────────────
 const DiagnosticoPage = lazyNamed(() => import('../pages/Dev/DiagnosticoPage'), 'DiagnosticoPage')
@@ -262,14 +257,9 @@ export function AppRouter() {
           <Route index element={<SuperDashboardPage />} />
           <Route path="clinicas" element={<SuperClinicasPage />} />
           <Route path="usuarios" element={<SuperUsuariosPage />} />
-          <Route path="saude" element={<SuperSaudePage />} />
           <Route path="financeiro" element={<SuperFinanceiroPage />} />
-          <Route path="ia" element={<SuperIAPage />} />
-          <Route path="whatsapp" element={<SuperWhatsAppPage />} />
           <Route path="logs" element={<SuperLogsPage />} />
-          <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
           <Route path="suporte" element={<SuperSuportePage />} />
-          <Route path="releases" element={<SuperReleasesPage />} />
         </Route>
       </Routes>
     </Suspense>

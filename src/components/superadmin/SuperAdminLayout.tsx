@@ -29,14 +29,9 @@ export function SuperAdminLayout() {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin' },
     { icon: Hospital, label: 'Clínicas', path: '/superadmin/clinicas' },
     { icon: Users, label: 'Usuários', path: '/superadmin/usuarios' },
-    { icon: Activity, label: 'Saúde Sistema', path: '/superadmin/saude' },
     { icon: DollarSign, label: 'Financeiro', path: '/superadmin/financeiro' },
-    { icon: Bot, label: 'IA', path: '/superadmin/ia' },
-    { icon: Smartphone, label: 'WhatsApp', path: '/superadmin/whatsapp' },
     { icon: FileSearch, label: 'Logs', path: '/superadmin/logs' },
-    { icon: Settings, label: 'Configurações', path: '/superadmin/configuracoes' },
     { icon: LifeBuoy, label: 'Suporte', path: '/superadmin/suporte' },
-    { icon: Rocket, label: 'Releases', path: '/superadmin/releases' },
   ]
 
   return (

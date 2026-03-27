@@ -1,249 +1,276 @@
-import React from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   DollarSign,
   TrendingUp,
-  CreditCard,
-  Calendar,
+  Users,
   BarChart3,
-  PieChart,
-  Download,
-  ArrowRight,
-  UserCheck,
-  AlertCircle
+  Loader2,
+  ArrowUpDown,
+  Building2,
+  Percent,
 } from 'lucide-react'
-import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
-import { useToast } from '../../hooks/useToast'
+interface Plano {
+  nome: string
+  valor: number
+  count: number
+}
+
+interface Clinica {
+  id: string
+  nome: string
+  created_at: string
+  status: string
+  plano: string
+}
+
+interface FinanceiroData {
+  mrr: number
+  arr: number
+  ltv: number
+  churn: number
+  receitaClinicas: number
+  planos: Plano[]
+  clinicas: Clinica[]
+}
+
+type SortDir = 'asc' | 'desc'
+
+function formatCurrency(value: number): string {
+  return `R$ ${value.toLocaleString('pt-BR')}`
+}
+
+function formatDate(dateStr: string): string {
+  try {
+    return new Date(dateStr).toLocaleDateString('pt-BR')
+  } catch {
+    return dateStr
+  }
+}
+
+function statusColor(status: string): string {
+  const s = status.toLowerCase()
+  if (s === 'ativa' || s === 'ativo' || s === 'active') return 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
+  if (s === 'suspensa' || s === 'suspended') return 'bg-red-500/10 text-red-400 ring-red-500/20'
+  if (s === 'trial') return 'bg-amber-500/10 text-amber-400 ring-amber-500/20'
+  if (s === 'inativa' || s === 'inactive') return 'bg-slate-500/10 text-slate-400 ring-slate-500/20'
+  return 'bg-slate-500/10 text-slate-400 ring-slate-500/20'
+}
 
 export function SuperFinanceiroPage() {
-  const { getFinanceiroStats, isLoading: _isLoading } = useSuperAdmin()
-  const { toast } = useToast()
-  const [data, setData] = React.useState<any>(null)
-  const [statusFilter, setStatusFilter] = React.useState<string>('todos')
+  const { getFinanceiro, isLoading } = useSuperAdmin()
+  const [data, setData] = useState<FinanceiroData | null>(null)
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
 
-  React.useEffect(() => {
-    async function fetch() {
-      const res = await getFinanceiroStats()
-      if (res) setData(res)
+  useEffect(() => {
+    async function load() {
+      const res = await getFinanceiro()
+      if (res) setData(res as FinanceiroData)
     }
-    fetch()
-  }, [getFinanceiroStats])
+    load()
+  }, [getFinanceiro])
 
-  const stats = [
-    { label: 'MRR Atual', value: `R$ ${(data?.mrr || 0).toLocaleString()}`, icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
-    { label: 'ARR Estimado', value: `R$ ${(data?.arr || 0).toLocaleString()}`, icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-    { label: 'LTV Médio', value: `R$ ${(data?.ltv || 0).toLocaleString()}`, icon: UserCheck, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-    { label: 'Churn Rate', value: `${data?.churn || 0}%`, icon: PieChart, color: 'text-red-400', bg: 'bg-red-400/10' },
+  const sortedClinicas = useMemo(() => {
+    if (!data?.clinicas) return []
+    return [...data.clinicas].sort((a, b) => {
+      const cmp = a.status.localeCompare(b.status)
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [data?.clinicas, sortDir])
+
+  const toggleSort = () => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+
+  const kpis = [
+    {
+      label: 'MRR',
+      value: formatCurrency(data?.mrr ?? 0),
+      icon: DollarSign,
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-400/10',
+    },
+    {
+      label: 'ARR',
+      value: formatCurrency(data?.arr ?? 0),
+      icon: TrendingUp,
+      color: 'text-blue-400',
+      bg: 'bg-blue-400/10',
+    },
+    {
+      label: 'LTV',
+      value: formatCurrency(data?.ltv ?? 0),
+      icon: Users,
+      color: 'text-purple-400',
+      bg: 'bg-purple-400/10',
+    },
+    {
+      label: 'Churn Rate',
+      value: `${data?.churn ?? 0}%`,
+      icon: Percent,
+      color: 'text-red-400',
+      bg: 'bg-red-400/10',
+    },
+    {
+      label: 'Receita Clinicas',
+      value: formatCurrency(data?.receitaClinicas ?? 0),
+      icon: Building2,
+      color: 'text-amber-400',
+      bg: 'bg-amber-400/10',
+    },
   ]
 
-  const planos = data?.planos || [
-    { nome: 'Básico', valor: '0', clinicas: 0, cor: 'bg-slate-500' },
-    { nome: 'Trial', valor: '0', clinicas: 0, cor: 'bg-purple-500' }
-  ]
-
-  const todosRecentes = data?.recentes || []
-  const recentes = statusFilter === 'todos' ? todosRecentes : todosRecentes.filter((r: any) => r.status === statusFilter)
-
-  const handleExportCSV = () => {
-    if (!data?.recentes || data.recentes.length === 0) {
-      toast({ title: 'Aviso', description: 'Nenhum dado para exportar.', type: 'info' })
-      return
-    }
-    const headers = ['ID', 'Clínica', 'Data', 'Valor', 'Status', 'Plano']
-    const csv = [
-      headers.join(','),
-      ...data.recentes.map((r: any) => `${r.id},"${r.clinica}",${r.data},"${r.valor}",${r.status},${r.plano}`)
-    ].join('\n')
-    
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.setAttribute('download', 'relatorio_financeiro.csv')
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  const handleFechamento = () => {
-    toast({ title: 'Em desenvolvimento', description: 'O fechamento mensal autom\u00e1tico ainda est\u00e1 em desenvolvimento. Realize o processo manualmente pelo painel financeiro.', type: 'info' })
+  if (isLoading && !data) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="w-8 h-8 text-purple-400 animate-spin" />
+      </div>
+    )
   }
 
   return (
     <div className="space-y-10 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-white">Financeiro da Plataforma</h1>
-          <p className="text-slate-400 font-medium">Gestão de MRR, assinaturas e faturamento recorrente.</p>
-        </div>
-        <div className="flex items-center gap-3">
-           <button 
-             onClick={handleExportCSV}
-             className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all"
-           >
-              <Download size={18} /> Exportar CSV
-           </button>
-           <button 
-             onClick={handleFechamento}
-             className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-2xl shadow-xl shadow-purple-600/20 transition-all active:scale-95 group"
-           >
-              <Calendar size={18} /> FECHAMENTO DO MÊS
-           </button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-black text-white">Financeiro da Plataforma</h1>
+        <p className="text-slate-400 font-medium mt-1">
+          Visao geral de receita, planos e clinicas.
+        </p>
       </div>
 
-      {/* Grid de KPIs Financeiros */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.label} className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-[32px] group relative overflow-hidden transition-all hover:bg-slate-800/50">
-             <div className="relative z-10 flex flex-col justify-between h-full">
-                <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6", stat.bg, stat.color)}>
-                  <stat.icon size={24} />
-                </div>
-                <div>
-                   <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{stat.label}</p>
-                   <div className="flex items-end gap-3">
-                      <span className="text-2xl font-black text-white tracking-tight">{stat.value}</span>
-                   </div>
-                </div>
-             </div>
-             <stat.icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        {kpis.map((kpi) => (
+          <div
+            key={kpi.label}
+            className="relative overflow-hidden bg-slate-800/40 border border-slate-700/50 rounded-2xl p-5 group hover:bg-slate-800/60 transition-all"
+          >
+            <div className="relative z-10">
+              <div
+                className={cn(
+                  'w-10 h-10 rounded-xl flex items-center justify-center mb-4',
+                  kpi.bg,
+                  kpi.color,
+                )}
+              >
+                <kpi.icon size={20} />
+              </div>
+              <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.15em] mb-1">
+                {kpi.label}
+              </p>
+              <span className="text-xl font-black text-white tracking-tight">{kpi.value}</span>
+            </div>
+            <kpi.icon
+              size={100}
+              className="absolute -bottom-6 -right-6 text-slate-700/5 group-hover:scale-110 transition-transform duration-700"
+            />
           </div>
         ))}
       </div>
 
+      {/* Distribuicao por Plano + Lista de Clinicas */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Distribuição por Plano */}
-        <div className="space-y-6">
-           <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-              <PieChart size={16} /> DISTRIBUIÇÃO POR PLANO
-           </h3>
-           <div className="bg-slate-800/40 border border-slate-700/50 p-8 rounded-[40px] space-y-8 shadow-2xl relative overflow-hidden">
-              <div className="flex items-center justify-center h-48 relative">
-                 {/* Fake Donut Chart */}
-                 <div className="w-40 h-40 rounded-full border-[24px] border-slate-700 relative flex items-center justify-center">
-                    <div className="absolute inset-0 rounded-full border-[24px] border-purple-500 border-t-transparent border-l-transparent rotate-45" />
-                    <div className="absolute inset-0 rounded-full border-[24px] border-indigo-500 border-b-transparent border-l-transparent border-r-transparent -rotate-12" />
-                    <div className="flex flex-col items-center">
-                       <span className="text-2xl font-black text-white">{planos.reduce((s: number, p: any) => s + (p.clinicas || 0), 0)}</span>
-                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">CLÍNICAS</span>
-                    </div>
-                 </div>
-              </div>
-
-              <div className="space-y-4">
-                 {planos.map((p: any) => (
-                   <div key={p.nome} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50 hover:bg-slate-900 transition-colors">
-                      <div className="flex items-center gap-3">
-                         <div className={cn("w-2 h-2 rounded-full", p.cor)} />
-                         <div className="flex flex-col">
-                            <span className="text-xs font-black text-white tracking-widest uppercase">{p.nome}</span>
-                            <span className="text-[10px] font-bold text-slate-500">R$ {p.valor}/mês</span>
-                         </div>
-                      </div>
-                      <div className="text-right">
-                         <span className="text-sm font-black text-slate-200">{p.clinicas}</span>
-                         <span className="text-[10px] font-bold text-slate-500 block">{planos.reduce((s: number, x: any) => s + (x.clinicas || 0), 0) > 0 ? (p.clinicas / planos.reduce((s: number, x: any) => s + (x.clinicas || 0), 0) * 100).toFixed(0) : 0}%</span>
-                      </div>
-                   </div>
-                 ))}
-              </div>
-              <a
-                 href="/superadmin/configuracoes"
-                 className="block w-full py-4 text-center text-[10px] font-black text-purple-400 hover:text-white uppercase tracking-widest border border-dashed border-purple-500/20 rounded-2xl hover:border-purple-500/40 transition-all"
+        {/* Distribuicao por Plano */}
+        <div className="space-y-4">
+          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+            <BarChart3 size={16} /> Distribuicao por Plano
+          </h2>
+          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 space-y-3">
+            {(!data?.planos || data.planos.length === 0) && (
+              <p className="text-sm text-slate-500">Nenhum plano encontrado.</p>
+            )}
+            {data?.planos?.map((plano) => (
+              <div
+                key={plano.nome}
+                className="flex items-center justify-between p-4 bg-slate-900/50 rounded-xl border border-slate-800/50 hover:bg-slate-900 transition-colors"
               >
-                 GERENCIAR PLANOS
-              </a>
-           </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-white">{plano.nome}</span>
+                  <span className="text-[11px] text-slate-500">
+                    {formatCurrency(plano.valor)}/mes
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-black text-white">{plano.count}</span>
+                  <span className="text-[10px] font-bold text-slate-500 block">
+                    {plano.count === 1 ? 'clinica' : 'clinicas'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Histórico Recente de Transações */}
-        <div className="lg:col-span-2 space-y-6">
-           <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
-                 <CreditCard size={16} /> ÚLTIMAS TRANSAÇÕES
-              </h3>
-              <div className="flex items-center gap-2">
-                 <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="px-3 py-1.5 bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold rounded-xl cursor-pointer">
-                   <option value="todos">Todos</option>
-                   <option value="pago">Pago</option>
-                   <option value="pendente">Pendente</option>
-                   <option value="vencido">Vencido</option>
-                 </select>
-              </div>
-           </div>
-
-           <div className="bg-slate-800/40 border border-slate-700/50 rounded-[40px] overflow-hidden shadow-2xl">
+        {/* Lista de Clinicas */}
+        <div className="lg:col-span-2 space-y-4">
+          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+            <Building2 size={16} /> Lista de Clinicas
+          </h2>
+          <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
-                 <thead>
-                    <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                       <th className="px-8 py-6">Clínica / Plano</th>
-                       <th className="px-8 py-6">Valor</th>
-                       <th className="px-8 py-6">Status</th>
-                       <th className="px-8 py-6 text-right">Data</th>
+                <thead>
+                  <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <th className="px-6 py-4">Nome</th>
+                    <th className="px-6 py-4">Plano</th>
+                    <th
+                      className="px-6 py-4 cursor-pointer select-none hover:text-slate-300 transition-colors"
+                      onClick={toggleSort}
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        Status
+                        <ArrowUpDown size={12} />
+                      </span>
+                    </th>
+                    <th className="px-6 py-4 text-right">Criacao</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/30">
+                  {sortedClinicas.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                        Nenhuma clinica encontrada.
+                      </td>
                     </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-800/30">
-                    {recentes.map((item: any) => (
-                       <tr key={item.id} className="hover:bg-slate-800/40 transition-colors group cursor-pointer">
-                          <td className="px-8 py-5">
-                             <div className="flex flex-col">
-                                <span className="text-sm font-black text-slate-200 group-hover:text-purple-400 transition-colors">{item.clinica}</span>
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{item.plano}</span>
-                             </div>
-                          </td>
-                          <td className="px-8 py-5">
-                             <span className="text-sm font-black text-white">R$ {item.valor}</span>
-                          </td>
-                          <td className="px-8 py-5">
-                             <Badge className={cn(
-                               "text-[9px] font-black border-none px-3",
-                               item.status === 'pago' ? "bg-emerald-500/10 text-emerald-500" : item.status === 'vencido' ? "bg-red-500/10 text-red-500" : "bg-amber-500/10 text-amber-500"
-                             )}>
-                               {item.status.toUpperCase()}
-                             </Badge>
-                          </td>
-                          <td className="px-8 py-5 text-right">
-                             <div className="flex items-center justify-end gap-3">
-                                <span className="text-xs font-bold text-slate-400">{item.data}</span>
-                                <ArrowRight size={16} className="text-slate-700 group-hover:text-white transition-all group-hover:translate-x-1" />
-                             </div>
-                          </td>
-                       </tr>
-                    ))}
-                 </tbody>
+                  )}
+                  {sortedClinicas.map((clinica) => (
+                    <tr
+                      key={clinica.id}
+                      className="hover:bg-slate-800/40 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <span className="text-sm font-bold text-slate-200">{clinica.nome}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-slate-300">{clinica.plano}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={cn(
+                            'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ring-1 ring-inset',
+                            statusColor(clinica.status),
+                          )}
+                        >
+                          {clinica.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-xs text-slate-400">
+                          {formatDate(clinica.created_at)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
               </table>
-              
-              <div className="p-6 bg-slate-900/30 border-t border-slate-800/50 flex items-center justify-between">
-                 <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                   <AlertCircle size={14} className="text-amber-500" /> Cobranças com vencimento em 7 dias
-                 </div>
-                 <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">
-                   {recentes.length} transação(ões) exibida(s)
-                 </span>
-              </div>
-           </div>
-
-           {/* Gráfico de Faturamento Estimado (Area Chart) */}
-           <div className="bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/20 p-8 rounded-[40px] relative overflow-hidden h-[240px] group shadow-2xl">
-              <div className="relative z-10 flex flex-col h-full">
-                 <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2">Projeção de Faturamento (30d)</h4>
-                 <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-black text-white tracking-tighter">R$ {((data?.mrr || 0) * 1.09).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</span>
-                    <span className="text-xs font-bold text-emerald-400">+9% projetado</span>
-                 </div>
-                 
-                 <div className="mt-auto flex items-center justify-center h-24 border border-dashed border-purple-500/20 rounded-2xl">
-                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Dados do gr&#225;fico indispon&#237;veis &mdash; aguardando hist&#243;rico real</span>
-                 </div>
-              </div>
-              <BarChart3 className="absolute -bottom-10 -right-10 w-48 h-48 text-purple-500/5 group-hover:scale-110 transition-transform duration-700" />
-           </div>
+            </div>
+            <div className="px-6 py-3 bg-slate-900/30 border-t border-slate-800/50 text-right">
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                {sortedClinicas.length} clinica(s)
+              </span>
+            </div>
+          </div>
         </div>
-
       </div>
     </div>
   )
