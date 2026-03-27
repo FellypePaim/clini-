@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.1.0** (Landing Page + Dark Clinical Redesign — 29/03/2026)
+- Versão: **v2.2.0** (Suporte lado clínica + Landing Page + Dark Clinical Redesign — 30/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -35,6 +35,7 @@
 - Fase 23: ✅ **Dark Clinical Redesign — UI/UX v2.0 (29/03/2026)**
 - Fase 24: ✅ **Landing Page — 8 seções + Quiz WhatsApp (29/03/2026)**
 - Fase 25: ✅ **Rebranding OVYVA → LYRA e VERDESK → NEXUS — frontend + DB + funções (29/03/2026)**
+- Fase 26: ✅ **Suporte lado clínica — two-panel chat com tickets (30/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -84,6 +85,8 @@ profissional_ausencias, notificacoes_fila
 12. `20260323000006_profiles_update_same_clinica.sql` — UPDATE mesma clínica
 13. `20260324000001_ai_usage_logs.sql` — Tabela ai_usage_logs + RLS
 14. `20260325000001_profissional_ausencias.sql` — Tabela ausências/folgas + RLS
+15. `20260325000002_clinicas_update_policy.sql` — Policy UPDATE clínicas
+16. `20260327000001_tickets_rls_clinica.sql` — RLS tickets_suporte + tickets_mensagens para clínicas
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
@@ -252,6 +255,8 @@ Actions:
 - `supabase/functions/user-manager/index.ts` — Gerenciamento de colaboradores
 - `src/hooks/useAusencias.ts` — CRUD ausências + conflitos + notificação
 - `src/components/configuracoes/AusenciasModal.tsx` — Modal de gestão de folgas
+- `src/pages/Suporte/SuportePage.tsx` — Suporte lado clínica (two-panel chat)
+- `src/hooks/useSuporteClinica.ts` — Hook de suporte para clínicas (queries diretas)
 - `CONTEXTO_PROJETO.md` — Este arquivo
 
 ## 13. CODE-SPLITTING
@@ -262,10 +267,14 @@ Actions:
 
 ## 14. SISTEMA DE SUPORTE
 - Tabelas: `tickets_suporte` (assunto, descricao, status, prioridade, clinica_id) + `tickets_mensagens` (conteudo, autor_id, e_superadmin)
-- SuperAdmin: two-panel chat — lista tickets + conversa em tempo real
+- **SuperAdmin** (`/superadmin/suporte`): two-panel chat — lista todos os tickets + conversa + alterar status/prioridade
+- **Clínica** (`/suporte`): two-panel chat — admin da clínica cria/acompanha tickets, envia mensagens
+  - RLS: clínicas só veem seus próprios tickets e mensagens
+  - Hook `useSuporteClinica.ts` com queries diretas ao Supabase (sem edge function)
+  - Tema claro (verde) alinhado ao design do painel da clínica
+  - Mensagens da clínica = verde direita, SuperAdmin = roxo esquerda
 - Status: aberto → em_andamento → resolvido → fechado
 - Prioridade: baixa, media, alta, critica
-- Mensagens diferenciadas por remetente (superadmin=roxo direita, clínica=cinza esquerda)
 - Chat desabilitado em tickets fechados/resolvidos
 
 ## 15. FASE 22 — SEGURANÇA RBAC + MELHORIAS (29/03/2026)
@@ -381,7 +390,6 @@ Actions:
 
 ## 16. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
-2. UI para clínicas abrirem tickets de suporte (lado do admin da clínica)
-3. Busca Global (Ctrl+K)
-4. Tela "Meu Perfil" acessível por todos os roles (sem Configurações)
-5. Upload de imagens no suporte
+2. Busca Global (Ctrl+K)
+3. Tela "Meu Perfil" acessível por todos os roles (sem Configurações)
+4. Upload de imagens no suporte

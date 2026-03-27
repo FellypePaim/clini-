@@ -13,6 +13,7 @@ import {
   ClipboardList,
   BarChart3,
   Settings,
+  LifeBuoy,
   ChevronRight,
   Activity,
   Database,
@@ -47,6 +48,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema',   roles: ['administrador'] },
+  { path: '/suporte',      label: 'Suporte',        icon: LifeBuoy,       group: 'sistema',   roles: ['administrador'] },
 ]
 
 export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarProps) {
