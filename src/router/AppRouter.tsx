@@ -126,7 +126,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 // ─── Guard de SuperAdmin ───────────────────────────────
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore()
-  if (!isAuthenticated || user?.role !== 'superadmin') {
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (user?.role !== 'superadmin') {
     return <Navigate to="/login" state={{ error: 'Acesso negado. Apenas superadmins.' }} replace />
   }
   return <>{children}</>
