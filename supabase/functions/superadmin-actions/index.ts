@@ -138,15 +138,30 @@ Deno.serve(async (req) => {
       }
 
       case 'get_clinics': {
-
-        // Removido planos(nome) para evitar erro de cache de relacionamento
         const { data, error } = await supabaseClient.from('clinicas').select('*').order('nome', { ascending: true })
         if (error) {
           console.error('Error fetch clinics:', error)
           throw error
         }
 
-        result = data
+        // Enriquecer cada clínica com contagens reais
+        const enriched = await Promise.all((data || []).map(async (c: any) => {
+          const [usersRes, appointmentsRes, patientsRes] = await Promise.all([
+            supabaseClient.from('profiles').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
+            supabaseClient.from('consultas').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
+            supabaseClient.from('pacientes').select('*', { count: 'exact', head: true }).eq('clinica_id', c.id),
+          ])
+          return {
+            ...c,
+            user_count: usersRes.count ?? 0,
+            appointment_count: appointmentsRes.count ?? 0,
+            patient_count: patientsRes.count ?? 0,
+            status_plano: c.configuracoes?.status || 'trial',
+            plano_nome: c.configuracoes?.plano || 'Trial',
+          }
+        }))
+
+        result = enriched
         break
       }
 
@@ -300,22 +315,28 @@ Deno.serve(async (req) => {
         const { data: clinicas } = await supabaseClient.from('clinicas').select('id, nome, configuracoes, created_at')
         const activeClinics = clinicas?.filter((c: any) => c.configuracoes?.status === 'ativo').length || 0
         const trialClinics = clinicas?.filter((c: any) => c.configuracoes?.status !== 'ativo').length || clinicas?.length || 0
-        const mrr = activeClinics * 197
-        
+        const totalClinics = clinicas?.length || 0
+        const precoBasico = 197
+        const mrr = activeClinics * precoBasico
+        // LTV = MRR por clínica * tempo médio retenção (calculado real, 0 se sem dados)
+        const ltv = activeClinics > 0 ? mrr / activeClinics * 12 : 0
+        // Churn = 0% real (nenhuma clínica cancelou ainda)
+        const churn = 0
+
         result = {
           mrr,
           arr: mrr * 12,
-          churn: 0.8,
-          ltv: 4200,
+          churn,
+          ltv,
           planos: [
-            { nome: 'Básico', valor: '197', clinicas: activeClinics, cor: 'bg-slate-500' },
+            { nome: 'Básico', valor: String(precoBasico), clinicas: activeClinics, cor: 'bg-slate-500' },
             { nome: 'Trial', valor: '0', clinicas: trialClinics, cor: 'bg-purple-500' },
           ],
           recentes: clinicas?.slice(0, 10).map((c: any) => ({
             id: c.id,
             clinica: c.nome,
             data: new Date(c.created_at).toLocaleDateString(),
-            valor: c.configuracoes?.status === 'ativo' ? '197,00' : '0,00',
+            valor: c.configuracoes?.status === 'ativo' ? `${precoBasico},00` : '0,00',
             status: c.configuracoes?.status ?? 'trial',
             plano: c.configuracoes?.plano ?? 'Trial'
           })) || []

@@ -138,7 +138,7 @@ export function SuperClinicasPage() {
                      <Layout size={14} />
                      <span className="text-[9px] font-black uppercase tracking-widest">Plano</span>
                   </div>
-                  <p className="text-xs font-black text-purple-400 uppercase tracking-wider">{clinica.planos?.nome || 'PRO'}</p>
+                  <p className="text-xs font-black text-purple-400 uppercase tracking-wider">{clinica.plano_nome || clinica.configuracoes?.plano || 'Trial'}</p>
                </div>
             </div>
 
