@@ -6,7 +6,18 @@ async function invoke(action: string, extra?: Record<string, unknown>) {
   const { data, error } = await supabase.functions.invoke('superadmin-actions', {
     body: { action, ...extra },
   })
-  if (error) throw error
+  if (error) {
+    // Tentar extrair mensagem real do body da resposta
+    let msg = error.message || 'Erro na Edge Function'
+    try {
+      if (error.context && typeof error.context.json === 'function') {
+        const body = await error.context.json()
+        if (body?.error) msg = body.error
+      }
+    } catch { /* ignore */ }
+    throw new Error(msg)
+  }
+  if (data?.error) throw new Error(data.error)
   return data
 }
 
@@ -53,10 +64,12 @@ export function useSuperAdmin() {
 
   const suspendClinic = useCallback(async (id: string, reason: string) => {
     try {
-      await invoke('suspend_clinic', { clinicId: id, payload: { suspender: true, motivo: reason } })
+      const result = await invoke('suspend_clinic', { clinicId: id, payload: { suspender: true, motivo: reason } })
+      if (result?.error) throw new Error(result.error)
       toast({ title: 'Clínica Suspensa', description: 'Acesso bloqueado.', type: 'success' })
-    } catch {
-      toast({ title: 'Erro', description: 'Falha ao suspender.', type: 'error' })
+    } catch (e: any) {
+      console.error('Suspend error:', e)
+      toast({ title: 'Erro', description: e.message || 'Falha ao suspender.', type: 'error' })
     }
   }, [toast])
 

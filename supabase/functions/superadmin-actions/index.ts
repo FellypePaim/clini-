@@ -199,13 +199,21 @@ Deno.serve(async (req) => {
         const targetId = clinicId ?? pd.clinicaId
         if (!targetId) throw new Error('clinicaId obrigatório')
 
-        // Buscar configuracoes atuais para não sobrescrever
-        const { data: current } = await db.from('clinicas').select('configuracoes').eq('id', targetId).single()
         const novoStatus = pd.suspender ? 'suspensa' : 'ativo'
+
+        // Buscar configuracoes atuais para merge seguro
+        const { data: current, error: fetchErr } = await db.from('clinicas').select('configuracoes').eq('id', targetId).single()
+        if (fetchErr) throw new Error(`Clínica não encontrada: ${fetchErr.message}`)
+
+        const merged = Object.assign({}, current?.configuracoes ?? {}, {
+          status: novoStatus,
+          motivo_suspensao: pd.suspender ? (pd.motivo || 'Suspensão via SuperAdmin') : null,
+        })
+
         const { error: sErr } = await db.from('clinicas')
-          .update({ configuracoes: { ...(current?.configuracoes ?? {}), status: novoStatus, motivo_suspensao: pd.motivo || null } })
+          .update({ configuracoes: merged })
           .eq('id', targetId)
-        if (sErr) throw sErr
+        if (sErr) throw new Error(`Falha ao atualizar: ${sErr.message}`)
 
         await db.from('auditoria_global').insert({
           usuario_id: user.id, clinica_id: targetId,
