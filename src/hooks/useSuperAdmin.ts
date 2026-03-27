@@ -138,6 +138,18 @@ export function useSuperAdmin() {
     finally { setIsLoading(false) }
   }, [])
 
+  // Usuário — update
+  const updateUser = useCallback(async (userId: string, updates: { role?: string; ativo?: boolean; clinica_id?: string | null }) => {
+    try {
+      await invoke('update_user', { payload: { user_id: userId, ...updates } })
+      toast({ title: 'Sucesso', description: 'Usuário atualizado.', type: 'success' })
+      return true
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message || 'Falha ao atualizar.', type: 'error' })
+      return false
+    }
+  }, [toast])
+
   // Suporte
   const getSuporte = useCallback(async () => {
     setIsLoading(true)
@@ -146,13 +158,49 @@ export function useSuperAdmin() {
     finally { setIsLoading(false) }
   }, [])
 
+  const createTicket = useCallback(async (data: { assunto: string; descricao?: string; prioridade?: string; clinica_id?: string }) => {
+    try {
+      const result = await invoke('create_ticket', { payload: data })
+      toast({ title: 'Ticket Criado', description: 'Ticket de suporte aberto.', type: 'success' })
+      return result?.ticket
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
+      return null
+    }
+  }, [toast])
+
+  const updateTicket = useCallback(async (ticketId: string, updates: { status?: string; prioridade?: string }) => {
+    try {
+      await invoke('update_ticket', { payload: { ticket_id: ticketId, ...updates } })
+      return true
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
+      return false
+    }
+  }, [toast])
+
+  const getTicketMessages = useCallback(async (ticketId: string) => {
+    try { const d = await invoke('get_ticket_messages', { payload: { ticket_id: ticketId } }); return d?.messages ?? [] }
+    catch { return [] }
+  }, [])
+
+  const sendTicketMessage = useCallback(async (ticketId: string, conteudo: string, eSuperadmin = true) => {
+    try {
+      const d = await invoke('send_ticket_message', { payload: { ticket_id: ticketId, conteudo, e_superadmin: eSuperadmin } })
+      return d?.message
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, type: 'error' })
+      return null
+    }
+  }, [toast])
+
   return {
     isLoading,
     getDashboard,
     getClinics, createClinic, suspendClinic, reactivateClinic, deleteClinic, impersonateClinic,
-    getUsers, createUser,
+    getUsers, createUser, updateUser,
     getFinanceiro,
     getAuditLogs,
-    getSuporte,
+    getSuporte, createTicket, updateTicket, getTicketMessages, sendTicketMessage,
   }
 }

@@ -108,9 +108,11 @@ Deno.serve(async (req) => {
           status: c.configuracoes?.status || 'trial',
         })) ?? []
 
-        // MRR
-        const precoBasico = 197
-        const mrr = ativas * precoBasico
+        // MRR baseado no plano (não no status)
+        const precos: Record<string, number> = { 'Basico': 197, 'Pro': 397, 'Enterprise': 797 }
+        const mrr = (clinicas ?? [])
+          .filter((c: any) => c.configuracoes?.status !== 'suspensa')
+          .reduce((sum: number, c: any) => sum + (precos[c.configuracoes?.plano] ?? 0), 0)
 
         return ok({
           clinicas: { total: totalClinicas, ativas, trial, suspensas },
@@ -291,32 +293,123 @@ Deno.serve(async (req) => {
       }
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // USUÁRIO — Atualizar (role, ativo, clinica_id)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'update_user': {
+        const userId = pd.user_id
+        if (!userId) throw new Error('user_id obrigatório')
+        const updates: Record<string, unknown> = {}
+        if (pd.role !== undefined) updates.role = pd.role
+        if (pd.ativo !== undefined) updates.ativo = pd.ativo
+        if (pd.clinica_id !== undefined) updates.clinica_id = pd.clinica_id || null
+        if (Object.keys(updates).length === 0) throw new Error('Nenhum campo para atualizar')
+        const { error: uErr } = await db.from('profiles').update(updates).eq('id', userId)
+        if (uErr) throw new Error(uErr.message)
+        return ok({ success: true })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // SUPORTE — CRUD completo de tickets + mensagens
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'create_ticket': {
+        const { assunto, descricao, prioridade, clinica_id: ticketClinicId } = pd
+        if (!assunto) throw new Error('assunto obrigatório')
+        const { data: ticket, error: tErr } = await db.from('tickets_suporte').insert({
+          assunto, descricao: descricao || null,
+          prioridade: prioridade || 'media', status: 'aberto',
+          clinica_id: ticketClinicId || null,
+        }).select().single()
+        if (tErr) throw new Error(tErr.message)
+        return ok({ ticket })
+      }
+
+      case 'update_ticket': {
+        const ticketId = pd.ticket_id
+        if (!ticketId) throw new Error('ticket_id obrigatório')
+        const updates: Record<string, unknown> = {}
+        if (pd.status !== undefined) updates.status = pd.status
+        if (pd.prioridade !== undefined) updates.prioridade = pd.prioridade
+        if (pd.responsavel_id !== undefined) updates.responsavel_id = pd.responsavel_id
+        updates.updated_at = new Date().toISOString()
+        const { error: utErr } = await db.from('tickets_suporte').update(updates).eq('id', ticketId)
+        if (utErr) throw new Error(utErr.message)
+        return ok({ success: true })
+      }
+
+      case 'get_ticket_messages': {
+        const ticketId = pd.ticket_id
+        if (!ticketId) throw new Error('ticket_id obrigatório')
+        const { data: messages, error: mErr } = await db.from('tickets_mensagens')
+          .select('*, profiles:autor_id(nome_completo, role, avatar_url)')
+          .eq('ticket_id', ticketId)
+          .order('created_at', { ascending: true })
+        if (mErr) throw new Error(mErr.message)
+        return ok({ messages: messages ?? [] })
+      }
+
+      case 'send_ticket_message': {
+        const { ticket_id: msgTicketId, conteudo, e_superadmin: isSuperAdmin } = pd
+        if (!msgTicketId || !conteudo) throw new Error('ticket_id e conteudo obrigatórios')
+        const { data: msg, error: smErr } = await db.from('tickets_mensagens').insert({
+          ticket_id: msgTicketId, autor_id: user.id,
+          conteudo, e_superadmin: isSuperAdmin ?? true,
+        }).select().single()
+        if (smErr) throw new Error(smErr.message)
+        // Atualizar ticket status para em_andamento se ainda está aberto
+        await db.from('tickets_suporte')
+          .update({ status: 'em_andamento', updated_at: new Date().toISOString() })
+          .eq('id', msgTicketId).eq('status', 'aberto')
+        return ok({ message: msg })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // FINANCEIRO — Métricas reais
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'get_financeiro': {
         const { data: clinicas } = await db.from('clinicas').select('id, nome, configuracoes, created_at')
-        const precoBasico = 197
-        const ativas = clinicas?.filter((c: any) => c.configuracoes?.status === 'ativo') ?? []
-        const trials = clinicas?.filter((c: any) => !c.configuracoes?.status || c.configuracoes?.status === 'trial') ?? []
-        const suspensas = clinicas?.filter((c: any) => c.configuracoes?.status === 'suspensa') ?? []
 
-        const mrr = ativas.length * precoBasico
-        const ltv = ativas.length > 0 ? precoBasico * 12 : 0 // 12 meses de retenção média
+        // Preços por plano
+        const precos: Record<string, number> = { 'Basico': 197, 'Pro': 397, 'Enterprise': 797 }
+        const planosPagos = Object.keys(precos) // planos que geram receita
 
-        // Receita real das clínicas (transações de todas as clínicas)
-        const { data: transacoes } = await db.from('lancamentos').select('valor, tipo, status, clinica_id')
+        // Classificar por PLANO (não por status)
+        const allClinics = clinicas ?? []
+        const pagantes = allClinics.filter((c: any) => {
+          const plano = c.configuracoes?.plano || 'Trial'
+          return planosPagos.includes(plano) && c.configuracoes?.status !== 'suspensa'
+        })
+        const trials = allClinics.filter((c: any) => {
+          const plano = c.configuracoes?.plano || 'Trial'
+          return plano === 'Trial' || !planosPagos.includes(plano)
+        })
+        const suspensas = allClinics.filter((c: any) => c.configuracoes?.status === 'suspensa')
+
+        // MRR = soma dos preços dos planos pagos (não-suspensos)
+        const mrr = pagantes.reduce((sum: number, c: any) => {
+          const plano = c.configuracoes?.plano || 'Trial'
+          return sum + (precos[plano] ?? 0)
+        }, 0)
+        const ltv = pagantes.length > 0 ? (mrr / pagantes.length) * 12 : 0
+
+        // Receita real das clínicas (lançamentos pagos)
+        const { data: transacoes } = await db.from('lancamentos').select('valor, tipo, status')
           .eq('tipo', 'receita').eq('status', 'pago')
         const receitaTotal = transacoes?.reduce((s: number, t: any) => s + (t.valor ?? 0), 0) ?? 0
+
+        // Agrupar por plano
+        const planoCount: Record<string, number> = {}
+        allClinics.forEach((c: any) => {
+          const p = c.configuracoes?.plano || 'Trial'
+          planoCount[p] = (planoCount[p] ?? 0) + 1
+        })
 
         return ok({
           mrr, arr: mrr * 12, ltv, churn: 0,
           receitaClinicas: receitaTotal,
-          planos: [
-            { nome: 'Ativo', valor: precoBasico, count: ativas.length },
-            { nome: 'Trial', valor: 0, count: trials.length },
-            { nome: 'Suspensa', valor: 0, count: suspensas.length },
-          ],
-          clinicas: (clinicas ?? []).map((c: any) => ({
+          planos: Object.entries({ Trial: 0, ...precos }).map(([nome, valor]) => ({
+            nome, valor, count: planoCount[nome] ?? 0,
+          })),
+          clinicas: allClinics.map((c: any) => ({
             id: c.id, nome: c.nome, created_at: c.created_at,
             status: c.configuracoes?.status || 'trial',
             plano: c.configuracoes?.plano || 'Trial',
