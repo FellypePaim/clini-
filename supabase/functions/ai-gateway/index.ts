@@ -700,6 +700,7 @@ JSON obrigatório:
     if (!horaAg.includes(':')) horaAg = `${horaAg}:00`
   }
 
+  console.log(`[OVYVA] RESPOSTA COMPLETA:`, JSON.stringify(resposta).substring(0, 500))
   console.log(`[OVYVA] Ação: ${resposta.acao_sugerida}, Data: ${dataAg}, Hora: ${horaAg}, Prof: ${resposta.dados_agendamento?.profissional_nome}, Proced: ${resposta.dados_agendamento?.procedimento}`)
 
   // ── AÇÃO: AGENDAR ──
@@ -743,6 +744,7 @@ JSON obrigatório:
     }
 
     // Criar pré-agendamento se tiver data/hora (aceita pacientes vinculados OU não)
+    console.log(`[OVYVA] Verificando se pode criar consulta: dataAg="${dataAg}" horaAg="${horaAg}" (truthy: ${!!dataAg && !!horaAg})`)
     if (dataAg && horaAg) {
       const dataHoraInicio = `${dataAg}T${horaAg}:00`
       const duracao = (matchProced as any)?.duracao_minutos ?? 30
