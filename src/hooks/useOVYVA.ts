@@ -135,22 +135,18 @@ export function useOVYVA() {
       lida: true,
     })
 
-    // 2. Enviar via WhatsApp real
+    // 2. Enviar via WhatsApp real (usando supabase.functions.invoke)
     try {
-      const { data: session } = await supabase.auth.getSession()
-      const token = session.session?.access_token
-      if (token && conv.contato_telefone) {
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whatsapp-send`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({
-            numero: conv.contato_telefone,
-            texto: textoComAssinatura,
-            tipo: 'texto',
-            clinica_id,
-          }),
-        })
-      }
+      const { data: sendResult, error: sendErr } = await supabase.functions.invoke('whatsapp-send', {
+        body: {
+          numero: conv.contato_telefone,
+          texto: textoComAssinatura,
+          tipo: 'texto',
+          clinica_id,
+        },
+      })
+      if (sendErr) console.error('WhatsApp send error:', sendErr)
+      else console.log('WhatsApp enviado:', sendResult)
     } catch (e) {
       console.error('Erro ao enviar WhatsApp:', e)
     }

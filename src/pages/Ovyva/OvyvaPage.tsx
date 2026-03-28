@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useCallback } from 'react'
 import { ConversationList } from '../../components/ovyva/ConversationList'
 import { ChatWindow } from '../../components/ovyva/ChatWindow'
 import { ContactContext } from '../../components/ovyva/ContactContext'
@@ -7,15 +7,37 @@ import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function OvyvaPage() {
-  const { conversations, selectConversation, activeConversation, sendMessage, takeoverConversation, returnToAI, refreshConversations } = useOVYVA()
+  const {
+    conversations, selectConversation, activeConversation, config,
+    sendMessage, takeoverConversation, returnToAI, refreshConversations,
+  } = useOVYVA()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const handleSelect = (id: string) => {
+  const aiName = config?.aiName || 'Sofia'
+
+  const handleSelect = useCallback((id: string) => {
     setSelectedId(id)
     const conv = conversations.find(c => c.id === id)
     if (conv) selectConversation(conv)
-  }
+  }, [conversations, selectConversation])
+
+  const handleTakeover = useCallback(async () => {
+    if (!selectedId) return
+    await takeoverConversation(selectedId)
+    await refreshConversations()
+    // Re-selecionar para pegar status atualizado
+    const updated = conversations.find(c => c.id === selectedId)
+    if (updated) selectConversation({ ...updated, status: 'atendido_humano' })
+  }, [selectedId, takeoverConversation, refreshConversations, conversations, selectConversation])
+
+  const handleReturnToAI = useCallback(async () => {
+    if (!selectedId) return
+    await returnToAI(selectedId)
+    await refreshConversations()
+    const updated = conversations.find(c => c.id === selectedId)
+    if (updated) selectConversation({ ...updated, status: 'ia_ativa' })
+  }, [selectedId, returnToAI, refreshConversations, conversations, selectConversation])
 
   // Usar activeConversation do hook (tem mensagens carregadas) ou fallback
   const selectedConversation = activeConversation?.id === selectedId ? activeConversation
@@ -32,14 +54,14 @@ export function OvyvaPage() {
              <div>
                 <h1 className="text-2xl font-black text-gray-900 border-none uppercase tracking-widest">OVYVA</h1>
                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                   <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Secretária Virtual IA 24/7 Ativa
+                   <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Secretaria Virtual IA 24/7 Ativa
                 </p>
              </div>
           </div>
 
           <div className="flex items-center gap-3">
-             <NavButton icon={<History className="w-4 h-4" />} label="Histórico" onClick={() => navigate('/ovyva/historico')} />
-             <NavButton icon={<Settings className="w-4 h-4" />} label="Configurações" onClick={() => navigate('/ovyva/configuracoes')} />
+             <NavButton icon={<History className="w-4 h-4" />} label="Historico" onClick={() => navigate('/ovyva/historico')} />
+             <NavButton icon={<Settings className="w-4 h-4" />} label="Configuracoes" onClick={() => navigate('/ovyva/configuracoes')} />
           </div>
        </div>
 
@@ -50,14 +72,15 @@ export function OvyvaPage() {
             selectedId={selectedId}
             onSelect={handleSelect}
           />
-          
+
           {selectedConversation ? (
             <>
-              <ChatWindow 
+              <ChatWindow
                 conversation={selectedConversation}
                 onSend={(text) => sendMessage(selectedConversation.id, text)}
-                onTakeover={() => takeoverConversation(selectedConversation.id)}
-                onReturnToAI={() => returnToAI(selectedConversation.id)}
+                onTakeover={handleTakeover}
+                onReturnToAI={handleReturnToAI}
+                aiName={aiName}
               />
               <ContactContext
                 conversation={selectedConversation}
@@ -79,7 +102,7 @@ export function OvyvaPage() {
 
 function NavButton({ icon, label, onClick }: { icon: React.ReactNode, label: string, onClick: () => void }) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className="px-6 py-2.5 bg-white hover:bg-gray-900 hover:text-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm"
     >

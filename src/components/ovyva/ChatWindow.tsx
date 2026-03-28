@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { 
-  Plus, Send, Bot, User, Settings, Clock, CheckCircle, Play, CalendarDays
+import {
+  Send, Bot, User, Settings, Clock, CheckCircle, Play, CalendarDays
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { OvyvaConversation, OvyvaMessage } from '../../types/ovyva'
@@ -12,9 +12,10 @@ interface ChatWindowProps {
   onSend: (text: string) => void
   onTakeover: () => void
   onReturnToAI: () => void
+  aiName?: string
 }
 
-export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: ChatWindowProps) {
+export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiName = 'Sofia' }: ChatWindowProps) {
   const [inputText, setInputText] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -26,8 +27,11 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
     scrollToBottom()
   }, [conversation.mensagens])
 
+  const isHumanMode = conversation.status === 'atendido_humano'
+  const isChatEnabled = isHumanMode // Só pode digitar se assumiu atendimento
+
   const handleSend = () => {
-    if (!inputText.trim()) return
+    if (!inputText.trim() || !isChatEnabled) return
     onSend(inputText)
     setInputText('')
   }
@@ -176,7 +180,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
                    </div>
                 </div>
                 {session.msgs.map(msg => (
-                  <MessageBubble key={msg.id} message={msg} />
+                  <MessageBubble key={msg.id} message={msg} aiName={aiName} />
                 ))}
              </div>
           ))}
@@ -185,35 +189,37 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
 
        {/* Input Area */}
        <div className="p-8 bg-white border-t border-gray-50 flex flex-col gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] z-10">
-          {conversation.status === 'ia_ativa' && (
-             <div className="bg-yellow-50/50 border border-yellow-100 p-3 rounded-2xl flex items-center gap-3 animate-slide-in">
+          {!isChatEnabled && (
+             <div className="bg-yellow-50/50 border border-yellow-100 p-3 rounded-2xl flex items-center gap-3">
                 <Clock className="w-4 h-4 text-orange-400" />
                 <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">
-                  IA em Modo Autônomo · Digite para interferir e assumir automaticamente
+                  IA em Modo Autonomo · Clique em "Assumir Atendimento" para responder manualmente
                 </p>
              </div>
           )}
 
           <div className="flex items-center gap-6">
-             <button className="p-3.5 bg-gray-50 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-2xl transition-all shadow-sm">
-                <Plus className="w-6 h-6" />
-             </button>
-             
              <div className="flex-1 relative group">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={inputText}
-                  placeholder="Escreva sua mensagem aqui..."
+                  placeholder={isChatEnabled ? "Escreva sua mensagem aqui..." : "Assuma o atendimento para responder..."}
+                  disabled={!isChatEnabled}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                  className="w-full bg-gray-50 border-2 border-transparent rounded-[32px] py-4 pl-8 pr-16 text-sm font-medium placeholder:text-gray-300 outline-none focus:bg-white focus:border-green-500/20 focus:ring-4 focus:ring-green-500/5 transition-all shadow-inner"
+                  className={cn(
+                    "w-full border-2 border-transparent rounded-[32px] py-4 pl-8 pr-16 text-sm font-medium placeholder:text-gray-300 outline-none transition-all shadow-inner",
+                    isChatEnabled
+                      ? "bg-gray-50 focus:bg-white focus:border-green-500/20 focus:ring-4 focus:ring-green-500/5"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  )}
                 />
-                <button 
+                <button
                   onClick={handleSend}
-                  disabled={!inputText.trim()}
+                  disabled={!inputText.trim() || !isChatEnabled}
                   className={cn(
                     "absolute right-2 top-2 w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                    inputText.trim() ? "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:scale-105 active:scale-90" : "bg-gray-100 text-gray-300"
+                    inputText.trim() && isChatEnabled ? "bg-green-500 text-white shadow-lg shadow-green-500/30 hover:scale-105 active:scale-90" : "bg-gray-100 text-gray-300"
                   )}
                 >
                    <Send className="w-5 h-5" />
@@ -225,7 +231,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI }: C
   )
 }
 
-function MessageBubble({ message }: { message: OvyvaMessage }) {
+function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; aiName?: string }) {
   const isPatient = message.remetente === 'paciente'
   const isIA      = message.remetente === 'ia'
 
@@ -243,7 +249,7 @@ function MessageBubble({ message }: { message: OvyvaMessage }) {
           {isIA && (
             <div className="flex items-center gap-2 mb-3 opacity-60">
                <Bot className="w-4 h-4" />
-               <span className="text-[10px] font-black uppercase tracking-widest">Sofia • IA Assistente</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">{aiName} • IA Assistente</span>
             </div>
           )}
 
