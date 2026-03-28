@@ -92,6 +92,19 @@ Deno.serve(async (req) => {
       tipo: message.imageMessage ? "imagem" : "texto"
     })
 
+    // 3.5 Verificar se a IA está ativa para esta conversa
+    const { data: conversa } = await supabase
+      .from("ovyva_conversas")
+      .select("status")
+      .eq("id", conversaId)
+      .single()
+
+    // Se humano assumiu ou conversa resolvida, NÃO chamar IA
+    if (conversa?.status === "atendido_humano" || conversa?.status === "resolvido") {
+      console.log(`[webhook] IA pausada para conversa ${conversaId} (status: ${conversa.status})`)
+      return new Response(JSON.stringify({ success: true, ia_skipped: true }))
+    }
+
     // 4. Chamar Resposta da IA (Processando Imagem se houver via Vision)
     const gatewayResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-gateway`, {
       method: "POST",

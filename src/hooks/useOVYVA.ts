@@ -118,26 +118,59 @@ export function useOVYVA() {
     loadMessages(conv.id)
   }, [loadMessages])
 
-  // Enviar mensagem como Humano
+  // Enviar mensagem como Humano — envia via WhatsApp real + salva no banco
   const sendMessage = useCallback(async (conversationId: string, texto: string) => {
+    const conv = conversations.find(c => c.id === conversationId)
+    if (!conv) return
+
+    // Adicionar assinatura do atendente
+    const nomeAtendente = user?.nome?.split(' ')[0] || 'Atendente'
+    const textoComAssinatura = `*${nomeAtendente}:*\n${texto}`
+
+    // 1. Salvar no banco
     await supabase.from('ovyva_mensagens').insert({
       conversa_id: conversationId,
       remetente: 'humano',
-      conteudo: texto,
-      sessao_id: conversations.find(c => c.id === conversationId)?.sessao_atual_id,
-      sessao_inicio: false,
-      lida: true
+      conteudo: textoComAssinatura,
+      lida: true,
     })
+
+    // 2. Enviar via WhatsApp real
+    try {
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      if (token && conv.contato_telefone) {
+        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/whatsapp-send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            numero: conv.contato_telefone,
+            texto: textoComAssinatura,
+            tipo: 'texto',
+            clinica_id,
+          }),
+        })
+      }
+    } catch (e) {
+      console.error('Erro ao enviar WhatsApp:', e)
+    }
+
     loadMessages(conversationId)
-  }, [conversations, loadMessages])
+  }, [conversations, loadMessages, clinica_id, user])
 
   const takeoverConversation = useCallback(async (conversationId: string) => {
-    await supabase.from('ovyva_conversas').update({ status: 'atendido_humano' }).eq('id', conversationId)
+    await supabase.from('ovyva_conversas').update({
+      status: 'atendido_humano',
+      atendente_id: user?.id || null,
+    }).eq('id', conversationId)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'atendido_humano' } : c))
-  }, [])
+  }, [user])
 
   const returnToAI = useCallback(async (conversationId: string) => {
-    await supabase.from('ovyva_conversas' as any).update({ status: 'ia_ativa' }).eq('id', conversationId)
+    await supabase.from('ovyva_conversas').update({
+      status: 'ia_ativa',
+      atendente_id: null,
+    }).eq('id', conversationId)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'ia_ativa' } : c))
   }, [])
 

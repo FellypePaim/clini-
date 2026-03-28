@@ -1,15 +1,13 @@
-import { 
-  UserPlus, 
-  ExternalLink, 
-  Calendar, 
-  Target, 
-  Zap, 
-  CreditCard, 
-  BarChart3, 
+import {
+  UserPlus,
+  ExternalLink,
+  Calendar,
+  Target,
+  Zap,
+  BarChart3,
   User,
   Activity,
   ArrowRight,
-  Stethoscope,
   Link2
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
@@ -125,9 +123,9 @@ export function ContactContext({ conversation }: ContactContextProps) {
             <Zap className="w-3.5 h-3.5" /> Ações Rápidas
           </h4>
           <div className="grid grid-cols-2 gap-4">
-             <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" onClick={() => navigate('/agenda')} />
-             <ActionButton icon={<CreditCard className="w-5 h-5" />} label="Cobrança" color="blue" onClick={() => navigate('/financeiro')} />
-             <ActionButton icon={<Stethoscope className="w-5 h-5" />} label="Receita" color="purple" onClick={() => navigate('/prescricoes')} />
+             <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" onClick={() => navigate(`/agenda?phone=${conversation.contato_telefone}&name=${encodeURIComponent(conversation.contato_nome || '')}`)} />
+             <ActionButton icon={<BarChart3 className="w-5 h-5" />} label="Verdesk" color="blue" onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
+             <ActionButton icon={<Activity className="w-5 h-5" />} label="Histórico" color="purple" onClick={() => conversation.paciente_id ? navigate(`/pacientes/${conversation.paciente_id}`) : navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
              <ActionButton icon={<ExternalLink className="w-5 h-5" />} label="WhatsApp" color="gray" onClick={() => window.open(`https://wa.me/${conversation.contato_telefone?.replace(/\D/g, '')}`, '_blank')} />
           </div>
        </div>
