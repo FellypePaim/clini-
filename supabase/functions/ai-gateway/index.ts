@@ -476,6 +476,35 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     `- Profissional ausente de ${a.data_inicio} a ${a.data_fim}`
   ).join('\n')
 
+  // Buscar consultas futuras DESTE CONTATO para contexto
+  let consultasDoContato: string[] = []
+  if (conversa.paciente_id) {
+    const { data: consultasPac } = await supabase.from("consultas")
+      .select("data_hora_inicio, status, procedimento_id")
+      .eq("clinica_id", clinica_id)
+      .eq("paciente_id", conversa.paciente_id)
+      .in("status", ["agendado", "confirmado"])
+      .gte("data_hora_inicio", `${todayBR}T00:00:00`)
+      .order("data_hora_inicio")
+    consultasDoContato = (consultasPac ?? []).map((c: any) => {
+      const dt = c.data_hora_inicio?.split("T") ?? []
+      return `- ${dt[0]?.split("-").reverse().join("/") ?? "?"} as ${dt[1]?.substring(0,5) ?? "?"} (${c.status})`
+    })
+  } else {
+    // Buscar por observações da OVYVA (contatos não cadastrados)
+    const { data: consultasOvyva } = await supabase.from("consultas")
+      .select("data_hora_inicio, status, observacoes")
+      .eq("clinica_id", clinica_id)
+      .ilike("observacoes", `%${conversa.contato_nome || conversa.contato_telefone}%`)
+      .in("status", ["agendado", "confirmado"])
+      .gte("data_hora_inicio", `${todayBR}T00:00:00`)
+      .order("data_hora_inicio")
+    consultasDoContato = (consultasOvyva ?? []).map((c: any) => {
+      const dt = c.data_hora_inicio?.split("T") ?? []
+      return `- ${dt[0]?.split("-").reverse().join("/") ?? "?"} as ${dt[1]?.substring(0,5) ?? "?"} (${c.status})`
+    })
+  }
+
   const systemPrompt = `
     Você é ${config.nome_assistente}, secretária virtual da clínica "${config.nome_clinica}".
     Tom de atendimento: ${tom[config.tom_voz] ?? "cordial e profissional"}.
@@ -494,6 +523,9 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     PROCEDIMENTOS DISPONÍVEIS:
     ${procedimentos.length > 0 ? procedimentos.map((p: any) => `- ${p.nome}: R$ ${p.valor_particular ?? 0} (${p.duracao_minutos ?? 30} min)`).join('\n') : "Nenhum procedimento cadastrado ainda."}
 
+    CONSULTAS AGENDADAS DESTE CONTATO:
+    ${consultasDoContato.length > 0 ? consultasDoContato.join('\n') : "Nenhuma consulta agendada."}
+
     HORÁRIOS DISPONÍVEIS PARA AGENDAMENTO (próximos dias):
     ${slotsLivres.length > 0 ? slotsLivres.join('\n') : "Nenhum horário disponível nos próximos 7 dias úteis."}
     ${ausenciasFormatadas ? `\nPROFISSIONAIS AUSENTES:\n${ausenciasFormatadas}` : ''}
@@ -504,14 +536,15 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     3. Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
     4. Em emergências médicas, oriente: ligue para SAMU (192)
     5. Seja objetiva — máximo 2-3 frases por resposta, direto ao ponto
-    6. ${profissionais.length > 1 ? 'IMPORTANTE: Se o paciente quiser agendar e a clínica tem mais de 1 profissional, PRIMEIRO pergunte com qual profissional ele deseja ser atendido. Liste os nomes dos profissionais disponíveis.' : ''}
-    7. Quando o paciente quiser agendar, pergunte qual dia/horário é melhor para ele. Depois VERIFIQUE se está na lista de disponíveis acima. Se não estiver, sugira os 2-3 horários livres mais próximos do que ele pediu.
+    6. ${profissionais.length > 1 ? 'Se o paciente quiser agendar e a clínica tem mais de 1 profissional, PRIMEIRO pergunte com qual profissional ele deseja ser atendido.' : ''}
+    7. Quando o paciente quiser agendar, pergunte qual dia/horário é melhor para ele. VERIFIQUE se está na lista de disponíveis.
     8. NUNCA sugira horários que NÃO estão na lista de disponíveis acima
-    9. Se o paciente quiser DESMARCAR: use ação "cancelar"
-    10. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar"
-    11. CRÍTICO: Quando o paciente CONFIRMAR o agendamento (disser "sim", "pode marcar", "confirmo", "ok", "quero"), use OBRIGATORIAMENTE acao_sugerida="agendar" com data, hora, profissional_nome e procedimento preenchidos. SEM ISSO O AGENDAMENTO NÃO SERÁ CRIADO.
+    9. CANCELAR: Quando o paciente pedir para cancelar, use acao_sugerida="cancelar". O paciente só pode cancelar consultas DELE MESMO (listadas acima).
+    10. REAGENDAR: Quando o paciente pedir para reagendar, use acao_sugerida="reagendar" com a NOVA data e hora nos dados_agendamento. O sistema vai cancelar a consulta antiga automaticamente e criar a nova. IMPORTANTE: coloque nos dados_agendamento a DATA E HORA NOVA que o paciente pediu, NÃO a antiga.
+    11. CRÍTICO: Quando o paciente CONFIRMAR (disser "sim", "pode marcar", "confirmo", "ok", "quero"), use OBRIGATORIAMENTE acao_sugerida="agendar" (ou "reagendar" se for reagendamento) com data, hora, profissional_nome e procedimento da NOVA consulta nos dados_agendamento.
     12. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome
     13. Se receber imagem, analise e descreva brevemente
+    14. O paciente NÃO pode cancelar ou reagendar consultas de outros pacientes
 
     Responda APENAS com JSON válido:
     {
@@ -592,15 +625,35 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
     await supabase.from("leads").update(updatePayload).eq("conversa_id", conversa.id)
 
-    // Se reagendamento, cancelar consultas futuras deste paciente primeiro
-    if (resposta.acao_sugerida === "reagendar" && conversa.paciente_id) {
-      await supabase.from("consultas")
-        .update({ status: "cancelado", observacoes: "[REAGENDADO POR OVYVA] Paciente solicitou nova data via WhatsApp." })
+    // Se reagendamento, cancelar consulta anterior
+    if (resposta.acao_sugerida === "reagendar") {
+      let cancelQuery = supabase.from("consultas")
+        .select("id, profissional_id, data_hora_inicio")
         .eq("clinica_id", clinica_id)
-        .eq("paciente_id", conversa.paciente_id)
         .in("status", ["agendado", "confirmado"])
-        .gte("data_hora_inicio", todayBR)
+        .gte("data_hora_inicio", `${todayBR}T00:00:00`)
+        .order("data_hora_inicio", { ascending: true })
         .limit(1)
+
+      if (conversa.paciente_id) {
+        cancelQuery = cancelQuery.eq("paciente_id", conversa.paciente_id)
+      } else {
+        cancelQuery = cancelQuery.ilike("observacoes", `%${conversa.contato_nome || conversa.contato_telefone}%`)
+      }
+
+      const { data: consultaAnterior } = await cancelQuery.single()
+      if (consultaAnterior) {
+        await supabase.from("consultas")
+          .update({ status: "cancelado", observacoes: "[REAGENDADO POR OVYVA] Paciente solicitou nova data via WhatsApp." })
+          .eq("id", consultaAnterior.id)
+
+        // Notificar profissional do cancelamento
+        const dtOld = consultaAnterior.data_hora_inicio?.split("T")
+        await notificarProfissional(supabase, clinica_id, consultaAnterior.profissional_id, "reagendamento",
+          `Consulta REAGENDADA via WhatsApp:\nPaciente: ${conversa.contato_nome || "Contato"}\nAnterior: ${dtOld?.[0]?.split("-").reverse().join("/") ?? "?"} as ${dtOld?.[1]?.substring(0, 5) ?? "?"}\nNova: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}`
+        )
+        console.log(`[OVYVA] Reagendamento: cancelou consulta ${consultaAnterior.id}`)
+      }
     }
 
     // Criar pré-agendamento se tiver data/hora (aceita pacientes vinculados OU não)
