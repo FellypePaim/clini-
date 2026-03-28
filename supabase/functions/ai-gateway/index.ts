@@ -793,22 +793,17 @@ JSON obrigatório:
 
       // Só inserir se tem os campos obrigatórios
       if (!conversa.paciente_id || !profissionalId) {
-        console.error("[OVYVA] Insert abortado: campos obrigatórios faltando", insertPayload)
+        console.error("[OVYVA] Insert abortado: campos obrigatórios faltando")
       } else {
         const { error: insertErr } = await supabase.from("consultas").insert(insertPayload)
-        if (insertErr) console.error("[OVYVA] Erro ao criar agendamento:", JSON.stringify(insertErr))
-        else console.log("[OVYVA] CONSULTA CRIADA COM SUCESSO!")
-      }
-      if (insertErr) console.error("Erro ao criar agendamento:", insertErr)
-      else {
-        console.log("[OVYVA] Agendamento criado com sucesso!")
-        // Notificar profissional via WhatsApp
-        await notificarProfissional(supabase, clinica_id, profissionalId, "agendamento",
-          `Nova consulta agendada via WhatsApp:\n` +
-          `Paciente: ${conversa.contato_nome || "Novo contato"}\n` +
-          `Data: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}\n` +
-          `Procedimento: ${(matchProced as any)?.nome || "Avaliacao"}`
-        )
+        if (insertErr) {
+          console.error("[OVYVA] Erro ao criar agendamento:", JSON.stringify(insertErr))
+        } else {
+          console.log("[OVYVA] CONSULTA CRIADA COM SUCESSO!")
+          await notificarProfissional(supabase, clinica_id, profissionalId, "agendamento",
+            `Nova consulta agendada via WhatsApp:\nPaciente: ${conversa.contato_nome || "Novo contato"}\nData: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}\nProcedimento: ${(matchProced as any)?.nome || "Avaliacao"}`
+          )
+        }
       }
     }
   }
