@@ -599,7 +599,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         .eq("clinica_id", clinica_id)
         .eq("paciente_id", conversa.paciente_id)
         .in("status", ["agendado", "confirmado"])
-        .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
+        .gte("data_hora_inicio", todayBR)
         .limit(1)
     }
 
@@ -754,7 +754,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 async function handleDashboardInsights(clinica_id: string, supabase: any) {
   if (!clinica_id) throw new Error("clinica_id é obrigatório para dashboard_insights")
 
-  const hoje = new Date().toISOString().split("T")[0]
+  const hoje = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })).toISOString().split("T")[0]
   const inicioMes = hoje.substring(0, 7) + "-01"
 
   const [consultasHoje, receitaMes, pacientesNovos, leadsAtivos, clinicaRes] = await Promise.all([

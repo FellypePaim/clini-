@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
     // ═══════════════════════════════════════════
     // 3. ANIVERSÁRIOS DO DIA (roda 1x por dia)
     // ═══════════════════════════════════════════
-    const hoje = new Date()
+    const hoje = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
     const dia = String(hoje.getDate()).padStart(2, "0")
     const mes = String(hoje.getMonth() + 1).padStart(2, "0")
 

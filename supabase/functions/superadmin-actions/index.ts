@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       return c ?? 0
     }
 
-    const today = new Date().toISOString().split('T')[0]
+    const today = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })).toISOString().split('T')[0]
 
     // ── Actions ──────────────────────────────────────────
     switch (action) {
