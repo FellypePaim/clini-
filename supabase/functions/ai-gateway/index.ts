@@ -335,12 +335,12 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     }
   }
 
-  // 5. Buscar configuração da clínica, procedimentos e agenda
+  // 5. Buscar configuração da clínica, procedimentos, profissionais e agenda
   // Usar timezone BR para todas as datas
   const nowBR = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
   const todayBR = nowBR.toISOString().split('T')[0] // YYYY-MM-DD em horário BR
 
-  const [clinicaRes, procedimentosRes, consultasRes, ausenciasRes] = await Promise.all([
+  const [clinicaRes, procedimentosRes, consultasRes, ausenciasRes, profissionaisRes] = await Promise.all([
     supabase
       .from("clinicas")
       .select("nome, configuracoes")
@@ -363,13 +363,20 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .from("profissional_ausencias")
       .select("profissional_id, data_inicio, data_fim")
       .eq("clinica_id", clinica_id)
-      .gte("data_fim", todayBR)
+      .gte("data_fim", todayBR),
+    supabase
+      .from("profiles")
+      .select("id, nome_completo, especialidade")
+      .eq("clinica_id", clinica_id)
+      .in("role", ["profissional", "admin"])
+      .eq("ativo", true)
   ])
 
   const clinicaData = clinicaRes.data
   const procedimentos = procedimentosRes.data || []
   const agendaOcupada = consultasRes.data || []
   const ausenciasData = ausenciasRes.data || []
+  const profissionais = profissionaisRes.data || []
 
   const ovyvaConfig = clinicaData?.configuracoes?.ovyva ?? {}
   const config = {
@@ -481,6 +488,9 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
     HORÁRIO DE FUNCIONAMENTO: ${config.horario_inicio} às ${config.horario_fim} (segunda a sábado)
 
+    PROFISSIONAIS DA CLÍNICA:
+    ${profissionais.length > 0 ? profissionais.map((p: any) => `- ${p.nome_completo}${p.especialidade ? ` (${p.especialidade})` : ''}`).join('\n') : "Nenhum profissional cadastrado."}
+
     PROCEDIMENTOS DISPONÍVEIS:
     ${procedimentos.length > 0 ? procedimentos.map((p: any) => `- ${p.nome}: R$ ${p.valor_particular ?? 0} (${p.duracao_minutos ?? 30} min)`).join('\n') : "Nenhum procedimento cadastrado ainda."}
 
@@ -494,13 +504,14 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     3. Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
     4. Em emergências médicas, oriente: ligue para SAMU (192)
     5. Seja objetiva — máximo 2-3 frases por resposta, direto ao ponto
-    6. IMPORTANTE: Quando o paciente quiser agendar, pergunte qual dia/horário é melhor para ele. Depois VERIFIQUE se está na lista de disponíveis acima. Se não estiver, sugira os 2-3 horários livres mais próximos do que ele pediu.
-    7. NUNCA sugira horários que NÃO estão na lista de disponíveis acima
-    8. Se o paciente quiser DESMARCAR: use ação "cancelar"
-    9. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar"
-    10. Se o paciente quiser AGENDAR: use ação "agendar" com data, hora e procedimento
-    11. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome
-    12. Se receber imagem, analise e descreva brevemente
+    6. ${profissionais.length > 1 ? 'IMPORTANTE: Se o paciente quiser agendar e a clínica tem mais de 1 profissional, PRIMEIRO pergunte com qual profissional ele deseja ser atendido. Liste os nomes dos profissionais disponíveis.' : ''}
+    7. Quando o paciente quiser agendar, pergunte qual dia/horário é melhor para ele. Depois VERIFIQUE se está na lista de disponíveis acima. Se não estiver, sugira os 2-3 horários livres mais próximos do que ele pediu.
+    8. NUNCA sugira horários que NÃO estão na lista de disponíveis acima
+    9. Se o paciente quiser DESMARCAR: use ação "cancelar"
+    10. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar"
+    11. CRÍTICO: Quando o paciente CONFIRMAR o agendamento (disser "sim", "pode marcar", "confirmo", "ok", "quero"), use OBRIGATORIAMENTE acao_sugerida="agendar" com data, hora, profissional_nome e procedimento preenchidos. SEM ISSO O AGENDAMENTO NÃO SERÁ CRIADO.
+    12. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome
+    13. Se receber imagem, analise e descreva brevemente
 
     Responda APENAS com JSON válido:
     {
@@ -510,8 +521,8 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       "dados_agendamento": {
         "data": "YYYY-MM-DD ou null",
         "hora": "HH:MM ou null",
-        "profissional_nome": "nome ou null",
-        "procedimento": "nome ou null"
+        "profissional_nome": "nome do profissional ou null",
+        "procedimento": "nome do procedimento ou null"
       },
       "confianca": 0.95
     }
@@ -601,17 +612,35 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       const endM = String(endMinutes % 60).padStart(2, "0")
       const dataHoraFim = `${dataAg}T${endH}:${endM}:00`
 
-      await supabase.from("consultas").insert({
+      // Buscar profissional pelo nome retornado pela IA
+      const profNome = (resposta.dados_agendamento?.profissional_nome || "").toLowerCase().trim()
+      let profissionalId = null
+      if (profNome && profissionais.length > 0) {
+        const matchProf = profissionais.find((p: any) =>
+          p.nome_completo.toLowerCase().includes(profNome) || profNome.includes(p.nome_completo.toLowerCase().split(' ')[0])
+        )
+        profissionalId = matchProf?.id || null
+      }
+      // Fallback: se não encontrou, usar o primeiro profissional da clínica
+      if (!profissionalId && profissionais.length > 0) {
+        profissionalId = profissionais[0].id
+      }
+
+      console.log(`[OVYVA] Criando consulta: ${dataHoraInicio} prof=${profissionalId} proced=${(matchProced as any)?.id}`)
+
+      const { error: insertErr } = await supabase.from("consultas").insert({
         clinica_id,
         paciente_id: conversa.paciente_id || null,
-        profissional_id: agendaOcupada[0]?.profissional_id || null,
+        profissional_id: profissionalId,
         procedimento_id: (matchProced as any)?.id || null,
         data_hora_inicio: dataHoraInicio,
         data_hora_fim: dataHoraFim,
         duracao_minutos: duracao,
         status: "agendado",
-        observacoes: `[PRÉ-AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp. Aguardando aprovação.`,
-      }).then(() => { }).catch((e: unknown) => console.error("Erro ao criar pré-agendamento:", e))
+        observacoes: `[AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp.`,
+      })
+      if (insertErr) console.error("Erro ao criar agendamento:", insertErr)
+      else console.log("[OVYVA] Agendamento criado com sucesso!")
     }
   }
 
