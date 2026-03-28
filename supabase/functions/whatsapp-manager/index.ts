@@ -261,6 +261,85 @@ Deno.serve(async (req) => {
     }
 
     // ─────────────────────────────────────────────────────────────
+    // AÇÃO: EXCLUIR INSTÂNCIA (desconecta + remove do banco)
+    // ─────────────────────────────────────────────────────────────
+    if (action === "excluir_instancia") {
+      const { instancia_id } = payload
+
+      const { data: instancia, error: instErr } = await supabase
+        .from("whatsapp_instancias")
+        .select("*")
+        .eq("id", instancia_id)
+        .eq("clinica_id", clinicaId)
+        .single()
+
+      if (instErr || !instancia) return json({ error: "Instância não encontrada" }, 404)
+
+      // Desconectar e deletar na Evolution API
+      try {
+        await fetch(`${evolutionUrl}/instance/logout/${instancia.nome_instancia}`, {
+          method: "DELETE",
+          headers: { "apikey": evolutionKey },
+        })
+        await fetch(`${evolutionUrl}/instance/delete/${instancia.nome_instancia}`, {
+          method: "DELETE",
+          headers: { "apikey": evolutionKey },
+        })
+      } catch { /* Evolution pode já não ter a instância */ }
+
+      // Remover do banco
+      await supabase.from("whatsapp_instancias").delete().eq("id", instancia_id)
+
+      return json({ success: true })
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // AÇÃO: RECONECTAR INSTÂNCIA (gera novo QR code)
+    // ─────────────────────────────────────────────────────────────
+    if (action === "reconectar") {
+      const { instancia_id } = payload
+
+      const { data: instancia, error: instErr } = await supabase
+        .from("whatsapp_instancias")
+        .select("*")
+        .eq("id", instancia_id)
+        .eq("clinica_id", clinicaId)
+        .single()
+
+      if (instErr || !instancia) return json({ error: "Instância não encontrada" }, 404)
+
+      // Tentar restart na Evolution API
+      try {
+        await fetch(`${evolutionUrl}/instance/restart/${instancia.nome_instancia}`, {
+          method: "PUT",
+          headers: { "apikey": evolutionKey },
+        })
+      } catch { /* ignore */ }
+
+      // Buscar novo QR code
+      const qrResp = await fetch(
+        `${evolutionUrl}/instance/connect/${instancia.nome_instancia}`,
+        { headers: { "apikey": evolutionKey } }
+      )
+      let qrCode = null
+      if (qrResp.ok) {
+        const qrData = await qrResp.json()
+        qrCode = qrData.base64 ?? qrData.code ?? null
+      }
+
+      await supabase
+        .from("whatsapp_instancias")
+        .update({
+          status: qrCode ? "qr_pending" : "connecting",
+          qr_code_base64: qrCode,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", instancia_id)
+
+      return json({ success: true, qr_code: qrCode, status: qrCode ? "qr_pending" : "connecting" })
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // AÇÃO: LISTAR INSTÂNCIAS DA CLÍNICA
     // ─────────────────────────────────────────────────────────────
     if (action === "listar") {

@@ -139,6 +139,34 @@ export function WhatsAppConexaoPage() {
     }
   }
 
+  const handleExcluir = async (instancia: Instancia) => {
+    if (!confirm(`Excluir permanentemente a instância "${instancia.nome_instancia}"? Esta ação não pode ser desfeita.`)) return
+    const token = await getToken()
+    try {
+      await callManager('excluir_instancia', { instancia_id: instancia.id }, token)
+      setInstancias(prev => prev.filter(i => i.id !== instancia.id))
+      if (pollingId === instancia.id) setPollingId(null)
+      toast({ title: 'Instância excluída', description: 'Conexão removida com sucesso.', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro ao excluir', description: err.message, type: 'error' })
+    }
+  }
+
+  const handleReconectar = async (instancia: Instancia) => {
+    const token = await getToken()
+    try {
+      const { qr_code, status } = await callManager('reconectar', { instancia_id: instancia.id }, token)
+      setInstancias(prev => prev.map(i => i.id === instancia.id
+        ? { ...i, status: status ?? 'connecting', qr_code_base64: qr_code }
+        : i
+      ))
+      setPollingId(instancia.id)
+      toast({ title: 'Reconectando', description: qr_code ? 'Escaneie o novo QR Code.' : 'Tentando reconectar...', type: 'success' })
+    } catch (err: any) {
+      toast({ title: 'Erro ao reconectar', description: err.message, type: 'error' })
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -222,6 +250,7 @@ export function WhatsAppConexaoPage() {
                       )}
                     </span>
 
+                    {/* Refresh QR — quando pendente */}
                     {isPending && (
                       <button
                         onClick={() => handleRefreshQR(inst)}
@@ -232,15 +261,36 @@ export function WhatsAppConexaoPage() {
                       </button>
                     )}
 
-                    {(isConnected || inst.status === 'disconnected') && (
+                    {/* Reconectar — quando desconectado ou erro */}
+                    {(inst.status === 'disconnected' || inst.status === 'error') && (
                       <button
-                        onClick={() => handleDesconectar(inst)}
-                        className="p-2.5 hover:bg-red-50 rounded-xl text-gray-300 hover:text-red-500 transition-all"
-                        title="Desconectar"
+                        onClick={() => handleReconectar(inst)}
+                        className="p-2.5 hover:bg-blue-50 rounded-xl text-gray-400 hover:text-blue-500 transition-all"
+                        title="Reconectar"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <RefreshCw className="w-4 h-4" />
                       </button>
                     )}
+
+                    {/* Desconectar — quando conectado */}
+                    {isConnected && (
+                      <button
+                        onClick={() => handleDesconectar(inst)}
+                        className="p-2.5 hover:bg-amber-50 rounded-xl text-gray-300 hover:text-amber-500 transition-all"
+                        title="Desconectar"
+                      >
+                        <WifiOff className="w-4 h-4" />
+                      </button>
+                    )}
+
+                    {/* Excluir — sempre visível */}
+                    <button
+                      onClick={() => handleExcluir(inst)}
+                      className="p-2.5 hover:bg-red-50 rounded-xl text-gray-300 hover:text-red-500 transition-all"
+                      title="Excluir instância"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
