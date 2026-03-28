@@ -509,7 +509,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     Você é ${config.nome_assistente}, secretária virtual da clínica "${config.nome_clinica}".
     Tom de atendimento: ${tom[config.tom_voz] ?? "cordial e profissional"}.
     Você está conversando com: ${nomeContato}.
-    ${perfilPaciente?.e_paciente_cadastrado ? `Este paciente é cadastrado na clínica.` : ""}
+    ${conversa.paciente_id ? `Este contato JÁ É paciente cadastrado na clínica. Não precisa perguntar o nome novamente.` : `Este contato AINDA NÃO é paciente cadastrado. Precisa coletar nome completo.`}
     Data e hora atuais: ${nowBR.toLocaleString("pt-BR")}.
 
     INFORMAÇÕES DA CLÍNICA:
@@ -542,9 +542,10 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     9. CANCELAR: Quando o paciente pedir para cancelar, use acao_sugerida="cancelar". O paciente só pode cancelar consultas DELE MESMO (listadas acima).
     10. REAGENDAR: Quando o paciente pedir para reagendar, use acao_sugerida="reagendar" com a NOVA data e hora nos dados_agendamento. O sistema vai cancelar a consulta antiga automaticamente e criar a nova. IMPORTANTE: coloque nos dados_agendamento a DATA E HORA NOVA que o paciente pediu, NÃO a antiga.
     11. CRÍTICO: Quando o paciente CONFIRMAR (disser "sim", "pode marcar", "confirmo", "ok", "quero"), use OBRIGATORIAMENTE acao_sugerida="agendar" (ou "reagendar" se for reagendamento) com data, hora, profissional_nome e procedimento da NOVA consulta nos dados_agendamento.
-    12. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome
-    13. Se receber imagem, analise e descreva brevemente
-    14. O paciente NÃO pode cancelar ou reagendar consultas de outros pacientes
+    12. PRIORIDADE MÁXIMA: Se este contato NÃO é paciente cadastrado e o nome é "paciente" ou desconhecido, sua PRIMEIRA pergunta DEVE ser: "Para que eu possa te ajudar melhor, qual é o seu nome completo?" (nome e sobrenome). Não prossiga sem o nome.
+    13. Quando o paciente informar nome e sobrenome, coloque em "nome_completo" na resposta JSON. O sistema vai cadastrar automaticamente.
+    14. Se receber imagem, analise e descreva brevemente
+    15. O paciente NÃO pode cancelar ou reagendar consultas de outros pacientes
 
     Responda APENAS com JSON válido:
     {
@@ -557,6 +558,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         "profissional_nome": "nome do profissional ou null",
         "procedimento": "nome do procedimento ou null"
       },
+      "nome_completo": "Nome Sobrenome do paciente ou null (preencha quando o paciente informar seu nome completo)",
       "confianca": 0.95
     }
   `
@@ -596,7 +598,62 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   let resposta
   try { resposta = JSON.parse(result.response.text()) } catch { throw new Error("Resposta inválida da IA (JSON malformado)") }
 
-  // 8. Atualizar ultimo_contato
+  // 8. Auto-cadastro de paciente se IA coletou nome completo e contato não é paciente
+  if (resposta.nome_completo && !conversa.paciente_id) {
+    const nomeCompleto = resposta.nome_completo.trim()
+    // Verificar se tem pelo menos nome + sobrenome (2 palavras)
+    if (nomeCompleto.split(/\s+/).length >= 2) {
+      try {
+        // Verificar se já existe paciente com esse telefone nesta clínica
+        const { data: existente } = await supabase.from("pacientes")
+          .select("id")
+          .eq("clinica_id", clinica_id)
+          .or(`telefone.eq.${conversa.contato_telefone},whatsapp.eq.${conversa.contato_telefone}`)
+          .limit(1)
+          .single()
+
+        if (existente) {
+          // Paciente já existe — vincular à conversa
+          await supabase.from("ovyva_conversas").update({
+            paciente_id: existente.id,
+            contato_nome: nomeCompleto,
+          }).eq("id", conversa.id)
+          conversa.paciente_id = existente.id
+          console.log(`[OVYVA] Paciente existente vinculado: ${existente.id}`)
+        } else {
+          // Criar novo paciente
+          const { data: novoPaciente } = await supabase.from("pacientes").insert({
+            clinica_id,
+            nome_completo: nomeCompleto,
+            telefone: conversa.contato_telefone,
+            whatsapp: conversa.contato_telefone,
+            como_conheceu: "WhatsApp OVYVA",
+            ativo: true,
+          }).select("id").single()
+
+          if (novoPaciente) {
+            await supabase.from("ovyva_conversas").update({
+              paciente_id: novoPaciente.id,
+              contato_nome: nomeCompleto,
+            }).eq("id", conversa.id)
+            conversa.paciente_id = novoPaciente.id
+            console.log(`[OVYVA] Paciente auto-cadastrado: ${nomeCompleto} (${novoPaciente.id})`)
+          }
+        }
+      } catch (e: any) {
+        console.error("[OVYVA] Erro no auto-cadastro:", e.message)
+      }
+    }
+  }
+
+  // Atualizar nome do contato se IA informou
+  if (resposta.nome_completo && conversa.contato_nome !== resposta.nome_completo) {
+    await supabase.from("ovyva_conversas").update({
+      contato_nome: resposta.nome_completo,
+    }).eq("id", conversa.id)
+  }
+
+  // 8b. Atualizar ultimo_contato
   await supabase.from("ovyva_conversas").update({
     ultimo_contato: new Date().toISOString(),
     total_mensagens: (conversa.total_mensagens ?? 0) + 2,
