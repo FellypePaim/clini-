@@ -138,6 +138,18 @@ export function useSuperAdmin() {
     finally { setIsLoading(false) }
   }, [])
 
+  // Clínica — zerar conversas
+  const resetConversations = useCallback(async (id: string) => {
+    try {
+      const result = await invoke('reset_conversations', { clinicId: id })
+      toast({ title: 'Conversas zeradas', description: `${result?.conversas ?? 0} conversas e ${result?.mensagens ?? 0} mensagens removidas.`, type: 'success' })
+      return true
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message || 'Falha ao zerar.', type: 'error' })
+      return false
+    }
+  }, [toast])
+
   // Usuário — update
   const updateUser = useCallback(async (userId: string, updates: { role?: string; ativo?: boolean; clinica_id?: string | null }) => {
     try {
@@ -197,7 +209,7 @@ export function useSuperAdmin() {
   return {
     isLoading,
     getDashboard,
-    getClinics, createClinic, suspendClinic, reactivateClinic, deleteClinic, impersonateClinic,
+    getClinics, createClinic, suspendClinic, reactivateClinic, deleteClinic, impersonateClinic, resetConversations,
     getUsers, createUser, updateUser,
     getFinanceiro,
     getAuditLogs,

@@ -90,6 +90,7 @@ export function SuperClinicasPage() {
     reactivateClinic,
     deleteClinic,
     impersonateClinic,
+    resetConversations,
     isLoading,
   } = useSuperAdmin()
   const toast = useToast((s) => s.toast)
@@ -150,6 +151,17 @@ export function SuperClinicasPage() {
   async function handleImpersonate(clinic: Clinic) {
     setActionLoadingId(clinic.id)
     await impersonateClinic(clinic.id)
+    setActionLoadingId(null)
+  }
+
+  async function handleResetConversations(clinic: Clinic) {
+    const confirmed = window.confirm(
+      `Zerar TODAS as conversas da OVYVA da clinica "${clinic.nome}"?\n\nIsso apaga todo o historico de mensagens. A IA vai atender todos os contatos como se fosse a primeira vez.`,
+    )
+    if (!confirmed) return
+    setActionLoadingId(clinic.id)
+    await resetConversations(clinic.id)
+    await loadClinics()
     setActionLoadingId(null)
   }
 
@@ -334,6 +346,15 @@ export function SuperClinicasPage() {
                     Deletar
                   </button>
                 </div>
+                <button
+                  disabled={actionLoadingId === clinic.id}
+                  onClick={() => handleResetConversations(clinic)}
+                  className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white font-bold text-[10px] rounded-xl transition-all disabled:opacity-50 w-full justify-center"
+                  title="Zerar historico de conversas OVYVA"
+                >
+                  <MessageCircle size={14} />
+                  Zerar Conversas OVYVA
+                </button>
               </div>
 
               {/* Background decoration */}

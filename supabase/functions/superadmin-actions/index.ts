@@ -230,6 +230,48 @@ Deno.serve(async (req) => {
       }
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CLÍNICA — Zerar histórico de conversas OVYVA
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'reset_conversations': {
+        const targetId = clinicId ?? pd.clinicaId
+        if (!targetId) throw new Error('clinicaId obrigatório')
+
+        // Buscar IDs das conversas da clínica
+        const { data: conversas } = await db.from('ovyva_conversas')
+          .select('id').eq('clinica_id', targetId)
+        const ids = (conversas ?? []).map((c: any) => c.id)
+
+        let msgsDeletadas = 0
+        let convsDeletadas = 0
+
+        if (ids.length > 0) {
+          // Deletar mensagens de todas as conversas
+          const { count: mc } = await db.from('ovyva_mensagens')
+            .delete({ count: 'exact' })
+            .in('conversa_id', ids)
+          msgsDeletadas = mc ?? 0
+
+          // Deletar as conversas
+          const { count: cc } = await db.from('ovyva_conversas')
+            .delete({ count: 'exact' })
+            .eq('clinica_id', targetId)
+          convsDeletadas = cc ?? 0
+        }
+
+        // Log auditoria
+        try {
+          await db.from('auditoria_global').insert({
+            usuario_id: user.id, clinica_id: targetId,
+            acao: 'RESET_CONVERSATIONS', recurso: 'ovyva_conversas',
+            resultado: 'sucesso',
+            dados_depois: { conversas: convsDeletadas, mensagens: msgsDeletadas },
+          })
+        } catch { /* ignore */ }
+
+        return ok({ success: true, conversas: convsDeletadas, mensagens: msgsDeletadas })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // CLÍNICA — Deletar
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'delete_clinic': {
