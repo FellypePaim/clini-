@@ -160,11 +160,30 @@ Deno.serve(async (req) => {
 async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: string, pushName?: string | null) {
     const { data } = await supabase.from("ovyva_conversas").select("id").eq("clinica_id", clinica_id).eq("contato_telefone", phone).single()
     if (data?.id) return data.id
+
+    // Criar conversa
     const { data: nova, error } = await supabase.from("ovyva_conversas").insert({
       clinica_id, contato_telefone: phone, status: "ia_ativa",
       contato_nome: pushName || null,
     }).select("id").single()
     if (error || !nova) { console.error("Erro ao criar conversa:", error); return null }
+
+    // Criar lead no CRM automaticamente (novo contato = lead)
+    try {
+      await supabase.from("leads").insert({
+        clinica_id,
+        nome: pushName || `Contato ${phone}`,
+        telefone: phone,
+        estagio: "perguntou_valor",
+        origem: "WhatsApp OVYVA",
+        conversa_id: nova.id,
+        ultimo_contato: new Date().toISOString(),
+      })
+      console.log(`[webhook] Lead criado para ${phone}`)
+    } catch (e: any) {
+      console.error("[webhook] Erro ao criar lead:", e.message)
+    }
+
     return nova.id
 }
 

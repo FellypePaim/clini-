@@ -125,7 +125,22 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                       )}
                    </div>
 
-                   <div className="mt-2 flex items-center gap-1.5">
+                   <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      {conv.metadata?.lead_stage && (
+                        <div className={cn(
+                          "flex items-center gap-1 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-lg border",
+                          conv.metadata.lead_stage === 'agendado' ? "text-emerald-600 bg-emerald-50 border-emerald-100" :
+                          conv.metadata.lead_stage === 'quase_fechando' ? "text-orange-600 bg-orange-50 border-orange-100" :
+                          conv.metadata.lead_stage === 'demonstrou_interesse' ? "text-amber-600 bg-amber-50 border-amber-100" :
+                          "text-blue-600 bg-blue-50 border-blue-100"
+                        )}>
+                          {conv.metadata.lead_stage === 'perguntou_valor' ? 'Perguntou' :
+                           conv.metadata.lead_stage === 'demonstrou_interesse' ? 'Interessado' :
+                           conv.metadata.lead_stage === 'quase_fechando' ? 'Quase Fechando' :
+                           conv.metadata.lead_stage === 'agendado' ? 'Agendado' :
+                           conv.metadata.lead_stage}
+                        </div>
+                      )}
                       {conv.status === 'ia_ativa' && (
                         <div className="flex items-center gap-1 text-[9px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-1.5 py-0.5 rounded-lg border border-green-100">
                           <Clock className="w-2.5 h-2.5" /> IA Ativa

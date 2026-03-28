@@ -644,11 +644,55 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     }
   }
 
-  // Se detectou interesse em procedimento mas não agendou, apenas atualiza interesse no lead
-  if (resposta.dados_agendamento?.procedimento && !["agendar", "reagendar"].includes(resposta.acao_sugerida)) {
-    await supabase.from("leads")
-      .update({ procedimento_interesse: resposta.dados_agendamento.procedimento })
-      .eq("conversa_id", conversa.id)
+  // ── ATUALIZAR CRM AUTOMATICAMENTE BASEADO NA INTENÇÃO ──
+  // Mapear intenção da IA → estágio do lead no CRM
+  const intentToStage: Record<string, string> = {
+    "informacao": "perguntou_valor",
+    "agendamento": "demonstrou_interesse",
+    "reagendamento": "demonstrou_interesse",
+    "reclamacao": "perguntou_valor",
+  }
+
+  if (resposta.intencao_detectada && conversa.id) {
+    const novoEstagio = resposta.acao_sugerida === "agendar" ? "agendado"
+      : intentToStage[resposta.intencao_detectada] || null
+
+    if (novoEstagio) {
+      const leadUpdate: any = {
+        ultimo_contato: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }
+
+      // Só avançar o estágio (nunca regredir)
+      const stageOrder = ["perguntou_valor", "demonstrou_interesse", "quase_fechando", "agendado"]
+      const { data: currentLead } = await supabase.from("leads")
+        .select("estagio, id")
+        .eq("conversa_id", conversa.id)
+        .single()
+
+      if (currentLead) {
+        const currentIdx = stageOrder.indexOf(currentLead.estagio || "")
+        const newIdx = stageOrder.indexOf(novoEstagio)
+        if (newIdx > currentIdx) {
+          leadUpdate.estagio = novoEstagio
+          // Atualizar metadata da conversa com o estágio do CRM
+          await supabase.from("ovyva_conversas").update({
+            metadata: { ...(conversa.metadata ?? {}), lead_stage: novoEstagio, intent: resposta.intencao_detectada },
+          }).eq("id", conversa.id)
+          // Registrar mudança no histórico
+          await supabase.from("leads_historico").insert({
+            lead_id: currentLead.id,
+            estagio_anterior: currentLead.estagio,
+            estagio_novo: novoEstagio,
+            anotacao: `[OVYVA IA] Intenção: ${resposta.intencao_detectada}`,
+          }).catch(() => {})
+        }
+        if (resposta.dados_agendamento?.procedimento) {
+          leadUpdate.procedimento_interesse = resposta.dados_agendamento.procedimento
+        }
+        await supabase.from("leads").update(leadUpdate).eq("id", currentLead.id)
+      }
+    }
   }
 
   // ── AÇÃO: CANCELAR ──
