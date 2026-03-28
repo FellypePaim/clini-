@@ -7,13 +7,19 @@ import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function OvyvaPage() {
-  const { conversations, sendMessage, takeoverConversation, returnToAI } = useOVYVA()
-  const [selectedId, setSelectedId] = useState<string | null>(conversations[0]?.id || null)
+  const { conversations, selectConversation, activeConversation, sendMessage, takeoverConversation, returnToAI, refreshConversations } = useOVYVA()
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const selectedConversation = useMemo(() => 
-    conversations.find(c => c.id === selectedId), 
-  [conversations, selectedId])
+  const handleSelect = (id: string) => {
+    setSelectedId(id)
+    const conv = conversations.find(c => c.id === id)
+    if (conv) selectConversation(conv)
+  }
+
+  // Usar activeConversation do hook (tem mensagens carregadas) ou fallback
+  const selectedConversation = activeConversation?.id === selectedId ? activeConversation
+    : conversations.find(c => c.id === selectedId) ?? null
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col gap-6 animate-fade-in">
@@ -39,10 +45,10 @@ export function OvyvaPage() {
 
        {/* Main Chat Panel */}
        <div className="flex-1 flex bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-2xl shadow-gray-200/50">
-          <ConversationList 
-            conversations={conversations} 
+          <ConversationList
+            conversations={conversations}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={handleSelect}
           />
           
           {selectedConversation ? (
@@ -53,8 +59,9 @@ export function OvyvaPage() {
                 onTakeover={() => takeoverConversation(selectedConversation.id)}
                 onReturnToAI={() => returnToAI(selectedConversation.id)}
               />
-              <ContactContext 
+              <ContactContext
                 conversation={selectedConversation}
+                onPatientLinked={refreshConversations}
               />
             </>
           ) : (

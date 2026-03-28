@@ -47,7 +47,8 @@ Deno.serve(async (req) => {
     if (fromMe || remoteJid.includes("@g.us")) return new Response("skipped")
 
     const whatsappNumber = remoteJid.split("@")[0]
-    let textContent = message.conversation || message.extendedTextMessage?.text || 
+    const pushName = msgData.pushName || payload.data?.pushName || null
+    let textContent = message.conversation || message.extendedTextMessage?.text ||
                       message.imageMessage?.caption || message.videoMessage?.caption || ""
 
     let mediaBase64 = null
@@ -84,7 +85,16 @@ Deno.serve(async (req) => {
     if (!textContent && !mediaBase64) return new Response("empty")
 
     // 3. Registrar Mensagem e Conversa
-    const conversaId = await getOuCriarConversaId(supabase, clinica_id, whatsappNumber)
+    const conversaId = await getOuCriarConversaId(supabase, clinica_id, whatsappNumber, pushName)
+
+    // Atualizar nome do contato se temos pushName e ainda não tem
+    if (pushName && conversaId) {
+      await supabase.from("ovyva_conversas")
+        .update({ contato_nome: pushName, ultimo_contato: new Date().toISOString() })
+        .eq("id", conversaId)
+        .is("contato_nome", null)
+    }
+
     await supabase.from("ovyva_mensagens").insert({
       conversa_id: conversaId,
       remetente: "paciente",
@@ -147,10 +157,13 @@ Deno.serve(async (req) => {
   }
 })
 
-async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: string) {
+async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: string, pushName?: string | null) {
     const { data } = await supabase.from("ovyva_conversas").select("id").eq("clinica_id", clinica_id).eq("contato_telefone", phone).single()
     if (data?.id) return data.id
-    const { data: nova, error } = await supabase.from("ovyva_conversas").insert({ clinica_id, contato_telefone: phone, status: "ia_ativa" }).select("id").single()
+    const { data: nova, error } = await supabase.from("ovyva_conversas").insert({
+      clinica_id, contato_telefone: phone, status: "ia_ativa",
+      contato_nome: pushName || null,
+    }).select("id").single()
     if (error || !nova) { console.error("Erro ao criar conversa:", error); return null }
     return nova.id
 }

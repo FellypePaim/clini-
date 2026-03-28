@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   UserPlus,
   ExternalLink,
@@ -8,22 +9,83 @@ import {
   User,
   Activity,
   ArrowRight,
-  Link2
+  Link2,
+  X,
+  Loader2,
+  Save,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { OvyvaConversation } from '../../types/ovyva'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '../ui/Avatar'
+import { supabase } from '../../lib/supabase'
+import { useAuthStore } from '../../store/authStore'
+import { useToast } from '../../hooks/useToast'
 
 interface ContactContextProps {
   conversation: OvyvaConversation
+  onPatientLinked?: () => void
 }
 
-export function ContactContext({ conversation }: ContactContextProps) {
+export function ContactContext({ conversation, onPatientLinked }: ContactContextProps) {
   const navigate = useNavigate()
+  const { user } = useAuthStore()
+  const { toast } = useToast()
+  const [showModal, setShowModal] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const displayName = conversation.contato_nome || `Novo Contato`
+  const displayName = conversation.contato_nome || 'Novo Contato'
   const isLead = !conversation.paciente_id
+
+  // Extrair primeiro e último nome do contato
+  const nameParts = (conversation.contato_nome || '').split(' ')
+  const [form, setForm] = useState({
+    nome_completo: conversation.contato_nome || '',
+    telefone: conversation.contato_telefone || '',
+    whatsapp: conversation.contato_telefone || '',
+    email: '',
+    cpf: '',
+    data_nascimento: '',
+    genero: '',
+    como_conheceu: 'WhatsApp OVYVA',
+  })
+
+  const handleSavePaciente = async () => {
+    if (!form.nome_completo.trim()) {
+      toast({ title: 'Nome obrigatorio', description: 'Preencha o nome do paciente.', type: 'error' })
+      return
+    }
+    setSaving(true)
+    try {
+      const { data: paciente, error } = await supabase.from('pacientes').insert({
+        clinica_id: user?.clinicaId,
+        nome_completo: form.nome_completo,
+        telefone: form.telefone,
+        whatsapp: form.whatsapp,
+        email: form.email || null,
+        cpf: form.cpf || null,
+        data_nascimento: form.data_nascimento || null,
+        genero: form.genero || null,
+        como_conheceu: form.como_conheceu,
+        ativo: true,
+      }).select('id').single()
+
+      if (error) throw error
+
+      // Vincular conversa ao paciente
+      await supabase.from('ovyva_conversas')
+        .update({ paciente_id: paciente.id })
+        .eq('id', conversation.id)
+
+      toast({ title: 'Paciente cadastrado', description: `${form.nome_completo} vinculado a esta conversa.`, type: 'success' })
+      setShowModal(false)
+      onPatientLinked?.()
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message || 'Falha ao cadastrar.', type: 'error' })
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="w-80 flex flex-col border-l border-gray-100 h-full bg-white shrink-0 overflow-y-auto custom-scrollbar p-8 animate-fade-in">
@@ -44,15 +106,15 @@ export function ContactContext({ conversation }: ContactContextProps) {
        {/* AI Intent Detection */}
        <div className="mb-10">
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-            <Target className="w-3.5 h-3.5" /> IA & Intenção
+            <Target className="w-3.5 h-3.5" /> IA & Intencao
           </h4>
           <div className="bg-green-50/50 p-6 rounded-[32px] border border-green-100 relative group overflow-hidden">
              <div className="absolute top-0 left-0 w-1 h-full bg-green-500" />
              <p className="text-xs font-black text-green-700 uppercase tracking-widest leading-relaxed">
-               {conversation.metadata?.intent || 'Aguardando classificação da IA'}
+               {conversation.metadata?.intent || 'Aguardando classificacao da IA'}
              </p>
              <p className="text-[10px] text-green-600/60 font-medium mt-2">
-                Precisão baseada no histórico de chat
+                Precisao baseada no historico de chat
              </p>
           </div>
        </div>
@@ -60,12 +122,12 @@ export function ContactContext({ conversation }: ContactContextProps) {
        {/* Patient Profile / Registration */}
        <div className="mb-10 space-y-4">
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
-            <User className="w-3.5 h-3.5" /> Perfil Clínico
+            <User className="w-3.5 h-3.5" /> Perfil Clinico
           </h4>
-          
+
           {!isLead ? (
             <div className="space-y-3">
-              <button 
+              <button
                 onClick={() => navigate(`/pacientes/${conversation.paciente_id}`)}
                 className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-white rounded-2xl border border-gray-100 transition-all group shadow-sm"
               >
@@ -74,39 +136,33 @@ export function ContactContext({ conversation }: ContactContextProps) {
                        <Activity className="w-5 h-5" />
                     </div>
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-gray-900 uppercase">Ver Prontuário</p>
-                       <p className="text-[9px] text-gray-400 font-medium">Histórico Clínico Completo</p>
+                       <p className="text-[10px] font-black text-gray-900 uppercase">Ver Prontuario</p>
+                       <p className="text-[9px] text-gray-400 font-medium">Historico Clinico Completo</p>
                     </div>
                  </div>
                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-green-500 transition-colors" />
               </button>
-              <button 
-                onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-white hover:bg-gray-50 text-gray-600 rounded-xl border border-gray-200 text-[9px] font-black uppercase tracking-widest transition-all"
-              >
-                 <BarChart3 className="w-3.5 h-3.5" /> Ver Histórico Verdesk
-              </button>
             </div>
           ) : (
             <div className="space-y-4">
-              <button 
-                onClick={() => navigate(`/pacientes?new=true&phone=${conversation.contato_telefone}&name=${encodeURIComponent(conversation.contato_nome || '')}`)}
+              <button
+                onClick={() => setShowModal(true)}
                 className="w-full py-4 bg-gray-900 hover:bg-black text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-gray-900/10 flex items-center justify-center gap-3 active:scale-95"
               >
                  <UserPlus className="w-4 h-4" /> Cadastrar como Paciente
               </button>
-              
+
               <div className="p-4 bg-orange-50 border border-orange-100 rounded-2xl flex flex-col gap-3">
                  <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1"><Link2 className="w-3 h-3" /> Origem</span>
                     <span className="text-[9px] font-black text-orange-600 uppercase bg-orange-100 px-2 py-1 rounded-md">OVYVA AI</span>
                  </div>
                  <div className="h-px bg-orange-200/50" />
-                 <button 
+                 <button
                    onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)}
                    className="flex items-center justify-between group"
                  >
-                    <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1 group-hover:underline">Estágio Verdesk</span>
+                    <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1 group-hover:underline">Estagio Verdesk</span>
                     <span className="text-[9px] font-black text-gray-900 uppercase">
                       {conversation.metadata?.lead_stage || 'Novo Lead Remoto'} &rarr;
                     </span>
@@ -114,21 +170,87 @@ export function ContactContext({ conversation }: ContactContextProps) {
               </div>
             </div>
           )}
-
        </div>
 
        {/* Quick Actions */}
        <div className="mb-10">
           <h4 className="text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
-            <Zap className="w-3.5 h-3.5" /> Ações Rápidas
+            <Zap className="w-3.5 h-3.5" /> Acoes Rapidas
           </h4>
           <div className="grid grid-cols-2 gap-4">
              <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" onClick={() => navigate(`/agenda?phone=${conversation.contato_telefone}&name=${encodeURIComponent(conversation.contato_nome || '')}`)} />
              <ActionButton icon={<BarChart3 className="w-5 h-5" />} label="Verdesk" color="blue" onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
-             <ActionButton icon={<Activity className="w-5 h-5" />} label="Histórico" color="purple" onClick={() => conversation.paciente_id ? navigate(`/pacientes/${conversation.paciente_id}`) : navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
+             <ActionButton icon={<Activity className="w-5 h-5" />} label="Historico" color="purple" onClick={() => conversation.paciente_id ? navigate(`/pacientes/${conversation.paciente_id}`) : navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
              <ActionButton icon={<ExternalLink className="w-5 h-5" />} label="WhatsApp" color="gray" onClick={() => window.open(`https://wa.me/${conversation.contato_telefone?.replace(/\D/g, '')}`, '_blank')} />
           </div>
        </div>
+
+       {/* Modal Cadastrar Paciente */}
+       {showModal && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 p-8 space-y-6 animate-fade-in" onClick={e => e.stopPropagation()}>
+             <div className="flex items-center justify-between">
+               <h2 className="text-lg font-black text-gray-900">Cadastrar Paciente</h2>
+               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-xl"><X className="w-5 h-5 text-gray-400" /></button>
+             </div>
+
+             <div className="space-y-4">
+               <div>
+                 <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Nome Completo *</label>
+                 <input value={form.nome_completo} onChange={e => setForm(f => ({ ...f, nome_completo: e.target.value }))}
+                   className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+               </div>
+               <div className="grid grid-cols-2 gap-3">
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Telefone</label>
+                   <input value={form.telefone} onChange={e => setForm(f => ({ ...f, telefone: e.target.value }))}
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+                 </div>
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">WhatsApp</label>
+                   <input value={form.whatsapp} onChange={e => setForm(f => ({ ...f, whatsapp: e.target.value }))}
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+                 </div>
+               </div>
+               <div className="grid grid-cols-2 gap-3">
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">E-mail</label>
+                   <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} type="email"
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+                 </div>
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">CPF</label>
+                   <input value={form.cpf} onChange={e => setForm(f => ({ ...f, cpf: e.target.value }))}
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+                 </div>
+               </div>
+               <div className="grid grid-cols-2 gap-3">
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Nascimento</label>
+                   <input value={form.data_nascimento} onChange={e => setForm(f => ({ ...f, data_nascimento: e.target.value }))} type="date"
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none" />
+                 </div>
+                 <div>
+                   <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Genero</label>
+                   <select value={form.genero} onChange={e => setForm(f => ({ ...f, genero: e.target.value }))}
+                     className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500/30 focus:border-green-500 outline-none bg-white">
+                     <option value="">Selecionar</option>
+                     <option value="masculino">Masculino</option>
+                     <option value="feminino">Feminino</option>
+                     <option value="outro">Outro</option>
+                   </select>
+                 </div>
+               </div>
+             </div>
+
+             <button onClick={handleSavePaciente} disabled={saving}
+               className="w-full py-4 bg-green-500 hover:bg-green-600 text-white rounded-2xl text-sm font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all">
+               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+               {saving ? 'Salvando...' : 'Cadastrar e Vincular'}
+             </button>
+           </div>
+         </div>
+       )}
     </div>
   )
 }

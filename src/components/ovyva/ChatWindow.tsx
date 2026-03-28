@@ -274,11 +274,11 @@ function MessageBubble({ message }: { message: OvyvaMessage }) {
           )}
 
           <div className={cn(
-            "absolute -bottom-6 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap",
-            isPatient ? "left-0" : "right-0"
+            "mt-2 flex items-center gap-2 whitespace-nowrap",
+            isPatient ? "justify-start" : "justify-end"
           )}>
-             <span className="text-[10px] text-gray-400 font-bold">{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-             <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+             <span className="text-[10px] text-gray-400 font-bold">{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+             {!isPatient && <CheckCircle className="w-3 h-3 text-green-500" />}
           </div>
        </div>
     </div>
