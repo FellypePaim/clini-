@@ -422,7 +422,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   const slotsLivres: string[] = []
   let diasVerificados = 0
 
-  for (let offset = 0; diasVerificados < 7 && offset < 14; offset++) {
+  for (let offset = 0; diasVerificados < 3 && offset < 7; offset++) {
     const dia = new Date(nowBR)
     dia.setDate(dia.getDate() + offset)
     const diaStr = dia.toISOString().split('T')[0]
@@ -570,7 +570,6 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   // 7. Chamar Gemini com histórico
   const model = genAI.getGenerativeModel({
     model: MODELS.flash,
-    generationConfig: { responseMimeType: "application/json" },
   })
 
   const chatHistory = (historico ?? []).map((m: any) => ({
@@ -597,22 +596,37 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   }
   userContent.push({ text: mensagem_atual })
 
+  console.log(`[OVYVA] Chamando Gemini. Historico: ${chatHistory.length} msgs. Slots: ${slotsLivres.length} dias.`)
+
   let result, usage, resposta
   try {
     result = await chat.sendMessage(userContent)
     usage = result.response.usageMetadata
-    const rawText = result.response.text()
+    console.log(`[OVYVA] Gemini respondeu. Tokens: ${usage?.promptTokenCount}/${usage?.candidatesTokenCount}`)
+    let rawText = result.response.text()
+    console.log("[OVYVA] Raw response:", rawText?.substring(0, 300))
+
+    // Limpar markdown code blocks se houver
+    rawText = rawText?.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim() || ''
+
     try {
       resposta = JSON.parse(rawText)
     } catch {
-      // Se JSON malformado, tentar extrair texto útil
-      console.error("[OVYVA] JSON malformado, raw:", rawText?.substring(0, 200))
-      resposta = {
-        resposta: rawText?.replace(/```json|```/g, '').trim() || "Desculpe, tive um problema. Pode repetir?",
-        intencao_detectada: "outro",
-        acao_sugerida: "nenhuma",
-        dados_agendamento: { data: null, hora: null, profissional_nome: null, procedimento: null },
-        confianca: 0.5,
+      // Tentar extrair JSON de dentro do texto
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try { resposta = JSON.parse(jsonMatch[0]) } catch { /* ignore */ }
+      }
+
+      if (!resposta) {
+        console.error("[OVYVA] JSON parse falhou, usando texto como resposta")
+        resposta = {
+          resposta: rawText || "Desculpe, tive um problema. Pode repetir?",
+          intencao_detectada: "outro",
+          acao_sugerida: "nenhuma",
+          dados_agendamento: { data: null, hora: null, profissional_nome: null, procedimento: null },
+          confianca: 0.5,
+        }
       }
     }
   } catch (geminiErr: any) {
