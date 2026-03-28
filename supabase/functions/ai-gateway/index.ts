@@ -335,7 +335,11 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     }
   }
 
-  // 5. Buscar configuração da clínica, procedimentos e agenda básica
+  // 5. Buscar configuração da clínica, procedimentos e agenda
+  // Usar timezone BR para todas as datas
+  const nowBR = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))
+  const todayBR = nowBR.toISOString().split('T')[0] // YYYY-MM-DD em horário BR
+
   const [clinicaRes, procedimentosRes, consultasRes, ausenciasRes] = await Promise.all([
     supabase
       .from("clinicas")
@@ -349,21 +353,23 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .eq("ativo", true),
     supabase
       .from("consultas")
-      .select("data_hora_inicio, duracao_minutos, profissional_id, status")
+      .select("data_hora_inicio, data_hora_fim, duracao_minutos, profissional_id, status")
       .eq("clinica_id", clinica_id)
-      .gte("data_hora_inicio", new Date().toISOString().split('T')[0])
-      .in("status", ["agendado", "confirmado"])
-      .limit(100),
+      .gte("data_hora_inicio", `${todayBR}T00:00:00`)
+      .in("status", ["agendado", "confirmado", "pendente"])
+      .order("data_hora_inicio")
+      .limit(200),
     supabase
       .from("profissional_ausencias")
       .select("profissional_id, data_inicio, data_fim")
       .eq("clinica_id", clinica_id)
-      .gte("data_fim", new Date().toISOString().split('T')[0])
+      .gte("data_fim", todayBR)
   ])
 
   const clinicaData = clinicaRes.data
   const procedimentos = procedimentosRes.data || []
   const agendaOcupada = consultasRes.data || []
+  const ausenciasData = ausenciasRes.data || []
 
   const ovyvaConfig = clinicaData?.configuracoes?.ovyva ?? {}
   const config = {
@@ -375,9 +381,83 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     horario_fim: ovyvaConfig.horario_fim ?? "18:00",
   }
 
-  // 6. Montar system prompt
+  // 6. Calcular SLOTS LIVRES reais para os próximos 7 dias úteis
+  const duracaoPadrao = 30 // minutos
+  const [hIni, mIni] = config.horario_inicio.split(':').map(Number)
+  const [hFim, mFim] = config.horario_fim.split(':').map(Number)
+
+  // Criar set de slots ocupados (chave: "YYYY-MM-DD HH:MM")
+  const ocupados = new Set<string>()
+  for (const c of agendaOcupada) {
+    if (!c.data_hora_inicio) continue
+    const inicio = new Date(c.data_hora_inicio)
+    const dur = c.duracao_minutos ?? duracaoPadrao
+    // Marcar cada bloco de 30min como ocupado
+    for (let m = 0; m < dur; m += duracaoPadrao) {
+      const slot = new Date(inicio.getTime() + m * 60000)
+      const key = `${slot.toISOString().split('T')[0]} ${String(slot.getHours()).padStart(2,'0')}:${String(slot.getMinutes()).padStart(2,'0')}`
+      ocupados.add(key)
+    }
+  }
+
+  // Criar set de dias com ausências
+  const diasAusencia = new Set<string>()
+  for (const a of ausenciasData) {
+    const start = new Date(a.data_inicio)
+    const end = new Date(a.data_fim)
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      diasAusencia.add(d.toISOString().split('T')[0])
+    }
+  }
+
+  // Gerar slots livres dos próximos 7 dias úteis
+  const diasSemana = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
+  const slotsLivres: string[] = []
+  let diasVerificados = 0
+
+  for (let offset = 0; diasVerificados < 7 && offset < 14; offset++) {
+    const dia = new Date(nowBR)
+    dia.setDate(dia.getDate() + offset)
+    const diaStr = dia.toISOString().split('T')[0]
+    const diaSemana = dia.getDay()
+
+    // Pular domingos
+    if (diaSemana === 0) continue
+    // Pular dias com ausência total
+    if (diasAusencia.has(diaStr)) continue
+
+    diasVerificados++
+    const livresNoDia: string[] = []
+
+    for (let h = hIni; h < hFim; h++) {
+      for (let m = (h === hIni ? mIni : 0); m < 60; m += duracaoPadrao) {
+        if (h === hFim - 1 && m + duracaoPadrao > (mFim || 60)) break
+        const horaStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+        const key = `${diaStr} ${horaStr}`
+
+        // Se é hoje, pular horários que já passaram
+        if (offset === 0) {
+          const slotTime = h * 60 + m
+          const nowTime = nowBR.getHours() * 60 + nowBR.getMinutes()
+          if (slotTime <= nowTime + 30) continue // margem de 30min
+        }
+
+        if (!ocupados.has(key)) {
+          livresNoDia.push(horaStr)
+        }
+      }
+    }
+
+    if (livresNoDia.length > 0) {
+      const nomeDia = diasSemana[diaSemana]
+      const dataFormatada = dia.toLocaleDateString('pt-BR')
+      slotsLivres.push(`${nomeDia} (${dataFormatada}): ${livresNoDia.join(', ')}`)
+    }
+  }
+
+  // 7. Montar system prompt
   const tom: Record<string, string> = {
-    informal: "descontraída, use linguagem simples e emojis ocasionais 😊",
+    informal: "descontraída, use linguagem simples e emojis ocasionais",
     cordial: "cordial e profissional, mas acessível",
     atenciosa: "atenciosa e empática, demonstre cuidado genuíno",
     formal: "formal e objetiva",
@@ -385,13 +465,6 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
   const nomeContato = perfilPaciente?.nome ?? "paciente"
 
-  // Formatar agenda ocupada de forma legível
-  const agendaFormatada = agendaOcupada.map((c: any) => {
-    const dt = c.data_hora_inicio?.split("T") ?? []
-    return `- ${dt[0] ?? "?"} às ${dt[1]?.substring(0,5) ?? "?"} (${c.duracao_minutos ?? 30}min)`
-  }).join('\n')
-
-  const ausenciasData = ausenciasRes.data || []
   const ausenciasFormatadas = ausenciasData.map((a: any) =>
     `- Profissional ausente de ${a.data_inicio} a ${a.data_fim}`
   ).join('\n')
@@ -401,7 +474,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     Tom de atendimento: ${tom[config.tom_voz] ?? "cordial e profissional"}.
     Você está conversando com: ${nomeContato}.
     ${perfilPaciente?.e_paciente_cadastrado ? `Este paciente é cadastrado na clínica.` : ""}
-    Data e hora atuais: ${new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}.
+    Data e hora atuais: ${nowBR.toLocaleString("pt-BR")}.
 
     INFORMAÇÕES DA CLÍNICA:
     ${config.base_conhecimento || "Clínica médica e estética."}
@@ -409,11 +482,11 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     HORÁRIO DE FUNCIONAMENTO: ${config.horario_inicio} às ${config.horario_fim} (segunda a sábado)
 
     PROCEDIMENTOS DISPONÍVEIS:
-    ${procedimentos.length > 0 ? procedimentos.map((p: any) => `- ${p.nome}: R$ ${p.valor_particular ?? 0} (${p.duracao_minutos} min)`).join('\n') : "Nenhum procedimento cadastrado ainda."}
+    ${procedimentos.length > 0 ? procedimentos.map((p: any) => `- ${p.nome}: R$ ${p.valor_particular ?? 0} (${p.duracao_minutos ?? 30} min)`).join('\n') : "Nenhum procedimento cadastrado ainda."}
 
-    HORÁRIOS JÁ OCUPADOS (NÃO sugerir estes):
-    ${agendaFormatada || "Nenhum agendamento encontrado — agenda livre."}
-    ${ausenciasFormatadas ? `\n\nPROFISSIONAIS AUSENTES (NÃO agende nesses dias):\n${ausenciasFormatadas}` : ''}
+    HORÁRIOS DISPONÍVEIS PARA AGENDAMENTO (próximos dias):
+    ${slotsLivres.length > 0 ? slotsLivres.join('\n') : "Nenhum horário disponível nos próximos 7 dias úteis."}
+    ${ausenciasFormatadas ? `\nPROFISSIONAIS AUSENTES:\n${ausenciasFormatadas}` : ''}
 
     REGRAS OBRIGATÓRIAS:
     1. Responda SEMPRE em português brasileiro
@@ -421,12 +494,13 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     3. Se não souber algo, diga "vou verificar com nossa equipe e te retorno"
     4. Em emergências médicas, oriente: ligue para SAMU (192)
     5. Seja objetiva — máximo 2-3 frases por resposta, direto ao ponto
-    6. Sugira apenas horários DENTRO do horário de funcionamento e que NÃO estejam na lista de ocupados
-    7. Se o paciente quiser DESMARCAR: use ação "cancelar"
-    8. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar" (cancela a atual e agenda a nova)
-    9. Se o paciente quiser AGENDAR: use ação "agendar" com data, hora e procedimento
-    10. VISÃO: Se receber imagem, analise e descreva brevemente
-    11. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome. Não agende sem saber quem é.
+    6. IMPORTANTE: Quando o paciente quiser agendar, pergunte qual dia/horário é melhor para ele. Depois VERIFIQUE se está na lista de disponíveis acima. Se não estiver, sugira os 2-3 horários livres mais próximos do que ele pediu.
+    7. NUNCA sugira horários que NÃO estão na lista de disponíveis acima
+    8. Se o paciente quiser DESMARCAR: use ação "cancelar"
+    9. Se o paciente quiser MUDAR DATA/HORA: use ação "reagendar"
+    10. Se o paciente quiser AGENDAR: use ação "agendar" com data, hora e procedimento
+    11. PRIORIDADE: Se o nome for "paciente" (desconhecido), PRIMEIRO pergunte o nome
+    12. Se receber imagem, analise e descreva brevemente
 
     Responda APENAS com JSON válido:
     {
