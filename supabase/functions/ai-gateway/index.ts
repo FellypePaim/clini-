@@ -749,12 +749,13 @@ JSON obrigatório:
     // Criar pré-agendamento se tiver data/hora (aceita pacientes vinculados OU não)
     console.log(`[OVYVA] Verificando se pode criar consulta: dataAg="${dataAg}" horaAg="${horaAg}" (truthy: ${!!dataAg && !!horaAg})`)
     if (dataAg && horaAg) {
-      const dataHoraInicio = `${dataAg}T${horaAg}:00`
+      // Adicionar timezone BR (-03:00) para Supabase salvar corretamente
+      const dataHoraInicio = `${dataAg}T${horaAg}:00-03:00`
       const duracao = (matchProced as any)?.duracao_minutos ?? 30
       const endMinutes = horaAg.split(":").map(Number).reduce((h: number, m: number) => h * 60 + m) + duracao
       const endH = String(Math.floor(endMinutes / 60)).padStart(2, "0")
       const endM = String(endMinutes % 60).padStart(2, "0")
-      const dataHoraFim = `${dataAg}T${endH}:${endM}:00`
+      const dataHoraFim = `${dataAg}T${endH}:${endM}:00-03:00`
 
       // Buscar profissional pelo nome retornado pela IA
       const profNome = (resposta.dados_agendamento?.profissional_nome || "").toLowerCase().trim()
@@ -795,6 +796,16 @@ JSON obrigatório:
       if (!conversa.paciente_id || !profissionalId) {
         console.error("[OVYVA] Insert abortado: campos obrigatórios faltando")
       } else {
+        // Verificar duplicata: mesma data/hora + mesmo paciente
+        const { count: existing } = await supabase.from("consultas")
+          .select("id", { count: "exact", head: true })
+          .eq("clinica_id", clinica_id)
+          .eq("paciente_id", conversa.paciente_id)
+          .eq("data_hora_inicio", dataHoraInicio)
+          .in("status", ["agendado", "confirmado"])
+        if ((existing ?? 0) > 0) {
+          console.log("[OVYVA] Consulta duplicada detectada, pulando insert")
+        } else {
         const { error: insertErr } = await supabase.from("consultas").insert(insertPayload)
         if (insertErr) {
           console.error("[OVYVA] Erro ao criar agendamento:", JSON.stringify(insertErr))
@@ -804,6 +815,7 @@ JSON obrigatório:
             `Nova consulta agendada via WhatsApp:\nPaciente: ${conversa.contato_nome || "Novo contato"}\nData: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}\nProcedimento: ${(matchProced as any)?.nome || "Avaliacao"}`
           )
         }
+        } // fecha else da duplicata
       }
     }
   }
