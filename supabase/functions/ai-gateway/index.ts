@@ -714,8 +714,26 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   const procedNome = (resposta.dados_agendamento?.procedimento || "").toLowerCase().trim()
   const matchProced = procedNome ? procedimentos.find((p: any) => p.nome.toLowerCase().includes(procedNome) || procedNome.includes(p.nome.toLowerCase())) : null
 
-  const dataAg = resposta.dados_agendamento?.data
-  const horaAg = resposta.dados_agendamento?.hora
+  let dataAg = resposta.dados_agendamento?.data
+  let horaAg = resposta.dados_agendamento?.hora
+
+  // Normalizar "null" string para null
+  if (dataAg === "null" || dataAg === "undefined") dataAg = null
+  if (horaAg === "null" || horaAg === "undefined") horaAg = null
+
+  // Converter data BR (28/03/2026) para ISO (2026-03-28) se necessário
+  if (dataAg && dataAg.includes('/')) {
+    const parts = dataAg.split('/')
+    if (parts.length === 3) dataAg = `${parts[2]}-${parts[1]}-${parts[0]}`
+  }
+
+  // Normalizar hora (15h → 15:00, 15:0 → 15:00)
+  if (horaAg) {
+    horaAg = horaAg.replace(/h/gi, ':00').replace(/:(\d)$/, ':0$1')
+    if (!horaAg.includes(':')) horaAg = `${horaAg}:00`
+  }
+
+  console.log(`[OVYVA] Ação: ${resposta.acao_sugerida}, Data: ${dataAg}, Hora: ${horaAg}, Prof: ${resposta.dados_agendamento?.profissional_nome}, Proced: ${resposta.dados_agendamento?.procedimento}`)
 
   // ── AÇÃO: AGENDAR ──
   if ((resposta.acao_sugerida === "agendar" || resposta.acao_sugerida === "reagendar") && conversa.id) {
