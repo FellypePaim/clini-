@@ -458,7 +458,11 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     if (livresNoDia.length > 0) {
       const nomeDia = diasSemana[diaSemana]
       const dataFormatada = dia.toLocaleDateString('pt-BR')
-      slotsLivres.push(`${nomeDia} (${dataFormatada}): ${livresNoDia.join(', ')}`)
+      // Limitar a 6 slots por dia para não estourar o prompt
+      const display = livresNoDia.length > 6
+        ? livresNoDia.slice(0, 3).join(', ') + ' ... ' + livresNoDia.slice(-3).join(', ')
+        : livresNoDia.join(', ')
+      slotsLivres.push(`${nomeDia} (${dataFormatada}): ${display}`)
     }
   }
 
@@ -593,10 +597,36 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   }
   userContent.push({ text: mensagem_atual })
 
-  const result = await chat.sendMessage(userContent)
-  const usage = result.response.usageMetadata
-  let resposta
-  try { resposta = JSON.parse(result.response.text()) } catch { throw new Error("Resposta inválida da IA (JSON malformado)") }
+  let result, usage, resposta
+  try {
+    result = await chat.sendMessage(userContent)
+    usage = result.response.usageMetadata
+    const rawText = result.response.text()
+    try {
+      resposta = JSON.parse(rawText)
+    } catch {
+      // Se JSON malformado, tentar extrair texto útil
+      console.error("[OVYVA] JSON malformado, raw:", rawText?.substring(0, 200))
+      resposta = {
+        resposta: rawText?.replace(/```json|```/g, '').trim() || "Desculpe, tive um problema. Pode repetir?",
+        intencao_detectada: "outro",
+        acao_sugerida: "nenhuma",
+        dados_agendamento: { data: null, hora: null, profissional_nome: null, procedimento: null },
+        confianca: 0.5,
+      }
+    }
+  } catch (geminiErr: any) {
+    console.error("[OVYVA] Gemini error:", geminiErr.message)
+    return {
+      data: {
+        resposta: "Desculpe, estou com dificuldade para processar. Pode repetir sua mensagem?",
+        intencao_detectada: "outro",
+        acao_sugerida: "nenhuma",
+      },
+      modelo: MODELS.flash,
+      usage: { inputTokens: 0, outputTokens: 0 },
+    }
+  }
 
   // 8. Auto-cadastro de paciente se IA coletou nome completo e contato não é paciente
   if (resposta.nome_completo && !conversa.paciente_id) {

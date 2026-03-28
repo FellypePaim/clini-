@@ -131,44 +131,58 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true, ia_skipped: true }))
     }
 
-    // 4. Chamar Resposta da IA (Processando Imagem se houver via Vision)
-    const gatewayResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-gateway`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
-      body: JSON.stringify({
-        action: "ovyva_respond",
-        clinica_id,
-        payload: {
-          numero_whatsapp: whatsappNumber,
-          mensagem_atual: textContent || "[Análise de Imagem]",
-          image_base64: message.imageMessage ? mediaBase64 : null,
-          mime_type: mediaMimeType
-        }
+    // 4. Chamar Resposta da IA
+    let textoResposta = ""
+    try {
+      const gatewayResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-gateway`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
+        body: JSON.stringify({
+          action: "ovyva_respond",
+          clinica_id,
+          payload: {
+            numero_whatsapp: whatsappNumber,
+            mensagem_atual: textContent || "[Análise de Imagem]",
+            image_base64: message.imageMessage ? mediaBase64 : null,
+            mime_type: mediaMimeType
+          }
+        })
       })
-    })
 
-    if (!gatewayResp.ok) throw new Error("AI Gateway Error")
+      if (!gatewayResp.ok) {
+        const errBody = await gatewayResp.text().catch(() => "unknown")
+        console.error(`[webhook] AI Gateway ${gatewayResp.status}: ${errBody}`)
+        textoResposta = "Desculpe, estou com uma instabilidade momentânea. Pode repetir sua mensagem em alguns segundos?"
+      } else {
+        const { data: aiData } = await gatewayResp.json()
+        textoResposta = aiData?.resposta || "Desculpe, não consegui processar sua mensagem. Pode tentar novamente?"
+      }
+    } catch (aiErr: any) {
+      console.error("[webhook] AI call error:", aiErr.message)
+      textoResposta = "Desculpe, estou com uma instabilidade momentânea. Pode repetir sua mensagem em alguns segundos?"
+    }
 
-    const { data: aiData } = await gatewayResp.json()
-    const textoResposta = aiData.resposta
-
-    // 5. Enviar Resposta
+    // 5. Enviar Resposta (sempre envia algo, mesmo se IA falhou)
     const partes = textoResposta.split(/\n\n+/).filter((m: string) => m.trim().length > 0)
     const evolutionUrl = `${Deno.env.get("EVOLUTION_API_URL")}/message/sendText/${instanceName}`
 
     for (const parte of partes) {
-        await fetch(evolutionUrl, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "apikey": evolutionKey },
-            body: JSON.stringify({ number: whatsappNumber, text: parte, options: { delay: 1000, presence: "composing" } })
-        })
+        try {
+          await fetch(evolutionUrl, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "apikey": evolutionKey },
+              body: JSON.stringify({ number: whatsappNumber, text: parte, options: { delay: 1000, presence: "composing" } })
+          })
+        } catch (sendErr: any) {
+          console.error("[webhook] Send error:", sendErr.message)
+        }
         await supabase.from("ovyva_mensagens").insert({ conversa_id: conversaId, remetente: "ia", conteudo: parte })
     }
 
     return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } })
 
   } catch (err: any) {
-    console.error("[webhook] Error:", err.message)
+    console.error("[webhook] Fatal error:", err.message)
     return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { "Content-Type": "application/json" } })
   }
 })
