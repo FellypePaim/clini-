@@ -37,8 +37,8 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/agenda',       label: 'Agenda',       icon: Calendar,        group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/pacientes',    label: 'Pacientes / PEP',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'recepção'] },
-  { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'recepção'] },
+  { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador'] },
   { path: '/estoque',      label: 'Estoque',      icon: Package,         group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
@@ -159,7 +159,7 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
             </>
           )}
           <p className="text-[10px] text-gray-300 text-center w-full">
-            v1.3.0 · Prontuário Verde
+            v1.6.0 · Prontuário Verde
           </p>
         </div>
       )}

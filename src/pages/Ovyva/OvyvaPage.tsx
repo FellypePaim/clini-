@@ -25,19 +25,12 @@ export function OvyvaPage() {
   const handleTakeover = useCallback(async () => {
     if (!selectedId) return
     await takeoverConversation(selectedId)
-    await refreshConversations()
-    // Re-selecionar para pegar status atualizado
-    const updated = conversations.find(c => c.id === selectedId)
-    if (updated) selectConversation({ ...updated, status: 'atendido_humano' })
-  }, [selectedId, takeoverConversation, refreshConversations, conversations, selectConversation])
+  }, [selectedId, takeoverConversation])
 
   const handleReturnToAI = useCallback(async () => {
     if (!selectedId) return
     await returnToAI(selectedId)
-    await refreshConversations()
-    const updated = conversations.find(c => c.id === selectedId)
-    if (updated) selectConversation({ ...updated, status: 'ia_ativa' })
-  }, [selectedId, returnToAI, refreshConversations, conversations, selectConversation])
+  }, [selectedId, returnToAI])
 
   // Usar activeConversation do hook (tem mensagens carregadas) ou fallback
   const selectedConversation = activeConversation?.id === selectedId ? activeConversation

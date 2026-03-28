@@ -667,10 +667,14 @@ JSON obrigatório:
     }).eq("id", conversa.id)
   }
 
-  // 8b. Atualizar ultimo_contato
+  // 8b. Atualizar ultimo_contato + intent
   await supabase.from("ovyva_conversas").update({
     ultimo_contato: new Date().toISOString(),
     total_mensagens: (conversa.total_mensagens ?? 0) + 2,
+    metadata: {
+      ...(conversa.metadata ?? {}),
+      intent: resposta.intencao_detectada || (conversa.metadata as any)?.intent || null,
+    },
   }).eq("id", conversa.id)
 
   // 9. Processar ação sugerida

@@ -160,6 +160,7 @@ export function useOVYVA() {
       atendente_id: user?.id || null,
     }).eq('id', conversationId)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'atendido_humano' } : c))
+    setActiveConversation(prev => prev?.id === conversationId ? { ...prev, status: 'atendido_humano' } : prev)
   }, [user])
 
   const returnToAI = useCallback(async (conversationId: string) => {
@@ -168,6 +169,7 @@ export function useOVYVA() {
       atendente_id: null,
     }).eq('id', conversationId)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'ia_ativa' } : c))
+    setActiveConversation(prev => prev?.id === conversationId ? { ...prev, status: 'ia_ativa' } : prev)
   }, [])
 
   const updateAIConfig = useCallback(async (newConfig: Partial<OvyvaConfig>) => {
