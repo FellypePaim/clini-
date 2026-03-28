@@ -366,9 +366,9 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .gte("data_fim", todayBR),
     supabase
       .from("profiles")
-      .select("id, nome_completo, especialidade")
+      .select("id, nome_completo, especialidade, telefone")
       .eq("clinica_id", clinica_id)
-      .in("role", ["profissional", "admin"])
+      .eq("role", "profissional")
       .eq("ativo", true)
   ])
 
@@ -640,7 +640,16 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
         observacoes: `[AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp.`,
       })
       if (insertErr) console.error("Erro ao criar agendamento:", insertErr)
-      else console.log("[OVYVA] Agendamento criado com sucesso!")
+      else {
+        console.log("[OVYVA] Agendamento criado com sucesso!")
+        // Notificar profissional via WhatsApp
+        await notificarProfissional(supabase, clinica_id, profissionalId, "agendamento",
+          `Nova consulta agendada via WhatsApp:\n` +
+          `Paciente: ${conversa.contato_nome || "Novo contato"}\n` +
+          `Data: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}\n` +
+          `Procedimento: ${(matchProced as any)?.nome || "Avaliacao"}`
+        )
+      }
     }
   }
 
@@ -696,14 +705,37 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   }
 
   // ── AÇÃO: CANCELAR ──
-  if (resposta.acao_sugerida === "cancelar" && conversa.paciente_id) {
-    await supabase.from("consultas")
-      .update({ status: "cancelado", observacoes: "[CANCELADO POR OVYVA] Paciente solicitou cancelamento via WhatsApp." })
+  if (resposta.acao_sugerida === "cancelar") {
+    // Buscar consulta futura (com ou sem paciente_id — pode ser contato não cadastrado)
+    let cancelQuery = supabase.from("consultas")
+      .select("id, profissional_id, data_hora_inicio")
       .eq("clinica_id", clinica_id)
-      .eq("paciente_id", conversa.paciente_id)
       .in("status", ["agendado", "confirmado"])
-      .gte("data_hora_inicio", new Date().toISOString().split("T")[0])
+      .gte("data_hora_inicio", todayBR)
+      .order("data_hora_inicio", { ascending: true })
       .limit(1)
+
+    if (conversa.paciente_id) {
+      cancelQuery = cancelQuery.eq("paciente_id", conversa.paciente_id)
+    }
+
+    const { data: consultaCancel } = await cancelQuery.single()
+    if (consultaCancel) {
+      await supabase.from("consultas")
+        .update({ status: "cancelado", observacoes: "[CANCELADO POR OVYVA] Paciente solicitou cancelamento via WhatsApp." })
+        .eq("id", consultaCancel.id)
+
+      // Notificar profissional
+      const dtCancel = consultaCancel.data_hora_inicio?.split("T")
+      await notificarProfissional(supabase, clinica_id, consultaCancel.profissional_id, "cancelamento",
+        `Consulta CANCELADA via WhatsApp:\n` +
+        `Paciente: ${conversa.contato_nome || "Contato"}\n` +
+        `Data: ${dtCancel?.[0]?.split("-").reverse().join("/") ?? "?"} as ${dtCancel?.[1]?.substring(0, 5) ?? "?"}`
+      )
+
+      // Atualizar lead para "perdido"
+      await supabase.from("leads").update({ estagio: "perdido" }).eq("conversa_id", conversa.id)
+    }
   }
 
   return {
@@ -838,4 +870,34 @@ function errorResponse(msg: string, status = 400) {
     JSON.stringify({ success: false, error: msg }),
     { status, headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" } }
   )
+}
+
+// ─────────────────────────────────────────
+// HELPER: NOTIFICAR PROFISSIONAL VIA WHATSAPP
+// ─────────────────────────────────────────
+async function notificarProfissional(supabase: any, clinica_id: string, profissional_id: string | null, tipo: string, mensagem: string) {
+  if (!profissional_id) return
+  try {
+    const { data: prof } = await supabase.from("profiles")
+      .select("telefone, nome_completo")
+      .eq("id", profissional_id)
+      .single()
+    if (!prof?.telefone) {
+      console.log(`[notif] Profissional ${profissional_id} sem telefone cadastrado`)
+      return
+    }
+    // Enfileirar na fila de notificações
+    await supabase.from("notificacoes_fila").insert({
+      clinica_id,
+      tipo: `profissional_${tipo}`,
+      canal: "whatsapp",
+      destinatario_telefone: prof.telefone,
+      destinatario_nome: prof.nome_completo,
+      mensagem: `[${clinica_id ? "Clínica" : ""}] ${mensagem}`,
+      agendar_para: new Date().toISOString(),
+    })
+    console.log(`[notif] Profissional ${prof.nome_completo} notificado: ${tipo}`)
+  } catch (e: any) {
+    console.error("[notif] Erro ao notificar profissional:", e.message)
+  }
 }

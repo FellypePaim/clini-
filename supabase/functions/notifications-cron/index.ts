@@ -64,7 +64,86 @@ Deno.serve(async (req) => {
     }
 
     // ═══════════════════════════════════════════
-    // 2. ANIVERSÁRIOS DO DIA (roda 1x por dia)
+    // 2. LEMBRETE DE CONSULTA 2H ANTES VIA WHATSAPP
+    // ═══════════════════════════════════════════
+    const agora = new Date()
+    const daqui2h = new Date(agora.getTime() + 2 * 60 * 60 * 1000)
+    const daqui2h30 = new Date(agora.getTime() + 2.5 * 60 * 60 * 1000)
+
+    // Buscar consultas que acontecem entre 2h e 2h30 a partir de agora
+    const { data: consultasProximas } = await supabase
+      .from("consultas")
+      .select("id, clinica_id, paciente_id, profissional_id, data_hora_inicio, duracao_minutos, procedimento_id")
+      .in("status", ["agendado", "confirmado"])
+      .gte("data_hora_inicio", daqui2h.toISOString())
+      .lte("data_hora_inicio", daqui2h30.toISOString())
+
+    for (const consulta of consultasProximas ?? []) {
+      // Verificar se já enviou lembrete para esta consulta
+      const { count: jaEnviou } = await supabase
+        .from("notificacoes_fila")
+        .select("id", { count: "exact", head: true })
+        .eq("consulta_id", consulta.id)
+        .eq("tipo", "lembrete")
+
+      if ((jaEnviou ?? 0) > 0) continue
+
+      // Buscar dados do paciente
+      let telefonePaciente = null
+      let nomePaciente = "Paciente"
+      if (consulta.paciente_id) {
+        const { data: pac } = await supabase.from("pacientes")
+          .select("nome_completo, telefone, whatsapp")
+          .eq("id", consulta.paciente_id)
+          .single()
+        if (pac) {
+          telefonePaciente = pac.whatsapp || pac.telefone
+          nomePaciente = pac.nome_completo || "Paciente"
+        }
+      }
+
+      // Se não tem paciente cadastrado, buscar na conversa do OVYVA
+      if (!telefonePaciente) {
+        const { data: conversaOvyva } = await supabase.from("ovyva_conversas")
+          .select("contato_telefone, contato_nome")
+          .eq("clinica_id", consulta.clinica_id)
+          .not("contato_telefone", "is", null)
+          .order("ultimo_contato", { ascending: false })
+          .limit(1)
+          .single()
+        if (conversaOvyva) {
+          telefonePaciente = conversaOvyva.contato_telefone
+          nomePaciente = conversaOvyva.contato_nome || nomePaciente
+        }
+      }
+
+      if (!telefonePaciente) continue
+
+      // Buscar nome da clínica
+      const { data: clinicaData } = await supabase.from("clinicas")
+        .select("nome").eq("id", consulta.clinica_id).single()
+
+      const horaConsulta = consulta.data_hora_inicio?.split("T")[1]?.substring(0, 5) || "?"
+      const dataConsulta = consulta.data_hora_inicio?.split("T")[0]?.split("-").reverse().join("/") || "?"
+
+      // Enfileirar lembrete para o paciente
+      await supabase.from("notificacoes_fila").insert({
+        clinica_id: consulta.clinica_id,
+        tipo: "lembrete",
+        canal: "whatsapp",
+        destinatario_telefone: telefonePaciente,
+        destinatario_nome: nomePaciente,
+        paciente_id: consulta.paciente_id,
+        consulta_id: consulta.id,
+        mensagem: `Ola ${nomePaciente}! Lembramos que sua consulta na ${clinicaData?.nome || "clinica"} esta marcada para hoje as ${horaConsulta}. Caso precise remarcar, entre em contato. Ate logo!`,
+        agendar_para: new Date().toISOString(),
+      })
+
+      results.enviados++
+    }
+
+    // ═══════════════════════════════════════════
+    // 3. ANIVERSÁRIOS DO DIA (roda 1x por dia)
     // ═══════════════════════════════════════════
     const hoje = new Date()
     const dia = String(hoje.getDate()).padStart(2, "0")
