@@ -188,7 +188,7 @@ export function WhatsAppConexaoPage() {
           {instancias.map(inst => {
             const statusInfo = STATUS_INFO[inst.status] ?? STATUS_INFO.disconnected
             const StatusIcon = statusInfo.icon
-            const isPending = inst.status === 'qr_pending'
+            const isPending = inst.status === 'qr_pending' || inst.status === 'connecting'
             const isConnected = inst.status === 'connected'
             const isPolling = pollingId === inst.id
 
