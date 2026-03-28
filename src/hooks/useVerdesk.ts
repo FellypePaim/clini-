@@ -28,13 +28,22 @@ export function useVerdesk() {
 
       if (pbErr) throw pbErr
 
+      // Mapear estágio do banco (snake_case) para o frontend (Display Name)
+      const stageMap: Record<string, LeadStage> = {
+        'perguntou_valor': 'Perguntou Valor',
+        'demonstrou_interesse': 'Demonstrou Interesse',
+        'quase_fechando': 'Quase Fechando',
+        'agendado': 'Agendado',
+        'perdido': 'Perdido',
+      }
+
       const mapped: Lead[] = (data || []).map((r: any) => ({
         id: r.id,
         name: r.nome,
         origin: (r.origem as LeadOrigin) || 'Manual',
         procedure: r.procedimento_interesse || 'Consulta',
         estimatedValue: r.valor_estimado || 0,
-        stage: (r.estagio as LeadStage) || 'Perguntou Valor',
+        stage: stageMap[r.estagio] || 'Perguntou Valor',
         phone: r.telefone || '',
         email: r.email || undefined,
         lastContactAt: r.ultimo_contato || r.updated_at,
@@ -92,6 +101,15 @@ export function useVerdesk() {
     }
   }, [clinicaId, getLeads, getCampaigns])
 
+  // Mapear estágio do frontend (Display Name) para o banco (snake_case)
+  const stageToDb: Record<string, string> = {
+    'Perguntou Valor': 'perguntou_valor',
+    'Demonstrou Interesse': 'demonstrou_interesse',
+    'Quase Fechando': 'quase_fechando',
+    'Agendado': 'agendado',
+    'Perdido': 'perdido',
+  }
+
   const moveLead = useCallback(async (leadId: string, toStage: LeadStage) => {
     if (!clinicaId) {
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
@@ -101,9 +119,10 @@ export function useVerdesk() {
       const previous = leads
       setLeads(prev => prev.map(l => l.id === leadId ? { ...l, stage: toStage } : l))
 
+      const dbStage = stageToDb[toStage] || toStage
       const { error: pbErr } = await supabase
         .from('leads')
-        .update({ estagio: toStage as any })
+        .update({ estagio: dbStage as any })
         .eq('id', leadId)
         .eq('clinica_id', clinicaId)
 
@@ -135,7 +154,7 @@ export function useVerdesk() {
           origem: data.origin,
           procedimento_interesse: data.procedure,
           valor_estimado: data.estimatedValue,
-          estagio: data.stage,
+          estagio: stageToDb[data.stage] || data.stage,
           telefone: data.phone,
           email: data.email
         } as any)
