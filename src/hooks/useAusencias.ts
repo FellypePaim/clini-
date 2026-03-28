@@ -290,7 +290,7 @@ export function useAusencias() {
               status: 'enviado',
               agendar_para: new Date().toISOString(),
               enviado_em: new Date().toISOString(),
-            }).catch(() => {})
+            })
           }
         }
 
