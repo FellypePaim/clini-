@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
 
     if (fromMe || remoteJid.includes("@g.us")) return new Response("skipped")
 
+    const messageId = key.id  // ID único da mensagem na Evolution
     const whatsappNumber = remoteJid.split("@")[0]
     const pushName = msgData.pushName || payload.data?.pushName || null
     let textContent = message.conversation || message.extendedTextMessage?.text ||
@@ -95,11 +96,26 @@ Deno.serve(async (req) => {
         .is("contato_nome", null)
     }
 
+    // Deduplicação: verificar se esta mensagem já foi processada (por messageId)
+    if (messageId) {
+      const { data: existing } = await supabase.from("ovyva_mensagens")
+        .select("id")
+        .eq("conversa_id", conversaId)
+        .eq("metadata->>messageId", messageId)
+        .limit(1)
+        .single()
+      if (existing) {
+        console.log(`[webhook] Mensagem ${messageId} já processada, ignorando`)
+        return new Response(JSON.stringify({ success: true, duplicate: true }))
+      }
+    }
+
     await supabase.from("ovyva_mensagens").insert({
       conversa_id: conversaId,
       remetente: "paciente",
       conteudo: textContent || "[Imagem enviada]",
-      tipo: message.imageMessage ? "imagem" : "texto"
+      tipo: message.imageMessage ? "imagem" : "texto",
+      metadata: messageId ? { messageId } : null,
     })
 
     // 3.5 Verificar status + lock de concorrência
@@ -115,22 +131,23 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ success: true, ia_skipped: true }))
     }
 
-    // Lock: se IA já está processando esta conversa, pular (mensagem já foi salva)
-    const metadata = conversa?.metadata as any ?? {}
-    if (metadata.ia_processing) {
-      const lockTime = new Date(metadata.ia_processing_since || 0).getTime()
-      const elapsed = Date.now() - lockTime
-      // Se lock tem menos de 30s, pular. Se mais de 30s, lock expirou (IA travou), prosseguir
-      if (elapsed < 30000) {
-        console.log(`[webhook] IA já processando conversa ${conversaId}, pulando (${Math.round(elapsed/1000)}s)`)
-        return new Response(JSON.stringify({ success: true, ia_queued: true }))
+    // Lock simples: verificar última resposta da IA — se foi há menos de 3s, pular
+    const { data: lastIaMsg } = await supabase.from("ovyva_mensagens")
+      .select("created_at")
+      .eq("conversa_id", conversaId)
+      .eq("remetente", "ia")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single()
+
+    if (lastIaMsg) {
+      const sinceLastResponse = Date.now() - new Date(lastIaMsg.created_at).getTime()
+      if (sinceLastResponse < 3000) {
+        // IA acabou de responder há menos de 3s — provavelmente é retrigger, pular
+        console.log(`[webhook] IA respondeu há ${Math.round(sinceLastResponse)}ms, ignorando retrigger`)
+        return new Response(JSON.stringify({ success: true, debounced: true }))
       }
     }
-
-    // Setar lock
-    await supabase.from("ovyva_conversas").update({
-      metadata: { ...metadata, ia_processing: true, ia_processing_since: new Date().toISOString() }
-    }).eq("id", conversaId)
 
     // 4. Chamar Resposta da IA (Processando Imagem se houver via Vision)
     const gatewayResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/ai-gateway`, {
@@ -166,25 +183,11 @@ Deno.serve(async (req) => {
         await supabase.from("ovyva_mensagens").insert({ conversa_id: conversaId, remetente: "ia", conteudo: parte })
     }
 
-    // Limpar lock
-    await supabase.from("ovyva_conversas").update({
-      metadata: { ...(conversa?.metadata as any ?? {}), ia_processing: false, ia_processing_since: null }
-    }).eq("id", conversaId)
-
     return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } })
 
   } catch (err: any) {
-    console.error(err)
-    // Limpar lock em caso de erro também
-    try {
-      const supabase2 = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } })
-      // Tentar limpar o lock de qualquer conversa que possa ter ficado travada
-      await supabase2.from("ovyva_conversas")
-        .update({ metadata: {} })
-        .not("metadata->ia_processing", "is", null)
-        .eq("metadata->ia_processing", true)
-    } catch { /* ignore cleanup errors */ }
-    return new Response(err.message, { status: 500 })
+    console.error("[webhook] Error:", err.message)
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { "Content-Type": "application/json" } })
   }
 })
 
