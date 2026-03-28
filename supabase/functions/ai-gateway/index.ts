@@ -784,10 +784,27 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
       // Só avançar o estágio (nunca regredir)
       const stageOrder = ["perguntou_valor", "demonstrou_interesse", "quase_fechando", "agendado"]
-      const { data: currentLead } = await supabase.from("leads")
+      let { data: currentLead } = await supabase.from("leads")
         .select("estagio, id")
         .eq("conversa_id", conversa.id)
         .single()
+
+      // Se lead não existe, criar agora (fallback para conversas antigas)
+      if (!currentLead) {
+        const { data: newLead } = await supabase.from("leads").insert({
+          clinica_id,
+          nome: conversa.contato_nome || `Contato ${conversa.contato_telefone}`,
+          telefone: conversa.contato_telefone,
+          estagio: novoEstagio,
+          origem: "WhatsApp OVYVA",
+          conversa_id: conversa.id,
+          ultimo_contato: new Date().toISOString(),
+        }).select("estagio, id").single()
+        if (newLead) {
+          currentLead = newLead
+          console.log(`[OVYVA] Lead criado via ai-gateway fallback: ${newLead.id}`)
+        }
+      }
 
       if (currentLead) {
         const currentIdx = stageOrder.indexOf(currentLead.estagio || "")

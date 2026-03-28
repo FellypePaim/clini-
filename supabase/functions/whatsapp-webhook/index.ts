@@ -169,8 +169,12 @@ async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: st
     if (error || !nova) { console.error("Erro ao criar conversa:", error); return null }
 
     // Criar lead no CRM automaticamente (novo contato = lead)
-    try {
-      await supabase.from("leads").insert({
+    // Verificar se já existe lead com esse telefone nesta clínica
+    const { data: leadExistente } = await supabase.from("leads")
+      .select("id").eq("clinica_id", clinica_id).eq("telefone", phone).limit(1).single()
+
+    if (!leadExistente) {
+      const { error: leadErr } = await supabase.from("leads").insert({
         clinica_id,
         nome: pushName || `Contato ${phone}`,
         telefone: phone,
@@ -179,9 +183,12 @@ async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: st
         conversa_id: nova.id,
         ultimo_contato: new Date().toISOString(),
       })
-      console.log(`[webhook] Lead criado para ${phone}`)
-    } catch (e: any) {
-      console.error("[webhook] Erro ao criar lead:", e.message)
+      if (leadErr) console.error("[webhook] Erro ao criar lead:", JSON.stringify(leadErr))
+      else console.log(`[webhook] Lead criado para ${phone}`)
+    } else {
+      // Atualizar conversa_id do lead existente
+      await supabase.from("leads").update({ conversa_id: nova.id }).eq("id", leadExistente.id)
+      console.log(`[webhook] Lead existente vinculado: ${leadExistente.id}`)
     }
 
     return nova.id
