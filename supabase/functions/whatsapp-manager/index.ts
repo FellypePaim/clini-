@@ -110,21 +110,45 @@ Deno.serve(async (req) => {
 
       // Configurar webhook automaticamente
       const webhookUrl = `${supabaseUrl}/functions/v1/whatsapp-webhook`
-      await fetch(`${evolutionUrl}/webhook/set/${nomeInstancia}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "apikey": evolutionKey },
-        body: JSON.stringify({
-          url: webhookUrl,
-          webhook_by_events: false,
-          webhook_base64: false,
-          events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE"]
-        }),
-      })
+      console.log(`[whatsapp-manager] Configurando webhook: ${webhookUrl} para ${nomeInstancia}`)
 
-      await supabase
-        .from("whatsapp_instancias")
-        .update({ webhook_configurado: true })
-        .eq("id", instancia.id)
+      // Tentar endpoint v2 da Evolution API
+      let webhookOk = false
+      try {
+        const whResp = await fetch(`${evolutionUrl}/webhook/set/${nomeInstancia}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "apikey": evolutionKey },
+          body: JSON.stringify({
+            url: webhookUrl,
+            webhook_by_events: false,
+            webhook_base64: false,
+            events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE"]
+          }),
+        })
+        console.log(`[whatsapp-manager] webhook/set response: ${whResp.status}`)
+        webhookOk = whResp.ok
+      } catch (e: any) {
+        console.error("[whatsapp-manager] webhook/set error:", e.message)
+      }
+
+      // Fallback: tentar endpoint alternativo (Evolution v1)
+      if (!webhookOk) {
+        try {
+          const whResp2 = await fetch(`${evolutionUrl}/instance/webhook/${nomeInstancia}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "apikey": evolutionKey },
+            body: JSON.stringify({
+              enabled: true,
+              url: webhookUrl,
+              events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE"]
+            }),
+          })
+          console.log(`[whatsapp-manager] instance/webhook response: ${whResp2.status}`)
+          webhookOk = whResp2.ok
+        } catch (e: any) {
+          console.error("[whatsapp-manager] instance/webhook error:", e.message)
+        }
+      }
 
       return json({ success: true, instancia, qr_code: qrCode })
     }
