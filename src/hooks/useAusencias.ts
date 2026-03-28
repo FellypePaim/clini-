@@ -257,11 +257,28 @@ export function useAusencias() {
 
         if (updateErr) throw updateErr
 
-        // 2. Enfileirar notificações WhatsApp se solicitado
+        // 2. Enviar notificações WhatsApp diretamente + salvar na fila
         if (notificar) {
-          const filaItems = consultas
-            .filter(c => c.paciente_telefone)
-            .map(c => ({
+          for (const c of consultas.filter(c => c.paciente_telefone)) {
+            const msg = mensagemCustom ||
+              `Olá ${c.paciente_nome}, sua consulta do dia ${new Date(c.data_hora_inicio).toLocaleDateString('pt-BR')} foi cancelada devido à ausência do profissional. Entraremos em contato para reagendar.`
+
+            // Enviar direto via whatsapp-send
+            try {
+              await supabase.functions.invoke('whatsapp-send', {
+                body: {
+                  numero: c.paciente_telefone,
+                  texto: msg,
+                  tipo: 'texto',
+                  clinica_id: clinicaId,
+                },
+              })
+            } catch (e) {
+              console.error('Erro ao enviar WhatsApp:', e)
+            }
+
+            // Salvar na fila como histórico
+            await supabase.from('notificacoes_fila').insert({
               clinica_id: clinicaId,
               consulta_id: c.id,
               paciente_id: c.paciente_id,
@@ -269,18 +286,11 @@ export function useAusencias() {
               canal: 'whatsapp',
               destinatario_nome: c.paciente_nome,
               destinatario_telefone: c.paciente_telefone,
-              mensagem: mensagemCustom ||
-                `Olá ${c.paciente_nome}, sua consulta do dia ${new Date(c.data_hora_inicio).toLocaleDateString('pt-BR')} foi cancelada devido à ausência do profissional. Entraremos em contato para reagendar.`,
-              status: 'pendente',
+              mensagem: msg,
+              status: 'enviado',
               agendar_para: new Date().toISOString(),
-            }))
-
-          if (filaItems.length > 0) {
-            const { error: filaErr } = await supabase
-              .from('notificacoes_fila')
-              .insert(filaItems)
-
-            if (filaErr) throw filaErr
+              enviado_em: new Date().toISOString(),
+            }).catch(() => {})
           }
         }
 
