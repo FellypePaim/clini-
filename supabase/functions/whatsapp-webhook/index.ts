@@ -96,32 +96,32 @@ Deno.serve(async (req) => {
         .is("contato_nome", null)
     }
 
-    // Deduplicação: verificar se esta mensagem já foi processada (por messageId)
-    if (messageId) {
-      const { data: existing } = await supabase.from("ovyva_mensagens")
-        .select("id")
-        .eq("conversa_id", conversaId)
-        .eq("metadata->>messageId", messageId)
-        .limit(1)
-        .single()
-      if (existing) {
-        console.log(`[webhook] Mensagem ${messageId} já processada, ignorando`)
-        return new Response(JSON.stringify({ success: true, duplicate: true }))
-      }
+    // Deduplicação simples: mesma conversa + mesmo texto + últimos 60s
+    const umMinutoAtras = new Date(Date.now() - 60000).toISOString()
+    const { count: duplicateCount } = await supabase.from("ovyva_mensagens")
+      .select("id", { count: "exact", head: true })
+      .eq("conversa_id", conversaId)
+      .eq("remetente", "paciente")
+      .eq("conteudo", textContent || "[Imagem enviada]")
+      .gte("created_at", umMinutoAtras)
+
+    if ((duplicateCount ?? 0) > 0) {
+      console.log(`[webhook] Mensagem duplicada ignorada: "${textContent?.substring(0,30)}"`)
+      return new Response(JSON.stringify({ success: true, duplicate: true }))
     }
 
+    // Salvar mensagem
     await supabase.from("ovyva_mensagens").insert({
       conversa_id: conversaId,
       remetente: "paciente",
       conteudo: textContent || "[Imagem enviada]",
       tipo: message.imageMessage ? "imagem" : "texto",
-      metadata: messageId ? { messageId } : null,
     })
 
-    // 3.5 Verificar status + lock de concorrência
+    // 3.5 Verificar status da conversa
     const { data: conversa } = await supabase
       .from("ovyva_conversas")
-      .select("status, metadata")
+      .select("status")
       .eq("id", conversaId)
       .single()
 
@@ -129,24 +129,6 @@ Deno.serve(async (req) => {
     if (conversa?.status === "atendido_humano" || conversa?.status === "resolvido") {
       console.log(`[webhook] IA pausada para conversa ${conversaId} (status: ${conversa.status})`)
       return new Response(JSON.stringify({ success: true, ia_skipped: true }))
-    }
-
-    // Lock simples: verificar última resposta da IA — se foi há menos de 3s, pular
-    const { data: lastIaMsg } = await supabase.from("ovyva_mensagens")
-      .select("created_at")
-      .eq("conversa_id", conversaId)
-      .eq("remetente", "ia")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single()
-
-    if (lastIaMsg) {
-      const sinceLastResponse = Date.now() - new Date(lastIaMsg.created_at).getTime()
-      if (sinceLastResponse < 3000) {
-        // IA acabou de responder há menos de 3s — provavelmente é retrigger, pular
-        console.log(`[webhook] IA respondeu há ${Math.round(sinceLastResponse)}ms, ignorando retrigger`)
-        return new Response(JSON.stringify({ success: true, debounced: true }))
-      }
     }
 
     // 4. Chamar Resposta da IA (Processando Imagem se houver via Vision)
