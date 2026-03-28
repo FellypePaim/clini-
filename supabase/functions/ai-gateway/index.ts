@@ -1048,7 +1048,10 @@ function errorResponse(msg: string, status = 400) {
 // HELPER: NOTIFICAR PROFISSIONAL VIA WHATSAPP
 // ─────────────────────────────────────────
 async function notificarProfissional(supabase: any, clinica_id: string, profissional_id: string | null, tipo: string, mensagem: string) {
-  if (!profissional_id) return
+  if (!profissional_id) {
+    console.log(`[notif] Sem profissional_id, pulando notificação`)
+    return
+  }
   try {
     const { data: prof } = await supabase.from("profiles")
       .select("telefone, nome_completo")
@@ -1058,17 +1061,43 @@ async function notificarProfissional(supabase: any, clinica_id: string, profissi
       console.log(`[notif] Profissional ${profissional_id} sem telefone cadastrado`)
       return
     }
-    // Enfileirar na fila de notificações
+
+    // Enviar DIRETO via whatsapp-send (não esperar CRON)
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+    try {
+      const resp = await fetch(`${supabaseUrl}/functions/v1/whatsapp-send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${serviceKey}` },
+        body: JSON.stringify({
+          numero: prof.telefone,
+          texto: mensagem,
+          tipo: "texto",
+          clinica_id,
+        }),
+      })
+      if (resp.ok) {
+        console.log(`[notif] WhatsApp enviado para ${prof.nome_completo} (${tipo})`)
+      } else {
+        const errText = await resp.text().catch(() => "")
+        console.error(`[notif] Falha ao enviar WhatsApp: ${resp.status} ${errText}`)
+      }
+    } catch (sendErr: any) {
+      console.error(`[notif] Erro no envio direto: ${sendErr.message}`)
+    }
+
+    // Também salvar na fila para histórico
     await supabase.from("notificacoes_fila").insert({
       clinica_id,
       tipo: `profissional_${tipo}`,
       canal: "whatsapp",
+      status: "enviado",
       destinatario_telefone: prof.telefone,
       destinatario_nome: prof.nome_completo,
-      mensagem: `[${clinica_id ? "Clínica" : ""}] ${mensagem}`,
+      mensagem,
       agendar_para: new Date().toISOString(),
-    })
-    console.log(`[notif] Profissional ${prof.nome_completo} notificado: ${tipo}`)
+      enviado_em: new Date().toISOString(),
+    }).catch(() => {})
   } catch (e: any) {
     console.error("[notif] Erro ao notificar profissional:", e.message)
   }
