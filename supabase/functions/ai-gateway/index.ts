@@ -353,7 +353,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .eq("ativo", true),
     supabase
       .from("consultas")
-      .select("data_hora_inicio, data_hora_fim, duracao_minutos, profissional_id, status")
+      .select("data_hora_inicio, data_hora_fim, profissional_id, status")
       .eq("clinica_id", clinica_id)
       .gte("data_hora_inicio", `${todayBR}T00:00:00`)
       .in("status", ["agendado", "confirmado", "pendente"])
@@ -398,7 +398,10 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   for (const c of agendaOcupada) {
     if (!c.data_hora_inicio) continue
     const inicio = new Date(c.data_hora_inicio)
-    const dur = c.duracao_minutos ?? duracaoPadrao
+    // Calcular duração a partir de início/fim (coluna duracao_minutos não existe)
+    const dur = c.data_hora_fim && c.data_hora_inicio
+      ? Math.round((new Date(c.data_hora_fim).getTime() - new Date(c.data_hora_inicio).getTime()) / 60000)
+      : duracaoPadrao
     // Marcar cada bloco de 30min como ocupado
     for (let m = 0; m < dur; m += duracaoPadrao) {
       const slot = new Date(inicio.getTime() + m * 60000)
@@ -769,17 +772,33 @@ JSON obrigatório:
 
       console.log(`[OVYVA] Criando consulta: ${dataHoraInicio} prof=${profissionalId} proced=${(matchProced as any)?.id}`)
 
-      const { error: insertErr } = await supabase.from("consultas").insert({
+      // paciente_id e profissional_id são obrigatórios na tabela consultas
+      if (!conversa.paciente_id) {
+        console.error("[OVYVA] Não é possível agendar: paciente_id é null (contato não cadastrado)")
+      }
+      if (!profissionalId) {
+        console.error("[OVYVA] Não é possível agendar: profissional_id é null")
+      }
+
+      const insertPayload: any = {
         clinica_id,
-        paciente_id: conversa.paciente_id || null,
+        paciente_id: conversa.paciente_id,
         profissional_id: profissionalId,
         procedimento_id: (matchProced as any)?.id || null,
         data_hora_inicio: dataHoraInicio,
         data_hora_fim: dataHoraFim,
-        duracao_minutos: duracao,
         status: "agendado",
         observacoes: `[AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp.`,
-      })
+      }
+
+      // Só inserir se tem os campos obrigatórios
+      if (!conversa.paciente_id || !profissionalId) {
+        console.error("[OVYVA] Insert abortado: campos obrigatórios faltando", insertPayload)
+      } else {
+        const { error: insertErr } = await supabase.from("consultas").insert(insertPayload)
+        if (insertErr) console.error("[OVYVA] Erro ao criar agendamento:", JSON.stringify(insertErr))
+        else console.log("[OVYVA] CONSULTA CRIADA COM SUCESSO!")
+      }
       if (insertErr) console.error("Erro ao criar agendamento:", insertErr)
       else {
         console.log("[OVYVA] Agendamento criado com sucesso!")
