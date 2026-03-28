@@ -542,8 +542,8 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
     9. CANCELAR: Quando o paciente pedir para cancelar, use acao_sugerida="cancelar". O paciente só pode cancelar consultas DELE MESMO (listadas acima).
     10. REAGENDAR: Quando o paciente pedir para reagendar, use acao_sugerida="reagendar" com a NOVA data e hora nos dados_agendamento. O sistema vai cancelar a consulta antiga automaticamente e criar a nova. IMPORTANTE: coloque nos dados_agendamento a DATA E HORA NOVA que o paciente pediu, NÃO a antiga.
     11. CRÍTICO: Quando o paciente CONFIRMAR (disser "sim", "pode marcar", "confirmo", "ok", "quero"), use OBRIGATORIAMENTE acao_sugerida="agendar" (ou "reagendar" se for reagendamento) com data, hora, profissional_nome e procedimento da NOVA consulta nos dados_agendamento.
-    12. PRIORIDADE MÁXIMA: Se este contato NÃO é paciente cadastrado e o nome é "paciente" ou desconhecido, sua PRIMEIRA pergunta DEVE ser: "Para que eu possa te ajudar melhor, qual é o seu nome completo?" (nome e sobrenome). Não prossiga sem o nome.
-    13. Quando o paciente informar nome e sobrenome, coloque em "nome_completo" na resposta JSON. O sistema vai cadastrar automaticamente.
+    12. Se este contato NÃO é paciente cadastrado e o nome é desconhecido, comece perguntando o nome completo (nome e sobrenome). Se o paciente ignorar e já fizer um pedido, atenda normalmente mas pergunte o nome de forma natural durante a conversa (ex: "E qual é o seu nome completo para eu registrar?").
+    13. Quando o paciente informar nome e sobrenome (2+ palavras), coloque em "nome_completo" na resposta JSON. O sistema cadastra automaticamente. Se informar só o primeiro nome, peça gentilmente o sobrenome também.
     14. Se receber imagem, analise e descreva brevemente
     15. O paciente NÃO pode cancelar ou reagendar consultas de outros pacientes
 

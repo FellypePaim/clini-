@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
     // 3.5 Verificar se a IA está ativa para esta conversa
     const { data: conversa } = await supabase
       .from("ovyva_conversas")
-      .select("status")
+      .select("status, metadata")
       .eq("id", conversaId)
       .single()
 
