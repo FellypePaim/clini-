@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.5.0** (SuperAdmin v2 — 100% real, Suporte com chat — 27/03/2026)
+- Versão: **v1.6.0** (OVYVA v3 — agendamento real + CRM automático — 28/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -30,6 +30,7 @@
 - Fase 18: ✅ **Types sync + ai_usage_logs + Code-splitting (24/03/2026)**
 - Fase 19: ✅ **Gestão de Ausências de Profissionais (25/03/2026)**
 - Fase 20: ✅ **SuperAdmin v2 — 100% dados reais, sem hardcode (27/03/2026)**
+- Fase 21: ✅ **OVYVA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -82,24 +83,44 @@ profissional_ausencias, notificacoes_fila
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
-### ai-gateway (✅ v3 — atualizada 25/03/2026)
+### ai-gateway (✅ v5 — atualizada 28/03/2026)
 Actions:
 - `detect_intent` → gemini-2.5-flash-lite
 - `transcribe_audio` → gemini-2.5-flash
 - `generate_summary` → gemini-2.5-flash
-- `ovyva_respond` → gemini-2.5-flash (com reagendamento, horários, ausências profissionais)
+- `ovyva_respond` → gemini-2.5-flash (prompt compacto, slots reais 3 dias, auto-cadastro paciente, CRM auto, notif profissional)
 - `dashboard_insights` → gemini-2.5-flash-lite
 
-### whatsapp-webhook (✅ multi-tenant, fail-fast)
-- Recebe webhook da Evolution API
-- Identifica clinica_id pela instância (sem fallback env var)
-- Encaminha para ai-gateway
+### OVYVA v3 — Funcionalidades (28/03/2026):
+- Auto-cadastro de paciente (nome + WhatsApp) quando IA coleta nome completo
+- Agendamento real na tabela `consultas` com timezone BR (-03:00)
+- Anti-duplicata: verifica se já existe consulta no mesmo horário
+- Notificação imediata ao profissional via WhatsApp (agendar/cancelar/reagendar)
+- CRM automático: cria lead + avança estágio baseado na intenção da IA
+- Pausa IA por contato quando humano assume atendimento
+- Chat OVYVA: envio real via whatsapp-send, assinatura do atendente
+- Lock de concorrência + deduplicação de mensagens
+- Fallback robusto: se IA falha, envia mensagem padrão (nunca fica mudo)
+- Profissionais: só role=profissional no prompt (admin/recepção excluídos)
+- Webhook Evolution API v2: campos camelCase, enabled:true, QRCODE_UPDATED
 
-### whatsapp-manager (✅)
+### whatsapp-webhook (✅ v3 — 28/03/2026)
+- Recebe webhook da Evolution API v2
+- Deduplicação de mensagens (mesmo texto + conversa + 60s)
+- Cria lead no CRM automaticamente ao novo contato
+- Salva pushName do contato
+- Pausa IA se conversa em `atendido_humano`
+- Fallback: se IA falha, envia "instabilidade momentânea"
+
+### whatsapp-manager (✅ v2 — 28/03/2026)
 - criar_instancia, obter_qrcode, verificar_status, desconectar, listar
+- excluir_instancia (logout + delete Evolution + remove DB)
+- reconectar (restart + novo QR code)
+- Webhook auto-config Evolution API v2 (camelCase, enabled:true)
 
-### whatsapp-send (✅)
+### whatsapp-send (✅ v2 — 28/03/2026)
 - Envia texto/imagem/documento via Evolution API
+- Busca instância dinâmica da clínica no banco (não mais hardcoded)
 
 ### superadmin-actions (✅ v4 — reescrita 27/03/2026)
 6 abas 100% funcionais, 0 dados fictícios:
@@ -165,25 +186,33 @@ Actions:
 - `/superadmin/logs` — Auditoria global com filtros e export CSV
 - `/superadmin/suporte` — Two-panel chat: tickets + mensagens em tempo real
 
-## 8. OVYVA — AGENTE IA v2
+## 8. OVYVA — AGENTE IA v3
 
 ### Capacidades:
-- **Agendar**: Cria pré-agendamento (status pendente), aceita pacientes cadastrados e não-cadastrados
-- **Cancelar**: Cancela consultas futuras (agendado/confirmado/pendente)
-- **Reagendar**: Cancela atual + cria nova consulta
-- **Transferir**: Marca conversa para atendimento humano
+- **Agendar**: Cria consulta REAL na tabela `consultas` (timezone BR -03:00)
+- **Cancelar**: Cancela consultas do próprio paciente + notifica profissional
+- **Reagendar**: Cancela anterior + cria nova + notifica profissional
+- **Transferir**: Marca conversa para atendimento humano (pausa IA)
 - **Informar**: Responde sobre procedimentos, preços, horários
+- **Auto-cadastro**: Cria paciente quando coleta nome completo (nome + WhatsApp)
+- **CRM automático**: Cria lead + avança estágio (perguntou → interessado → agendado)
+- **Notificar profissional**: WhatsApp imediato em agendar/cancelar/reagendar
 
-### Contexto do prompt:
-- Nome/tom da assistente personalizado por clínica
-- Horário de funcionamento (config da clínica)
-- Data/hora atuais para contexto temporal
-- Tabela de procedimentos com valores reais (valor_particular)
-- Agenda ocupada (data_hora_inicio)
-- **Ausências de profissionais** (não sugere horários em dias de folga)
-- Perfil do paciente se vinculado
-- Histórico de 20 mensagens
-- Base de conhecimento customizada
+### Contexto do prompt (compacto ~500 bytes):
+- Nome/tom da assistente + clínica
+- Lista de profissionais (só role=profissional)
+- Procedimentos com valores
+- Consultas agendadas DESTE contato
+- Slots livres reais (3 dias úteis, calculados no backend)
+- Ausências de profissionais (dias filtrados)
+- Histórico limitado a 20 mensagens
+
+### Segurança:
+- Paciente só cancela/reagenda consultas dele mesmo
+- Anti-duplicata: verifica antes de inserir
+- Deduplicação de mensagens no webhook
+- Fallback robusto: se Gemini falha → mensagem padrão
+- Lock: pausa IA quando humano assume
 
 ## 9. AGENDA — DRAG-AND-DROP
 - DayView: arrastar cards para mudar horário (snap 15min)
@@ -198,7 +227,8 @@ Actions:
 - 3 opções ao conflitar: cancelar + notificar WhatsApp / cancelar sem notificar / apenas marcar folga
 - Bloqueio visual na Agenda (DayView + WeekView) — overlay "Profissional ausente"
 - OVYVA respeita ausências automaticamente (não sugere horários)
-- Notificação enfileirada em `notificacoes_fila` tipo `cancelamento_ausencia`
+- Notificação enviada DIRETO via whatsapp-send (não espera CRON)
+- CRON (15min): lembrete 2h antes de consultas + aniversários + cobranças
 
 ## 11. ALERTAS DO SISTEMA (SINO)
 - Consultas agendadas hoje
@@ -234,8 +264,13 @@ Actions:
 - Mensagens diferenciadas por remetente (superadmin=roxo direita, clínica=cinza esquerda)
 - Chat desabilitado em tickets fechados/resolvidos
 
-## 15. PRÓXIMOS PASSOS
+## 15. MIGRATIONS ADICIONAIS
+- `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
+- `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
+
+## 16. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
-2. Testar fluxo WhatsApp completo (Evolution API + OVYVA)
-3. UI para clínicas abrirem tickets de suporte (lado do admin da clínica)
-4. Busca Global (Ctrl+K)
+2. UI para clínicas abrirem tickets de suporte (lado do admin da clínica)
+3. Busca Global (Ctrl+K)
+4. Chat OVYVA: mensagens enviadas pelo painel chegarem no WhatsApp do paciente
+5. Upload de imagens no suporte
