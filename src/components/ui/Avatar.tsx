@@ -8,12 +8,12 @@ interface AvatarProps {
 }
 
 const COLORS = [
-  'bg-blue-100 text-blue-600',
-  'bg-green-100 text-green-600',
-  'bg-purple-100 text-purple-600',
-  'bg-orange-100 text-orange-600',
-  'bg-pink-100 text-pink-600',
-  'bg-indigo-100 text-indigo-600',
+  'bg-cyan-500/10 text-cyan-500',
+  'bg-indigo-500/10 text-indigo-400',
+  'bg-purple-500/10 text-purple-400',
+  'bg-amber-500/10 text-amber-400',
+  'bg-pink-500/10 text-pink-400',
+  'bg-blue-500/10 text-blue-400',
 ]
 
 export function Avatar({ nome, url, className, size = 'md' }: AvatarProps) {

@@ -4,10 +4,10 @@ import { useToast } from '../../hooks/useToast'
 import type { ToastType } from '../../hooks/useToast'
 
 const TOAST_STYLES: Record<ToastType, { bg: string, border: string, icon: React.ReactNode, text: string }> = {
-  success: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', icon: <CheckCircle2 className="text-emerald-500" size={20} /> },
-  error: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: <AlertCircle className="text-red-500" size={20} /> },
-  warning: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800', icon: <AlertTriangle className="text-amber-500" size={20} /> },
-  info: { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', icon: <Info className="text-blue-500" size={20} /> }
+  success: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', icon: <CheckCircle2 className="text-emerald-400" size={20} /> },
+  error: { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400', icon: <AlertCircle className="text-red-400" size={20} /> },
+  warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', text: 'text-amber-400', icon: <AlertTriangle className="text-amber-400" size={20} /> },
+  info: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400', icon: <Info className="text-blue-400" size={20} /> }
 }
 
 export function ToastProvider() {

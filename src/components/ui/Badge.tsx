@@ -9,12 +9,12 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  green:  'bg-green-100 text-green-800 ring-green-200',
-  blue:   'bg-blue-100 text-blue-800 ring-blue-200',
-  purple: 'bg-purple-100 text-purple-800 ring-purple-200',
-  orange: 'bg-orange-100 text-orange-800 ring-orange-200',
-  gray:   'bg-gray-100 text-gray-700 ring-gray-200',
-  red:    'bg-red-100 text-red-700 ring-red-200',
+  green:  'bg-cyan-500/10 text-cyan-500 ring-cyan-500/20',
+  blue:   'bg-blue-500/10 text-blue-400 ring-blue-500/20',
+  purple: 'bg-purple-500/10 text-purple-400 ring-purple-500/20',
+  orange: 'bg-orange-500/10 text-orange-400 ring-orange-500/20',
+  gray:   'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] ring-[var(--color-border)]',
+  red:    'bg-red-500/10 text-red-400 ring-red-500/20',
 }
 
 const sizeStyles = {
