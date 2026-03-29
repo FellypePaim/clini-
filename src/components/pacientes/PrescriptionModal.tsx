@@ -227,7 +227,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-sm font-black text-gray-900 border-none">Medicamentos</h3>
-                    <button onClick={addItem} className="flex items-center gap-2 text-xs font-black text-green-600 hover:text-green-700 transition-all bg-green-50 px-3 py-2 rounded-xl">
+                    <button onClick={addItem} className="flex items-center gap-2 text-xs font-black text-cyan-500 hover:text-cyan-600 transition-all bg-cyan-500/5 px-3 py-2 rounded-xl">
                       <Plus className="w-4 h-4" /> Adicionar Outro
                     </button>
                   </div>
@@ -253,7 +253,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-40 overflow-y-auto">
                                 {MEDICAMENTOS_COMUNS.filter(m => m.nome.toLowerCase().includes(searchMed.toLowerCase())).map(m => (
                                   <button key={m.nome} type="button" onClick={() => selectMedicamento(index, m)}
-                                    className="w-full text-left px-3 py-2 text-xs hover:bg-green-50 transition-colors border-b border-gray-50 last:border-0">
+                                    className="w-full text-left px-3 py-2 text-xs hover:bg-cyan-500/5 transition-colors border-b border-gray-50 last:border-0">
                                     <span className="font-semibold text-gray-900">{m.nome}</span>
                                     <span className="text-gray-400 ml-2">{m.dosagem} · {m.frequencia}</span>
                                   </button>
@@ -314,7 +314,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                     <div className="flex-1 space-y-3">
                        <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 text-green-400">
+                         <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 text-cyan-400">
                            <Lock className="w-5 h-5" />
                          </div>
                          <h3 className="text-lg font-black leading-none">Assinatura Certificada</h3>
@@ -328,7 +328,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                             type="checkbox" 
                             checked={isSigned} 
                             onChange={(e) => setIsSigned(e.target.checked)}
-                            className="w-5 h-5 rounded-lg border-white/20 bg-transparent text-green-600 focus:ring-green-500" 
+                            className="w-5 h-5 rounded-lg border-white/20 bg-transparent text-cyan-500 focus:ring-cyan-500" 
                           />
                           <span className="text-xs font-bold text-gray-300">Assinar digitalmente</span>
                        </div>
@@ -339,7 +339,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                              placeholder="Sua senha digital..."
                              value={password}
                              onChange={(e) => setPassword(e.target.value)}
-                             className="w-full px-4 py-3 bg-white border-none rounded-2xl text-xs text-gray-900 font-bold placeholder:text-gray-400 focus:ring-4 focus:ring-green-500/30 transition-all outline-none" 
+                             className="w-full px-4 py-3 bg-white border-none rounded-2xl text-xs text-gray-900 font-bold placeholder:text-gray-400 focus:ring-4 focus:ring-cyan-500/30 transition-all outline-none" 
                            />
                          </div>
                        )}
@@ -358,8 +358,8 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
              
              <div ref={previewRef} className="w-[320px] bg-white shadow-2xl rounded-sm p-8 flex flex-col min-h-[450px] origin-top scale-110">
                 {/* PDF Header */}
-                <div className="flex flex-col items-center text-center border-b-2 border-green-600 pb-4 mb-6">
-                   <div className="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center text-white mb-2 shadow-sm">
+                <div className="flex flex-col items-center text-center border-b-2 border-cyan-500 pb-4 mb-6">
+                   <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-white mb-2 shadow-sm">
                       <Plus className="w-5 h-5" />
                    </div>
                    <h1 className="text-[10px] font-black uppercase text-gray-900 tracking-wider">{user?.clinicaNome || 'Clínica'}</h1>
@@ -396,8 +396,8 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                       
                       {isSigned && password && (
                         <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-80 pointer-events-none">
-                           <div className="w-16 h-16 border-4 border-green-500 rounded-full flex items-center justify-center rotate-12 bg-white/80 p-1">
-                              <p className="text-[6px] font-black text-green-600 text-center leading-tight">ASSINADO DIGITALMENTE</p>
+                           <div className="w-16 h-16 border-4 border-cyan-500 rounded-full flex items-center justify-center rotate-12 bg-white/80 p-1">
+                              <p className="text-[6px] font-black text-cyan-500 text-center leading-tight">ASSINADO DIGITALMENTE</p>
                            </div>
                         </div>
                       )}
@@ -423,7 +423,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
               </button>
               <button 
                 onClick={handleSendWA}
-                className="flex items-center gap-2 px-6 py-4 bg-green-100 hover:bg-green-200 text-green-700 rounded-2xl text-xs font-black transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-4 bg-cyan-500/10 hover:bg-cyan-500/15 text-cyan-600 rounded-2xl text-xs font-black transition-all active:scale-95"
               >
                 <Smartphone className="w-4 h-4" /> Enviar por WhatsApp
               </button>
@@ -442,7 +442,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                 className="flex-1 md:flex-none flex items-center justify-center gap-3 px-10 py-4 bg-gray-900 hover:bg-black text-white rounded-[24px] text-sm font-black shadow-2xl shadow-gray-900/30 transition-all active:scale-[0.98] disabled:opacity-30"
               >
                 {isSubmitting ? 'Gerando...' : 'Finalizar Prescrição'}
-                {!isSubmitting && <CheckCircle className="w-5 h-5 text-green-400" />}
+                {!isSubmitting && <CheckCircle className="w-5 h-5 text-cyan-400" />}
               </button>
            </div>
         </div>

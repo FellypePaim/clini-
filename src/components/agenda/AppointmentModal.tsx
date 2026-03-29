@@ -49,7 +49,7 @@ const PROCEDIMENTOS = [
 
 const STATUS_OPTIONS = [
   { value: 'agendado',   label: 'Pendente',   dot: 'bg-yellow-400' },
-  { value: 'confirmado', label: 'Confirmado', dot: 'bg-green-500' },
+  { value: 'confirmado', label: 'Confirmado', dot: 'bg-emerald-500' },
   { value: 'cancelado',  label: 'Cancelado',  dot: 'bg-red-400' },
 ]
 
@@ -205,7 +205,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                       key={pac.id}
                       type="button"
                       onClick={() => handleSelectPaciente(pac)}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-green-50 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cyan-500/5 transition-colors text-left"
                     >
                       <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
                         {pac.nome[0]}
@@ -326,7 +326,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 onClick={() => setValue('repetir', !repetir)}
                 className={cn(
                   'w-9 h-5 rounded-full transition-all duration-200 flex items-center shrink-0',
-                  repetir ? 'bg-green-500' : 'bg-gray-200'
+                  repetir ? 'bg-cyan-500' : 'bg-gray-200'
                 )}
               >
                 <div className={cn(

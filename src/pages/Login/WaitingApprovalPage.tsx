@@ -65,12 +65,12 @@ export function WaitingApprovalPage() {
       <div className="w-full max-w-md text-center animate-fade-in">
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-10">
-          <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 bg-cyan-600 rounded-xl flex items-center justify-center">
             <Stethoscope className="w-5 h-5 text-white" />
           </div>
           <div>
             <span className="text-gray-900 text-xl font-bold">Prontuário</span>
-            <span className="text-green-600 text-xl font-light"> Verde</span>
+            <span className="text-cyan-500 text-xl font-light"> Verde</span>
           </div>
         </div>
 
@@ -100,7 +100,7 @@ export function WaitingApprovalPage() {
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 shrink-0" />
+            <CheckCircle className="w-5 h-5 text-cyan-500 mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-gray-900">O que o admin precisa fazer</p>
               <p className="text-sm text-gray-500">Ir em Configurações → Profissionais → adicionar seu e-mail à equipe</p>

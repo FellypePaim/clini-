@@ -121,7 +121,7 @@ export function OvyvaConfigPage() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4 text-gray-400">
-          <Clock className="w-8 h-8 animate-spin text-green-500" />
+          <Clock className="w-8 h-8 animate-spin text-cyan-500" />
           <p className="text-xs font-bold uppercase tracking-widest">Carregando configurações...</p>
         </div>
       </div>
@@ -135,7 +135,7 @@ export function OvyvaConfigPage() {
           <div className="flex items-center gap-6">
              <button 
               onClick={() => navigate('/ovyva')}
-              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-green-600"
+              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
@@ -150,7 +150,7 @@ export function OvyvaConfigPage() {
           <button 
             onClick={handleSave}
             disabled={isSaving || !clinicaId}
-            className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-green-500/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
+            className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-cyan-500/20 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
           >
              {isSaving ? <Clock className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
              Salvar Configurações
@@ -187,14 +187,14 @@ export function OvyvaConfigPage() {
              />
 
              <div className="mt-8 p-6 bg-gradient-to-br from-gray-900 to-gray-800 rounded-[32px] text-white relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/20 rounded-full blur-3xl group-hover:bg-green-500/40 transition-all" />
-                <Zap className="w-6 h-6 text-green-400 mb-4" />
+                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/20 rounded-full blur-3xl group-hover:bg-cyan-500/40 transition-all" />
+                <Zap className="w-6 h-6 text-cyan-400 mb-4" />
                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed">Status da IA</p>
                 <div className="flex items-center gap-2 mt-2">
-                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                   <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ativa (24h)</span>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-3">Assistente: <span className="text-green-400 font-bold">{form.nome_assistente}</span></p>
+                <p className="text-[10px] text-gray-500 mt-3">Assistente: <span className="text-cyan-400 font-bold">{form.nome_assistente}</span></p>
              </div>
           </div>
 
@@ -310,12 +310,12 @@ export function OvyvaConfigPage() {
                      />
                   </FormField>
 
-                  <div className="p-5 bg-green-50 rounded-2xl border border-green-100">
+                  <div className="p-5 bg-cyan-500/5 rounded-2xl border border-cyan-500/20">
                     <div className="flex items-start gap-3">
-                      <Sparkles className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                      <Sparkles className="w-5 h-5 text-cyan-500 shrink-0 mt-0.5" />
                       <div>
-                        <p className="text-xs font-black text-green-800 uppercase tracking-widest">Dica de Prompt</p>
-                        <p className="text-[11px] text-green-700 mt-1 leading-relaxed">
+                        <p className="text-xs font-black text-cyan-700 uppercase tracking-widest">Dica de Prompt</p>
+                        <p className="text-[11px] text-cyan-600 mt-1 leading-relaxed">
                           Quanto mais detalhado for este texto, mais precisa será a IA. Inclua valores dos procedimentos, convênios aceitos, nome dos profissionais e especialidades.
                         </p>
                       </div>
@@ -340,12 +340,12 @@ function SectionTab({ icon, label, active, onClick }: { icon: React.ReactNode, l
       onClick={onClick}
       className={cn(
         "w-full p-6 h-20 rounded-[32px] flex items-center gap-6 transition-all duration-300 border border-transparent group",
-        active ? "bg-white shadow-xl shadow-gray-200/40 border-gray-100 text-green-600" : "hover:bg-gray-100/50 text-gray-400"
+        active ? "bg-white shadow-xl shadow-gray-200/40 border-gray-100 text-cyan-500" : "hover:bg-gray-100/50 text-gray-400"
       )}
     >
        <div className={cn(
         "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
-        active ? "bg-green-50 text-green-600 scale-110" : "bg-gray-50 text-gray-300 group-hover:bg-white"
+        active ? "bg-cyan-500/5 text-cyan-500 scale-110" : "bg-gray-50 text-gray-300 group-hover:bg-white"
        )}>
           {icon}
        </div>

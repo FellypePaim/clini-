@@ -171,8 +171,8 @@ export function PacientesPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 bg-cyan-500/5 rounded-lg flex items-center justify-center">
+              <Users className="w-5 h-5 text-cyan-500" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{kpis.total}</p>
@@ -236,7 +236,7 @@ export function PacientesPage() {
                 onClick={() => { setFilterConvenio(c); setCurrentPage(1); }}
                 className={cn(
                   'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 capitalize',
-                  filterConvenio === c ? 'bg-white text-green-700 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
+                  filterConvenio === c ? 'bg-white text-cyan-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
                 )}
               >
                 {c === 'todos' ? 'Todos' : c}
@@ -253,7 +253,7 @@ export function PacientesPage() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {isLoading && patients.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <div className="w-8 h-8 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-gray-400">Carregando pacientes...</p>
           </div>
         ) : (
@@ -288,7 +288,7 @@ export function PacientesPage() {
                         <div className="flex items-center gap-3">
                           <Avatar nome={p.nome} />
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 group-hover:text-green-600 transition-colors truncate">
+                            <p className="text-sm font-semibold text-gray-900 group-hover:text-cyan-500 transition-colors truncate">
                               {p.nome}
                             </p>
                             <p className="text-[11px] text-gray-400">
@@ -323,7 +323,7 @@ export function PacientesPage() {
                         <Badge
                           variant={p.convenio === 'Particular' || !p.convenio ? 'gray' : 'green'}
                           className={cn(
-                            p.convenio === 'Unimed' && 'bg-green-50 text-green-700 border-green-100',
+                            p.convenio === 'Unimed' && 'bg-emerald-50 text-emerald-700 border-emerald-100',
                             p.convenio === 'Bradesco Saúde' && 'bg-blue-50 text-blue-700 border-blue-100'
                           )}
                         >
@@ -358,7 +358,7 @@ export function PacientesPage() {
                               href={`https://wa.me/55${phone.replace(/\D/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 hover:bg-green-50 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
+                              className="p-1.5 hover:bg-cyan-500/5 rounded-lg text-gray-400 hover:text-cyan-500 transition-colors"
                               title="WhatsApp"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -374,7 +374,7 @@ export function PacientesPage() {
                           </button>
                           <button
                             onClick={() => navigate(`/pacientes/${p.id}`)}
-                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-green-600 transition-colors"
+                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-cyan-500 transition-colors"
                             title="Ver prontuário"
                           >
                             <FileText className="w-4 h-4" />
@@ -559,14 +559,14 @@ export function PacientesPage() {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null) }} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col animate-fade-in">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Upload className="w-4 h-4 text-green-600" /> Importar Pacientes (CSV)</h3>
+              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Upload className="w-4 h-4 text-cyan-500" /> Importar Pacientes (CSV)</h3>
               <button onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null) }} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {importResult ? (
                 <div className="text-center space-y-4 py-8">
-                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto" />
+                  <CheckCircle className="w-12 h-12 text-cyan-500 mx-auto" />
                   <h4 className="text-lg font-bold text-gray-900">Importação concluída!</h4>
                   <p className="text-sm text-gray-500">{importResult.success} paciente(s) importado(s){importResult.errors > 0 ? `, ${importResult.errors} erro(s)` : ''}</p>
                   <button onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null); getPatients() }} className="btn-primary">Fechar</button>
@@ -599,7 +599,7 @@ export function PacientesPage() {
                         setImportData(rows)
                       }
                       reader.readAsText(file, 'UTF-8')
-                    }} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer" />
+                    }} className="w-full text-sm file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:font-semibold file:bg-cyan-500/5 file:text-cyan-600 hover:file:bg-cyan-500/10 cursor-pointer" />
                   </div>
 
                   {importData.length > 0 && (
@@ -647,7 +647,7 @@ export function PacientesPage() {
                   setImporting(false)
                   setImportResult({ success, errors })
                 }}
-                  className="flex items-center gap-1.5 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
+                  className="flex items-center gap-1.5 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
                   {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />} Importar {importData.length} paciente(s)
                 </button>
               </div>

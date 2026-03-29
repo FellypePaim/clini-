@@ -274,7 +274,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
               onClick={editingId ? handleSaveSinaisEdited : handleSaveSinais}
               disabled={savingSinais}
               className={cn("flex items-center gap-1.5 px-4 py-2 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50",
-                editingId ? "bg-blue-600 hover:bg-blue-700" : "bg-green-600 hover:bg-green-700")}
+                editingId ? "bg-blue-600 hover:bg-blue-700" : "bg-cyan-600 hover:bg-cyan-700")}
             >
               {savingSinais ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
               {editingId ? 'Atualizar' : 'Registrar'}
@@ -324,14 +324,14 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
             <div>
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Peso</label>
               <input type="number" step="0.1" placeholder="70.0" value={sinais.peso} onChange={e => setSinais(s => ({ ...s, peso: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400" />
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
               <p className="text-[9px] text-gray-300 mt-1 text-center">kg</p>
             </div>
             {/* Altura */}
             <div>
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Altura</label>
               <input type="number" placeholder="170" value={sinais.altura} onChange={e => setSinais(s => ({ ...s, altura: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400" />
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
               <p className="text-[9px] text-gray-300 mt-1 text-center">cm</p>
             </div>
             {/* IMC calculado */}
@@ -339,7 +339,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
               <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">IMC</label>
               <div className={cn(
                 "w-full rounded-lg py-2 px-3 text-sm text-center font-bold border",
-                imc ? (parseFloat(imc) < 18.5 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : parseFloat(imc) < 25 ? 'bg-green-50 text-green-700 border-green-200' : parseFloat(imc) < 30 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-red-700 border-red-200') : 'bg-gray-50 text-gray-300 border-gray-200'
+                imc ? (parseFloat(imc) < 18.5 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : parseFloat(imc) < 25 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : parseFloat(imc) < 30 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-red-700 border-red-200') : 'bg-gray-50 text-gray-300 border-gray-200'
               )}>
                 {imc || '—'}
               </div>
@@ -392,7 +392,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
           <button
             onClick={handleSaveCondicoes}
             disabled={savingCondicoes}
-            className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
           >
             {savingCondicoes ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />} Salvar
           </button>
@@ -431,7 +431,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
       {chartData.length >= 2 && (
         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-green-500" />
+            <TrendingUp className="w-4 h-4 text-cyan-500" />
             <h3 className="text-sm font-bold text-gray-900">Evolução dos Sinais Vitais</h3>
           </div>
           <div className="p-6">

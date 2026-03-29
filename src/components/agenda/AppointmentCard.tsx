@@ -12,7 +12,7 @@ export const STATUS_CONFIG: Record<AppointmentStatus, {
   badgeBg: string
   badgeText: string
 }> = {
-  confirmado:     { label: 'Confirmado',     dot: 'bg-green-500',  bg: 'bg-green-50',  border: 'border-green-200', text: 'text-green-800',  badgeBg: 'bg-green-100',  badgeText: 'text-green-800' },
+  confirmado:     { label: 'Confirmado',     dot: 'bg-emerald-500',  bg: 'bg-emerald-50',  border: 'border-emerald-200', text: 'text-emerald-800',  badgeBg: 'bg-emerald-100',  badgeText: 'text-emerald-800' },
   agendado:       { label: 'Pendente',       dot: 'bg-yellow-400', bg: 'bg-yellow-50', border: 'border-yellow-200',text: 'text-yellow-800', badgeBg: 'bg-yellow-100', badgeText: 'text-yellow-800' },
   em_atendimento: { label: 'Em atendimento', dot: 'bg-blue-500',   bg: 'bg-blue-50',   border: 'border-blue-200',  text: 'text-blue-800',   badgeBg: 'bg-blue-100',   badgeText: 'text-blue-800' },
   concluido:      { label: 'Concluído',      dot: 'bg-gray-400',   bg: 'bg-gray-50',   border: 'border-gray-200',  text: 'text-gray-600',   badgeBg: 'bg-gray-100',   badgeText: 'text-gray-600' },
@@ -164,7 +164,7 @@ export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onS
         <div className="px-5 pb-3 flex gap-2">
           <button
             onClick={() => onStatusChange('confirmado')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-cyan-500/5 text-cyan-600 text-xs font-medium hover:bg-cyan-500/10 transition-colors"
           >
             <CheckCircle className="w-3.5 h-3.5" /> Confirmar
           </button>

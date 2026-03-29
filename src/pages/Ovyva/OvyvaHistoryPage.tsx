@@ -113,7 +113,7 @@ export function OvyvaHistoryPage() {
 
   function getStatusLabel(status: string) {
     const map: Record<string, { label: string; icon: any; style: string }> = {
-      'ia_ativa':         { label: 'Ativo-IA',        icon: Bot,  style: 'bg-green-50 text-green-700 border-green-100' },
+      'ia_ativa':         { label: 'Ativo-IA',        icon: Bot,  style: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
       'aguardando_humano': { label: 'Transf. Humano',  icon: User, style: 'bg-orange-50 text-orange-700 border-orange-100' },
       'atendido_humano':  { label: 'Atendido',        icon: CheckCircle, style: 'bg-blue-50 text-blue-700 border-blue-100' },
       'concluido':        { label: 'Concluído',       icon: CheckCircle, style: 'bg-gray-50 text-gray-500 border-gray-100' },
@@ -128,7 +128,7 @@ export function OvyvaHistoryPage() {
           <div className="flex items-center gap-6">
              <button 
               onClick={() => navigate('/ovyva')}
-              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-green-600"
+              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
@@ -148,13 +148,13 @@ export function OvyvaHistoryPage() {
                <div className={cn(
                 "absolute -top-10 -right-10 w-32 h-32 blur-3xl rounded-full opacity-10 group-hover:scale-150 transition-transform",
                 kpi.color === 'blue' ? "bg-blue-500" : 
-                kpi.color === 'green' ? "bg-green-500" : 
+                kpi.color === 'green' ? "bg-emerald-500" :
                 kpi.color === 'orange' ? "bg-orange-500" : "bg-purple-500"
                )} />
                <div className={cn(
                 "w-12 h-12 rounded-2xl flex items-center justify-center mb-6 transition-all group-hover:scale-110",
                 kpi.color === 'blue' ? "bg-blue-50 text-blue-600" : 
-                kpi.color === 'green' ? "bg-green-50 text-green-600" : 
+                kpi.color === 'green' ? "bg-emerald-50 text-emerald-600" :
                 kpi.color === 'orange' ? "bg-orange-50 text-orange-600" : "bg-purple-50 text-purple-600"
                )}>
                   {kpi.icon}
@@ -174,13 +174,13 @@ export function OvyvaHistoryPage() {
           <div className="p-8 border-b border-gray-50 flex items-center justify-between flex-wrap gap-4">
              <div className="flex items-center gap-6">
                 <div className="relative group min-w-[280px]">
-                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors" />
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-cyan-500 transition-colors" />
                   <input 
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Nome ou telefone..." 
-                    className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-green-500/10"
+                    className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-cyan-500/10"
                   />
                 </div>
                 <div className="flex items-center bg-gray-50 p-1 rounded-xl">
@@ -205,7 +205,7 @@ export function OvyvaHistoryPage() {
 
           {loading ? (
             <div className="flex items-center justify-center flex-1 p-12">
-              <Clock className="w-6 h-6 animate-spin text-green-500" />
+              <Clock className="w-6 h-6 animate-spin text-cyan-500" />
             </div>
           ) : conversasFiltradas.length === 0 ? (
             <div className="flex flex-col items-center justify-center flex-1 p-12 text-gray-400">

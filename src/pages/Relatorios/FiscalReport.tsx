@@ -164,16 +164,16 @@ export function FiscalReport() {
         </div>
         <div className="flex items-center gap-3">
           <input type="month" value={mesAno} onChange={e => setMesAno(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-green-500/20" />
+            className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-cyan-500/20" />
           <button onClick={handleExportPDF} disabled={!dados}
-            className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50">
+            className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50">
             <Download className="w-4 h-4" /> Exportar PDF
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-green-500" /></div>
+        <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>
       ) : dados ? (
         <>
           {/* KPIs */}
@@ -184,7 +184,7 @@ export function FiscalReport() {
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-5">
               <p className="text-xs text-gray-400">Recebido</p>
-              <p className="text-xl font-bold text-green-600 mt-1">{fmtMoney(dados.totalReceitasPagas)}</p>
+              <p className="text-xl font-bold text-cyan-500 mt-1">{fmtMoney(dados.totalReceitasPagas)}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-5">
               <p className="text-xs text-gray-400">Despesas</p>
@@ -192,7 +192,7 @@ export function FiscalReport() {
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-5">
               <p className="text-xs text-gray-400">Lucro Líquido Est.</p>
-              <p className={cn("text-xl font-bold mt-1", dados.lucroLiquido >= 0 ? "text-green-600" : "text-red-600")}>{fmtMoney(dados.lucroLiquido)}</p>
+              <p className={cn("text-xl font-bold mt-1", dados.lucroLiquido >= 0 ? "text-cyan-500" : "text-red-600")}>{fmtMoney(dados.lucroLiquido)}</p>
             </div>
           </div>
 
@@ -212,7 +212,7 @@ export function FiscalReport() {
                         <span className="font-bold text-gray-900">{fmtMoney(valor as number)}</span>
                       </div>
                       <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                        <div className="h-full bg-cyan-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )

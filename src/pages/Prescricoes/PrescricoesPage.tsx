@@ -226,12 +226,12 @@ export function PrescricoesPage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <ClipboardList className="text-green-600" size={26} /> Prescrições Digitais
+              <ClipboardList className="text-cyan-500" size={26} /> Prescrições Digitais
             </h1>
             <p className="text-slate-500 text-sm mt-0.5">Prescrições com assinatura eletrônica e exportação PDF</p>
           </div>
           <button onClick={() => setShowModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-xl shadow-md transition-colors">
+            className="flex items-center gap-2 px-5 py-2.5 font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-xl shadow-md transition-colors">
             <Plus size={18} /> Nova Prescrição
           </button>
         </div>
@@ -239,19 +239,19 @@ export function PrescricoesPage() {
           <div className="relative flex-1 min-w-[220px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input type="text" placeholder="Buscar por paciente..." value={search} onChange={e => { setSearch(e.target.value); setPage(1) }}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20" />
+              className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500/20" />
           </div>
           <div className="flex items-center bg-slate-50 rounded-lg p-1 border border-slate-100">
             {(['todos', 'ativa', 'cancelada'] as const).map(s => (
               <button key={s} onClick={() => { setFilterStatus(s); setPage(1) }}
                 className={cn('px-3 py-1.5 rounded-md text-xs font-medium transition-all capitalize',
-                  filterStatus === s ? 'bg-white text-green-700 shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-700')}>
+                  filterStatus === s ? 'bg-white text-cyan-600 shadow-sm border border-slate-100' : 'text-slate-500 hover:text-slate-700')}>
                 {s === 'todos' ? 'Todas' : s === 'ativa' ? 'Ativas' : 'Canceladas'}
               </button>
             ))}
           </div>
           <select value={filterPeriod} onChange={e => { setFilterPeriod(e.target.value as any); setPage(1) }}
-            className="px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20">
+            className="px-3 py-2 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500/20">
             <option value="todos">Qualquer data</option>
             <option value="7d">Últimos 7 dias</option>
             <option value="30d">Últimos 30 dias</option>
@@ -262,12 +262,12 @@ export function PrescricoesPage() {
 
       <main className="flex-1 overflow-y-auto p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-green-500" /></div>
+          <div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-cyan-500" /></div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400">
             <ClipboardList className="w-16 h-16 mb-4 text-slate-200" />
             <p className="font-bold text-lg">Nenhuma prescrição encontrada</p>
-            <button onClick={() => setShowModal(true)} className="mt-3 text-green-600 text-sm font-medium hover:underline">Criar primeira prescrição</button>
+            <button onClick={() => setShowModal(true)} className="mt-3 text-cyan-500 text-sm font-medium hover:underline">Criar primeira prescrição</button>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto space-y-4">
@@ -291,14 +291,14 @@ export function PrescricoesPage() {
                   <div key={p.id} className="bg-white rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                     {/* Header do card — sempre visível */}
                     <div className="p-4 flex items-center gap-4 cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : p.id)}>
-                      <div className="w-10 h-10 rounded-xl bg-green-50 text-green-600 flex items-center justify-center shrink-0 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-xl bg-cyan-500/5 text-cyan-500 flex items-center justify-center shrink-0 font-bold text-sm">
                         Rx
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-bold text-slate-800 text-sm">{p.paciente_nome}</h3>
                           <Badge className={cn("border-none text-[9px] uppercase font-bold",
-                            p.status === 'ativa' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600')}>
+                            p.status === 'ativa' ? 'bg-cyan-500/10 text-cyan-600' : 'bg-red-100 text-red-600')}>
                             {p.status}
                           </Badge>
                         </div>
@@ -317,7 +317,7 @@ export function PrescricoesPage() {
                           <pre className="text-xs text-slate-600 font-mono whitespace-pre-wrap leading-relaxed">{p.conteudo}</pre>
                         </div>
                         <div className="px-4 py-3 flex items-center justify-between border-t border-slate-100">
-                          <span className="flex items-center gap-1.5 text-[10px] text-green-600 font-medium">
+                          <span className="flex items-center gap-1.5 text-[10px] text-cyan-500 font-medium">
                             <CheckCircle2 size={12} /> Assinada digitalmente
                           </span>
                           <div className="flex items-center gap-1">
@@ -327,7 +327,7 @@ export function PrescricoesPage() {
                             <button onClick={() => handlePrint(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
                               <Printer className="w-3 h-3" /> Imprimir
                             </button>
-                            <button onClick={() => handleDownloadPDF(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                            <button onClick={() => handleDownloadPDF(p)} className="flex items-center gap-1 px-2.5 py-1.5 text-[10px] font-semibold text-cyan-500 hover:bg-cyan-500/5 rounded-lg transition-colors">
                               <Download className="w-3 h-3" /> PDF
                             </button>
                             {p.status === 'ativa' && (
@@ -366,7 +366,7 @@ export function PrescricoesPage() {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
                     <button key={n} onClick={() => setPage(n)}
                       className={cn("w-8 h-8 flex items-center justify-center rounded-lg text-xs font-semibold transition-colors",
-                        page === n ? "bg-green-600 text-white" : "border border-slate-200 text-slate-500 hover:bg-slate-50")}>
+                        page === n ? "bg-cyan-600 text-white" : "border border-slate-200 text-slate-500 hover:bg-slate-50")}>
                       {n}
                     </button>
                   ))}
@@ -398,7 +398,7 @@ export function PrescricoesPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Conteúdo da Prescrição</label>
-                <textarea rows={12} className="w-full p-3 text-sm font-mono border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
+                <textarea rows={12} className="w-full p-3 text-sm font-mono border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500/20 resize-none"
                   value={editConteudo} onChange={e => setEditConteudo(e.target.value)} />
               </div>
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start gap-2">
@@ -461,7 +461,7 @@ export function PrescricoesPage() {
           <div className="relative bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
             <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3 text-white">
-                <ClipboardList className="w-5 h-5 text-green-400" />
+                <ClipboardList className="w-5 h-5 text-cyan-400" />
                 <span className="text-sm font-bold">Prescrição — {viewingPresc.paciente_nome}</span>
               </div>
               <div className="flex items-center gap-1">
@@ -472,13 +472,13 @@ export function PrescricoesPage() {
             </div>
             <div className="flex-1 overflow-y-auto p-8 flex justify-center">
               <div className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '500px' }}>
-                <div className="border-b-2 border-green-600 p-8 pb-6">
+                <div className="border-b-2 border-cyan-500 p-8 pb-6">
                   <h2 className="text-xl font-black text-gray-900">{user?.clinicaNome || 'Prontuário Verde'}</h2>
                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Prescrição Médica Digital</p>
                 </div>
                 <div className="px-8 pt-8 pb-4 text-center">
                   <h3 className="text-base font-black text-gray-900 uppercase tracking-wider">Prescrição Médica</h3>
-                  <div className="w-16 h-0.5 bg-green-500 mx-auto mt-3" />
+                  <div className="w-16 h-0.5 bg-cyan-500 mx-auto mt-3" />
                 </div>
                 <div className="px-8 py-3">
                   <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg text-xs">
@@ -492,8 +492,8 @@ export function PrescricoesPage() {
                 </div>
                 <div className="px-8 py-6 mt-4 border-t-2 border-dashed border-gray-200 text-center">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-2">Assinatura Digital</p>
-                  <p className="text-[10px] font-mono text-green-600">{viewingPresc.assinatura_hash.substring(0, 40)}</p>
-                  <p className="text-[9px] font-bold text-green-600 uppercase tracking-widest mt-3">Documento Assinado Digitalmente</p>
+                  <p className="text-[10px] font-mono text-cyan-500">{viewingPresc.assinatura_hash.substring(0, 40)}</p>
+                  <p className="text-[9px] font-bold text-cyan-500 uppercase tracking-widest mt-3">Documento Assinado Digitalmente</p>
                   <div className="w-32 h-px bg-gray-300 mx-auto mt-6 mb-2" />
                   <p className="text-xs text-gray-700 font-semibold">{viewingPresc.profissional_nome}</p>
                   <p className="text-[10px] text-gray-400">{user?.crm || ''}</p>
@@ -513,7 +513,7 @@ export function PrescricoesPage() {
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
             <div className="flex items-center justify-between p-6 border-b border-gray-100">
               <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <ClipboardList className="w-5 h-5 text-green-600" /> Nova Prescrição Digital
+                <ClipboardList className="w-5 h-5 text-cyan-500" /> Nova Prescrição Digital
               </h2>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500" /></button>
             </div>
@@ -528,26 +528,26 @@ export function PrescricoesPage() {
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-10 overflow-hidden">
                       {pacienteOpts.map(p => (
                         <button key={p.id} type="button" onClick={() => { setPacienteSelecionado(p); setPacienteSearch(p.nome); setPacienteOpts([]) }}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-green-50 transition-colors"><span className="font-medium">{p.nome}</span>{p.cpf && <span className="text-gray-400 ml-2 text-xs">CPF: {p.cpf}</span>}</button>
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-cyan-500/5 transition-colors"><span className="font-medium">{p.nome}</span>{p.cpf && <span className="text-gray-400 ml-2 text-xs">CPF: {p.cpf}</span>}</button>
                       ))}
                     </div>
                   )}
                 </div>
-                {pacienteSelecionado && <p className="text-xs text-green-600 font-semibold mt-1 flex items-center gap-1"><CheckCircle2 size={12} /> {pacienteSelecionado.nome}</p>}
+                {pacienteSelecionado && <p className="text-xs text-cyan-500 font-semibold mt-1 flex items-center gap-1"><CheckCircle2 size={12} /> {pacienteSelecionado.nome}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Conteúdo da Prescrição *</label>
-                <textarea rows={12} required className="w-full p-3 text-sm font-mono border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-green-500/20 resize-none"
+                <textarea rows={12} required className="w-full p-3 text-sm font-mono border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-cyan-500/20 resize-none"
                   value={conteudo} onChange={e => setConteudo(e.target.value)} />
               </div>
-              <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-2">
-                <Shield size={16} className="text-green-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-green-700 font-medium">Ao salvar, a prescrição será assinada digitalmente. Válida por 180 dias.</p>
+              <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 flex items-start gap-2">
+                <Shield size={16} className="text-cyan-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-cyan-600 font-medium">Ao salvar, a prescrição será assinada digitalmente. Válida por 180 dias.</p>
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-4 py-2.5 font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
                 <button type="submit" disabled={saving || !pacienteSelecionado}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-white bg-green-600 hover:bg-green-700 rounded-xl transition-colors disabled:opacity-50">
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-xl transition-colors disabled:opacity-50">
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
                   {saving ? 'Assinando...' : 'Assinar e Salvar'}
                 </button>

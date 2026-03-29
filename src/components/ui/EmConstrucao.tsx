@@ -22,8 +22,8 @@ export function EmConstrucao({
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
       {/* Ícone animado */}
       <div className="relative mb-8">
-        <div className="w-24 h-24 bg-green-50 rounded-3xl flex items-center justify-center">
-          <Icon className="w-12 h-12 text-green-400" />
+        <div className="w-24 h-24 bg-cyan-500/5 rounded-3xl flex items-center justify-center">
+          <Icon className="w-12 h-12 text-cyan-400" />
         </div>
         {/* Ponto pulsante */}
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
@@ -50,8 +50,8 @@ export function EmConstrucao({
           <div
             key={i}
             className={cn(
-              'h-1.5 rounded-full bg-green-200',
-              i === 1 ? 'w-8 bg-green-500' : 'w-4'
+              'h-1.5 rounded-full bg-cyan-200',
+              i === 1 ? 'w-8 bg-cyan-500' : 'w-4'
             )}
           />
         ))}

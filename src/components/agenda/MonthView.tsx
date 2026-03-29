@@ -96,7 +96,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
               key={dateStr}
               onClick={() => onDayClick(dateStr)}
               className={cn(
-                'bg-white min-h-24 p-1.5 cursor-pointer hover:bg-green-50/50 transition-colors flex flex-col',
+                'bg-white min-h-24 p-1.5 cursor-pointer hover:bg-cyan-500/5 transition-colors flex flex-col',
                 !isCurrentMonth && 'bg-gray-50/60',
               )}
             >
@@ -104,12 +104,12 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold',
-                  isToday ? 'bg-green-600 text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
+                  isToday ? 'bg-cyan-600 text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
                 )}>
                   {day.getDate()}
                 </span>
                 {dayApts.length > 0 && (
-                  <span className="text-[9px] text-green-600 font-semibold">
+                  <span className="text-[9px] text-cyan-500 font-semibold">
                     {dayApts.length}
                   </span>
                 )}

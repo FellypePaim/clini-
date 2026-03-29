@@ -47,19 +47,19 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
        {/* List Header */}
        <div className="p-6 border-b border-gray-50 shrink-0">
           <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
-            <MessageSquare className="w-6 h-6 text-green-500" />
+            <MessageSquare className="w-6 h-6 text-cyan-500" />
             Mensagens
           </h2>
           
           <div className="space-y-4">
             <div className="relative group">
-               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-green-500 transition-colors" />
+               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-cyan-500 transition-colors" />
                <input
                 type="text"
                 placeholder="Buscar contato..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-green-500/10 transition-all"
+                className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-cyan-500/10 transition-all"
                />
             </div>
 
@@ -99,7 +99,7 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                 className={cn(
                   "w-full p-4 flex gap-4 transition-all duration-300 border-b border-gray-50 group border-l-4",
                   selectedId === conv.id 
-                    ? "bg-green-50/50 border-l-green-500" 
+                    ? "bg-cyan-500/5 border-l-cyan-500" 
                     : "bg-white hover:bg-gray-50/80 border-l-transparent"
                 )}
               >
@@ -119,7 +119,7 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                         {conv.ultima_mensagem || "Nova conversa iniciada..."}
                       </p>
                       {unread > 0 && (
-                        <span className="ml-2 bg-green-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
+                        <span className="ml-2 bg-cyan-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full ring-2 ring-white">
                           {unread}
                         </span>
                       )}
@@ -142,7 +142,7 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                         </div>
                       )}
                       {conv.status === 'ia_ativa' && (
-                        <div className="flex items-center gap-1 text-[9px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-1.5 py-0.5 rounded-lg border border-green-100">
+                        <div className="flex items-center gap-1 text-[9px] font-black text-cyan-500 uppercase tracking-widest bg-cyan-500/5 px-1.5 py-0.5 rounded-lg border border-cyan-500/20">
                           <Clock className="w-2.5 h-2.5" /> IA Ativa
                         </div>
                       )}
@@ -177,14 +177,14 @@ function FilterTab({ active, onClick, label, count }: { active: boolean, onClick
       onClick={onClick}
       className={cn(
         "flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-center flex items-center justify-center gap-1.5",
-        active ? "bg-white text-green-600 shadow-sm" : "text-gray-400 hover:text-gray-600"
+        active ? "bg-white text-cyan-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
       )}
     >
       {label}
       {count !== undefined && count > 0 && (
         <span className={cn(
           "px-1.5 rounded-md",
-          active ? "bg-green-100 text-green-600" : "bg-gray-200 text-gray-500"
+          active ? "bg-cyan-500/10 text-cyan-500" : "bg-gray-200 text-gray-500"
         )}>
           {count}
         </span>

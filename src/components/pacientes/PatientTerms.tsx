@@ -285,7 +285,7 @@ Responda APENAS com JSON válido nesta estrutura:
       let y = 20
 
       // Header
-      pdf.setFillColor(22, 163, 74) // green-600
+      pdf.setFillColor(8, 145, 178) // cyan-600
       pdf.rect(0, 0, w, 2, 'F')
 
       pdf.setFont('helvetica', 'bold')
@@ -575,7 +575,7 @@ Responda APENAS com JSON válido nesta estrutura:
                        <button
                          onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(e, tpl) }}
                          disabled={isSaving}
-                         className="flex items-center gap-1 text-[9px] font-semibold text-green-600 ml-auto hover:bg-green-50 px-2 py-1 rounded-lg transition-colors"
+                         className="flex items-center gap-1 text-[9px] font-semibold text-cyan-500 ml-auto hover:bg-cyan-500/5 px-2 py-1 rounded-lg transition-colors"
                        >
                          <Send className="w-3 h-3" /> WhatsApp
                        </button>
@@ -667,7 +667,7 @@ Responda APENAS com JSON válido nesta estrutura:
                     <div className="flex items-center gap-6">
                        <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center",
-                        isAssinado ? "bg-green-100 text-green-600" : "bg-yellow-100 text-yellow-600"
+                        isAssinado ? "bg-emerald-100 text-emerald-600" : "bg-yellow-100 text-yellow-600"
                        )}>
                           <FileCheck className="w-6 h-6" />
                        </div>
@@ -688,7 +688,7 @@ Responda APENAS com JSON válido nesta estrutura:
                     <div className="flex items-center gap-3">
                        <span className={cn(
                         "px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border",
-                        isAssinado ? "bg-green-50 text-green-700 border-green-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
+                        isAssinado ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-yellow-50 text-yellow-700 border-yellow-100"
                        )}>
                           {isAssinado ? 'Assinado' : 'Pendente'}
                        </span>
@@ -758,9 +758,9 @@ Responda APENAS com JSON válido nesta estrutura:
             {/* Toolbar */}
             <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3 text-white">
-                <FileCheck className="w-5 h-5 text-green-400" />
+                <FileCheck className="w-5 h-5 text-cyan-400" />
                 <span className="text-sm font-bold truncate">{viewingTermo.titulo || 'Termo de Consentimento'}</span>
-                <span className={cn("px-2 py-0.5 rounded-md text-[9px] font-bold uppercase", viewingTermo.assinado_em ? "bg-green-500/20 text-green-400" : "bg-yellow-500/20 text-yellow-400")}>
+                <span className={cn("px-2 py-0.5 rounded-md text-[9px] font-bold uppercase", viewingTermo.assinado_em ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-400")}>
                   {viewingTermo.assinado_em ? 'Assinado' : 'Pendente'}
                 </span>
               </div>
@@ -781,7 +781,7 @@ Responda APENAS com JSON válido nesta estrutura:
             <div className="flex-1 overflow-y-auto p-8 flex justify-center">
               <div ref={docRef} className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '600px' }}>
                 {/* Header do documento */}
-                <div className="border-b-2 border-green-600 p-8 pb-6">
+                <div className="border-b-2 border-cyan-500 p-8 pb-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h2 className="text-xl font-black text-gray-900 leading-tight">Prontuario Verde</h2>
@@ -799,7 +799,7 @@ Responda APENAS com JSON válido nesta estrutura:
                   <h3 className="text-base font-black text-gray-900 text-center uppercase tracking-wider leading-relaxed">
                     {viewingTermo.titulo || 'Termo de Consentimento'}
                   </h3>
-                  <div className="w-16 h-0.5 bg-green-500 mx-auto mt-3" />
+                  <div className="w-16 h-0.5 bg-cyan-500 mx-auto mt-3" />
                 </div>
 
                 {/* Conteudo */}
@@ -845,7 +845,7 @@ Responda APENAS com JSON válido nesta estrutura:
                           <img src={resolvedSignUrl || ''} alt="Assinatura" className="max-h-32 object-contain" />
                         </div>
                       </div>
-                      <div className="flex items-center justify-center gap-2 mt-4 text-green-600">
+                      <div className="flex items-center justify-center gap-2 mt-4 text-cyan-500">
                         <Lock className="w-3.5 h-3.5" />
                         <p className="text-[9px] font-black uppercase tracking-widest">Documento Assinado Digitalmente</p>
                       </div>
@@ -956,7 +956,7 @@ Responda APENAS com JSON válido nesta estrutura:
                  {/* Assinatura do Profissional */}
                  <div>
                     <div className="flex items-center justify-between mb-2">
-                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-green-500" /> Assinatura do Profissional</label>
+                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-cyan-500" /> Assinatura do Profissional</label>
                        <button onClick={() => sigPadProf.current?.clear()} className="text-[10px] font-semibold text-red-400 hover:text-red-600">Limpar</button>
                     </div>
                     <div className="bg-gray-50 rounded-xl border-2 border-gray-200 h-36 overflow-hidden touch-none relative">
@@ -974,7 +974,7 @@ Responda APENAS com JSON válido nesta estrutura:
               </div>
 
               <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 shrink-0">
-                 <div className="flex items-center gap-2 text-green-600">
+                 <div className="flex items-center gap-2 text-cyan-500">
                     <Lock className="w-3.5 h-3.5" />
                     <span className="text-[9px] font-bold uppercase tracking-wider">Ambiente Seguro</span>
                  </div>
@@ -985,7 +985,7 @@ Responda APENAS com JSON válido nesta estrutura:
                       disabled={isSaving}
                       className="flex items-center gap-2 px-6 py-2.5 bg-gray-900 hover:bg-black text-white rounded-xl text-sm font-bold shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
-                      {isSaving ? 'Salvando...' : 'Concluir e Salvar'} <CheckCircle className="w-4 h-4 text-green-400" />
+                      {isSaving ? 'Salvando...' : 'Concluir e Salvar'} <CheckCircle className="w-4 h-4 text-cyan-400" />
                     </button>
                  </div>
               </div>

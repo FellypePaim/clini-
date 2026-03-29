@@ -156,7 +156,7 @@ export function FileUpload({
         className={cn(
           "relative w-full border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center gap-4 text-center cursor-pointer overflow-hidden",
           disabled ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" :
-          isDragging ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-green-400 hover:bg-gray-50"
+          isDragging ? "border-cyan-500 bg-cyan-500/5" : "border-gray-200 hover:border-cyan-400 hover:bg-gray-50"
         )}
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true) }}
         onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false) }}
@@ -176,7 +176,7 @@ export function FileUpload({
         />
         <div className={cn(
           "p-4 rounded-full transition-colors",
-          isDragging ? "bg-green-100 text-green-600" : "bg-white text-gray-400 shadow-sm border border-gray-100"
+          isDragging ? "bg-cyan-500/10 text-cyan-500" : "bg-white text-gray-400 shadow-sm border border-gray-100"
         )}>
           <UploadCloud className="w-8 h-8" />
         </div>
@@ -212,7 +212,7 @@ export function FileUpload({
                     {u.error ? (
                       <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-0.5"><AlertCircle className="w-3 h-3" /> {u.error}</p>
                     ) : u.done ? (
-                      <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle className="w-3 h-3" /> Enviado</p>
+                      <p className="text-[10px] text-cyan-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-0.5"><CheckCircle className="w-3 h-3" /> Enviado</p>
                     ) : (
                       <p className="text-[10px] text-blue-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-0.5"><Loader2 className="w-3 h-3 animate-spin" /> Enviando...</p>
                     )}
@@ -237,7 +237,7 @@ export function FileUpload({
           {existingFiles.map(file => (
             <div key={file.id} className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-between group">
                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 shrink-0 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
+                  <div className="w-10 h-10 shrink-0 bg-cyan-500/5 rounded-lg flex items-center justify-center text-cyan-500">
                     {file.mime_type.startsWith('image/') ? <ImageIcon className="w-5 h-5" /> : <FileIcon className="w-5 h-5" />}
                   </div>
                   <div className="min-w-0">

@@ -220,7 +220,7 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                           </td>
                           <td className="px-4 py-3 text-center">
                             {a.notificou_pacientes ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/5 text-cyan-600 border border-cyan-500/20">
                                 <Check size={10} /> Notificado
                               </span>
                             ) : a.consultas_canceladas > 0 ? (

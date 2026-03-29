@@ -121,7 +121,7 @@ export function PublicAnamnesisPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
-        <Activity className="w-10 h-10 text-green-500 animate-spin" />
+        <Activity className="w-10 h-10 text-cyan-500 animate-spin" />
         <p className="text-gray-500 font-bold">Iniciando anamnese...</p>
       </div>
     )
@@ -130,16 +130,16 @@ export function PublicAnamnesisPage() {
   if (isSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center gap-6 bg-white animate-fade-in">
-        <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center text-white shadow-2xl shadow-green-200">
+        <div className="w-20 h-20 rounded-full bg-cyan-500 flex items-center justify-center text-white shadow-2xl shadow-cyan-500/20">
           <CheckCircle className="w-10 h-10" />
         </div>
         <div>
           <h1 className="text-2xl font-black text-gray-900 leading-tight">Pronto, {patient?.nome.split(' ')[0]}!</h1>
           <p className="text-gray-500 text-sm mt-3 leading-relaxed">Suas informações foram recebidas e agora fazem parte do seu prontuário digital seguro.</p>
         </div>
-        <div className="w-full bg-green-50 rounded-2xl p-5 border border-green-100 flex items-start gap-4 text-left">
-          <Info className="w-5 h-5 text-green-600 mt-0.5" />
-          <p className="text-xs text-green-800 leading-relaxed font-medium">Não é necessário fazer mais nada. Você pode fechar esta aba e aguardar o seu atendimento.</p>
+        <div className="w-full bg-cyan-500/5 rounded-2xl p-5 border border-cyan-500/20 flex items-start gap-4 text-left">
+          <Info className="w-5 h-5 text-cyan-500 mt-0.5" />
+          <p className="text-xs text-cyan-700 leading-relaxed font-medium">Não é necessário fazer mais nada. Você pode fechar esta aba e aguardar o seu atendimento.</p>
         </div>
       </div>
     )
@@ -190,7 +190,7 @@ export function PublicAnamnesisPage() {
              </div>
           </div>
 
-          <div className="flex items-center gap-3 text-green-600 justify-center my-6">
+          <div className="flex items-center gap-3 text-cyan-500 justify-center my-6">
              <Lock className="w-4 h-4" />
              <span className="text-[10px] font-black uppercase tracking-widest">Ambiente Criptografado</span>
           </div>
@@ -210,18 +210,18 @@ export function PublicAnamnesisPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center pb-20 overflow-x-hidden">
       {/* Wave Header */}
-      <div className="w-full bg-green-600 px-6 pt-12 pb-24 text-white relative">
+      <div className="w-full bg-cyan-600 px-6 pt-12 pb-24 text-white relative">
         <div className="max-w-md mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-black tracking-widest text-green-100/70">Prontuário Verde</p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-cyan-100/70">Prontuário Verde</p>
               <h1 className="text-xl font-black">Ficha de Anamnese</h1>
             </div>
           </div>
-          <p className="text-sm font-medium text-green-50 leading-relaxed">Olá, <b>{patient?.nome}</b>! Por favor, responda às perguntas abaixo para prepararmos o seu atendimento.</p>
+          <p className="text-sm font-medium text-cyan-50 leading-relaxed">Olá, <b>{patient?.nome}</b>! Por favor, responda às perguntas abaixo para prepararmos o seu atendimento.</p>
         </div>
         
         {/* Curvas decorativas */}
@@ -299,7 +299,7 @@ export function PublicAnamnesisPage() {
                     value={formState.queixa}
                     onChange={(e) => setFormState(s => ({ ...s, queixa: e.target.value }))}
                     placeholder="Aperte aqui para escrever..."
-                    className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none resize-none shadow-sm"
+                    className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none resize-none shadow-sm"
                   />
                </div>
              </div>
@@ -317,7 +317,7 @@ export function PublicAnamnesisPage() {
                      name="medicamentos"
                      value={formState.medicamentos}
                      onChange={(e) => setFormState(s => ({ ...s, medicamentos: e.target.value }))}
-                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none shadow-sm"
+                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none shadow-sm"
                      placeholder="Ex: AAS, Glifage..."
                    />
                </div>
@@ -340,7 +340,7 @@ export function PublicAnamnesisPage() {
                         className={cn(
                           "flex-1 py-3 px-2 border rounded-xl text-[10px] font-bold transition-all active:scale-95 shadow-sm",
                           formState.atividadeFisica === l
-                            ? "bg-green-600 text-white border-green-600"
+                            ? "bg-cyan-600 text-white border-cyan-500"
                             : "bg-white border-gray-200 text-gray-500"
                         )}
                       >{l}</button>
@@ -374,7 +374,7 @@ function Section({ icon, title, children }: { icon: React.ReactNode, title: stri
   return (
     <div className="flex flex-col gap-4 animate-slide-in">
        <div className="flex items-center gap-2 px-1">
-         <span className="p-1 px-2.5 bg-green-100 text-green-700 rounded-lg text-xs font-black shadow-sm flex items-center gap-2">
+         <span className="p-1 px-2.5 bg-cyan-500/10 text-cyan-600 rounded-lg text-xs font-black shadow-sm flex items-center gap-2">
            {icon} {title}
          </span>
        </div>
@@ -395,7 +395,7 @@ function RadioToggle({ label, value, onChange }: { label: string, value: boolean
           onClick={() => onChange(true)}
           className={cn(
             "w-10 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-            value ? "bg-green-500 text-white shadow-xl shadow-green-200" : "text-gray-400 hover:bg-gray-50"
+            value ? "bg-cyan-500 text-white shadow-xl shadow-cyan-500/20" : "text-gray-400 hover:bg-gray-50"
           )}
         >SIM</button>
         <button

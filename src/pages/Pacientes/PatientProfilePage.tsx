@@ -140,7 +140,7 @@ export function PatientProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-3">
-        <Clock className="w-10 h-10 text-green-500 animate-spin" />
+        <Clock className="w-10 h-10 text-cyan-500 animate-spin" />
         <p className="text-gray-500 font-medium">Carregando prontuário...</p>
       </div>
     )
@@ -162,7 +162,7 @@ export function PatientProfilePage() {
       <div className="flex flex-col gap-4">
         <button 
           onClick={() => navigate('/pacientes')} 
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition-colors w-fit group"
+          className="flex items-center gap-2 text-sm text-gray-500 hover:text-cyan-500 transition-colors w-fit group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Voltar para Pacientes
         </button>
@@ -175,7 +175,7 @@ export function PatientProfilePage() {
                 <h1 className="text-2xl font-bold text-gray-900">{patient.nome}</h1>
                 <Badge 
                   variant={patient.ativo ? 'green' : 'gray'}
-                  className={patient.ativo ? 'bg-green-50 text-green-700 border-green-100' : 'bg-gray-100 text-gray-500'}
+                  className={patient.ativo ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-100 text-gray-500'}
                 >
                   {patient.ativo ? 'Ativo' : 'Inativo'}
                 </Badge>
@@ -187,7 +187,7 @@ export function PatientProfilePage() {
                 {patient.convenio && (
                   <>
                     <span className="text-gray-300">|</span>
-                    <span className="text-green-600 font-medium">{patient.convenio}</span>
+                    <span className="text-cyan-500 font-medium">{patient.convenio}</span>
                   </>
                 )}
               </div>
@@ -210,7 +210,7 @@ export function PatientProfilePage() {
             onClick={() => setActiveTab(tab)}
             className={cn(
               'px-4 py-2 rounded-lg text-sm font-semibold capitalize flex items-center gap-2 transition-all duration-200 whitespace-nowrap',
-              activeTab === tab ? 'bg-white text-green-700 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab ? 'bg-white text-cyan-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
             )}
           >
             {tab === 'resumo' && <Activity className="w-4 h-4" />}
@@ -245,7 +245,7 @@ export function PatientProfilePage() {
               </div>
               <div className="bg-white rounded-xl border border-gray-100 p-4">
                 <p className="text-xs text-gray-400 font-medium">Convênio</p>
-                <p className="text-sm font-bold text-green-600 mt-1">{patient.convenio || 'Particular'}</p>
+                <p className="text-sm font-bold text-cyan-500 mt-1">{patient.convenio || 'Particular'}</p>
               </div>
               <div className="bg-white rounded-xl border border-gray-100 p-4">
                 <p className="text-xs text-gray-400 font-medium">Alergias</p>
@@ -267,8 +267,8 @@ export function PatientProfilePage() {
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Contato</h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
-                        <Phone className="w-4 h-4 text-green-600" />
+                      <div className="w-8 h-8 rounded-lg bg-cyan-500/5 flex items-center justify-center shrink-0">
+                        <Phone className="w-4 h-4 text-cyan-500" />
                       </div>
                       <div>
                         <p className="text-xs text-gray-400">Telefone</p>
@@ -311,7 +311,7 @@ export function PatientProfilePage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => navigate('/agenda')}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                     >
                       <Calendar className="w-4 h-4" /> Agendar consulta
                     </button>
@@ -320,14 +320,14 @@ export function PatientProfilePage() {
                         href={`https://wa.me/${patient.contato.telefone.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                       >
                         <Phone className="w-4 h-4" /> Enviar WhatsApp
                       </a>
                     )}
                     <button
                       onClick={() => setIsPrescriptionModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-green-50 hover:text-green-700 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                     >
                       <FileText className="w-4 h-4" /> Nova prescrição
                     </button>
@@ -353,7 +353,7 @@ export function PatientProfilePage() {
                         <div key={apt.id} className="relative group/apt">
                           <div className={cn(
                             "absolute -left-[22px] top-1 w-5 h-5 rounded-full border-[3px] border-white flex items-center justify-center shadow-sm z-10 transition-all group-hover/apt:scale-110",
-                            idx === 0 ? "bg-green-500 ring-2 ring-green-100" : "bg-gray-200 group-hover/apt:bg-green-400"
+                            idx === 0 ? "bg-cyan-500 ring-2 ring-cyan-500/20" : "bg-gray-200 group-hover/apt:bg-cyan-400"
                           )}>
                             {idx === 0 && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
                           </div>
@@ -368,7 +368,7 @@ export function PatientProfilePage() {
                               <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                                  className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-gray-400 hover:text-cyan-500 hover:bg-cyan-500/5 rounded-lg transition-colors"
                                   title="Editar evolução"
                                 >
                                   <Stethoscope className="w-3.5 h-3.5" />
@@ -395,7 +395,7 @@ export function PatientProfilePage() {
 
                             <div
                               onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                              className="p-3 bg-gray-50 group-hover/apt:bg-green-50/40 rounded-xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
+                              className="p-3 bg-gray-50 group-hover/apt:bg-cyan-500/5 rounded-xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
                             >
                               <p className={apt.observacoes ? '' : 'italic text-gray-400'}>
                                 {apt.observacoes || 'Sem evolução — clique para adicionar'}
@@ -429,11 +429,11 @@ export function PatientProfilePage() {
 
             {/* Status da anamnese preenchida via link */}
             {anamneseHistory.length > 0 && (
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
+              <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4 flex items-center gap-3">
+                <CheckCircle className="w-5 h-5 text-cyan-500 shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-green-800">Anamnese preenchida pelo paciente</p>
-                  <p className="text-xs text-green-600">{anamneseHistory.length} formulário{anamneseHistory.length > 1 ? 's' : ''} recebido{anamneseHistory.length > 1 ? 's' : ''} via link</p>
+                  <p className="text-sm font-semibold text-cyan-700">Anamnese preenchida pelo paciente</p>
+                  <p className="text-xs text-cyan-500">{anamneseHistory.length} formulário{anamneseHistory.length > 1 ? 's' : ''} recebido{anamneseHistory.length > 1 ? 's' : ''} via link</p>
                 </div>
               </div>
             )}
@@ -443,12 +443,12 @@ export function PatientProfilePage() {
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                 <div>
                   <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                    <ClipboardList className="w-4 h-4 text-green-600" /> Anamnese Clínica
+                    <ClipboardList className="w-4 h-4 text-cyan-500" /> Anamnese Clínica
                   </h3>
                   <p className="text-xs text-gray-400 mt-0.5">Preenchido pelo profissional durante a consulta</p>
                 </div>
                 <button
-                  className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
                   onClick={handleSaveAnamnesis}
                   disabled={isSavingAnamnesis}
                 >
@@ -518,7 +518,7 @@ export function PatientProfilePage() {
                                 className={cn(
                                   "flex-1 px-3 py-2 rounded-lg text-xs font-semibold border transition-all text-center",
                                   anamneseForm.habitos.atividadeFisica.toLowerCase() === l.toLowerCase()
-                                    ? "bg-green-100 text-green-700 border-green-200"
+                                    ? "bg-cyan-500/10 text-cyan-600 border-cyan-500/20"
                                     : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
                                 )}
                               >
@@ -625,12 +625,12 @@ export function PatientProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsAnamnesisModalOpen(false)} />
           <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
-            <div className="bg-green-500 p-8 flex flex-col items-center text-white text-center">
+            <div className="bg-cyan-500 p-8 flex flex-col items-center text-white text-center">
               <div className="bg-white p-4 rounded-2xl shadow-xl mb-6">
                  <QRCodeSVG value={anamnesisLink} size={160} />
               </div>
               <h3 className="text-lg font-black leading-tight">Link de Anamnese Gerado!</h3>
-              <p className="text-xs text-green-100 mt-2">O paciente pode escanear o QR Code acima ou receber o link abaixo para preencher o formulário.</p>
+              <p className="text-xs text-cyan-100 mt-2">O paciente pode escanear o QR Code acima ou receber o link abaixo para preencher o formulário.</p>
             </div>
             
             <div className="p-6 space-y-4">
@@ -695,7 +695,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
     <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
       <div className="mb-6 border-b border-gray-100 pb-4">
         <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-          <ClipboardList className="w-5 h-5 text-green-600" /> Respostas do Paciente
+          <ClipboardList className="w-5 h-5 text-cyan-500" /> Respostas do Paciente
         </h3>
         <p className="text-sm text-gray-400">{history.length} anamnese(s) preenchida(s) via link</p>
       </div>
@@ -714,7 +714,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
               {/* Linha resumida - sempre visível */}
               <div className="flex items-center justify-between p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-green-700 bg-green-100 px-3 py-1 rounded-full">{dateLabel}</span>
+                  <span className="text-xs font-bold text-cyan-600 bg-cyan-500/10 px-3 py-1 rounded-full">{dateLabel}</span>
                   <span className="text-xs text-gray-500 truncate max-w-[250px]">{anam.queixa_principal || 'Sem queixa informada'}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
@@ -746,7 +746,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
 
               {/* Detalhes expandidos */}
               {isExpanded && (
-                <div className="p-5 bg-green-50/30 border-t border-green-100 animate-fade-in">
+                <div className="p-5 bg-cyan-500/5 border-t border-cyan-500/20 animate-fade-in">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Queixa Principal</p>
@@ -771,8 +771,8 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
                           {habitos.fuma && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Fumante</span>}
                           {habitos.alcool && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold border border-orange-100">Etilista</span>}
                           {habitos.atividade_fisica && <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold border border-blue-100">Ativ. Física: {habitos.atividade_fisica}</span>}
-                          {!habitos.fuma && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não fuma</span>}
-                          {!habitos.alcool && <span className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">Não etilista</span>}
+                          {!habitos.fuma && <span className="px-2 py-1 bg-cyan-500/5 text-cyan-500 rounded-lg text-xs font-bold border border-cyan-500/20">Não fuma</span>}
+                          {!habitos.alcool && <span className="px-2 py-1 bg-cyan-500/5 text-cyan-500 rounded-lg text-xs font-bold border border-cyan-500/20">Não etilista</span>}
                         </div>
                       </div>
                     )}
@@ -838,7 +838,7 @@ function AnamneseField({ label, value, onChange, placeholder }: { label: string,
         value={value} 
         onChange={onChange}
         placeholder={placeholder}
-        className="input-base min-h-[100px] resize-none text-sm py-3 px-4 focus:ring-4 focus:ring-green-500/10 placeholder:text-gray-300" 
+        className="input-base min-h-[100px] resize-none text-sm py-3 px-4 focus:ring-4 focus:ring-cyan-500/10 placeholder:text-gray-300" 
       />
     </div>
   )
@@ -850,7 +850,7 @@ function AnamneseToggle({ label, active, onToggle }: { label: string, active: bo
       <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">{label}</span>
       <div className={cn(
         "w-10 h-6 rounded-full p-1 transition-all",
-        active ? "bg-green-500" : "bg-gray-200"
+        active ? "bg-cyan-500" : "bg-gray-200"
       )}>
         <div className={cn(
           "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",

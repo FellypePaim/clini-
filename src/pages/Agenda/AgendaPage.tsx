@@ -175,7 +175,7 @@ export function AgendaPage() {
                 </button>
                 <button
                   onClick={() => setDate(new Date())}
-                  className="px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition-colors"
+                  className="px-3 py-1.5 text-xs font-semibold text-cyan-600 bg-cyan-500/5 hover:bg-cyan-500/10 rounded-lg transition-colors"
                 >
                   Hoje
                 </button>
@@ -221,7 +221,7 @@ export function AgendaPage() {
                   setModalInitialHour('08:00')
                   setIsModalOpen(true)
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" /> Nova Consulta
               </button>

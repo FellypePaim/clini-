@@ -78,7 +78,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
         {/* HEADER */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/50 backdrop-blur-xl">
           <div className="flex items-center gap-3 w-full pr-4">
-            <div className="p-2 bg-green-50 rounded-xl text-green-600">
+            <div className="p-2 bg-cyan-500/5 rounded-xl text-cyan-500">
               {isImage ? <ImageIcon className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
@@ -93,7 +93,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
               <>
                 <button
                   onClick={handleDownload}
-                  className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors group"
+                  className="p-2 text-gray-400 hover:text-cyan-500 hover:bg-cyan-500/5 rounded-full transition-colors group"
                   title="Fazer Download"
                 >
                   <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -138,7 +138,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
           
           {isLoading && (
             <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm gap-3">
-              <Loader2 className="w-8 h-8 text-green-500 animate-spin" />
+              <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
               <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Carregando Mídia Segura...</p>
             </div>
           )}
@@ -179,7 +179,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
                   
                   <button 
                     onClick={handleDownload}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-xl font-bold hover:bg-green-600 transition-colors shadow-sm"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500 text-white rounded-xl font-bold hover:bg-cyan-600 transition-colors shadow-sm"
                   >
                     <Download className="w-5 h-5" />
                     Fazer Download do Arquivo

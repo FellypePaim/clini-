@@ -19,7 +19,7 @@ const CATEGORIAS = [
   { id: 'todos', label: 'Todos', color: 'bg-gray-900 text-white', icon: FolderOpen },
   { id: 'exame', label: 'Exames', color: 'bg-blue-600 text-white', icon: FileText },
   { id: 'laudo', label: 'Laudos', color: 'bg-purple-600 text-white', icon: ClipboardList },
-  { id: 'receita', label: 'Receitas', color: 'bg-green-600 text-white', icon: Plus },
+  { id: 'receita', label: 'Receitas', color: 'bg-cyan-600 text-white', icon: Plus },
   { id: 'atestado', label: 'Atestados', color: 'bg-orange-600 text-white', icon: CheckCircle },
   { id: 'radiografia', label: 'Radiografias', color: 'bg-cyan-600 text-white', icon: ImageIcon },
   { id: 'foto', label: 'Fotos', color: 'bg-pink-600 text-white', icon: ImageIcon },
@@ -29,7 +29,7 @@ const CATEGORIAS = [
 const CATEGORIAS_MAP: Record<string, { label: string; color: string }> = {
   exame: { label: 'Exame', color: 'bg-blue-100 text-blue-700' },
   laudo: { label: 'Laudo', color: 'bg-purple-100 text-purple-700' },
-  receita: { label: 'Receita', color: 'bg-green-100 text-green-700' },
+  receita: { label: 'Receita', color: 'bg-cyan-500/10 text-cyan-600' },
   atestado: { label: 'Atestado', color: 'bg-orange-100 text-orange-700' },
   radiografia: { label: 'Radiografia', color: 'bg-cyan-100 text-cyan-700' },
   foto: { label: 'Foto', color: 'bg-pink-100 text-pink-700' },
@@ -258,7 +258,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Upload className="w-4 h-4 text-green-600" />
+            <Upload className="w-4 h-4 text-cyan-500" />
             <h3 className="text-sm font-bold text-gray-900">Enviar Documentos</h3>
           </div>
           <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
             <select
               value={uploadCategoria}
               onChange={e => setUploadCategoria(e.target.value)}
-              className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:ring-2 focus:ring-green-500/20"
+              className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:ring-2 focus:ring-cyan-500/20"
             >
               {CATEGORIAS.filter(c => c.id !== 'todos').map(c => (
                 <option key={c.id} value={c.id}>{c.label}</option>
@@ -334,7 +334,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
               <div className="relative">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-300" />
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
-                  className="pl-7 pr-3 py-1.5 text-[10px] border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-green-500/20 w-36" />
+                  className="pl-7 pr-3 py-1.5 text-[10px] border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-cyan-500/20 w-36" />
               </div>
             )}
           </div>
@@ -343,7 +343,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
         {/* Grid de arquivos */}
         <div className="p-5">
           {isLoading ? (
-            <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 animate-spin text-green-500" /></div>
+            <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 animate-spin text-cyan-500" /></div>
           ) : filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map(file => {
@@ -351,7 +351,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
                 const isImage = file.mime_type?.startsWith('image/')
                 const preview = previewUrls[file.id]
                 return (
-                  <div key={file.id} className="group cursor-pointer bg-gray-50/50 hover:bg-white rounded-xl border border-gray-100 hover:border-green-200 hover:shadow-md transition-all overflow-hidden">
+                  <div key={file.id} className="group cursor-pointer bg-gray-50/50 hover:bg-white rounded-xl border border-gray-100 hover:border-cyan-500/20 hover:shadow-md transition-all overflow-hidden">
                     {/* Preview de imagem */}
                     {isImage && preview ? (
                       <div className="h-28 bg-gray-100 overflow-hidden" onClick={() => setViewingFile(file)}>
@@ -366,7 +366,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
                         </div>
                       ) : null}
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-semibold text-gray-900 truncate group-hover:text-green-700 transition-colors">{file.nome}</h4>
+                        <h4 className="text-xs font-semibold text-gray-900 truncate group-hover:text-cyan-600 transition-colors">{file.nome}</h4>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className={cn('px-1.5 py-0.5 rounded text-[8px] font-semibold', cat.color)}>{cat.label}</span>
                           <span className="text-[9px] text-gray-300">{fmtSize(file.tamanho_bytes)}</span>
@@ -378,7 +378,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
                     {/* Ações */}
                     <div className="px-3 pb-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={(e) => { e.stopPropagation(); handleSendWhatsApp(file) }}
-                        className="flex items-center gap-1 px-2 py-1 text-[9px] font-semibold text-green-600 hover:bg-green-50 rounded transition-colors">
+                        className="flex items-center gap-1 px-2 py-1 text-[9px] font-semibold text-cyan-500 hover:bg-cyan-500/5 rounded transition-colors">
                         <Send className="w-3 h-3" /> WhatsApp
                       </button>
                     </div>

@@ -116,7 +116,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
         <div className="flex items-baseline gap-2">
           <span className={cn(
             'text-3xl font-bold',
-            isToday ? 'text-green-600' : 'text-gray-800'
+            isToday ? 'text-cyan-500' : 'text-gray-800'
           )}>
             {date.getDate()}
           </span>
@@ -124,7 +124,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
             {date.toLocaleDateString('pt-BR', { weekday: 'long', month: 'long', year: 'numeric' })}
           </span>
           {isToday && (
-            <span className="ml-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-600 text-xs font-semibold">
               Hoje
             </span>
           )}
@@ -161,12 +161,12 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute left-0 right-0 border-t border-gray-100 cursor-pointer hover:bg-green-50/40 transition-colors group"
+              className="absolute left-0 right-0 border-t border-gray-100 cursor-pointer hover:bg-cyan-500/5 transition-colors group"
               style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT }}
               onClick={() => onSlotClick(h)}
             >
               <div className="absolute top-1 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <span className="text-[10px] text-green-500 font-medium">+ Consulta</span>
+                <span className="text-[10px] text-cyan-500 font-medium">+ Consulta</span>
               </div>
             </div>
           ))}
@@ -174,7 +174,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
           {/* Drop preview */}
           {dragPreviewTop !== null && (
             <div
-              className="absolute left-2 right-2 bg-green-200/40 border-2 border-dashed border-green-400 rounded-lg pointer-events-none z-30 transition-all duration-75"
+              className="absolute left-2 right-2 bg-cyan-500/15 border-2 border-dashed border-cyan-400 rounded-lg pointer-events-none z-30 transition-all duration-75"
               style={{ top: dragPreviewTop, height: SLOT_HEIGHT / 2 }}
             />
           )}
@@ -186,9 +186,9 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
               className="absolute left-0 right-0 z-10 flex items-center pointer-events-none"
               style={{ top: `${nowTopPercent}%` }}
             >
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500 -ml-1.5 shrink-0" />
-              <div className="flex-1 h-px bg-green-500" />
-              <span className="text-[10px] text-green-600 font-semibold ml-1 bg-white px-1 rounded">
+              <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 -ml-1.5 shrink-0" />
+              <div className="flex-1 h-px bg-cyan-500" />
+              <span className="text-[10px] text-cyan-500 font-semibold ml-1 bg-white px-1 rounded">
                 {now.getHours().toString().padStart(2,'0')}:{now.getMinutes().toString().padStart(2,'0')}
               </span>
             </div>

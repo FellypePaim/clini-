@@ -162,7 +162,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
               title: `${leadsCount} novo${leadsCount > 1 ? 's' : ''} lead${leadsCount > 1 ? 's' : ''}`,
               description: 'Contatos recebidos nas últimas 24h',
               icon: UserPlus,
-              color: 'text-green-600 bg-green-50',
+              color: 'text-cyan-500 bg-cyan-500/5',
               link: '/verdesk',
             })
           }

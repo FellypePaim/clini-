@@ -101,14 +101,14 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
       
       <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in">
         {/* Header */}
-        <div className="bg-green-600 p-6 text-white flex items-center justify-between shrink-0">
+        <div className="bg-cyan-600 p-6 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
               <Stethoscope className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-xl font-black">Registro de Evolução Clínica</h2>
-              <p className="text-xs text-green-100/70 font-medium">Paciente: <b>{appointment.pacienteNome}</b> · {new Date(appointment.data).toLocaleDateString()}</p>
+              <p className="text-xs text-cyan-100/70 font-medium">Paciente: <b>{appointment.pacienteNome}</b> · {new Date(appointment.data).toLocaleDateString()}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all">
@@ -193,9 +193,9 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                         <button 
                           key={cid.codigo}
                           onClick={() => { setSelectedCid(cid); setCidSearch(cid.codigo); }}
-                          className="w-full px-4 py-3 hover:bg-green-50 text-left flex items-center gap-3 group/item transition-colors"
+                          className="w-full px-4 py-3 hover:bg-cyan-500/5 text-left flex items-center gap-3 group/item transition-colors"
                         >
-                          <span className="text-xs font-black text-green-600 bg-green-50 px-2 py-1 rounded-md group-hover/item:bg-white">{cid.codigo}</span>
+                          <span className="text-xs font-black text-cyan-500 bg-cyan-500/5 px-2 py-1 rounded-md group-hover/item:bg-white">{cid.codigo}</span>
                           <span className="text-sm font-medium text-gray-700">{cid.nome}</span>
                         </button>
                       )) : (
@@ -208,10 +208,10 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                   )}
                 </div>
                 {selectedCid && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-100 rounded-xl w-fit">
-                    <span className="text-xs font-black text-green-700">{selectedCid.codigo}</span>
-                    <span className="text-xs text-green-700/80 font-medium">— {selectedCid.nome}</span>
-                    <button onClick={() => { setSelectedCid(null); setCidSearch(''); }} className="ml-1 text-green-300 hover:text-green-600 transition-colors">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-cyan-500/5 border border-cyan-500/20 rounded-xl w-fit">
+                    <span className="text-xs font-black text-cyan-600">{selectedCid.codigo}</span>
+                    <span className="text-xs text-cyan-600/80 font-medium">— {selectedCid.nome}</span>
+                    <button onClick={() => { setSelectedCid(null); setCidSearch(''); }} className="ml-1 text-cyan-300 hover:text-cyan-500 transition-colors">
                       <X className="w-4 h-4" />
                     </button>
                   </div>
@@ -225,7 +225,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                      <PenTool className="w-3.5 h-3.5" /> Assinatura Eletrônica 
                    </label>
                    {signature && (
-                      <Badge variant="green" className="text-[9px] h-4 bg-green-50 text-green-700 animate-pulse border-none">
+                      <Badge variant="green" className="text-[9px] h-4 bg-cyan-500/5 text-cyan-600 animate-pulse border-none">
                         <Fingerprint size={10} className="mr-1" /> PROTEGIDA COM HASH
                       </Badge>
                    )}
@@ -255,7 +255,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                        
                        <div className="pt-4 border-t border-gray-200/50">
                          <div className="p-4 bg-white/70 rounded-2xl flex items-center gap-3">
-                            <Activity className="w-5 h-5 text-green-500" />
+                            <Activity className="w-5 h-5 text-cyan-500" />
                             <p className="text-[10px] text-gray-500 leading-relaxed italic">"Resumo gerado automaticamente com base nas anotações clínicas."</p>
                          </div>
                        </div>
@@ -292,7 +292,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
              <button 
                onClick={handleSave}
                disabled={isSubmitting || !content || content === '<p><br></p>'}
-               className="flex items-center gap-2 px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-2xl text-sm font-black shadow-xl shadow-green-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
+               className="flex items-center gap-2 px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-2xl text-sm font-black shadow-xl shadow-cyan-500/20 transition-all active:scale-[0.98] disabled:opacity-50"
              >
                {isSubmitting ? <Activity className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                Salvar Evolução

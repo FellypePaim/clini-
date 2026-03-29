@@ -172,13 +172,13 @@ export function SuperUsuariosPage() {
         <span
           className={cn(
             'w-2 h-2 rounded-full',
-            ativo ? 'bg-green-500' : 'bg-red-500',
+            ativo ? 'bg-cyan-500' : 'bg-red-500',
           )}
         />
         <span
           className={cn(
             'text-[10px] font-black uppercase tracking-widest',
-            ativo ? 'text-green-500' : 'text-red-500',
+            ativo ? 'text-cyan-500' : 'text-red-500',
           )}
         >
           {ativo ? 'Ativo' : 'Inativo'}
@@ -342,7 +342,7 @@ export function SuperUsuariosPage() {
                               onClick={() => handleToggleAtivo(user)}
                               className={cn(
                                 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500/50',
-                                user.ativo ? 'bg-green-600' : 'bg-slate-700',
+                                user.ativo ? 'bg-cyan-600' : 'bg-slate-700',
                               )}
                               title={user.ativo ? 'Desativar usuario' : 'Ativar usuario'}
                             >

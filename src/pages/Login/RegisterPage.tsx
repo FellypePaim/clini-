@@ -66,16 +66,16 @@ export function RegisterPage() {
   // ── Escolha do tipo de conta ──────────────────
   if (!accountType) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
         <div className="w-full max-w-lg animate-fade-in">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10 justify-center">
-            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
               <span className="text-gray-900 text-2xl font-bold">Prontuário</span>
-              <span className="text-green-600 text-2xl font-light"> Verde</span>
+              <span className="text-cyan-500 text-2xl font-light"> Verde</span>
             </div>
           </div>
 
@@ -88,16 +88,16 @@ export function RegisterPage() {
             {/* Admin / Nova Clínica */}
             <button
               onClick={() => setAccountType('admin')}
-              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-gray-200 bg-white hover:border-green-500 hover:shadow-lg transition-all duration-200"
+              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-gray-200 bg-white hover:border-cyan-500 hover:shadow-lg transition-all duration-200"
             >
-              <div className="w-16 h-16 rounded-2xl bg-green-100 group-hover:bg-green-500 transition-colors flex items-center justify-center">
-                <Building2 className="w-8 h-8 text-green-600 group-hover:text-white transition-colors" />
+              <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 group-hover:bg-cyan-500 transition-colors flex items-center justify-center">
+                <Building2 className="w-8 h-8 text-cyan-500 group-hover:text-white transition-colors" />
               </div>
               <div className="text-center">
                 <h3 className="font-bold text-gray-900 text-lg">Administrador</h3>
                 <p className="text-sm text-gray-500 mt-1">Quero cadastrar uma nova clínica</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-green-500 absolute top-4 right-4 transition-colors" />
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-cyan-500 absolute top-4 right-4 transition-colors" />
             </button>
 
             {/* Funcionário */}
@@ -117,7 +117,7 @@ export function RegisterPage() {
           </div>
 
           <div className="mt-8 text-center">
-            <Link to="/login" className="text-sm text-gray-500 hover:text-green-600 transition-colors inline-flex items-center gap-1">
+            <Link to="/login" className="text-sm text-gray-500 hover:text-cyan-500 transition-colors inline-flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Já tenho uma conta
             </Link>
           </div>
@@ -218,16 +218,16 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
       <div className="w-full max-w-lg animate-fade-in">
         {/* Header */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-green-600 transition-colors mb-6">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-cyan-500 transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-green-600" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+            <Building2 className="w-5 h-5 text-cyan-500" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-gray-900">Cadastrar nova clínica</h2>
@@ -275,7 +275,7 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
         </form>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          <Link to="/login" className="hover:text-green-600 transition-colors">Já tenho uma conta</Link>
+          <Link to="/login" className="hover:text-cyan-500 transition-colors">Já tenho uma conta</Link>
         </p>
       </div>
     </div>
@@ -298,7 +298,7 @@ function FuncionarioRegisterForm({ isLoading, globalError, showPassword, setShow
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
       <div className="w-full max-w-lg animate-fade-in">
         {/* Header */}
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6">

@@ -111,9 +111,9 @@ export function SegurancaPage() {
           <div className="space-y-3">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Políticas de Senha</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-green-500" /><span className="text-gray-600">Mínimo 6 caracteres (Supabase Auth)</span></div>
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-green-500" /><span className="text-gray-600">Hash bcrypt no banco</span></div>
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-green-500" /><span className="text-gray-600">Recuperação de senha por e-mail</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Mínimo 6 caracteres (Supabase Auth)</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Hash bcrypt no banco</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Recuperação de senha por e-mail</span></div>
             </div>
           </div>
           <div className="space-y-3">
@@ -139,7 +139,7 @@ export function SegurancaPage() {
             <div>
               <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
                 {user?.email}
-                <Badge className="bg-green-100 text-green-700 px-1.5 border-none text-[10px]">ATIVA</Badge>
+                <Badge className="bg-emerald-100 text-emerald-700 px-1.5 border-none text-[10px]">ATIVA</Badge>
               </h4>
               <p className="text-xs text-gray-500 mt-0.5">{user?.nome} · {user?.role}</p>
             </div>
@@ -155,7 +155,7 @@ export function SegurancaPage() {
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
           <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-            <UserCheck className="w-4 h-4 text-green-600" /> Conformidade LGPD
+            <UserCheck className="w-4 h-4 text-cyan-500" /> Conformidade LGPD
           </h2>
         </div>
         <div className="p-6 space-y-4">
@@ -163,13 +163,13 @@ export function SegurancaPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button onClick={handleExportLGPD} disabled={exportingLGPD}
-              className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors text-left">
-              <Download className="w-5 h-5 text-green-600 shrink-0" />
+              className="flex items-center gap-2 p-4 bg-cyan-500/5 border border-cyan-500/20 rounded-xl hover:bg-cyan-500/10 transition-colors text-left">
+              <Download className="w-5 h-5 text-cyan-500 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-green-800">
+                <p className="text-sm font-semibold text-cyan-700">
                   {exportingLGPD ? 'Exportando...' : 'Exportar Todos os Dados'}
                 </p>
-                <p className="text-[10px] text-green-600 mt-0.5">Pacientes, consultas, prescrições, termos, evoluções (JSON)</p>
+                <p className="text-[10px] text-cyan-500 mt-0.5">Pacientes, consultas, prescrições, termos, evoluções (JSON)</p>
               </div>
             </button>
 

@@ -341,7 +341,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
           <FileCheck className="w-3.5 h-3.5" /> Termo
         </button>
         {custoTotal > 0 && (
-          <span className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-green-700 bg-green-50 border border-green-200 rounded-lg">
+          <span className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-cyan-600 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
             <DollarSign className="w-3.5 h-3.5" /> Custo: {fmtMoney(custoTotal)}
           </span>
         )}
@@ -366,10 +366,10 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Visual Map Area */}
       <div className="lg:col-span-1 bg-white rounded-[40px] border border-gray-100 p-10 shadow-sm flex flex-col items-center relative overflow-hidden group">
-         <div className="absolute top-0 left-0 w-full h-1.5 bg-green-500/10 group-hover:bg-green-500/30 transition-all" />
+         <div className="absolute top-0 left-0 w-full h-1.5 bg-cyan-500/10 group-hover:bg-cyan-500/30 transition-all" />
          
          <div className="flex items-center gap-2 mb-8 self-start">
-            <MapPin className="w-5 h-5 text-green-500" />
+            <MapPin className="w-5 h-5 text-cyan-500" />
             <div>
               <h3 className="text-sm font-black text-gray-900 border-none">Mapeamento Facial</h3>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Interativo front-view</p>
@@ -396,8 +396,8 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                     onClick={() => handleZoneClick(zone.id)}
                     className={cn(
                       "cursor-pointer transition-all duration-300 stroke-2",
-                      isSelected ? "fill-green-500/40 stroke-green-500" : "fill-gray-100/30 stroke-gray-200 hover:stroke-gray-400",
-                      isActive && "fill-green-500/60 stroke-green-600 scale-110 shadow-2xl"
+                      isSelected ? "fill-cyan-500/40 stroke-cyan-500" : "fill-gray-100/30 stroke-gray-200 hover:stroke-gray-400",
+                      isActive && "fill-cyan-500/60 stroke-cyan-500 scale-110 shadow-2xl"
                     )}
                     style={{ transformOrigin: `${zone.cx}px ${zone.cy}px` }}
                   />
@@ -490,14 +490,14 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                  selectedZones.map(zone => (
                    <div key={zone.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100 hover:bg-white transition-all group">
                      <div className="flex items-center gap-4">
-                       <div className="w-8 h-8 rounded-xl bg-green-100 text-green-600 flex items-center justify-center text-xs font-black">
+                       <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-xs font-black">
                          {ZONES_CONFIG.find(z => z.id === zone.id)?.id.substring(0, 2).toUpperCase()}
                        </div>
                        <div>
                          <p className="text-xs font-black text-gray-900 uppercase tracking-widest leading-none mb-1">{zone.label}</p>
                          <p className="text-[11px] text-gray-500 font-medium capitalize">
                            {zone.procedimento} · {zone.produto} ({zone.quantidade})
-                           {getCustoProduto(zone.produto || '') > 0 && <span className="text-green-600 ml-1">{fmtMoney(getCustoProduto(zone.produto || ''))}</span>}
+                           {getCustoProduto(zone.produto || '') > 0 && <span className="text-cyan-500 ml-1">{fmtMoney(getCustoProduto(zone.produto || ''))}</span>}
                          </p>
                        </div>
                      </div>
@@ -516,13 +516,13 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
          </div>
 
          {/* History of sessions — Visual Interativo */}
-         <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-green-950 rounded-[40px] p-8 text-white overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-green-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+         <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-cyan-950 rounded-[40px] p-8 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
             <div className="relative">
               <div className="flex items-center justify-between mb-8">
                  <div className="flex items-center gap-3">
-                   <div className="w-10 h-10 rounded-2xl bg-green-500/20 flex items-center justify-center">
-                     <History className="w-5 h-5 text-green-400" />
+                   <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 flex items-center justify-center">
+                     <History className="w-5 h-5 text-cyan-400" />
                    </div>
                    <div>
                      <h3 className="text-sm font-black uppercase tracking-widest">Sessões de Harmonização</h3>
@@ -545,10 +545,10 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                    const PROC_COLORS: Record<string, string> = { botox: '#22c55e', preenchimento: '#3b82f6', biorevolumizador: '#a855f7', fios: '#f59e0b', outros: '#6b7280' }
 
                    return (
-                     <div key={session.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isExpanded ? "border-green-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
+                     <div key={session.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isExpanded ? "border-cyan-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
                        <div className="p-5 flex items-start justify-between">
                          <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isExpanded ? null : session.id)}>
-                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-green-500/20 shrink-0">
+                           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-600 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-cyan-500/20 shrink-0">
                              {sessions.length - sIdx}
                            </div>
                            <div className="flex-1 min-w-0">
@@ -587,7 +587,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                              )
                            })}
                            {mapeamento.url && (
-                             <a href={mapeamento.url} target="_blank" rel="noopener noreferrer" className="block p-3 bg-green-500/10 rounded-xl border border-green-500/20 text-[10px] font-bold text-green-400 hover:text-green-300 uppercase tracking-widest text-center transition-all hover:bg-green-500/20">
+                             <a href={mapeamento.url} target="_blank" rel="noopener noreferrer" className="block p-3 bg-cyan-500/10 rounded-xl border border-cyan-500/20 text-[10px] font-bold text-cyan-400 hover:text-cyan-300 uppercase tracking-widest text-center transition-all hover:bg-cyan-500/20">
                                Ver Mapa Facial Salvo →
                              </a>
                            )}

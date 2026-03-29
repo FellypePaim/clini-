@@ -86,7 +86,7 @@ export function SignaturePad({ onSave, onClear }: SignaturePadProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 p-1 group transition-all hover:border-green-200">
+      <div className="relative border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 p-1 group transition-all hover:border-cyan-500/20">
         <canvas
           ref={canvasRef}
           onMouseDown={startDrawing}

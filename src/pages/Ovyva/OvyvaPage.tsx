@@ -43,7 +43,7 @@ export function OvyvaPage() {
        {/* OVYVA Header */}
        <div className="flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-green-500 flex items-center justify-center text-white shadow-xl shadow-green-500/20">
+             <div className="w-12 h-12 rounded-2xl bg-cyan-500 flex items-center justify-center text-white shadow-xl shadow-cyan-500/20">
                 <Bot className="w-6 h-6" />
              </div>
              <div>

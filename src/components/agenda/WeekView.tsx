@@ -133,22 +133,22 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               key={idx}
               className={cn(
                 'py-3 flex flex-col items-center border-l border-gray-100 first:border-l-0',
-                isToday && 'bg-green-50'
+                isToday && 'bg-cyan-500/5'
               )}
             >
-              <span className={cn('text-[11px] font-medium', isToday ? 'text-green-600' : 'text-gray-400')}>
+              <span className={cn('text-[11px] font-medium', isToday ? 'text-cyan-500' : 'text-gray-400')}>
                 {DIAS[idx]}
               </span>
               <div className={cn(
                 'w-8 h-8 rounded-full flex items-center justify-center my-0.5',
-                isToday ? 'bg-green-600 text-white' : 'text-gray-700'
+                isToday ? 'bg-cyan-600 text-white' : 'text-gray-700'
               )}>
                 <span className={cn('text-sm font-bold')}>{d.getDate()}</span>
               </div>
               {aptCount > 0 && (
                 <div className="flex gap-0.5">
                   {Array.from({ length: Math.min(aptCount, 3) }).map((_, i) => (
-                    <div key={i} className="w-1 h-1 rounded-full bg-green-400" />
+                    <div key={i} className="w-1 h-1 rounded-full bg-cyan-400" />
                   ))}
                   {aptCount > 3 && <div className="w-1 h-1 rounded-full bg-gray-300" />}
                 </div>
@@ -188,7 +188,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               ref={(el) => { colRefs.current[idx] = el }}
               className={cn(
                 'relative border-l border-gray-100',
-                isToday && 'bg-green-50/20'
+                isToday && 'bg-cyan-500/5'
               )}
               style={{ height: totalHeight }}
               onDragOver={(e) => handleDragOver(e, idx)}
@@ -199,12 +199,12 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               {HOURS.map((h) => (
                 <div
                   key={h}
-                  className="absolute left-0 right-0 border-t border-gray-100 group cursor-pointer hover:bg-green-50/50 transition-colors"
+                  className="absolute left-0 right-0 border-t border-gray-100 group cursor-pointer hover:bg-cyan-500/5 transition-colors"
                   style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT }}
                   onClick={() => onSlotClick(dateStr, h)}
                 >
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[9px] text-green-400 font-medium">+</span>
+                    <span className="text-[9px] text-cyan-400 font-medium">+</span>
                   </div>
                 </div>
               ))}
@@ -212,7 +212,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               {/* Drop preview */}
               {dropPreview?.dayIdx === idx && (
                 <div
-                  className="absolute left-1 right-1 bg-green-200/40 border-2 border-dashed border-green-400 rounded-lg pointer-events-none z-30 transition-all duration-75"
+                  className="absolute left-1 right-1 bg-cyan-500/15 border-2 border-dashed border-cyan-400 rounded-lg pointer-events-none z-30 transition-all duration-75"
                   style={{ top: dropPreview.top, height: SLOT_HEIGHT / 2 }}
                 />
               )}

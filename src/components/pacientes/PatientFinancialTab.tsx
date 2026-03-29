@@ -304,7 +304,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4">
           <p className="text-xs text-gray-400">Pago</p>
-          <p className="text-lg font-bold text-green-600 mt-1">{fmtMoney(totalPago)}</p>
+          <p className="text-lg font-bold text-cyan-500 mt-1">{fmtMoney(totalPago)}</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-100 p-4">
           <p className="text-xs text-gray-400">Em atraso</p>
@@ -316,17 +316,17 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Wallet className="w-4 h-4 text-green-600" /> Orçamentos</h3>
+            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Wallet className="w-4 h-4 text-cyan-500" /> Orçamentos</h3>
             <p className="text-xs text-gray-400 mt-0.5">{orcamentos.length} registro{orcamentos.length !== 1 ? 's' : ''}</p>
           </div>
-          <button onClick={() => setShowNewModal(true)} className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors">
+          <button onClick={() => setShowNewModal(true)} className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg transition-colors">
             <Plus className="w-4 h-4" /> Novo Orçamento
           </button>
         </div>
 
         <div className="p-5">
           {isLoading ? (
-            <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 animate-spin text-green-500" /></div>
+            <div className="flex justify-center py-12"><Loader2 className="w-7 h-7 animate-spin text-cyan-500" /></div>
           ) : orcamentos.length > 0 ? (
             <div className="space-y-3">
               {orcamentos.map(orc => {
@@ -340,7 +340,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1 min-w-0">
                         <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
-                          isPago ? "bg-green-50 text-green-600" : isAtrasado ? "bg-red-50 text-red-500" : "bg-yellow-50 text-yellow-600")}>
+                          isPago ? "bg-emerald-50 text-emerald-600" : isAtrasado ? "bg-red-50 text-red-500" : "bg-yellow-50 text-yellow-600")}>
                           {isPago ? <CheckCircle className="w-5 h-5" /> : isAtrasado ? <AlertTriangle className="w-5 h-5" /> : <ClipboardList className="w-5 h-5" />}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -362,9 +362,9 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
 
                       <div className="flex items-center gap-2 shrink-0 ml-3">
                         <div className="text-right">
-                          <p className={cn("text-sm font-bold", isPago ? "text-green-700" : isAtrasado ? "text-red-700" : "text-gray-900")}>{fmtMoney(orc.total)}</p>
+                          <p className={cn("text-sm font-bold", isPago ? "text-emerald-700" : isAtrasado ? "text-red-700" : "text-gray-900")}>{fmtMoney(orc.total)}</p>
                           <span className={cn("inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                            isPago ? "bg-green-50 text-green-700" : isAtrasado ? "bg-red-50 text-red-700" : "bg-yellow-50 text-yellow-700")}>
+                            isPago ? "bg-emerald-50 text-emerald-700" : isAtrasado ? "bg-red-50 text-red-700" : "bg-yellow-50 text-yellow-700")}>
                             {isPago ? 'Pago' : isAtrasado ? 'Vencido' : 'Pendente'}
                           </span>
                         </div>
@@ -375,7 +375,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
                     <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity">
                       {!isPago && (
                         <button onClick={() => { setShowPayModal(orc.id); setPayValor('') }}
-                          className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-green-700 hover:bg-green-50 rounded-lg transition-colors">
+                          className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-cyan-600 hover:bg-cyan-500/5 rounded-lg transition-colors">
                           <DollarSign className="w-3 h-3" /> Registrar Pagamento
                         </button>
                       )}
@@ -384,7 +384,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
                         <Printer className="w-3 h-3" /> {isPago ? 'Recibo' : 'PDF'}
                       </button>
                       <button onClick={() => handleSendWhatsApp(orc)}
-                        className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                        className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold text-cyan-500 hover:bg-cyan-500/5 rounded-lg transition-colors">
                         <Send className="w-3 h-3" /> WhatsApp
                       </button>
                     </div>
@@ -419,9 +419,9 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
                   {newItens.map((item, i) => (
                     <div key={i} className="flex items-center gap-2">
                       <input value={item.descricao} onChange={e => { const n = [...newItens]; n[i].descricao = e.target.value; setNewItens(n) }}
-                        placeholder="Ex: Limpeza, Restauração..." className="flex-1 bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-green-500/20" />
+                        placeholder="Ex: Limpeza, Restauração..." className="flex-1 bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-cyan-500/20" />
                       <input type="number" value={item.valor || ''} onChange={e => { const n = [...newItens]; n[i].valor = parseFloat(e.target.value) || 0; setNewItens(n) }}
-                        placeholder="R$" className="w-24 bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-right outline-none focus:ring-2 focus:ring-green-500/20" />
+                        placeholder="R$" className="w-24 bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-right outline-none focus:ring-2 focus:ring-cyan-500/20" />
                       {newItens.length > 1 && (
                         <button onClick={() => setNewItens(prev => prev.filter((_, idx) => idx !== i))} className="p-1.5 text-gray-400 hover:text-red-500 rounded-lg"><Trash2 className="w-3.5 h-3.5" /></button>
                       )}
@@ -457,7 +457,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
             <div className="px-6 py-4 border-t border-gray-100 flex justify-between shrink-0">
               <button onClick={() => setShowNewModal(false)} className="px-4 py-2 text-sm text-gray-500">Cancelar</button>
               <button onClick={handleCreate} disabled={saving}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
                 {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} Criar Orçamento
               </button>
             </div>
@@ -471,7 +471,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowPayModal(null)} />
           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm animate-fade-in">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><CreditCard className="w-4 h-4 text-green-600" /> Registrar Pagamento</h3>
+              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><CreditCard className="w-4 h-4 text-cyan-500" /> Registrar Pagamento</h3>
               <button onClick={() => setShowPayModal(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
             </div>
 
@@ -483,7 +483,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
                   {FORMAS.map(f => (
                     <button key={f.id} onClick={() => setPayForma(f.id)}
                       className={cn("py-2 px-2 rounded-lg text-[10px] font-semibold border transition-all text-center",
-                        payForma === f.id ? "bg-green-50 text-green-700 border-green-200" : "bg-white text-gray-500 border-gray-200")}>
+                        payForma === f.id ? "bg-cyan-500/5 text-cyan-600 border-cyan-500/20" : "bg-white text-gray-500 border-gray-200")}>
                       {f.icon} {f.label}
                     </button>
                   ))}
@@ -520,7 +520,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
             <div className="px-6 py-4 border-t border-gray-100 flex justify-between">
               <button onClick={() => setShowPayModal(null)} className="px-4 py-2 text-sm text-gray-500">Cancelar</button>
               <button onClick={handlePay} disabled={!!payingId}
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
+                className="flex items-center gap-1.5 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-xl disabled:opacity-50">
                 {payingId ? <Loader2 className="w-4 h-4 animate-spin" /> : <DollarSign className="w-4 h-4" />} Confirmar
               </button>
             </div>

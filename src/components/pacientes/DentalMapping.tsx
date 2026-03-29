@@ -487,7 +487,7 @@ Responda APENAS com JSON válido:
           <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
             <Printer className="w-3.5 h-3.5" /> Imprimir PDF
           </button>
-          <button onClick={handleGerarOrcamento} disabled={registeredCount === 0} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-40">
+          <button onClick={handleGerarOrcamento} disabled={registeredCount === 0} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-600 bg-cyan-500/5 border border-cyan-500/20 rounded-lg hover:bg-cyan-500/10 transition-colors disabled:opacity-40">
             <DollarSign className="w-3.5 h-3.5" /> Gerar Orçamento
           </button>
           <button onClick={() => { setCompareMode(!compareMode); setCompareSessionA(null); setCompareSessionB(null) }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", compareMode ? "text-blue-700 bg-blue-50 border-blue-200" : "text-gray-600 bg-white border-gray-200 hover:border-gray-300")}>
@@ -755,7 +755,7 @@ Responda APENAS com JSON válido:
                       {([
                         { v: 'pendente', l: 'Pendente', c: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
                         { v: 'em_andamento', l: 'Em andamento', c: 'bg-blue-100 text-blue-700 border-blue-200' },
-                        { v: 'concluido', l: 'Concluído', c: 'bg-green-100 text-green-700 border-green-200' },
+                        { v: 'concluido', l: 'Concluído', c: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
                       ] as const).map(st => (
                         <button
                           key={st.v}
@@ -1231,7 +1231,7 @@ function KpiCard({ label, value, total, color }: { label: string; value: string 
     blue: 'bg-blue-50 text-blue-700 border-blue-100',
     red: 'bg-red-50 text-red-700 border-red-100',
     orange: 'bg-orange-50 text-orange-700 border-orange-100',
-    green: 'bg-green-50 text-green-700 border-green-100',
+    green: 'bg-emerald-50 text-emerald-700 border-emerald-100',
     yellow: 'bg-yellow-50 text-yellow-700 border-yellow-100',
   }
   return (

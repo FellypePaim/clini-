@@ -394,7 +394,7 @@ export function ProdutosPage() {
               <div>
                 <label className="text-xs font-bold text-gray-400 uppercase mb-1 block">Quantidade *</label>
                 <input type="number" min="1" value={movQty} onChange={e => setMovQty(e.target.value)} autoFocus
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-green-500/20" placeholder="0" />
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-cyan-500/20" placeholder="0" />
                 {movModal.tipo === 'saida' && selectedProduct && Number(movQty) > selectedProduct.currentStock && (
                   <p className="text-xs text-red-500 mt-1">Estoque atual: {selectedProduct.currentStock}. Quantidade excede o disponível.</p>
                 )}
