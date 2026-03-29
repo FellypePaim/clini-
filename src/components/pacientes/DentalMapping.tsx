@@ -484,13 +484,13 @@ Responda APENAS com JSON válido:
           <KpiCard label="Pendentes" value={tratPendentes} color="yellow" />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+          <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:border-gray-300 transition-colors">
             <Printer className="w-3.5 h-3.5" /> Imprimir PDF
           </button>
           <button onClick={handleGerarOrcamento} disabled={registeredCount === 0} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-cyan-600 bg-cyan-500/5 border border-cyan-500/20 rounded-lg hover:bg-cyan-500/10 transition-colors disabled:opacity-40">
             <DollarSign className="w-3.5 h-3.5" /> Gerar Orçamento
           </button>
-          <button onClick={() => { setCompareMode(!compareMode); setCompareSessionA(null); setCompareSessionB(null) }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", compareMode ? "text-blue-700 bg-blue-50 border-blue-200" : "text-gray-600 bg-white border-gray-200 hover:border-gray-300")}>
+          <button onClick={() => { setCompareMode(!compareMode); setCompareSessionA(null); setCompareSessionB(null) }} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", compareMode ? "text-blue-700 bg-blue-50 border-blue-200" : "text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border-[var(--color-border)] hover:border-gray-300")}>
             <GitCompare className="w-3.5 h-3.5" /> {compareMode ? 'Sair da Comparação' : 'Comparar Sessões'}
           </button>
         </div>
@@ -498,15 +498,15 @@ Responda APENAS com JSON válido:
 
       {/* Comparação de Sessões */}
       {compareMode && sessions.length >= 2 && (
-        <div className="bg-white rounded-xl border border-blue-200 p-5 space-y-4">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-blue-200 p-5 space-y-4">
           <h3 className="text-xs font-bold text-blue-700 uppercase tracking-wider flex items-center gap-2">
             <GitCompare className="w-4 h-4" /> Comparar Sessões
           </h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Sessão A (anterior)</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase mb-1 block">Sessão A (anterior)</label>
               <select value={compareSessionA || ''} onChange={e => setCompareSessionA(e.target.value || null)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-xs outline-none">
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-xs outline-none">
                 <option value="">Selecionar...</option>
                 {sessions.map((s: any, i: number) => {
                   const dp = (s.created_at as string).split('T')[0].split('-')
@@ -515,9 +515,9 @@ Responda APENAS com JSON válido:
               </select>
             </div>
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase mb-1 block">Sessão B (recente)</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase mb-1 block">Sessão B (recente)</label>
               <select value={compareSessionB || ''} onChange={e => setCompareSessionB(e.target.value || null)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-xs outline-none">
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-xs outline-none">
                 <option value="">Selecionar...</option>
                 {sessions.map((s: any, i: number) => {
                   const dp = (s.created_at as string).split('T')[0].split('-')
@@ -542,29 +542,29 @@ Responda APENAS com JSON válido:
 
             return (
               <div className="space-y-3">
-                <div className="flex items-center gap-4 text-xs text-gray-500">
+                <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
                   <span>Sessão A: <b>{Object.keys(a.dentes).length} dentes</b> por {a.profissional}</span>
                   <span>→</span>
                   <span>Sessão B: <b>{Object.keys(b.dentes).length} dentes</b> por {b.profissional}</span>
                 </div>
                 {changes.length > 0 ? (
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{changes.length} mudança{changes.length > 1 ? 's' : ''} detectada{changes.length > 1 ? 's' : ''}</p>
+                    <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">{changes.length} mudança{changes.length > 1 ? 's' : ''} detectada{changes.length > 1 ? 's' : ''}</p>
                     {changes.map(c => {
                       const cfgA = CONDITIONS.find(x => x.value === c.antes)
                       const cfgB = CONDITIONS.find(x => x.value === c.depois)
                       return (
-                        <div key={c.tooth} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg text-xs">
-                          <span className="font-bold text-gray-900 w-12">Dente {c.tooth}</span>
+                        <div key={c.tooth} className="flex items-center gap-3 p-2 bg-[var(--color-bg-deep)] rounded-lg text-xs">
+                          <span className="font-bold text-[var(--color-text-primary)] w-12">Dente {c.tooth}</span>
                           <span className="px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: `${cfgA?.color || '#999'}20`, color: cfgA?.color || '#999' }}>{cfgA?.label || c.antes}</span>
-                          <span className="text-gray-300">→</span>
+                          <span className="text-[var(--color-text-dim)]">→</span>
                           <span className="px-2 py-0.5 rounded text-[10px] font-semibold" style={{ backgroundColor: `${cfgB?.color || '#999'}20`, color: cfgB?.color || '#999' }}>{cfgB?.label || c.depois}</span>
                         </div>
                       )
                     })}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">Nenhuma mudança detectada entre as sessões.</p>
+                  <p className="text-xs text-[var(--color-text-muted)] italic">Nenhuma mudança detectada entre as sessões.</p>
                 )}
               </div>
             )
@@ -573,7 +573,7 @@ Responda APENAS com JSON válido:
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-100">
+      <div className="flex items-center gap-1 bg-[var(--color-bg-card)]/50 p-1 rounded-xl border border-[var(--color-border)]">
         {([
           { key: 'odontograma', label: 'Odontograma', icon: <Search className="w-4 h-4" /> },
           { key: 'periodontal', label: 'Periodontal', icon: <Activity className="w-4 h-4" /> },
@@ -584,7 +584,7 @@ Responda APENAS com JSON válido:
             onClick={() => setActiveTab(t.key)}
             className={cn(
               'flex-1 px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all',
-              activeTab === t.key ? 'bg-white text-blue-700 shadow-sm border border-gray-100' : 'text-gray-400 hover:text-gray-600'
+              activeTab === t.key ? 'bg-[var(--color-bg-card)] text-blue-700 shadow-sm border border-[var(--color-border)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
             )}
           >
             {t.icon} {t.label}
@@ -596,9 +596,9 @@ Responda APENAS com JSON válido:
       {activeTab === 'odontograma' && (
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Mapa Dental */}
-          <div className="flex-1 bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+          <div className="flex-1 bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Odontograma Interativo</h3>
+              <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Odontograma Interativo</h3>
               <button
                 onClick={handleSave}
                 disabled={isSubmitting || registeredCount === 0}
@@ -610,7 +610,7 @@ Responda APENAS com JSON válido:
             </div>
 
             {/* Legenda de condições */}
-            <div className="flex flex-wrap gap-2 mb-6 p-3 bg-gray-50 rounded-xl">
+            <div className="flex flex-wrap gap-2 mb-6 p-3 bg-[var(--color-bg-deep)] rounded-xl">
               {CONDITIONS.map(c => (
                 <button
                   key={c.value}
@@ -618,7 +618,7 @@ Responda APENAS com JSON válido:
                   className={cn(
                     "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all",
                     activeCondition === c.value
-                      ? 'bg-white shadow-sm scale-105'
+                      ? 'bg-[var(--color-bg-card)] shadow-sm scale-105'
                       : 'opacity-60 hover:opacity-100'
                   )}
                   style={activeCondition === c.value ? { borderColor: c.color, color: c.color } : { borderColor: '#e5e7eb', color: '#6b7280' }}
@@ -633,7 +633,7 @@ Responda APENAS com JSON válido:
             <div className="space-y-6">
               {/* Superior */}
               <div className="space-y-2">
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Arcada Superior</p>
+                <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-center">Arcada Superior</p>
                 <div className="flex justify-center gap-1">
                   {QUADRANTS[0].teeth.map(t => (
                     <ToothButton key={t} tooth={t} color={getConditionColor(t)} isActive={activeTooth === t} data={toothMap[t]} onClick={() => { handleToothClick(t); applyConditionTo(t) }} />
@@ -655,18 +655,18 @@ Responda APENAS com JSON válido:
                     <ToothButton key={t} tooth={t} color={getConditionColor(t)} isActive={activeTooth === t} data={toothMap[t]} onClick={() => { handleToothClick(t); applyConditionTo(t) }} />
                   ))}
                 </div>
-                <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest text-center">Arcada Inferior</p>
+                <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest text-center">Arcada Inferior</p>
               </div>
             </div>
 
             {/* Observações */}
             <div className="mt-6">
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Observações Gerais</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Observações Gerais</label>
               <textarea
                 value={observacoesGerais}
                 onChange={(e) => setObservacoesGerais(e.target.value)}
                 placeholder="Observações clínicas, notas sobre oclusão, ATM, etc..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 resize-none min-h-[60px] transition-all"
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 resize-none min-h-[60px] transition-all"
                 rows={2}
               />
             </div>
@@ -675,13 +675,13 @@ Responda APENAS com JSON válido:
           {/* Painel Lateral - Detalhes do Dente Selecionado */}
           <div className="w-full lg:w-80 space-y-4">
             {activeTooth ? (
-              <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--color-border)]">
                   <div>
-                    <h4 className="text-lg font-black text-gray-900">Dente {activeTooth}</h4>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{TOOTH_TYPES[activeTooth] || ''} · Quadrante {Math.floor(activeTooth / 10)}</p>
+                    <h4 className="text-lg font-black text-[var(--color-text-primary)]">Dente {activeTooth}</h4>
+                    <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{TOOTH_TYPES[activeTooth] || ''} · Quadrante {Math.floor(activeTooth / 10)}</p>
                   </div>
-                  <button onClick={() => setActiveTooth(null)} className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400">
+                  <button onClick={() => setActiveTooth(null)} className="p-1.5 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -689,11 +689,11 @@ Responda APENAS com JSON válido:
                 <div className="space-y-4">
                   {/* Condição */}
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Condição</label>
+                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Condição</label>
                     <select
                       value={toothMap[activeTooth]?.condition || 'higido'}
                       onChange={(e) => updateToothData(activeTooth, { condition: e.target.value as ToothCondition })}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 text-sm font-bold outline-none"
+                      className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl py-2 px-3 text-sm font-bold outline-none"
                     >
                       {CONDITIONS.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
                     </select>
@@ -701,7 +701,7 @@ Responda APENAS com JSON válido:
 
                   {/* Faces afetadas */}
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Faces Afetadas</label>
+                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Faces Afetadas</label>
                     <div className="flex gap-1.5">
                       {['M','D','V','L','O'].map(face => {
                         const isSelected = toothMap[activeTooth]?.faces?.includes(face)
@@ -715,7 +715,7 @@ Responda APENAS com JSON válido:
                             }}
                             className={cn(
                               "w-10 h-10 rounded-xl text-xs font-black border-2 transition-all",
-                              isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-gray-50 text-gray-400 border-gray-200 hover:border-blue-300"
+                              isSelected ? "bg-blue-600 text-white border-blue-600" : "bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:border-blue-300"
                             )}
                           >
                             {face}
@@ -723,34 +723,34 @@ Responda APENAS com JSON válido:
                         )
                       })}
                     </div>
-                    <p className="text-[9px] text-gray-300 mt-1">M=Mesial D=Distal V=Vestibular L=Lingual O=Oclusal</p>
+                    <p className="text-[9px] text-[var(--color-text-dim)] mt-1">M=Mesial D=Distal V=Vestibular L=Lingual O=Oclusal</p>
                   </div>
 
                   {/* Procedimento planejado */}
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Procedimento Planejado</label>
+                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Procedimento Planejado</label>
                     <input
                       value={toothMap[activeTooth]?.procedimento_planejado || ''}
                       onChange={(e) => updateToothData(activeTooth, { procedimento_planejado: e.target.value })}
                       placeholder="Ex: Restauração classe II em resina"
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 text-xs outline-none"
+                      className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl py-2 px-3 text-xs outline-none"
                     />
                   </div>
 
                   {/* Observação */}
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Observação</label>
+                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Observação</label>
                     <textarea
                       value={toothMap[activeTooth]?.observacao || ''}
                       onChange={(e) => updateToothData(activeTooth, { observacao: e.target.value })}
                       placeholder="Notas sobre este dente..."
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl py-2 px-3 text-xs outline-none resize-none min-h-[60px]"
+                      className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl py-2 px-3 text-xs outline-none resize-none min-h-[60px]"
                     />
                   </div>
 
                   {/* Status do tratamento */}
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Status do Tratamento</label>
+                    <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Status do Tratamento</label>
                     <div className="flex gap-1">
                       {([
                         { v: 'pendente', l: 'Pendente', c: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
@@ -762,7 +762,7 @@ Responda APENAS com JSON válido:
                           onClick={() => updateToothData(activeTooth, { status_tratamento: st.v })}
                           className={cn(
                             "flex-1 py-1.5 rounded-lg text-[9px] font-bold border transition-all",
-                            toothMap[activeTooth]?.status_tratamento === st.v ? st.c : "bg-gray-50 text-gray-400 border-gray-200"
+                            toothMap[activeTooth]?.status_tratamento === st.v ? st.c : "bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)]"
                           )}
                         >
                           {st.l}
@@ -774,7 +774,7 @@ Responda APENAS com JSON válido:
                   {/* Profissional responsável */}
                   {profissionais.length > 0 && (
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Profissional</label>
+                      <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Profissional</label>
                       <div className="flex flex-wrap gap-1">
                         {profissionais.map(p => (
                           <button
@@ -782,7 +782,7 @@ Responda APENAS com JSON válido:
                             onClick={() => updateToothData(activeTooth, { profissional_cor: p.cor })}
                             className={cn(
                               "flex items-center gap-1 px-2 py-1 rounded-lg text-[9px] font-bold border transition-all",
-                              toothMap[activeTooth]?.profissional_cor === p.cor ? "border-2 shadow-sm" : "border-gray-200 opacity-60"
+                              toothMap[activeTooth]?.profissional_cor === p.cor ? "border-2 shadow-sm" : "border-[var(--color-border)] opacity-60"
                             )}
                             style={toothMap[activeTooth]?.profissional_cor === p.cor ? { borderColor: p.cor, color: p.cor } : {}}
                           >
@@ -802,16 +802,16 @@ Responda APENAS com JSON válido:
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-2xl border border-dashed border-gray-200 p-8 text-center">
-                <Info className="w-8 h-8 text-gray-200 mx-auto mb-3" />
-                <p className="text-xs font-bold text-gray-400">Selecione uma condição na legenda e clique em um dente</p>
+              <div className="bg-[var(--color-bg-deep)] rounded-2xl border border-dashed border-[var(--color-border)] p-8 text-center">
+                <Info className="w-8 h-8 text-[var(--color-text-dim)] mx-auto mb-3" />
+                <p className="text-xs font-bold text-[var(--color-text-muted)]">Selecione uma condição na legenda e clique em um dente</p>
               </div>
             )}
 
             {/* Resumo rápido */}
             {registeredCount > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
-                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Resumo</h4>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-4 shadow-sm">
+                <h4 className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-3">Resumo</h4>
                 <div className="space-y-1.5">
                   {CONDITIONS.filter(c => Object.values(toothMap).some(t => t.condition === c.value)).map(c => {
                     const count = Object.values(toothMap).filter(t => t.condition === c.value).length
@@ -819,7 +819,7 @@ Responda APENAS com JSON válido:
                       <div key={c.value} className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-2">
                           <span style={{ color: c.color }}>{c.icon}</span>
-                          <span className="text-gray-600 font-medium">{c.label}</span>
+                          <span className="text-[var(--color-text-secondary)] font-medium">{c.label}</span>
                         </span>
                         <span className="font-black" style={{ color: c.color }}>{count}</span>
                       </div>
@@ -834,16 +834,16 @@ Responda APENAS com JSON válido:
 
       {/* Periodontal Tab */}
       {activeTab === 'periodontal' && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-8 shadow-sm">
           <div className="mb-6">
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Avaliação Periodontal</h3>
-            <p className="text-xs text-gray-400 mt-1">Profundidade de sondagem, sangramento, mobilidade e recessão</p>
+            <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Avaliação Periodontal</h3>
+            <p className="text-xs text-[var(--color-text-muted)] mt-1">Profundidade de sondagem, sangramento, mobilidade e recessão</p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-100 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                <tr className="border-b border-[var(--color-border)] text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                   <th className="text-left py-3 px-2">Dente</th>
                   <th className="py-3 px-2">Prof. V (mm)</th>
                   <th className="py-3 px-2">Prof. L (mm)</th>
@@ -855,24 +855,24 @@ Responda APENAS com JSON válido:
               <tbody>
                 {[...QUADRANTS[0].teeth, ...QUADRANTS[1].teeth, 0, ...QUADRANTS[3].teeth, ...QUADRANTS[2].teeth].map((t, i) => {
                   if (t === 0) return (
-                    <tr key={`sep-${i}`} className="h-2 bg-gray-100">
-                      <td colSpan={6} className="text-[9px] text-gray-400 font-bold text-center uppercase tracking-widest py-1">Arcada Inferior</td>
+                    <tr key={`sep-${i}`} className="h-2 bg-[var(--color-bg-card)]">
+                      <td colSpan={6} className="text-[9px] text-[var(--color-text-muted)] font-bold text-center uppercase tracking-widest py-1">Arcada Inferior</td>
                     </tr>
                   )
                   return (
-                  <tr key={t} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td className="py-2 px-2 font-black text-gray-700">{t}</td>
-                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.profundidade?.[0] || ''} onChange={(e) => updatePerio(t, { profundidade: [parseInt(e.target.value) || 0, perioMap[t]?.profundidade?.[1] || 0] })} /></td>
-                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.profundidade?.[1] || ''} onChange={(e) => updatePerio(t, { profundidade: [perioMap[t]?.profundidade?.[0] || 0, parseInt(e.target.value) || 0] })} /></td>
+                  <tr key={t} className="border-b border-gray-50 hover:bg-[var(--color-bg-card-hover)]/50 transition-colors">
+                    <td className="py-2 px-2 font-black text-[var(--color-text-secondary)]">{t}</td>
+                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.profundidade?.[0] || ''} onChange={(e) => updatePerio(t, { profundidade: [parseInt(e.target.value) || 0, perioMap[t]?.profundidade?.[1] || 0] })} /></td>
+                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.profundidade?.[1] || ''} onChange={(e) => updatePerio(t, { profundidade: [perioMap[t]?.profundidade?.[0] || 0, parseInt(e.target.value) || 0] })} /></td>
                     <td className="py-2 px-2 text-center">
-                      <button onClick={() => updatePerio(t, { sangramento: !perioMap[t]?.sangramento })} className={cn("w-6 h-6 rounded-full border-2 transition-all mx-auto", perioMap[t]?.sangramento ? "bg-red-500 border-red-500" : "bg-white border-gray-200")} />
+                      <button onClick={() => updatePerio(t, { sangramento: !perioMap[t]?.sangramento })} className={cn("w-6 h-6 rounded-full border-2 transition-all mx-auto", perioMap[t]?.sangramento ? "bg-red-500 border-red-500" : "bg-[var(--color-bg-card)] border-[var(--color-border)]")} />
                     </td>
                     <td className="py-2 px-2">
-                      <select className="bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 outline-none" value={perioMap[t]?.mobilidade || 0} onChange={(e) => updatePerio(t, { mobilidade: parseInt(e.target.value) })}>
+                      <select className="bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-1 px-2 outline-none" value={perioMap[t]?.mobilidade || 0} onChange={(e) => updatePerio(t, { mobilidade: parseInt(e.target.value) })}>
                         {[0,1,2,3].map(v => <option key={v} value={v}>Grau {v}</option>)}
                       </select>
                     </td>
-                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-gray-50 border border-gray-200 rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.recessao || ''} onChange={(e) => updatePerio(t, { recessao: parseInt(e.target.value) || 0 })} /></td>
+                    <td className="py-2 px-2"><input type="number" min={0} max={15} className="w-14 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-1 px-2 text-center outline-none" value={perioMap[t]?.recessao || ''} onChange={(e) => updatePerio(t, { recessao: parseInt(e.target.value) || 0 })} /></td>
                   </tr>
                   )
                 })}
@@ -881,7 +881,7 @@ Responda APENAS com JSON válido:
           </div>
 
           <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center gap-4 text-xs text-gray-400">
+            <div className="flex items-center gap-4 text-xs text-[var(--color-text-muted)]">
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /> = Sangramento</span>
               <span>V = Vestibular · L = Lingual</span>
             </div>
@@ -894,11 +894,11 @@ Responda APENAS com JSON válido:
 
       {/* Plano de Tratamento Tab */}
       {activeTab === 'plano' && (
-        <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-8 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Plano de Tratamento</h3>
-              <p className="text-xs text-gray-400 mt-1">Defina as etapas e prioridades do tratamento</p>
+              <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Plano de Tratamento</h3>
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">Defina as etapas e prioridades do tratamento</p>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -921,14 +921,14 @@ Responda APENAS com JSON válido:
               </h4>
               <div className="space-y-2">
                 {Object.values(toothMap).filter(t => t.condition !== 'higido' && t.condition !== 'ausente').map(t => (
-                  <div key={t.tooth} className="flex items-center justify-between text-xs bg-white rounded-lg p-2.5 border border-blue-100">
+                  <div key={t.tooth} className="flex items-center justify-between text-xs bg-[var(--color-bg-card)] rounded-lg p-2.5 border border-blue-100">
                     <div className="flex items-center gap-3">
-                      <span className="font-black text-gray-900">Dente {t.tooth}</span>
+                      <span className="font-black text-[var(--color-text-primary)]">Dente {t.tooth}</span>
                       <span className="px-2 py-0.5 rounded-md text-[9px] font-bold" style={{ backgroundColor: `${CONDITIONS.find(c => c.value === t.condition)?.color}15`, color: CONDITIONS.find(c => c.value === t.condition)?.color }}>
                         {CONDITIONS.find(c => c.value === t.condition)?.label}
                       </span>
                     </div>
-                    <span className="text-gray-500 font-medium">{t.procedimento_planejado || t.faces?.join(',') || '—'}</span>
+                    <span className="text-[var(--color-text-muted)] font-medium">{t.procedimento_planejado || t.faces?.join(',') || '—'}</span>
                   </div>
                 ))}
               </div>
@@ -939,7 +939,7 @@ Responda APENAS com JSON válido:
             value={planoTexto}
             onChange={(e) => setPlanoTexto(e.target.value)}
             placeholder={"1. Urgência: Restauração do dente 36 (cárie extensa)\n2. Tratamento endodôntico dente 46\n3. Exodontia do 38 (terceiro molar incluso)\n4. Profilaxia e raspagem\n5. Moldagem para prótese parcial\n\nPrazo estimado: 3 meses\nRetorno: 15 dias após cada procedimento"}
-            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 resize-none min-h-[250px] transition-all"
+            className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-400 resize-none min-h-[250px] transition-all"
             rows={12}
           />
         </div>
@@ -956,7 +956,7 @@ Responda APENAS com JSON válido:
               </div>
               <div>
                 <h3 className="text-sm font-black uppercase tracking-widest">Histórico Odontológico</h3>
-                <p className="text-[10px] text-gray-500 font-medium mt-0.5">{sessions.length} avaliação(ões) registrada(s)</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-0.5">{sessions.length} avaliação(ões) registrada(s)</p>
               </div>
             </div>
           </div>
@@ -974,7 +974,7 @@ Responda APENAS com JSON válido:
               dentesArr.forEach((d: any) => { condStats[d.condition] = (condStats[d.condition] || 0) + 1 })
 
               return (
-                <div key={s.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isOpen ? "border-blue-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
+                <div key={s.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isOpen ? "border-blue-500/30 bg-[var(--color-bg-card)]/[0.03]" : "border-white/5 hover:border-white/10 bg-[var(--color-bg-card)]/[0.02]")}>
                   {/* Header */}
                   <div className="p-5 flex items-start justify-between">
                     <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isOpen ? null : s.id)}>
@@ -984,7 +984,7 @@ Responda APENAS com JSON válido:
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-black">{(() => { const p = (s.created_at as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}</p>
-                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'}</p>
+                        <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-0.5">{(s.profiles as any)?.nome_completo || 'Profissional'}</p>
 
                         {/* Mini badges de condições */}
                         <div className="flex flex-wrap gap-1.5 mt-3">
@@ -997,7 +997,7 @@ Responda APENAS com JSON válido:
                               </span>
                             )
                           })}
-                          {dentesCount === 0 && <span className="text-[10px] text-gray-600">Sem dentes registrados</span>}
+                          {dentesCount === 0 && <span className="text-[10px] text-[var(--color-text-secondary)]">Sem dentes registrados</span>}
                         </div>
                       </div>
                     </div>
@@ -1010,7 +1010,7 @@ Responda APENAS com JSON válido:
                       <button onClick={() => handleDeleteSession(s.id)} className="p-2 text-red-400/60 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all" title="Excluir">
                         <Trash2 className="w-4 h-4" />
                       </button>
-                      <button onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-2 text-gray-500 hover:text-white rounded-lg transition-all">
+                      <button onClick={() => setExpandedSession(isOpen ? null : s.id)} className="p-2 text-[var(--color-text-muted)] hover:text-white rounded-lg transition-all">
                         <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", isOpen && "rotate-180")} />
                       </button>
                     </div>
@@ -1021,8 +1021,8 @@ Responda APENAS com JSON válido:
                     <div className="px-5 pb-5 animate-fade-in space-y-4">
                       {/* Mini Odontograma Visual */}
                       {dentesCount > 0 && (
-                        <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                          <p className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Mapa Dental</p>
+                        <div className="p-4 bg-[var(--color-bg-card)]/5 rounded-xl border border-white/5">
+                          <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-3">Mapa Dental</p>
                           <div className="flex flex-wrap gap-1 justify-center">
                             {[...Array(32)].map((_, i) => {
                               const toothNum = i < 8 ? 18 - i : i < 16 ? 21 + (i - 8) : i < 24 ? 38 - (i - 16) : 41 + (i - 24)
@@ -1049,16 +1049,16 @@ Responda APENAS com JSON válido:
                           {dentesArr.map((d: any) => {
                             const cfg = CONDITIONS.find(c => c.value === d.condition)
                             return (
-                              <div key={d.tooth} className="flex items-center gap-3 p-2.5 bg-white/5 rounded-lg border border-white/5 text-xs">
+                              <div key={d.tooth} className="flex items-center gap-3 p-2.5 bg-[var(--color-bg-card)]/5 rounded-lg border border-white/5 text-xs">
                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0" style={{ backgroundColor: `${cfg?.color || '#666'}20`, color: cfg?.color || '#666' }}>
                                   {d.tooth}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-2">
                                     <span className="font-bold" style={{ color: cfg?.color }}>{cfg?.label}</span>
-                                    {d.faces?.length > 0 && <span className="text-gray-500">({d.faces.join(',')})</span>}
+                                    {d.faces?.length > 0 && <span className="text-[var(--color-text-muted)]">({d.faces.join(',')})</span>}
                                   </div>
-                                  {d.procedimento_planejado && <p className="text-gray-400 text-[10px] truncate">{d.procedimento_planejado}</p>}
+                                  {d.procedimento_planejado && <p className="text-[var(--color-text-muted)] text-[10px] truncate">{d.procedimento_planejado}</p>}
                                 </div>
                               </div>
                             )
@@ -1070,11 +1070,11 @@ Responda APENAS com JSON válido:
                       {map.plano_tratamento && (
                         <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10">
                           <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><FileText className="w-3 h-3" /> Plano de Tratamento</p>
-                          <p className="text-xs text-gray-300 whitespace-pre-line leading-relaxed">{map.plano_tratamento}</p>
+                          <p className="text-xs text-[var(--color-text-dim)] whitespace-pre-line leading-relaxed">{map.plano_tratamento}</p>
                         </div>
                       )}
                       {map.observacoes && (
-                        <p className="text-xs text-gray-500 italic px-1">{map.observacoes}</p>
+                        <p className="text-xs text-[var(--color-text-muted)] italic px-1">{map.observacoes}</p>
                       )}
                     </div>
                   )}
@@ -1082,11 +1082,11 @@ Responda APENAS com JSON válido:
               )
             }) : (
               <div className="py-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-8 h-8 text-gray-700" />
+                <div className="w-16 h-16 rounded-2xl bg-[var(--color-bg-card)]/5 flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-8 h-8 text-[var(--color-text-secondary)]" />
                 </div>
-                <p className="text-xs font-black text-gray-600 uppercase tracking-widest">Nenhuma avaliação anterior</p>
-                <p className="text-[10px] text-gray-700 mt-1">Preencha o odontograma acima e salve</p>
+                <p className="text-xs font-black text-[var(--color-text-secondary)] uppercase tracking-widest">Nenhuma avaliação anterior</p>
+                <p className="text-[10px] text-[var(--color-text-secondary)] mt-1">Preencha o odontograma acima e salve</p>
               </div>
             )}
           </div>
@@ -1097,7 +1097,7 @@ Responda APENAS com JSON válido:
       {showIAModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-xl animate-fade-in" onClick={() => setShowIAModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-in">
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-slide-in">
             <div className="bg-purple-600 p-6 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Sparkles className="w-6 h-6" />
@@ -1106,36 +1106,36 @@ Responda APENAS com JSON válido:
                   <p className="text-xs text-purple-200">Responda as perguntas e a IA gera o plano</p>
                 </div>
               </div>
-              <button onClick={() => setShowIAModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X className="w-5 h-5" /></button>
+              <button onClick={() => setShowIAModal(false)} className="p-2 hover:bg-[var(--color-bg-card)]/10 rounded-xl"><X className="w-5 h-5" /></button>
             </div>
 
             <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Queixa principal do paciente</label>
+                <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1.5 block">Queixa principal do paciente</label>
                 <input value={iaForm.queixaPrincipal} onChange={(e) => setIaForm(p => ({ ...p, queixaPrincipal: e.target.value }))} placeholder="Ex: Dor no dente 36, sangramento gengival..." className="input-base text-sm" />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Nível de urgência</label>
+                <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1.5 block">Nível de urgência</label>
                 <div className="flex gap-2">
                   {['baixa', 'moderada', 'alta', 'emergência'].map(u => (
-                    <button key={u} onClick={() => setIaForm(p => ({ ...p, urgencia: u }))} className={cn("flex-1 py-2 rounded-xl text-xs font-bold border transition-all capitalize", iaForm.urgencia === u ? "bg-purple-600 text-white border-purple-600" : "bg-gray-50 text-gray-500 border-gray-200")}>
+                    <button key={u} onClick={() => setIaForm(p => ({ ...p, urgencia: u }))} className={cn("flex-1 py-2 rounded-xl text-xs font-bold border transition-all capitalize", iaForm.urgencia === u ? "bg-purple-600 text-white border-purple-600" : "bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)]")}>
                       {u}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Histórico relevante do paciente</label>
+                <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1.5 block">Histórico relevante do paciente</label>
                 <textarea value={iaForm.historicoPaciente} onChange={(e) => setIaForm(p => ({ ...p, historicoPaciente: e.target.value }))} placeholder="Ex: Diabético, usa anticoagulante, alergia a penicilina..." className="input-base text-sm min-h-[60px] resize-none" rows={2} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1.5 block">Preferências do profissional</label>
+                <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1.5 block">Preferências do profissional</label>
                 <textarea value={iaForm.preferencias} onChange={(e) => setIaForm(p => ({ ...p, preferencias: e.target.value }))} placeholder="Ex: Priorizar estética, usar resina flow, evitar amalgama..." className="input-base text-sm min-h-[60px] resize-none" rows={2} />
               </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
-                <span className="text-xs font-bold text-gray-600">Paciente com orçamento limitado?</span>
+              <div className="flex items-center justify-between p-3 bg-[var(--color-bg-deep)] rounded-xl border border-[var(--color-border)]">
+                <span className="text-xs font-bold text-[var(--color-text-secondary)]">Paciente com orçamento limitado?</span>
                 <button onClick={() => setIaForm(p => ({ ...p, orcamentoLimitado: !p.orcamentoLimitado }))} className={cn("w-10 h-6 rounded-full p-1 transition-all", iaForm.orcamentoLimitado ? "bg-purple-500" : "bg-gray-200")}>
-                  <div className={cn("w-4 h-4 rounded-full bg-white shadow-sm transition-transform", iaForm.orcamentoLimitado ? "translate-x-4" : "translate-x-0")} />
+                  <div className={cn("w-4 h-4 rounded-full bg-[var(--color-bg-card)] shadow-sm transition-transform", iaForm.orcamentoLimitado ? "translate-x-4" : "translate-x-0")} />
                 </button>
               </div>
 
@@ -1147,7 +1147,7 @@ Responda APENAS com JSON válido:
               )}
             </div>
 
-            <div className="p-6 border-t border-gray-100 flex gap-3">
+            <div className="p-6 border-t border-[var(--color-border)] flex gap-3">
               <button onClick={() => setShowIAModal(false)} className="flex-1 btn-secondary">Cancelar</button>
               <button
                 onClick={handleGenerateAIPlan}
@@ -1170,8 +1170,8 @@ Responda APENAS com JSON válido:
             </h4>
             <span className="text-[9px] font-bold text-purple-400 bg-purple-100 px-2 py-1 rounded-lg">Gemini</span>
           </div>
-          <div className="bg-white rounded-xl border border-purple-100 p-5 max-h-64 overflow-y-auto custom-scrollbar">
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{iaResult}</p>
+          <div className="bg-[var(--color-bg-card)] rounded-xl border border-purple-100 p-5 max-h-64 overflow-y-auto custom-scrollbar">
+            <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">{iaResult}</p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -1180,7 +1180,7 @@ Responda APENAS com JSON válido:
             >
               <CheckCircle className="w-4 h-4" /> Usar este Plano
             </button>
-            <button onClick={() => setIaResult(null)} className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all">
+            <button onClick={() => setIaResult(null)} className="py-3 px-4 bg-[var(--color-bg-card)] text-[var(--color-text-muted)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all">
               Descartar
             </button>
           </div>

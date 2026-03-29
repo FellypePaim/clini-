@@ -57,14 +57,14 @@ export function RelatoriosPage() {
   const filteredReports = REPORTS.filter(r => activeTab === 'Todos' || r.category === activeTab)
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-6 bg-white border-b border-slate-200">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-6 bg-[var(--color-bg-card)] border-b border-[var(--color-border)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2 mb-1">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2 mb-1">
             <FileText className="text-indigo-600" />
             Central de Relatórios
           </h1>
-          <p className="text-slate-500">Métricas analíticas, operacionais e financeiras da clínica</p>
+          <p className="text-[var(--color-text-muted)]">Métricas analíticas, operacionais e financeiras da clínica</p>
         </div>
 
         {/* Categoria Filtro */}
@@ -76,7 +76,7 @@ export function RelatoriosPage() {
               className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
                 activeTab === cat 
                   ? 'bg-slate-800 text-white shadow-md' 
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)]'
               }`}
             >
               {cat}
@@ -94,7 +94,7 @@ export function RelatoriosPage() {
 
            return (
              <section key={category} className="mb-10 last:mb-0">
-               <h2 className="text-lg font-bold text-slate-800 mb-4 px-1">{category}</h2>
+               <h2 className="text-lg font-bold text-[var(--color-text-primary)] mb-4 px-1">{category}</h2>
                <div className="grid grid-cols-1 md: lg:grid-cols-3 xl:grid-cols-4 gap-4">
                  {catReports.map((report) => (
                    <Link 
@@ -102,10 +102,10 @@ export function RelatoriosPage() {
                      to={report.isImplemented ? report.path : '#'}
                      onClick={(e) => !report.isImplemented && e.preventDefault()}
                      className={`
-                       group bg-white p-5 rounded-2xl border transition-all h-full flex flex-col items-start
+                       group bg-[var(--color-bg-card)] p-5 rounded-2xl border transition-all h-full flex flex-col items-start
                        ${report.isImplemented 
                          ? 'border-indigo-100 hover:border-indigo-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer' 
-                         : 'border-slate-200 opacity-60 hover:opacity-100 cursor-not-allowed'}
+                         : 'border-[var(--color-border)] opacity-60 hover:opacity-100 cursor-not-allowed'}
                      `}
                      title={!report.isImplemented ? "Relatório em desenvolvimento" : undefined}
                    >
@@ -118,21 +118,21 @@ export function RelatoriosPage() {
                          {report.icon}
                        </div>
                        {report.isImplemented && (
-                         <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-indigo-50 transition-all text-indigo-500">
+                         <div className="w-8 h-8 rounded-full bg-[var(--color-bg-deep)] flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-indigo-50 transition-all text-indigo-500">
                            <ChevronRight size={18} />
                          </div>
                        )}
                      </div>
                      
-                     <h3 className={`font-bold text-base mb-2 ${report.isImplemented ? 'text-slate-900 group-hover:text-indigo-700' : 'text-slate-700'}`}>
+                     <h3 className={`font-bold text-base mb-2 ${report.isImplemented ? 'text-[var(--color-text-primary)] group-hover:text-indigo-700' : 'text-[var(--color-text-secondary)]'}`}>
                        {report.title}
                      </h3>
-                     <p className="text-sm text-slate-500 font-medium leading-relaxed mb-4 flex-1">
+                     <p className="text-sm text-[var(--color-text-muted)] font-medium leading-relaxed mb-4 flex-1">
                        {report.description}
                      </p>
                      
                      {!report.isImplemented && (
-                       <Badge className="bg-slate-100 text-slate-500 border-none font-bold text-[10px] uppercase tracking-widest mt-auto">
+                       <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-none font-bold text-[10px] uppercase tracking-widest mt-auto">
                          Em Breve
                        </Badge>
                      )}

@@ -120,7 +120,7 @@ export function PerformancePage() {
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
 
   if (isLoading) {
-    return <div className="p-8 text-center text-slate-500">Carregando métricas de performance do Verdesk...</div>
+    return <div className="p-8 text-center text-[var(--color-text-muted)]">Carregando métricas de performance do Verdesk...</div>
   }
 
   if (error) {
@@ -128,66 +128,66 @@ export function PerformancePage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50 overflow-y-auto">
-      <header className="px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)] overflow-y-auto">
+      <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="flex items-center gap-4 mb-4">
-          <Link to="/verdesk" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+          <Link to="/verdesk" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Dashboard de Performance</h1>
-            <p className="text-slate-500">Métricas e acompanhamento do CRM Verdesk</p>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Dashboard de Performance</h1>
+            <p className="text-[var(--color-text-muted)]">Métricas e acompanhamento do CRM Verdesk</p>
           </div>
         </div>
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md: gap-4 mt-6">
           {/* Card 1 */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Total de Leads</span>
+              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Total de Leads</span>
               <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><Users size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{stats.totalLeads}</span>
-              <span className="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded-full">Total acumulado</span>
+              <span className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.totalLeads}</span>
+              <span className="text-xs font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-deep)] px-2 py-0.5 rounded-full">Total acumulado</span>
             </div>
           </div>
 
           {/* Card 2 */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Taxa de Conversão</span>
+              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Taxa de Conversão</span>
               <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Percent size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{stats.conversionRate}%</span>
+              <span className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.conversionRate}%</span>
               <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded-full">Geral</span>
             </div>
           </div>
 
           {/* Card 3 */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Ticket Médio</span>
+              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Ticket Médio</span>
               <div className="p-2 bg-amber-50 text-amber-600 rounded-lg"><TrendingUp size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">
+              <span className="text-3xl font-bold text-[var(--color-text-primary)]">
                 {stats.avgTicket.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
               </span>
             </div>
           </div>
 
           {/* Card 4 */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Leads por OVYVA</span>
+              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Leads por OVYVA</span>
               <div className="p-2 bg-pink-50 text-pink-600 rounded-lg"><PieChartIcon size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">{stats.ovyvaPercentage.toFixed(0)}%</span>
-              <span className="text-xs font-bold text-slate-500">do total gerado</span>
+              <span className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.ovyvaPercentage.toFixed(0)}%</span>
+              <span className="text-xs font-bold text-[var(--color-text-muted)]">do total gerado</span>
             </div>
           </div>
         </div>
@@ -196,8 +196,8 @@ export function PerformancePage() {
       <main className="p-6 grid grid-cols-1 md: gap-6">
         
         {/* Funnel Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-base font-bold text-slate-800 mb-6">Funil de Conversão</h3>
+        <div className="bg-[var(--color-bg-card)] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-6">Funil de Conversão</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={funnelData} layout="vertical" margin={{ top: 0, right: 30, left: 40, bottom: 0 }}>
@@ -215,8 +215,8 @@ export function PerformancePage() {
         </div>
 
         {/* Origin Pie Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <h3 className="text-base font-bold text-slate-800 mb-6">Leads por Origem</h3>
+        <div className="bg-[var(--color-bg-card)] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-6">Leads por Origem</h3>
           <div className="h-64 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -244,8 +244,8 @@ export function PerformancePage() {
               {originData.map((entry, index) => (
                 <div key={entry.name} className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
-                  <span className="text-sm font-semibold text-slate-600">{entry.name}</span>
-                  <span className="text-sm font-bold text-slate-900 ml-auto">{entry.value}</span>
+                  <span className="text-sm font-semibold text-[var(--color-text-secondary)]">{entry.name}</span>
+                  <span className="text-sm font-bold text-[var(--color-text-primary)] ml-auto">{entry.value}</span>
                 </div>
               ))}
             </div>
@@ -253,10 +253,10 @@ export function PerformancePage() {
         </div>
 
         {/* Evolution Line Chart */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm col-span-2">
+        <div className="bg-[var(--color-bg-card)] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm col-span-2">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-base font-bold text-slate-800">Top 5 Procedimentos mais Procurados</h3>
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Geral (Todos os estágios)</span>
+            <h3 className="text-base font-bold text-[var(--color-text-primary)]">Top 5 Procedimentos mais Procurados</h3>
+            <span className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-widest">Geral (Todos os estágios)</span>
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">

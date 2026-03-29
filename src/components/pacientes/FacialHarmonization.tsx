@@ -328,10 +328,10 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
     <div className="flex flex-col gap-6 animate-fade-in">
       {/* Toolbar */}
       <div className="flex items-center gap-2 flex-wrap">
-        <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+        <button onClick={handlePrintPDF} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:border-gray-300 transition-colors">
           <Printer className="w-3.5 h-3.5" /> Imprimir PDF
         </button>
-        <button onClick={() => setShowProtocolos(!showProtocolos)} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", showProtocolos ? "text-purple-700 bg-purple-50 border-purple-200" : "text-gray-600 bg-white border-gray-200 hover:border-gray-300")}>
+        <button onClick={() => setShowProtocolos(!showProtocolos)} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-lg transition-colors", showProtocolos ? "text-purple-700 bg-purple-50 border-purple-200" : "text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border-[var(--color-border)] hover:border-gray-300")}>
           <Layers className="w-3.5 h-3.5" /> Protocolos
         </button>
         <button onClick={handleAgendarRetorno} disabled={selectedZones.length === 0} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-40">
@@ -354,9 +354,9 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {PROTOCOLOS.map(p => (
               <button key={p.id} onClick={() => applyProtocolo(p)}
-                className="p-3 bg-white rounded-xl border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all text-left">
-                <p className="text-xs font-bold text-gray-900">{p.label}</p>
-                <p className="text-[10px] text-gray-400 mt-1">{p.zonas.length} zonas · retorno {p.retornoMeses}m</p>
+                className="p-3 bg-[var(--color-bg-card)] rounded-xl border border-purple-100 hover:border-purple-300 hover:shadow-md transition-all text-left">
+                <p className="text-xs font-bold text-[var(--color-text-primary)]">{p.label}</p>
+                <p className="text-[10px] text-[var(--color-text-muted)] mt-1">{p.zonas.length} zonas · retorno {p.retornoMeses}m</p>
               </button>
             ))}
           </div>
@@ -365,14 +365,14 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
 
     <div className="flex flex-col lg:flex-row gap-8">
       {/* Visual Map Area */}
-      <div className="lg:col-span-1 bg-white rounded-[40px] border border-gray-100 p-10 shadow-sm flex flex-col items-center relative overflow-hidden group">
+      <div className="lg:col-span-1 bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] p-10 shadow-sm flex flex-col items-center relative overflow-hidden group">
          <div className="absolute top-0 left-0 w-full h-1.5 bg-cyan-500/10 group-hover:bg-cyan-500/30 transition-all" />
          
          <div className="flex items-center gap-2 mb-8 self-start">
             <MapPin className="w-5 h-5 text-cyan-500" />
             <div>
-              <h3 className="text-sm font-black text-gray-900 border-none">Mapeamento Facial</h3>
-              <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Interativo front-view</p>
+              <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none">Mapeamento Facial</h3>
+              <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Interativo front-view</p>
             </div>
          </div>
 
@@ -408,10 +408,10 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
             {/* Popover for active zone */}
             {activeZoneId && activeZoneConfig && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 animate-slide-in pointer-events-none">
-                 <div className="bg-white rounded-[32px] p-6 shadow-2xl border border-gray-100 w-[280px] pointer-events-auto">
-                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
-                       <span className="text-xs font-black text-gray-900">{activeZoneConfig.label}</span>
-                       <button onClick={() => setActiveZoneId(null)} className="p-1 hover:bg-gray-100 rounded-lg text-gray-400">
+                 <div className="bg-[var(--color-bg-card)] rounded-[32px] p-6 shadow-2xl border border-[var(--color-border)] w-[280px] pointer-events-auto">
+                    <div className="flex items-center justify-between mb-4 pb-2 border-b border-[var(--color-border)]">
+                       <span className="text-xs font-black text-[var(--color-text-primary)]">{activeZoneConfig.label}</span>
+                       <button onClick={() => setActiveZoneId(null)} className="p-1 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]">
                          <X className="w-4 h-4" />
                        </button>
                     </div>
@@ -421,7 +421,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                           <select 
                             value={activeZoneData?.procedimento || 'botox'}
                             onChange={(e) => updateZone({ procedimento: e.target.value as ProcedureHarmonization })}
-                            className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold py-2 px-3 outline-none"
+                            className="w-full bg-[var(--color-bg-deep)] border-none rounded-xl text-xs font-bold py-2 px-3 outline-none"
                           >
                              <option value="botox">Botox</option>
                              <option value="preenchimento">Preenchimento</option>
@@ -437,7 +437,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                             placeholder="Ex: Botox Allergan" 
                             value={activeZoneData?.produto || ''}
                             onChange={(e) => updateZone({ produto: e.target.value })}
-                            className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold py-2 px-3 placeholder:text-gray-300 outline-none"
+                            className="w-full bg-[var(--color-bg-deep)] border-none rounded-xl text-xs font-bold py-2 px-3 placeholder:text-[var(--color-text-dim)] outline-none"
                           />
                        </ZoneField>
 
@@ -447,7 +447,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                             placeholder="Ex: 10 UI / 0.5ml" 
                             value={activeZoneData?.quantidade || ''}
                             onChange={(e) => updateZone({ quantidade: e.target.value })}
-                            className="w-full bg-gray-50 border-none rounded-xl text-xs font-bold py-2 px-3 placeholder:text-gray-300 outline-none"
+                            className="w-full bg-[var(--color-bg-deep)] border-none rounded-xl text-xs font-bold py-2 px-3 placeholder:text-[var(--color-text-dim)] outline-none"
                           />
                        </ZoneField>
 
@@ -469,11 +469,11 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
       {/* Procedures Recap & Sessions Sidebar */}
       <div className="flex-1 space-y-8">
          {/* Current Session Map Summary */}
-         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
+         <div className="bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8 border-b border-gray-50 pb-4">
                <div>
-                 <h3 className="text-sm font-black text-gray-900">Resumo da Sessão Atual</h3>
-                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{selectedZones.length} zonas registradas</p>
+                 <h3 className="text-sm font-black text-[var(--color-text-primary)]">Resumo da Sessão Atual</h3>
+                 <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">{selectedZones.length} zonas registradas</p>
                </div>
                <button 
                 onClick={handleSave}
@@ -488,14 +488,14 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
             <div className="space-y-3">
                {selectedZones.length > 0 ? (
                  selectedZones.map(zone => (
-                   <div key={zone.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100 hover:bg-white transition-all group">
+                   <div key={zone.id} className="flex items-center justify-between p-4 bg-[var(--color-bg-deep)]/50 rounded-2xl border border-[var(--color-border)] hover:bg-[var(--color-bg-card)] transition-all group">
                      <div className="flex items-center gap-4">
                        <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center text-xs font-black">
                          {ZONES_CONFIG.find(z => z.id === zone.id)?.id.substring(0, 2).toUpperCase()}
                        </div>
                        <div>
-                         <p className="text-xs font-black text-gray-900 uppercase tracking-widest leading-none mb-1">{zone.label}</p>
-                         <p className="text-[11px] text-gray-500 font-medium capitalize">
+                         <p className="text-xs font-black text-[var(--color-text-primary)] uppercase tracking-widest leading-none mb-1">{zone.label}</p>
+                         <p className="text-[11px] text-[var(--color-text-muted)] font-medium capitalize">
                            {zone.procedimento} · {zone.produto} ({zone.quantidade})
                            {getCustoProduto(zone.produto || '') > 0 && <span className="text-cyan-500 ml-1">{fmtMoney(getCustoProduto(zone.produto || ''))}</span>}
                          </p>
@@ -508,8 +508,8 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                  ))
                ) : (
                  <div className="py-12 flex flex-col items-center justify-center text-center opacity-30 select-none">
-                    <Sparkles className="w-12 h-12 text-gray-200 mb-4" />
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Clique nas zonas da face para iniciar</p>
+                    <Sparkles className="w-12 h-12 text-[var(--color-text-dim)] mb-4" />
+                    <p className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-widest">Clique nas zonas da face para iniciar</p>
                  </div>
                )}
             </div>
@@ -526,7 +526,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                    </div>
                    <div>
                      <h3 className="text-sm font-black uppercase tracking-widest">Sessões de Harmonização</h3>
-                     <p className="text-[10px] text-gray-500 font-medium mt-0.5">{sessions.length} sessão(ões) registrada(s)</p>
+                     <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-0.5">{sessions.length} sessão(ões) registrada(s)</p>
                    </div>
                  </div>
               </div>
@@ -545,7 +545,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                    const PROC_COLORS: Record<string, string> = { botox: '#22c55e', preenchimento: '#3b82f6', biorevolumizador: '#a855f7', fios: '#f59e0b', outros: '#6b7280' }
 
                    return (
-                     <div key={session.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isExpanded ? "border-cyan-500/30 bg-white/[0.03]" : "border-white/5 hover:border-white/10 bg-white/[0.02]")}>
+                     <div key={session.id} className={cn("rounded-2xl border transition-all duration-300 overflow-hidden", isExpanded ? "border-cyan-500/30 bg-[var(--color-bg-card)]/[0.03]" : "border-white/5 hover:border-white/10 bg-[var(--color-bg-card)]/[0.02]")}>
                        <div className="p-5 flex items-start justify-between">
                          <div className="flex items-start gap-4 cursor-pointer flex-1" onClick={() => setExpandedSession(isExpanded ? null : session.id)}>
                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-600 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-cyan-500/20 shrink-0">
@@ -553,7 +553,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                            </div>
                            <div className="flex-1 min-w-0">
                              <p className="text-sm font-black">{(() => { const p = (session.created_at as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}</p>
-                             <p className="text-[10px] text-gray-400 font-medium mt-0.5">{profNome}</p>
+                             <p className="text-[10px] text-[var(--color-text-muted)] font-medium mt-0.5">{profNome}</p>
                              {/* Mini badges */}
                              <div className="flex flex-wrap gap-1.5 mt-3">
                                {Object.entries(procGroups).map(([proc, count]) => (
@@ -561,11 +561,11 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                                    {count}x {proc}
                                  </span>
                                ))}
-                               {zonas.length === 0 && <span className="text-[10px] text-gray-600">Sem zonas registradas</span>}
+                               {zonas.length === 0 && <span className="text-[10px] text-[var(--color-text-secondary)]">Sem zonas registradas</span>}
                              </div>
                            </div>
                          </div>
-                         <button onClick={() => setExpandedSession(isExpanded ? null : session.id)} className="p-2 text-gray-500 hover:text-white rounded-lg transition-all shrink-0">
+                         <button onClick={() => setExpandedSession(isExpanded ? null : session.id)} className="p-2 text-[var(--color-text-muted)] hover:text-white rounded-lg transition-all shrink-0">
                            <ChevronDown className={cn("w-4 h-4 transition-transform duration-300", isExpanded && "rotate-180")} />
                          </button>
                        </div>
@@ -575,13 +575,13 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                            {zonas.map((z: any, i: number) => {
                              const pc = PROC_COLORS[z.procedimento] || '#666'
                              return (
-                               <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5 text-xs">
+                               <div key={i} className="flex items-center gap-3 p-3 bg-[var(--color-bg-card)]/5 rounded-xl border border-white/5 text-xs">
                                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${pc}20` }}>
                                    <Sparkles className="w-4 h-4" style={{ color: pc }} />
                                  </div>
                                  <div className="flex-1 min-w-0">
                                    <span className="font-bold text-white">{z.label || z.id}</span>
-                                   <p className="text-gray-400 text-[10px] mt-0.5">{z.procedimento} · {z.produto || '—'} ({z.quantidade || '—'})</p>
+                                   <p className="text-[var(--color-text-muted)] text-[10px] mt-0.5">{z.procedimento} · {z.produto || '—'} ({z.quantidade || '—'})</p>
                                  </div>
                                </div>
                              )
@@ -597,11 +597,11 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
                    )
                  }) : (
                    <div className="py-12 text-center">
-                     <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
-                       <Sparkles className="w-8 h-8 text-gray-700" />
+                     <div className="w-16 h-16 rounded-2xl bg-[var(--color-bg-card)]/5 flex items-center justify-center mx-auto mb-4">
+                       <Sparkles className="w-8 h-8 text-[var(--color-text-secondary)]" />
                      </div>
-                     <p className="text-xs font-black text-gray-600 uppercase tracking-widest">Nenhuma sessão registrada</p>
-                     <p className="text-[10px] text-gray-700 mt-1">Selecione zonas no mapa acima e salve</p>
+                     <p className="text-xs font-black text-[var(--color-text-secondary)] uppercase tracking-widest">Nenhuma sessão registrada</p>
+                     <p className="text-[10px] text-[var(--color-text-secondary)] mt-1">Selecione zonas no mapa acima e salve</p>
                    </div>
                  )}
               </div>
@@ -609,15 +609,15 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
          </div>
 
          {/* Record of Photos (Antes/Depois) */}
-         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
+         <div className="bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] p-8 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600">
                    <Camera className="w-5 h-5" />
                 </div>
                 <div>
-                   <h3 className="text-sm font-black text-gray-900 border-none">Registro Fotográfico</h3>
-                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Antes e Depois</p>
+                   <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none">Registro Fotográfico</h3>
+                   <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Antes e Depois</p>
                 </div>
               </div>
               {fotosRegistro.length >= 2 && (
@@ -655,10 +655,10 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
     {comparePhotos && (
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setComparePhotos(null)} />
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900">Comparação Antes / Depois</h3>
-            <button onClick={() => setComparePhotos(null)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
+        <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
+          <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Comparação Antes / Depois</h3>
+            <button onClick={() => setComparePhotos(null)} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]"><X className="w-4 h-4" /></button>
           </div>
           <div className="relative h-96 overflow-hidden select-none" onMouseMove={e => {
             const rect = e.currentTarget.getBoundingClientRect()
@@ -671,8 +671,8 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
               <img src={comparePhotos.before} alt="Antes" className="w-full h-full object-cover" style={{ width: `${10000 / sliderPos}%`, maxWidth: 'none' }} />
             </div>
             {/* Slider */}
-            <div className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg" style={{ left: `${sliderPos}%` }}>
-              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-xs font-bold text-gray-500 cursor-ew-resize">
+            <div className="absolute top-0 bottom-0 w-0.5 bg-[var(--color-bg-card)] shadow-lg" style={{ left: `${sliderPos}%` }}>
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 bg-[var(--color-bg-card)] rounded-full shadow-lg flex items-center justify-center text-xs font-bold text-[var(--color-text-muted)] cursor-ew-resize">
                 ↔
               </div>
             </div>
@@ -690,7 +690,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
 function ZoneField({ label, children }: { label: string, children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-       <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1">{label}</p>
+       <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">{label}</p>
        {children}
     </div>
   )

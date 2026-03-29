@@ -162,14 +162,14 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+      <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto animate-fade-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[var(--color-border)]">
           <div>
-            <h2 className="text-base font-bold text-gray-900">Nova Consulta</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Preencha os dados do agendamento</p>
+            <h2 className="text-base font-bold text-[var(--color-text-primary)]">Nova Consulta</h2>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Preencha os dados do agendamento</p>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -199,7 +199,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
               </div>
 
               {showPacienteDropdown && pacientesFiltrados.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-10 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-xl z-10 overflow-hidden">
                   {pacientesFiltrados.map(pac => (
                     <button
                       key={pac.id}
@@ -207,12 +207,12 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                       onClick={() => handleSelectPaciente(pac)}
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-cyan-500/5 transition-colors text-left"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-[var(--color-bg-card)] flex items-center justify-center text-xs font-bold text-[var(--color-text-muted)] shrink-0">
                         {pac.nome[0]}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-gray-800">{pac.nome}</p>
-                        <p className="text-xs text-gray-400">{pac.telefone}</p>
+                        <p className="text-sm font-medium text-[var(--color-text-primary)]">{pac.nome}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">{pac.telefone}</p>
                       </div>
                     </button>
                   ))}
@@ -229,8 +229,8 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
               </div>
             )}
             {pacienteSearch && !selectedConvenio && pacienteNomeValue && (
-              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                <span className="text-xs text-gray-500">Particular — sem convênio vinculado</span>
+              <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg">
+                <span className="text-xs text-[var(--color-text-muted)]">Particular — sem convênio vinculado</span>
               </div>
             )}
           </div>
@@ -250,7 +250,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-dim)] pointer-events-none" />
             </div>
             {errors.profissionalId && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" />{errors.profissionalId.message}</p>}
           </div>
@@ -281,7 +281,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 <select {...register('procedimento')} className="input-base pr-8 appearance-none cursor-pointer">
                   {PROCEDIMENTOS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-dim)] pointer-events-none" />
               </div>
             </div>
             <div>
@@ -290,7 +290,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 <select {...register('status')} className="input-base pr-8 appearance-none cursor-pointer">
                   {STATUS_OPTIONS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-dim)] pointer-events-none" />
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
           </div>
 
           {/* ── Recorrência ──────────────────────────── */}
-          <div className="border border-dashed border-gray-200 rounded-xl p-4 space-y-3">
+          <div className="border border-dashed border-[var(--color-border)] rounded-xl p-4 space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <div
                 onClick={() => setValue('repetir', !repetir)}
@@ -330,13 +330,13 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                 )}
               >
                 <div className={cn(
-                  'w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200',
+                  'w-4 h-4 bg-[var(--color-bg-card)] rounded-full shadow-sm transition-transform duration-200',
                   repetir ? 'translate-x-4' : 'translate-x-0.5'
                 )} />
               </div>
               <div className="flex items-center gap-1.5">
-                <Repeat className="w-3.5 h-3.5 text-gray-400" />
-                <span className="text-sm font-medium text-gray-700">Repetir agendamento</span>
+                <Repeat className="w-3.5 h-3.5 text-[var(--color-text-muted)]" />
+                <span className="text-sm font-medium text-[var(--color-text-secondary)]">Repetir agendamento</span>
               </div>
             </label>
 
@@ -350,7 +350,7 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
                       <option value="quinzenal">Quinzenal</option>
                       <option value="mensal">Mensal</option>
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-dim)] pointer-events-none" />
                   </div>
                 </div>
                 <div>

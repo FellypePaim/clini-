@@ -341,27 +341,27 @@ export function DiagnosticoPage() {
   const modules = Array.from(new Set(tests.map(t => t.module)))
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50 p-6 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)] p-6 overflow-y-auto">
       {/* Dev Tabs / Navegação Horizontal Simples */}
-      <div className="flex gap-4 mb-4 pb-4 border-b border-slate-200 text-sm font-semibold text-slate-500">
+      <div className="flex gap-4 mb-4 pb-4 border-b border-[var(--color-border)] text-sm font-semibold text-[var(--color-text-muted)]">
          <Link to="/dev/diagnostico" className="text-indigo-600 bg-indigo-50 px-3 py-1 rounded-md">🔥 Diagnóstico Geral</Link>
          <Link to="/dev/storage-diagnostico" className="hover:text-blue-600 transition-colors">📦 Storage</Link>
          <Link to="/dev/superadmin-diagnostico" className="hover:text-purple-600 transition-colors">👑 SuperAdmin</Link>
       </div>
 
-      <header className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200">
+      <header className="flex items-center justify-between mb-8 pb-4 border-b border-[var(--color-border)]">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <Activity className="text-indigo-600" />
             Diagnóstico do Sistema
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Bateria de testes de integração com Supabase.</p>
+          <p className="text-[var(--color-text-muted)] text-sm mt-1">Bateria de testes de integração com Supabase.</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={handleResetChat}
             disabled={isResetting}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 shadow-sm disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-[var(--color-bg-card)] border border-red-200 rounded-lg hover:bg-red-50 shadow-sm disabled:opacity-50"
           >
             {isResetting ? <Clock className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
             Resetar Chat
@@ -370,7 +370,7 @@ export function DiagnosticoPage() {
           {report && (
             <button
                onClick={exportReport}
-               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm"
+               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-card-hover)] shadow-sm"
             >
               <Download size={16} /> Exportar Relatório
             </button>
@@ -393,21 +393,21 @@ export function DiagnosticoPage() {
         {modules.map(modName => {
            const modTests = tests.filter(t => t.module === modName)
            return (
-             <div key={modName} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                <h2 className="font-semibold text-lg text-slate-800 mb-4">{modName}</h2>
+             <div key={modName} className="bg-[var(--color-bg-card)] p-5 rounded-xl border border-[var(--color-border)] shadow-sm">
+                <h2 className="font-semibold text-lg text-[var(--color-text-primary)] mb-4">{modName}</h2>
                 <div className="space-y-3">
                    {modTests.map(t => (
-                      <div key={t.id} className="flex flex-col border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                      <div key={t.id} className="flex flex-col border-b border-[var(--color-border)] pb-3 last:border-0 last:pb-0">
                          <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                {t.status === 'idle' && <div className="w-5 h-5 rounded-full border-2 border-slate-300" />}
                                {t.status === 'running' && <Clock className="animate-spin text-blue-500" size={20} />}
                                {t.status === 'success' && <CheckCircle className="text-emerald-500" size={20} />}
                                {t.status === 'failed' && <XCircle className="text-red-500" size={20} />}
-                               <span className="text-slate-700 font-medium">{t.name}</span>
+                               <span className="text-[var(--color-text-secondary)] font-medium">{t.name}</span>
                             </div>
                             {t.duration !== undefined && (
-                               <span className="text-slate-400 text-xs font-mono">{t.duration}ms</span>
+                               <span className="text-[var(--color-text-muted)] text-xs font-mono">{t.duration}ms</span>
                             )}
                          </div>
                          {t.error && (
@@ -424,12 +424,12 @@ export function DiagnosticoPage() {
       </main>
 
       {report && (
-         <footer className="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center text-sm">
+         <footer className="mt-8 pt-4 border-t border-[var(--color-border)] flex justify-between items-center text-sm">
             <div className="flex gap-4">
                <span className="text-emerald-600 font-semibold">{report.passed} passaram</span>
                <span className="text-red-600 font-semibold">{report.failed} falharam</span>
             </div>
-            <span className="text-slate-500">Tempo total: {(report.totalTimeMs / 1000).toFixed(2)}s</span>
+            <span className="text-[var(--color-text-muted)]">Tempo total: {(report.totalTimeMs / 1000).toFixed(2)}s</span>
          </footer>
       )}
     </div>

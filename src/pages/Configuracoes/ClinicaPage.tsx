@@ -84,7 +84,7 @@ function maskPhone(v: string): string {
   return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
 }
 
-const INPUT = "w-full p-3 border border-slate-200 rounded-xl bg-slate-50 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
+const INPUT = "w-full p-3 border border-[var(--color-border)] rounded-xl bg-[var(--color-bg-deep)] text-[var(--color-text-primary)] font-medium focus:ring-2 focus:ring-indigo-500 outline-none transition-colors"
 
 export function ClinicaPage() {
   const { toast } = useToast()
@@ -265,16 +265,16 @@ export function ClinicaPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex items-center justify-center min-h-[300px]">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm p-8 flex items-center justify-center min-h-[300px]">
         <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+        <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
           <Building className="text-indigo-600" />
           Dados da Clínica
         </h2>
@@ -287,9 +287,9 @@ export function ClinicaPage() {
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Logo + Identidade */}
-        <div className="flex gap-8 items-start border-b border-slate-100 pb-8">
+        <div className="flex gap-8 items-start border-b border-[var(--color-border)] pb-8">
           <div className="shrink-0 flex flex-col items-center gap-3">
-            <label className="relative w-32 h-32 rounded-full overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 hover:border-indigo-400 hover:text-indigo-600 transition-colors cursor-pointer group">
+            <label className="relative w-32 h-32 rounded-full overflow-hidden bg-[var(--color-bg-deep)] border-2 border-dashed border-[var(--color-border)] flex flex-col items-center justify-center text-[var(--color-text-muted)] hover:border-indigo-400 hover:text-indigo-600 transition-colors cursor-pointer group">
                <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} disabled={isUploading || !clinicaId} />
                {isUploading ? (
                  <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
@@ -302,22 +302,22 @@ export function ClinicaPage() {
                  </>
                )}
             </label>
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Circular (JPG/PNG)</span>
+            <span className="text-[10px] uppercase font-bold text-[var(--color-text-muted)] tracking-wider">Circular (JPG/PNG)</span>
           </div>
           <div className="flex-1 space-y-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Razão Social / Nome da Clínica <span className="text-red-400">*</span></label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Razão Social / Nome da Clínica <span className="text-red-400">*</span></label>
               <input type="text" value={form.nome} onChange={e => update('nome', e.target.value)}
                 className={INPUT} required placeholder="Ex: Clínica Saúde & Estética" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Hash size={14}/> CNPJ</label>
+                <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5"><Hash size={14}/> CNPJ</label>
                 <input type="text" value={maskCNPJ(form.cnpj)} onChange={e => update('cnpj', e.target.value)}
                   className={INPUT} placeholder="00.000.000/0000-00" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Hash size={14}/> CRM/CRO Responsável</label>
+                <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5"><Hash size={14}/> CRM/CRO Responsável</label>
                 <input type="text" value={form.cro} onChange={e => update('cro', e.target.value)}
                   className={INPUT} placeholder="CRO-MG 12345" />
               </div>
@@ -326,15 +326,15 @@ export function ClinicaPage() {
         </div>
 
         {/* Horário de Funcionamento */}
-        <div className="border-b border-slate-100 pb-8 space-y-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Clock size={18} className="text-indigo-500"/> Horário de Funcionamento</h3>
+        <div className="border-b border-[var(--color-border)] pb-8 space-y-4">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2"><Clock size={18} className="text-indigo-500"/> Horário de Funcionamento</h3>
           <div className="flex flex-wrap gap-2">
             {DIAS.map(({ key, label }) => (
               <button key={key} type="button" onClick={() => toggleDia(key)}
                 className={`px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${
                   form.dias_funcionamento.includes(key)
                     ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                    : 'bg-slate-50 text-slate-400 border-slate-200 hover:text-slate-600'
+                    : 'bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:text-[var(--color-text-secondary)]'
                 }`}>
                 {label}
               </button>
@@ -342,25 +342,25 @@ export function ClinicaPage() {
           </div>
           <div className="grid grid-cols-2 gap-4 max-w-sm">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Abertura</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Abertura</label>
               <input type="time" value={form.horario_inicio} onChange={e => update('horario_inicio', e.target.value)}
                 className={INPUT} />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Fechamento</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Fechamento</label>
               <input type="time" value={form.horario_fim} onChange={e => update('horario_fim', e.target.value)}
                 className={INPUT} />
             </div>
           </div>
-          <p className="text-xs text-slate-400">Usado pela OVYVA (IA) para sugerir horários de agendamento aos pacientes.</p>
+          <p className="text-xs text-[var(--color-text-muted)]">Usado pela OVYVA (IA) para sugerir horários de agendamento aos pacientes.</p>
         </div>
 
         {/* Endereço */}
-        <div className="border-b border-slate-100 pb-8 space-y-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><MapPin size={18} className="text-indigo-500"/> Localização</h3>
+        <div className="border-b border-[var(--color-border)] pb-8 space-y-4">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2"><MapPin size={18} className="text-indigo-500"/> Localização</h3>
           <div className="grid grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">CEP</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">CEP</label>
               <div className="relative">
                 <input type="text" value={maskCEP(form.cep)} onChange={e => handleCepChange(e.target.value)}
                   className={INPUT} placeholder="00000-000" />
@@ -368,29 +368,29 @@ export function ClinicaPage() {
               </div>
             </div>
             <div className="col-span-2">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Logradouro / Rua</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Logradouro / Rua</label>
               <input type="text" value={form.logradouro} onChange={e => update('logradouro', e.target.value)}
                 className={INPUT} placeholder="Rua das Flores" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Número</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Número</label>
               <input type="text" value={form.numero} onChange={e => update('numero', e.target.value)}
                 className={INPUT} placeholder="123" />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Complemento</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Complemento</label>
               <input type="text" value={form.complemento} onChange={e => update('complemento', e.target.value)}
                 className={INPUT} placeholder="Sala 01" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Bairro</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Bairro</label>
               <input type="text" value={form.bairro} onChange={e => update('bairro', e.target.value)}
                 className={INPUT} placeholder="Centro" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Cidade/UF</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Cidade/UF</label>
               <input type="text" value={form.cidade} onChange={e => update('cidade', e.target.value)}
                 className={INPUT} placeholder="Belo Horizonte/MG" />
             </div>
@@ -398,26 +398,26 @@ export function ClinicaPage() {
         </div>
 
         {/* Contato */}
-        <div className="border-b border-slate-100 pb-8 space-y-4">
-          <h3 className="text-base font-bold text-slate-800 flex items-center gap-2"><Phone size={18} className="text-indigo-500"/> Contato Oficial</h3>
+        <div className="border-b border-[var(--color-border)] pb-8 space-y-4">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2"><Phone size={18} className="text-indigo-500"/> Contato Oficial</h3>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">Telefone Principal</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">Telefone Principal</label>
               <input type="tel" value={maskPhone(form.telefone)} onChange={e => update('telefone', e.target.value)}
                 className={INPUT} placeholder="(31) 3333-4444" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2">WhatsApp de Atendimento</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2">WhatsApp de Atendimento</label>
               <input type="tel" value={maskPhone(form.whatsapp)} onChange={e => update('whatsapp', e.target.value)}
                 className={INPUT} placeholder="(31) 99999-8888" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Mail size={14} /> E-mail Público</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5"><Mail size={14} /> E-mail Público</label>
               <input type="email" value={form.email} onChange={e => update('email', e.target.value)}
                 className={INPUT} placeholder="contato@clinica.com.br" />
             </div>
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-2 flex items-center gap-1.5"><Globe size={14} /> Site ou Instagram</label>
+              <label className="block text-sm font-bold text-[var(--color-text-secondary)] mb-2 flex items-center gap-1.5"><Globe size={14} /> Site ou Instagram</label>
               <input type="text" value={form.site} onChange={e => update('site', e.target.value)}
                 className={INPUT} placeholder="@clinica ou www.clinica.com.br" />
             </div>

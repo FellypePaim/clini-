@@ -86,7 +86,7 @@ export function SignaturePad({ onSave, onClear }: SignaturePadProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50 p-1 group transition-all hover:border-cyan-500/20">
+      <div className="relative border-2 border-dashed border-[var(--color-border)] rounded-3xl bg-[var(--color-bg-deep)]/50 p-1 group transition-all hover:border-cyan-500/20">
         <canvas
           ref={canvasRef}
           onMouseDown={startDrawing}
@@ -101,7 +101,7 @@ export function SignaturePad({ onSave, onClear }: SignaturePadProps) {
         
         {isEmpty && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-xs text-gray-300 font-bold uppercase tracking-widest italic flex flex-col items-center gap-2">
+            <p className="text-xs text-[var(--color-text-dim)] font-bold uppercase tracking-widest italic flex flex-col items-center gap-2">
               Assine aqui com o mouse ou caneta
               <CheckCircle className="w-5 h-5 opacity-20" />
             </p>
@@ -110,13 +110,13 @@ export function SignaturePad({ onSave, onClear }: SignaturePadProps) {
         
         <button 
           onClick={handleClear}
-          className="absolute bottom-4 right-4 p-2 bg-white rounded-xl shadow-sm border border-gray-100 text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+          className="absolute bottom-4 right-4 p-2 bg-[var(--color-bg-card)] rounded-xl shadow-sm border border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
           type="button"
         >
           <Eraser className="w-4 h-4" />
         </button>
       </div>
-      <p className="text-[10px] text-gray-400 text-center uppercase font-black tracking-tighter">Assinatura digital válida exclusivamente para uso interno nesta plataforma médica Clini+</p>
+      <p className="text-[10px] text-[var(--color-text-muted)] text-center uppercase font-black tracking-tighter">Assinatura digital válida exclusivamente para uso interno nesta plataforma médica Clini+</p>
     </div>
   )
 }

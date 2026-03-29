@@ -224,7 +224,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                 const colorMap: Record<string, string> = {
                   red: 'bg-red-100 text-red-700', orange: 'bg-orange-100 text-orange-700',
                   purple: 'bg-purple-100 text-purple-700', blue: 'bg-blue-100 text-blue-700',
-                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-gray-700',
+                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-[var(--color-text-secondary)]',
                 }
                 return <span key={c.id} className={cn('px-2 py-0.5 rounded-md text-xs font-semibold', colorMap[c.cor])}>{c.label}</span>
               })}
@@ -247,7 +247,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                 const colorMap: Record<string, string> = {
                   red: 'bg-red-100 text-red-700', orange: 'bg-orange-100 text-orange-700',
                   purple: 'bg-purple-100 text-purple-700', blue: 'bg-blue-100 text-blue-700',
-                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-gray-700',
+                  pink: 'bg-pink-100 text-pink-700', gray: 'bg-gray-200 text-[var(--color-text-secondary)]',
                 }
                 return <span key={c.id} className={cn('px-2 py-0.5 rounded-md text-xs font-semibold', colorMap[c.cor])}>{c.label}</span>
               })}
@@ -257,16 +257,16 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
       )}
 
       {/* Sinais Vitais - Registro Atual */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart className="w-4 h-4 text-red-500" />
-            <h3 className="text-sm font-bold text-gray-900">Sinais Vitais</h3>
-            <span className="text-xs text-gray-400">— {editingId ? 'editando registro' : 'registrar agora'}</span>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Sinais Vitais</h3>
+            <span className="text-xs text-[var(--color-text-muted)]">— {editingId ? 'editando registro' : 'registrar agora'}</span>
           </div>
           <div className="flex items-center gap-2">
             {editingId && (
-              <button onClick={() => { setEditingId(null); setSinais(sinaisVazio) }} className="px-3 py-2 text-xs font-medium text-gray-500 hover:text-gray-700">
+              <button onClick={() => { setEditingId(null); setSinais(sinaisVazio) }} className="px-3 py-2 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
                 Cancelar
               </button>
             )}
@@ -286,78 +286,78 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
             {/* PA */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Pressão Arterial</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Pressão Arterial</label>
               <div className="flex items-center gap-1">
                 <input type="number" placeholder="120" value={sinais.pressao_sistolica} onChange={e => setSinais(s => ({ ...s, pressao_sistolica: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
-                <span className="text-gray-300 font-bold">/</span>
+                  className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+                <span className="text-[var(--color-text-dim)] font-bold">/</span>
                 <input type="number" placeholder="80" value={sinais.pressao_diastolica} onChange={e => setSinais(s => ({ ...s, pressao_diastolica: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+                  className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
               </div>
-              <p className="text-[9px] text-gray-300 mt-1 text-center">mmHg</p>
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">mmHg</p>
             </div>
             {/* FC */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Freq. Cardíaca</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Freq. Cardíaca</label>
               <input type="number" placeholder="72" value={sinais.frequencia_cardiaca} onChange={e => setSinais(s => ({ ...s, frequencia_cardiaca: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
-              <p className="text-[9px] text-gray-300 mt-1 text-center">bpm</p>
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400" />
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">bpm</p>
             </div>
             {/* SpO2 */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Saturação O₂</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Saturação O₂</label>
               <input type="number" placeholder="98" value={sinais.saturacao_o2} onChange={e => setSinais(s => ({ ...s, saturacao_o2: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" />
-              <p className="text-[9px] text-gray-300 mt-1 text-center">%</p>
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" />
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">%</p>
             </div>
             {/* Temp */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Temperatura</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Temperatura</label>
               <input type="number" step="0.1" placeholder="36.5" value={sinais.temperatura} onChange={e => setSinais(s => ({ ...s, temperatura: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" />
-              <p className="text-[9px] text-gray-300 mt-1 text-center">°C</p>
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400" />
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">°C</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
             {/* Peso */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Peso</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Peso</label>
               <input type="number" step="0.1" placeholder="70.0" value={sinais.peso} onChange={e => setSinais(s => ({ ...s, peso: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
-              <p className="text-[9px] text-gray-300 mt-1 text-center">kg</p>
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">kg</p>
             </div>
             {/* Altura */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Altura</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Altura</label>
               <input type="number" placeholder="170" value={sinais.altura} onChange={e => setSinais(s => ({ ...s, altura: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
-              <p className="text-[9px] text-gray-300 mt-1 text-center">cm</p>
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm text-center outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400" />
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">cm</p>
             </div>
             {/* IMC calculado */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">IMC</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">IMC</label>
               <div className={cn(
                 "w-full rounded-lg py-2 px-3 text-sm text-center font-bold border",
-                imc ? (parseFloat(imc) < 18.5 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : parseFloat(imc) < 25 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : parseFloat(imc) < 30 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-red-700 border-red-200') : 'bg-gray-50 text-gray-300 border-gray-200'
+                imc ? (parseFloat(imc) < 18.5 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : parseFloat(imc) < 25 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : parseFloat(imc) < 30 ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-red-700 border-red-200') : 'bg-[var(--color-bg-deep)] text-[var(--color-text-dim)] border-[var(--color-border)]'
               )}>
                 {imc || '—'}
               </div>
-              <p className="text-[9px] text-gray-300 mt-1 text-center">
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-1 text-center">
                 {imc ? (parseFloat(imc) < 18.5 ? 'Abaixo' : parseFloat(imc) < 25 ? 'Normal' : parseFloat(imc) < 30 ? 'Sobrepeso' : 'Obesidade') : 'kg/m²'}
               </p>
             </div>
             {/* Observações */}
             <div>
-              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 block">Obs.</label>
+              <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 block">Obs.</label>
               <input type="text" placeholder="Notas..." value={sinais.observacoes} onChange={e => setSinais(s => ({ ...s, observacoes: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-gray-500/20" />
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg py-2 px-3 text-sm outline-none focus:ring-2 focus:ring-gray-500/20" />
             </div>
           </div>
 
           {/* Escala de Dor */}
           <div>
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 block">Escala de Dor (0 = sem dor — 10 = pior dor)</label>
+            <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2 block">Escala de Dor (0 = sem dor — 10 = pior dor)</label>
             <div className="flex items-center gap-1">
               {Array.from({ length: 11 }, (_, i) => (
                 <button
@@ -382,12 +382,12 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
       </div>
 
       {/* Condições Médicas Estruturadas */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-blue-500" />
-            <h3 className="text-sm font-bold text-gray-900">Condições Médicas</h3>
-            <span className="text-xs text-gray-400">— marque as relevantes</span>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Condições Médicas</h3>
+            <span className="text-xs text-[var(--color-text-muted)]">— marque as relevantes</span>
           </div>
           <button
             onClick={handleSaveCondicoes}
@@ -407,7 +407,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                 purple: active ? 'bg-purple-100 text-purple-700 border-purple-200' : '',
                 blue: active ? 'bg-blue-100 text-blue-700 border-blue-200' : '',
                 pink: active ? 'bg-pink-100 text-pink-700 border-pink-200' : '',
-                gray: active ? 'bg-gray-200 text-gray-700 border-gray-300' : '',
+                gray: active ? 'bg-gray-200 text-[var(--color-text-secondary)] border-gray-300' : '',
               }
               return (
                 <button
@@ -415,7 +415,7 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                   onClick={() => toggleCondicao(c.id)}
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all",
-                    active ? colorMap[c.cor] : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
+                    active ? colorMap[c.cor] : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:border-gray-300"
                   )}
                 >
                   {active && <CheckCircle className="w-3 h-3 inline mr-1" />}
@@ -429,10 +429,10 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
 
       {/* Gráfico de Evolução */}
       {chartData.length >= 2 && (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-cyan-500" />
-            <h3 className="text-sm font-bold text-gray-900">Evolução dos Sinais Vitais</h3>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Evolução dos Sinais Vitais</h3>
           </div>
           <div className="p-6">
             <ResponsiveContainer width="100%" height={200}>
@@ -451,15 +451,15 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
 
       {/* Histórico de registros */}
       {historySinais.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Histórico de Sinais Vitais</h3>
-            <span className="text-xs text-gray-400">{historySinais.length} registro{historySinais.length !== 1 ? 's' : ''}</span>
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+          <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Histórico de Sinais Vitais</h3>
+            <span className="text-xs text-[var(--color-text-muted)]">{historySinais.length} registro{historySinais.length !== 1 ? 's' : ''}</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-[var(--color-border)] text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3 px-4">Data</th>
                   <th className="py-3 px-3">PA</th>
                   <th className="py-3 px-3">FC</th>
@@ -475,8 +475,8 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                 {historySinais.slice(0, 10).map((s: any) => {
                   const dp = (s.created_at as string).split('T')[0].split('-')
                   return (
-                    <tr key={s.id} className="border-b border-gray-50 hover:bg-gray-50/50 group">
-                      <td className="py-2.5 px-4 font-semibold text-gray-700">{dp[2]}/{dp[1]}</td>
+                    <tr key={s.id} className="border-b border-gray-50 hover:bg-[var(--color-bg-card-hover)]/50 group">
+                      <td className="py-2.5 px-4 font-semibold text-[var(--color-text-secondary)]">{dp[2]}/{dp[1]}</td>
                       <td className="py-2.5 px-3 text-center">{s.pressao_sistolica && s.pressao_diastolica ? `${s.pressao_sistolica}/${s.pressao_diastolica}` : '—'}</td>
                       <td className="py-2.5 px-3 text-center">{s.frequencia_cardiaca || '—'}</td>
                       <td className="py-2.5 px-3 text-center">{s.saturacao_o2 ? `${s.saturacao_o2}%` : '—'}</td>
@@ -490,10 +490,10 @@ export function PatientAnamnese({ pacienteId, patient, onUpdatePatient }: Props)
                       </td>
                       <td className="py-2.5 px-3 text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => handleEditSinais(s)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
+                          <button onClick={() => handleEditSinais(s)} className="p-1.5 text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
-                          <button onClick={() => handleDeleteSinais(s.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
+                          <button onClick={() => handleDeleteSinais(s.id)} className="p-1.5 text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Excluir">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>

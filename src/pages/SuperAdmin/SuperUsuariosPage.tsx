@@ -152,7 +152,7 @@ export function SuperUsuariosPage() {
   // ------ Render helpers ------
 
   function RoleBadge({ role }: { role: string }) {
-    const cfg = ROLE_CONFIG[role] ?? { label: role, bg: 'bg-slate-500/15', text: 'text-slate-400' }
+    const cfg = ROLE_CONFIG[role] ?? { label: role, bg: 'bg-[var(--color-bg-deep)]0/15', text: 'text-[var(--color-text-muted)]' }
     return (
       <span
         className={cn(
@@ -194,7 +194,7 @@ export function SuperUsuariosPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-black text-white">Gestao de Usuarios</h1>
-        <p className="text-slate-400 font-medium mt-1">
+        <p className="text-[var(--color-text-muted)] font-medium mt-1">
           Gerencie todos os usuarios e permissoes da plataforma.
         </p>
       </div>
@@ -204,7 +204,7 @@ export function SuperUsuariosPage() {
         {/* Search */}
         <div className="flex-1 relative group">
           <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-purple-400 transition-colors"
             size={20}
           />
           <input
@@ -212,7 +212,7 @@ export function SuperUsuariosPage() {
             placeholder="Buscar por nome ou email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
+            className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
           />
         </div>
 
@@ -221,7 +221,7 @@ export function SuperUsuariosPage() {
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="appearance-none bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-4 pr-10 text-slate-300 font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer"
+            className="appearance-none bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-4 pr-10 text-[var(--color-text-dim)] font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all cursor-pointer"
           >
             {ROLE_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -231,7 +231,7 @@ export function SuperUsuariosPage() {
           </select>
           <ChevronDown
             size={16}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none"
           />
         </div>
 
@@ -258,7 +258,7 @@ export function SuperUsuariosPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-[0.15em]">
+                <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.15em]">
                   <th className="px-6 py-5">Usuario</th>
                   <th className="px-6 py-5">Clinica</th>
                   <th className="px-6 py-5">Role</th>
@@ -285,7 +285,7 @@ export function SuperUsuariosPage() {
                               className="w-10 h-10 rounded-xl object-cover border border-slate-700/50"
                             />
                           ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-black text-sm text-slate-400 border border-slate-700/50 group-hover:from-purple-600 group-hover:to-indigo-600 group-hover:text-white transition-all">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center font-black text-sm text-[var(--color-text-muted)] border border-slate-700/50 group-hover:from-purple-600 group-hover:to-indigo-600 group-hover:text-white transition-all">
                               {user.nome_completo?.charAt(0)?.toUpperCase() || '?'}
                             </div>
                           )}
@@ -293,7 +293,7 @@ export function SuperUsuariosPage() {
                             <span className="text-sm font-bold text-slate-200 truncate">
                               {user.nome_completo || 'Sem nome'}
                             </span>
-                            <span className="flex items-center gap-1 text-[11px] text-slate-500 truncate">
+                            <span className="flex items-center gap-1 text-[11px] text-[var(--color-text-muted)] truncate">
                               <Mail size={11} className="flex-shrink-0" />
                               {user.email}
                             </span>
@@ -304,8 +304,8 @@ export function SuperUsuariosPage() {
                       {/* Clinica */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <Building2 size={14} className="text-slate-600 flex-shrink-0" />
-                          <span className="text-xs font-semibold text-slate-400 truncate">
+                          <Building2 size={14} className="text-[var(--color-text-secondary)] flex-shrink-0" />
+                          <span className="text-xs font-semibold text-[var(--color-text-muted)] truncate">
                             {user.clinicas?.nome || 'Sem clinica'}
                           </span>
                         </div>
@@ -323,7 +323,7 @@ export function SuperUsuariosPage() {
 
                       {/* Last login */}
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <div className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">
                           <Clock size={12} className="flex-shrink-0" />
                           {formatLastLogin(user.last_login)}
                         </div>
@@ -332,7 +332,7 @@ export function SuperUsuariosPage() {
                       {/* Actions */}
                       <td className="px-6 py-4 text-right">
                         {isSuperAdmin ? (
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                          <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
                             Protegido
                           </span>
                         ) : (
@@ -348,7 +348,7 @@ export function SuperUsuariosPage() {
                             >
                               <span
                                 className={cn(
-                                  'inline-block h-4 w-4 rounded-full bg-white transition-transform',
+                                  'inline-block h-4 w-4 rounded-full bg-[var(--color-bg-card)] transition-transform',
                                   user.ativo ? 'translate-x-6' : 'translate-x-1',
                                 )}
                               />
@@ -358,7 +358,7 @@ export function SuperUsuariosPage() {
                             <select
                               value={user.role}
                               onChange={(e) => handleRoleChange(user, e.target.value)}
-                              className="bg-slate-800/60 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs font-bold text-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
+                              className="bg-slate-800/60 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs font-bold text-[var(--color-text-dim)] focus:outline-none focus:ring-2 focus:ring-purple-500/50 cursor-pointer"
                             >
                               <option value="admin">Admin</option>
                               <option value="profissional">Profissional</option>
@@ -373,7 +373,7 @@ export function SuperUsuariosPage() {
                                     clinicDropdownUserId === user.id ? null : user.id,
                                   )
                                 }
-                                className="flex items-center gap-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 rounded-lg text-xs font-bold text-slate-400 hover:text-white hover:border-purple-500/50 transition-all"
+                                className="flex items-center gap-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 rounded-lg text-xs font-bold text-[var(--color-text-muted)] hover:text-white hover:border-purple-500/50 transition-all"
                                 title="Mover para clinica"
                               >
                                 <Building2 size={12} />
@@ -390,7 +390,7 @@ export function SuperUsuariosPage() {
                                       'w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-800 transition-colors',
                                       !user.clinica_id
                                         ? 'text-purple-400'
-                                        : 'text-slate-400',
+                                        : 'text-[var(--color-text-muted)]',
                                     )}
                                   >
                                     Sem clinica
@@ -403,7 +403,7 @@ export function SuperUsuariosPage() {
                                         'w-full text-left px-4 py-2 text-xs font-semibold hover:bg-slate-800 transition-colors',
                                         user.clinica_id === c.id
                                           ? 'text-purple-400'
-                                          : 'text-slate-400',
+                                          : 'text-[var(--color-text-muted)]',
                                       )}
                                     >
                                       {c.nome}
@@ -425,8 +425,8 @@ export function SuperUsuariosPage() {
           {/* Empty state */}
           {filteredUsuarios.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20">
-              <Users size={48} className="text-slate-800 mb-4" />
-              <p className="text-slate-500 font-bold text-sm">
+              <Users size={48} className="text-[var(--color-text-primary)] mb-4" />
+              <p className="text-[var(--color-text-muted)] font-bold text-sm">
                 Nenhum usuario encontrado.
               </p>
             </div>
@@ -488,9 +488,9 @@ function CreateUserModal({
   }
 
   const inputClass =
-    'w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all'
+    'w-full bg-slate-800/60 border border-slate-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-[var(--color-text-secondary)] focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all'
   const labelClass =
-    'block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5'
+    'block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5'
 
   return (
     <div
@@ -508,14 +508,14 @@ function CreateUserModal({
             </div>
             <div>
               <h2 className="text-lg font-black text-white">Criar Usuario</h2>
-              <p className="text-xs text-slate-500">Adicionar novo usuario a plataforma</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Adicionar novo usuario a plataforma</p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-xl transition-colors"
           >
-            <X className="w-5 h-5 text-slate-400" />
+            <X className="w-5 h-5 text-[var(--color-text-muted)]" />
           </button>
         </div>
 
@@ -592,7 +592,7 @@ function CreateUserModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+              className="px-5 py-2.5 text-sm font-bold text-[var(--color-text-muted)] hover:text-white hover:bg-slate-800 rounded-xl transition-all"
             >
               Cancelar
             </button>

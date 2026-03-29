@@ -55,8 +55,8 @@ function statusColor(status: string): string {
   if (s === 'ativa' || s === 'ativo' || s === 'active') return 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
   if (s === 'suspensa' || s === 'suspended') return 'bg-red-500/10 text-red-400 ring-red-500/20'
   if (s === 'trial') return 'bg-amber-500/10 text-amber-400 ring-amber-500/20'
-  if (s === 'inativa' || s === 'inactive') return 'bg-slate-500/10 text-slate-400 ring-slate-500/20'
-  return 'bg-slate-500/10 text-slate-400 ring-slate-500/20'
+  if (s === 'inativa' || s === 'inactive') return 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20'
+  return 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20'
 }
 
 export function SuperFinanceiroPage() {
@@ -133,7 +133,7 @@ export function SuperFinanceiroPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-black text-white">Financeiro da Plataforma</h1>
-        <p className="text-slate-400 font-medium mt-1">
+        <p className="text-[var(--color-text-muted)] font-medium mt-1">
           Visao geral de receita, planos e clinicas.
         </p>
       </div>
@@ -155,14 +155,14 @@ export function SuperFinanceiroPage() {
               >
                 <kpi.icon size={20} />
               </div>
-              <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.15em] mb-1">
+              <p className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-[0.15em] mb-1">
                 {kpi.label}
               </p>
               <span className="text-xl font-black text-white tracking-tight">{kpi.value}</span>
             </div>
             <kpi.icon
               size={100}
-              className="absolute -bottom-6 -right-6 text-slate-700/5 group-hover:scale-110 transition-transform duration-700"
+              className="absolute -bottom-6 -right-6 text-[var(--color-text-secondary)]/5 group-hover:scale-110 transition-transform duration-700"
             />
           </div>
         ))}
@@ -172,12 +172,12 @@ export function SuperFinanceiroPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Distribuicao por Plano */}
         <div className="space-y-4">
-          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+          <h2 className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
             <BarChart3 size={16} /> Distribuicao por Plano
           </h2>
           <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 space-y-3">
             {(!data?.planos || data.planos.length === 0) && (
-              <p className="text-sm text-slate-500">Nenhum plano encontrado.</p>
+              <p className="text-sm text-[var(--color-text-muted)]">Nenhum plano encontrado.</p>
             )}
             {data?.planos?.map((plano) => (
               <div
@@ -186,13 +186,13 @@ export function SuperFinanceiroPage() {
               >
                 <div className="flex flex-col">
                   <span className="text-sm font-bold text-white">{plano.nome}</span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-[var(--color-text-muted)]">
                     {formatCurrency(plano.valor)}/mes
                   </span>
                 </div>
                 <div className="text-right">
                   <span className="text-lg font-black text-white">{plano.count}</span>
-                  <span className="text-[10px] font-bold text-slate-500 block">
+                  <span className="text-[10px] font-bold text-[var(--color-text-muted)] block">
                     {plano.count === 1 ? 'clinica' : 'clinicas'}
                   </span>
                 </div>
@@ -203,18 +203,18 @@ export function SuperFinanceiroPage() {
 
         {/* Lista de Clinicas */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+          <h2 className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
             <Building2 size={16} /> Lista de Clinicas
           </h2>
           <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                     <th className="px-6 py-4">Nome</th>
                     <th className="px-6 py-4">Plano</th>
                     <th
-                      className="px-6 py-4 cursor-pointer select-none hover:text-slate-300 transition-colors"
+                      className="px-6 py-4 cursor-pointer select-none hover:text-[var(--color-text-dim)] transition-colors"
                       onClick={toggleSort}
                     >
                       <span className="inline-flex items-center gap-1">
@@ -228,7 +228,7 @@ export function SuperFinanceiroPage() {
                 <tbody className="divide-y divide-slate-800/30">
                   {sortedClinicas.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-500">
+                      <td colSpan={4} className="px-6 py-8 text-center text-sm text-[var(--color-text-muted)]">
                         Nenhuma clinica encontrada.
                       </td>
                     </tr>
@@ -242,7 +242,7 @@ export function SuperFinanceiroPage() {
                         <span className="text-sm font-bold text-slate-200">{clinica.nome}</span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-sm text-slate-300">{clinica.plano}</span>
+                        <span className="text-sm text-[var(--color-text-dim)]">{clinica.plano}</span>
                       </td>
                       <td className="px-6 py-4">
                         <span
@@ -255,7 +255,7 @@ export function SuperFinanceiroPage() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <span className="text-xs text-slate-400">
+                        <span className="text-xs text-[var(--color-text-muted)]">
                           {formatDate(clinica.created_at)}
                         </span>
                       </td>
@@ -265,7 +265,7 @@ export function SuperFinanceiroPage() {
               </table>
             </div>
             <div className="px-6 py-3 bg-slate-900/30 border-t border-slate-800/50 text-right">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                 {sortedClinicas.length} clinica(s)
               </span>
             </div>

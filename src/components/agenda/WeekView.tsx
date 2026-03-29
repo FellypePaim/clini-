@@ -121,7 +121,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
     <div className="flex-1 overflow-auto">
       {/* Cabeçalho dos dias */}
       <div
-        className="sticky top-0 z-10 bg-white border-b border-gray-100 grid"
+        className="sticky top-0 z-10 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] grid"
         style={{ gridTemplateColumns: '56px repeat(6, 1fr)' }}
       >
         <div /> {/* espaço horas */}
@@ -132,16 +132,16 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
             <div
               key={idx}
               className={cn(
-                'py-3 flex flex-col items-center border-l border-gray-100 first:border-l-0',
+                'py-3 flex flex-col items-center border-l border-[var(--color-border)] first:border-l-0',
                 isToday && 'bg-cyan-500/5'
               )}
             >
-              <span className={cn('text-[11px] font-medium', isToday ? 'text-cyan-500' : 'text-gray-400')}>
+              <span className={cn('text-[11px] font-medium', isToday ? 'text-cyan-500' : 'text-[var(--color-text-muted)]')}>
                 {DIAS[idx]}
               </span>
               <div className={cn(
                 'w-8 h-8 rounded-full flex items-center justify-center my-0.5',
-                isToday ? 'bg-cyan-600 text-white' : 'text-gray-700'
+                isToday ? 'bg-cyan-600 text-white' : 'text-[var(--color-text-secondary)]'
               )}>
                 <span className={cn('text-sm font-bold')}>{d.getDate()}</span>
               </div>
@@ -171,7 +171,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               className="absolute flex items-start justify-end pr-2 pt-1"
               style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT, left: 0, right: 0 }}
             >
-              <span className="text-[10px] text-gray-300 font-medium">{String(h).padStart(2,'0')}:00</span>
+              <span className="text-[10px] text-[var(--color-text-dim)] font-medium">{String(h).padStart(2,'0')}:00</span>
             </div>
           ))}
         </div>
@@ -187,7 +187,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               key={idx}
               ref={(el) => { colRefs.current[idx] = el }}
               className={cn(
-                'relative border-l border-gray-100',
+                'relative border-l border-[var(--color-border)]',
                 isToday && 'bg-cyan-500/5'
               )}
               style={{ height: totalHeight }}
@@ -199,7 +199,7 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               {HOURS.map((h) => (
                 <div
                   key={h}
-                  className="absolute left-0 right-0 border-t border-gray-100 group cursor-pointer hover:bg-cyan-500/5 transition-colors"
+                  className="absolute left-0 right-0 border-t border-[var(--color-border)] group cursor-pointer hover:bg-cyan-500/5 transition-colors"
                   style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT }}
                   onClick={() => onSlotClick(dateStr, h)}
                 >
@@ -240,8 +240,8 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               {ausencias?.filter(a =>
                 a.data_inicio <= dateStr && a.data_fim >= dateStr
               ).length! > 0 && (
-                <div className="absolute inset-x-0 top-0 bottom-0 bg-slate-200/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
-                  <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+                <div className="absolute inset-x-0 top-0 bottom-0 bg-[var(--color-border)]/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
+                  <span className="text-xs font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-3 py-1.5 rounded-full border border-[var(--color-border)] shadow-sm flex items-center gap-1.5">
                     Ausente
                   </span>
                 </div>

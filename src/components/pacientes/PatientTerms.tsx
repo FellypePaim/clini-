@@ -535,23 +535,23 @@ Responda APENAS com JSON válido nesta estrutura:
     <div className="flex flex-col lg:flex-row gap-6 animate-fade-in">
       {/* Templates List */}
       <div className="lg:w-[420px] space-y-5 shrink-0">
-         <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+         <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50">
                <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
                      <ClipboardList className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                     <h3 className="text-sm font-bold text-gray-900">Modelos de Termos</h3>
-                     <p className="text-xs text-gray-400 mt-0.5">Selecione, revise e solicite assinatura</p>
+                     <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Modelos de Termos</h3>
+                     <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Selecione, revise e solicite assinatura</p>
                   </div>
                </div>
 
                {/* Filtro por categoria */}
                <div className="flex flex-wrap gap-1.5 mt-3">
-                  <button onClick={() => setCatFilter('todos')} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === 'todos' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200')}>Todos</button>
+                  <button onClick={() => setCatFilter('todos')} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === 'todos' ? 'bg-gray-900 text-white border-gray-900' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)]')}>Todos</button>
                   {Object.entries(CATEGORIAS).map(([k, v]) => (
-                     <button key={k} onClick={() => setCatFilter(k)} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === k ? v.color + ' border-transparent' : 'bg-white text-gray-500 border-gray-200')}>{v.label}</button>
+                     <button key={k} onClick={() => setCatFilter(k)} className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all', catFilter === k ? v.color + ' border-transparent' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)]')}>{v.label}</button>
                   ))}
                </div>
             </div>
@@ -562,14 +562,14 @@ Responda APENAS com JSON válido nesta estrutura:
                  return (
                  <div
                   key={tpl.id}
-                  className="p-4 bg-gray-50/50 hover:bg-white border border-gray-100 hover:border-blue-200 rounded-xl transition-all group cursor-pointer"
+                  className="p-4 bg-[var(--color-bg-deep)]/50 hover:bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:border-blue-200 rounded-xl transition-all group cursor-pointer"
                   onClick={() => openTermForEdit(tpl)}
                  >
                     <div className="flex items-start justify-between gap-2 mb-2">
-                       <p className="text-xs font-bold text-gray-900 leading-snug group-hover:text-blue-600 transition-colors">{tpl.titulo}</p>
+                       <p className="text-xs font-bold text-[var(--color-text-primary)] leading-snug group-hover:text-blue-600 transition-colors">{tpl.titulo}</p>
                        <span className={cn('px-2 py-0.5 rounded-md text-[9px] font-semibold shrink-0', cat.color)}>{cat.label}</span>
                     </div>
-                    <p className="text-[10px] text-gray-400 line-clamp-2 leading-relaxed">{tpl.desc.substring(0, 100)}...</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] line-clamp-2 leading-relaxed">{tpl.desc.substring(0, 100)}...</p>
                     <div className="flex items-center gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                        <span className="text-[9px] font-semibold text-blue-500 flex items-center gap-1"><FileCheck className="w-3 h-3" /> Revisar e Assinar</span>
                        <button
@@ -587,14 +587,14 @@ Responda APENAS com JSON válido nesta estrutura:
          </div>
 
          {/* Gerar Termo com IA */}
-         <div className="bg-white rounded-[40px] border border-purple-100 p-8 shadow-sm">
+         <div className="bg-[var(--color-bg-card)] rounded-[40px] border border-purple-100 p-8 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
                <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600">
                   <Sparkles className="w-5 h-5" />
                </div>
                <div>
-                  <h3 className="text-sm font-black text-gray-900 border-none">Criar Termo com IA</h3>
-                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Descreva o procedimento e a IA gera o termo</p>
+                  <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none">Criar Termo com IA</h3>
+                  <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Descreva o procedimento e a IA gera o termo</p>
                </div>
             </div>
 
@@ -603,7 +603,7 @@ Responda APENAS com JSON válido nesta estrutura:
                  value={iaPrompt}
                  onChange={(e) => setIaPrompt(e.target.value)}
                  placeholder="Ex: Termo de consentimento para aplicação de ácido hialurônico nos lábios com lista de riscos e cuidados pós-procedimento..."
-                 className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none resize-none shadow-sm min-h-[80px]"
+                 className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-2xl p-4 text-sm focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none resize-none shadow-sm min-h-[80px]"
                  rows={3}
                />
                <button
@@ -625,8 +625,8 @@ Responda APENAS com JSON válido nesta estrutura:
                       <h4 className="text-xs font-black text-purple-700 uppercase tracking-widest">{iaResult.titulo}</h4>
                       <span className="text-[9px] font-bold text-purple-400 bg-purple-100 px-2 py-1 rounded-lg">Gerado por IA</span>
                     </div>
-                    <div className="bg-white rounded-2xl border border-purple-100 p-5 max-h-48 overflow-y-auto custom-scrollbar">
-                       <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{iaResult.conteudo}</p>
+                    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-purple-100 p-5 max-h-48 overflow-y-auto custom-scrollbar">
+                       <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">{iaResult.conteudo}</p>
                     </div>
                     <div className="flex items-center gap-3">
                        <button
@@ -637,7 +637,7 @@ Responda APENAS com JSON válido nesta estrutura:
                        </button>
                        <button
                          onClick={() => setIaResult(null)}
-                         className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all"
+                         className="py-3 px-4 bg-[var(--color-bg-card)] text-[var(--color-text-muted)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gray-200 transition-all"
                        >
                          Descartar
                        </button>
@@ -650,20 +650,20 @@ Responda APENAS com JSON válido nesta estrutura:
 
       {/* History Area */}
       <div className="flex-1 space-y-6">
-         <div className="bg-white rounded-[40px] border border-gray-100 p-8 shadow-sm">
+         <div className="bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] p-8 shadow-sm">
             <div className="flex items-center justify-between mb-8">
                <div className="flex items-center gap-2 opacity-60">
                   <Stamp className="w-5 h-5" />
                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] border-none">Termos Gerados & Assinados</h3>
                </div>
-               <span className="text-[10px] font-bold text-gray-400">{termos.length} termo(s)</span>
+               <span className="text-[10px] font-bold text-[var(--color-text-muted)]">{termos.length} termo(s)</span>
             </div>
 
             <div className="space-y-4">
                {termos.length > 0 ? termos.map((st: any) => {
                  const isAssinado = !!st.assinado_em
                  return (
-                   <div key={st.id} className="p-6 bg-white border border-gray-100 rounded-[32px] flex items-center justify-between shadow-sm hover:shadow-xl hover:shadow-gray-200/40 transition-all hover:scale-[1.01] group">
+                   <div key={st.id} className="p-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-[32px] flex items-center justify-between shadow-sm hover:shadow-xl hover:shadow-black/5 transition-all hover:scale-[1.01] group">
                     <div className="flex items-center gap-6">
                        <div className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center",
@@ -672,8 +672,8 @@ Responda APENAS com JSON válido nesta estrutura:
                           <FileCheck className="w-6 h-6" />
                        </div>
                        <div>
-                          <p className="text-sm font-black text-gray-900 mb-1">{st.titulo || 'Termo de Consentimento'}</p>
-                          <div className="flex items-center gap-4 text-[10px] text-gray-400 font-medium">
+                          <p className="text-sm font-black text-[var(--color-text-primary)] mb-1">{st.titulo || 'Termo de Consentimento'}</p>
+                          <div className="flex items-center gap-4 text-[10px] text-[var(--color-text-muted)] font-medium">
                              <span className="flex items-center gap-1.5">
                                <Calendar className="w-3.5 h-3.5" />
                                {(() => { const p = ((st.assinado_em || st.created_at) as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}
@@ -741,9 +741,9 @@ Responda APENAS com JSON válido nesta estrutura:
                  )
                }) : (
                  <div className="py-12 flex flex-col items-center justify-center text-center opacity-30 select-none">
-                    <Stamp className="w-12 h-12 text-gray-200 mb-4" />
-                    <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Nenhum termo registrado</p>
-                    <p className="text-[10px] text-gray-300 mt-1">Selecione um modelo ao lado para gerar</p>
+                    <Stamp className="w-12 h-12 text-[var(--color-text-dim)] mb-4" />
+                    <p className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-widest">Nenhum termo registrado</p>
+                    <p className="text-[10px] text-[var(--color-text-dim)] mt-1">Selecione um modelo ao lado para gerar</p>
                  </div>
                )}
             </div>
@@ -754,7 +754,7 @@ Responda APENAS com JSON válido nesta estrutura:
       {viewingTermo && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-xl animate-fade-in" onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} />
-          <div className="relative bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slide-in flex flex-col">
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slide-in flex flex-col">
             {/* Toolbar */}
             <div className="bg-gray-800 px-6 py-3 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3 text-white">
@@ -765,13 +765,13 @@ Responda APENAS com JSON válido nesta estrutura:
                 </span>
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={handlePrint} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Imprimir">
+                <button onClick={handlePrint} className="p-2 text-[var(--color-text-muted)] hover:text-white hover:bg-[var(--color-bg-card)]/10 rounded-lg transition-colors" title="Imprimir">
                   <Printer className="w-4 h-4" />
                 </button>
-                <button onClick={handleDownloadPdf} disabled={isGeneratingPdf} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Baixar PDF">
+                <button onClick={handleDownloadPdf} disabled={isGeneratingPdf} className="p-2 text-[var(--color-text-muted)] hover:text-white hover:bg-[var(--color-bg-card)]/10 rounded-lg transition-colors" title="Baixar PDF">
                   {isGeneratingPdf ? <Activity className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                 </button>
-                <button onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                <button onClick={() => { setViewingTermo(null); setResolvedSignUrl(null) }} className="p-2 text-[var(--color-text-muted)] hover:text-white hover:bg-[var(--color-bg-card)]/10 rounded-lg transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -779,24 +779,24 @@ Responda APENAS com JSON válido nesta estrutura:
 
             {/* Documento */}
             <div className="flex-1 overflow-y-auto p-8 flex justify-center">
-              <div ref={docRef} className="bg-white w-full max-w-xl shadow-xl rounded-sm border border-gray-200" style={{ minHeight: '600px' }}>
+              <div ref={docRef} className="bg-[var(--color-bg-card)] w-full max-w-xl shadow-xl rounded-sm border border-[var(--color-border)]" style={{ minHeight: '600px' }}>
                 {/* Header do documento */}
                 <div className="border-b-2 border-cyan-500 p-8 pb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-black text-gray-900 leading-tight">Prontuario Verde</h2>
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Sistema de Gestao Clinica</p>
+                      <h2 className="text-xl font-black text-[var(--color-text-primary)] leading-tight">Prontuario Verde</h2>
+                      <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Sistema de Gestao Clinica</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Documento Digital</p>
-                      <p className="text-[10px] text-gray-300 mt-0.5">ID: {viewingTermo.id?.substring(0, 8) || '—'}</p>
+                      <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">Documento Digital</p>
+                      <p className="text-[10px] text-[var(--color-text-dim)] mt-0.5">ID: {viewingTermo.id?.substring(0, 8) || '—'}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Titulo do termo */}
                 <div className="px-8 pt-8 pb-4">
-                  <h3 className="text-base font-black text-gray-900 text-center uppercase tracking-wider leading-relaxed">
+                  <h3 className="text-base font-black text-[var(--color-text-primary)] text-center uppercase tracking-wider leading-relaxed">
                     {viewingTermo.titulo || 'Termo de Consentimento'}
                   </h3>
                   <div className="w-16 h-0.5 bg-cyan-500 mx-auto mt-3" />
@@ -805,32 +805,32 @@ Responda APENAS com JSON válido nesta estrutura:
                 {/* Conteudo */}
                 {viewingTermo.conteudo && (
                   <div className="px-8 py-4">
-                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">{viewingTermo.conteudo}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">{viewingTermo.conteudo}</p>
                   </div>
                 )}
 
                 {/* Info */}
                 <div className="px-8 py-4 space-y-3 text-xs">
-                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-[var(--color-bg-deep)] rounded-lg">
                     <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Data</p>
-                      <p className="text-gray-700 font-bold mt-1">
+                      <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Data</p>
+                      <p className="text-[var(--color-text-secondary)] font-bold mt-1">
                         {(() => { const p = ((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[0].split('-'); return `${p[2]}/${p[1]}/${p[0]}` })()}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Horario</p>
-                      <p className="text-gray-700 font-bold mt-1">
+                      <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Horario</p>
+                      <p className="text-[var(--color-text-secondary)] font-bold mt-1">
                         {((viewingTermo.assinado_em || viewingTermo.created_at) as string).split('T')[1]?.substring(0, 5) ?? '—'}
                       </p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Tipo</p>
-                      <p className="text-gray-700 font-bold mt-1 capitalize">{viewingTermo.tipo || 'Consentimento'}</p>
+                      <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Tipo</p>
+                      <p className="text-[var(--color-text-secondary)] font-bold mt-1 capitalize">{viewingTermo.tipo || 'Consentimento'}</p>
                     </div>
                     <div>
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Profissional</p>
-                      <p className="text-gray-700 font-bold mt-1">{user?.nome || 'Profissional'}</p>
+                      <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Profissional</p>
+                      <p className="text-[var(--color-text-secondary)] font-bold mt-1">{user?.nome || 'Profissional'}</p>
                     </div>
                   </div>
                 </div>
@@ -838,10 +838,10 @@ Responda APENAS com JSON válido nesta estrutura:
                 {/* Assinatura */}
                 <div className="px-8 py-6 mt-4">
                   {viewingTermo.assinatura_url ? (
-                    <div className="border-t-2 border-dashed border-gray-200 pt-6">
-                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest text-center mb-4">Assinatura Digital do Paciente</p>
+                    <div className="border-t-2 border-dashed border-[var(--color-border)] pt-6">
+                      <p className="text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest text-center mb-4">Assinatura Digital do Paciente</p>
                       <div className="flex justify-center">
-                        <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 inline-block">
+                        <div className="bg-[var(--color-bg-deep)] rounded-xl border border-[var(--color-border)] p-4 inline-block">
                           <img src={resolvedSignUrl || ''} alt="Assinatura" className="max-h-32 object-contain" />
                         </div>
                       </div>
@@ -858,8 +858,8 @@ Responda APENAS com JSON válido nesta estrutura:
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center">
-                  <p className="text-[8px] text-gray-400 leading-relaxed">
+                <div className="px-8 py-4 bg-[var(--color-bg-deep)] border-t border-[var(--color-border)] text-center">
+                  <p className="text-[8px] text-[var(--color-text-muted)] leading-relaxed">
                     Este documento foi gerado eletronicamente pelo sistema Prontuario Verde.
                     Possui validade juridica conforme Lei 14.063/2020.
                   </p>
@@ -874,31 +874,31 @@ Responda APENAS com JSON válido nesta estrutura:
       {showEditModal && activeTemplate && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowEditModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fade-in">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col animate-fade-in">
+            <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-deep)]/50 shrink-0">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">Revisar Termo</h3>
-                <p className="text-xs text-gray-400 mt-0.5">{activeTemplate.titulo}</p>
+                <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Revisar Termo</h3>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{activeTemplate.titulo}</p>
               </div>
-              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
+              <button onClick={() => setShowEditModal(false)} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider mb-2">Conteúdo do termo (editável)</p>
+              <p className="text-[10px] text-[var(--color-text-muted)] font-semibold uppercase tracking-wider mb-2">Conteúdo do termo (editável)</p>
               <textarea
                 value={editableContent}
                 onChange={e => setEditableContent(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none min-h-[300px] font-mono"
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl p-4 text-sm text-[var(--color-text-secondary)] leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none min-h-[300px] font-mono"
               />
-              <p className="text-[9px] text-gray-300 mt-2">Dados do paciente (nome, CPF) foram preenchidos automaticamente. Edite conforme necessário.</p>
+              <p className="text-[9px] text-[var(--color-text-dim)] mt-2">Dados do paciente (nome, CPF) foram preenchidos automaticamente. Edite conforme necessário.</p>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
-              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</button>
+            <div className="px-6 py-4 border-t border-[var(--color-border)] flex items-center justify-between shrink-0">
+              <button onClick={() => setShowEditModal(false)} className="px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">Cancelar</button>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrintBlank}
-                  className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-xl transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-[var(--color-bg-card)] hover:bg-gray-200 text-[var(--color-text-secondary)] text-sm font-medium rounded-xl transition-colors"
                 >
                   <Printer className="w-4 h-4" /> Imprimir (assinar à mão)
                 </button>
@@ -919,29 +919,29 @@ Responda APENAS com JSON válido nesta estrutura:
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowSignModal(false)} />
 
-           <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
+           <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in">
               <div className="bg-blue-600 px-6 py-4 text-white flex items-center gap-3">
                  <Maximize2 className="w-5 h-5" />
                  <div className="flex-1">
                     <h3 className="text-base font-bold">Assinatura Digital</h3>
                     <p className="text-xs text-blue-200">{activeTemplate.titulo}</p>
                  </div>
-                 <button onClick={() => setShowSignModal(false)} className="p-2 hover:bg-white/10 rounded-lg"><X className="w-5 h-5" /></button>
+                 <button onClick={() => setShowSignModal(false)} className="p-2 hover:bg-[var(--color-bg-card)]/10 rounded-lg"><X className="w-5 h-5" /></button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                  {/* Preview do conteúdo */}
-                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 max-h-32 overflow-y-auto text-xs text-gray-500 leading-relaxed whitespace-pre-line">
+                 <div className="bg-[var(--color-bg-deep)] p-4 rounded-xl border border-[var(--color-border)] max-h-32 overflow-y-auto text-xs text-[var(--color-text-muted)] leading-relaxed whitespace-pre-line">
                     {editableContent || activeTemplate.desc}
                  </div>
 
                  {/* Assinatura do Paciente */}
                  <div>
                     <div className="flex items-center justify-between mb-2">
-                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-blue-500" /> Assinatura do Paciente *</label>
+                       <label className="text-xs font-bold text-[var(--color-text-secondary)] flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-blue-500" /> Assinatura do Paciente *</label>
                        <button onClick={() => sigPadPaciente.current?.clear()} className="text-[10px] font-semibold text-red-400 hover:text-red-600">Limpar</button>
                     </div>
-                    <div className="bg-gray-50 rounded-xl border-2 border-gray-200 h-36 overflow-hidden touch-none relative">
+                    <div className="bg-[var(--color-bg-deep)] rounded-xl border-2 border-[var(--color-border)] h-36 overflow-hidden touch-none relative">
                        <SignatureCanvas
                         ref={sigPadPaciente}
                         penColor='#111827'
@@ -956,10 +956,10 @@ Responda APENAS com JSON válido nesta estrutura:
                  {/* Assinatura do Profissional */}
                  <div>
                     <div className="flex items-center justify-between mb-2">
-                       <label className="text-xs font-bold text-gray-700 flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-cyan-500" /> Assinatura do Profissional</label>
+                       <label className="text-xs font-bold text-[var(--color-text-secondary)] flex items-center gap-1.5"><FileCheck className="w-3.5 h-3.5 text-cyan-500" /> Assinatura do Profissional</label>
                        <button onClick={() => sigPadProf.current?.clear()} className="text-[10px] font-semibold text-red-400 hover:text-red-600">Limpar</button>
                     </div>
-                    <div className="bg-gray-50 rounded-xl border-2 border-gray-200 h-36 overflow-hidden touch-none relative">
+                    <div className="bg-[var(--color-bg-deep)] rounded-xl border-2 border-[var(--color-border)] h-36 overflow-hidden touch-none relative">
                        <SignatureCanvas
                         ref={sigPadProf}
                         penColor='#1e40af'
@@ -969,17 +969,17 @@ Responda APENAS com JSON válido nesta estrutura:
                           <Stamp className="w-16 h-16 mx-auto" />
                        </div>
                     </div>
-                    <p className="text-[9px] text-gray-300 mt-1">Opcional — assine para validar como profissional responsável</p>
+                    <p className="text-[9px] text-[var(--color-text-dim)] mt-1">Opcional — assine para validar como profissional responsável</p>
                  </div>
               </div>
 
-              <div className="px-6 py-4 flex items-center justify-between border-t border-gray-100 shrink-0">
+              <div className="px-6 py-4 flex items-center justify-between border-t border-[var(--color-border)] shrink-0">
                  <div className="flex items-center gap-2 text-cyan-500">
                     <Lock className="w-3.5 h-3.5" />
                     <span className="text-[9px] font-bold uppercase tracking-wider">Ambiente Seguro</span>
                  </div>
                  <div className="flex items-center gap-3">
-                    <button onClick={() => setShowSignModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Cancelar</button>
+                    <button onClick={() => setShowSignModal(false)} className="px-4 py-2 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">Cancelar</button>
                     <button
                       onClick={handleSign}
                       disabled={isSaving}

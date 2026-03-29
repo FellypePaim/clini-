@@ -24,7 +24,7 @@ const STATUS_INFO: Record<InstanciaStatus, { label: string; color: string; icon:
   connected:    { label: 'Conectado',       color: 'text-emerald-600 bg-emerald-50 border-emerald-200',  icon: CheckCircle },
   qr_pending:   { label: 'Aguardando Scan', color: 'text-amber-600 bg-amber-50 border-amber-200',  icon: QrCode },
   connecting:   { label: 'Conectando...',   color: 'text-blue-600 bg-blue-50 border-blue-200',    icon: Loader2 },
-  disconnected: { label: 'Desconectado',    color: 'text-slate-500 bg-slate-50 border-slate-200', icon: WifiOff },
+  disconnected: { label: 'Desconectado',    color: 'text-[var(--color-text-muted)] bg-[var(--color-bg-deep)] border-[var(--color-border)]', icon: WifiOff },
   error:        { label: 'Erro',            color: 'text-red-600 bg-red-50 border-red-200',       icon: AlertCircle },
 }
 
@@ -172,8 +172,8 @@ export function WhatsAppConexaoPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-black text-gray-900 uppercase tracking-[0.2em]">Conexões WhatsApp</h2>
-          <p className="text-[11px] text-gray-400 mt-0.5 font-bold tracking-wide">
+          <h2 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-[0.2em]">Conexões WhatsApp</h2>
+          <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 font-bold tracking-wide">
             Cada clínica pode ter uma instância WhatsApp dedicada para a IA OVYVA
           </p>
         </div>
@@ -206,10 +206,10 @@ export function WhatsAppConexaoPage() {
           <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
         </div>
       ) : instancias.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-2xl">
-          <Smartphone className="w-12 h-12 mb-4 text-gray-200" />
+        <div className="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)] border-2 border-dashed border-[var(--color-border)] rounded-2xl">
+          <Smartphone className="w-12 h-12 mb-4 text-[var(--color-text-dim)]" />
           <p className="text-sm font-bold">Nenhuma conexão configurada</p>
-          <p className="text-xs text-gray-300 mt-1">Clique em "Nova Conexão" para começar</p>
+          <p className="text-xs text-[var(--color-text-dim)] mt-1">Clique em "Nova Conexão" para começar</p>
         </div>
       ) : (
         <div className="grid gap-4">
@@ -221,21 +221,21 @@ export function WhatsAppConexaoPage() {
             const isPolling = pollingId === inst.id
 
             return (
-              <div key={inst.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div key={inst.id} className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
                 {/* Header da instância */}
                 <div className="flex items-center justify-between p-6">
                   <div className="flex items-center gap-4">
-                    <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', isConnected ? 'bg-emerald-50' : 'bg-gray-50')}>
-                      <Smartphone className={cn('w-6 h-6', isConnected ? 'text-emerald-600' : 'text-gray-400')} />
+                    <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center', isConnected ? 'bg-emerald-50' : 'bg-[var(--color-bg-deep)]')}>
+                      <Smartphone className={cn('w-6 h-6', isConnected ? 'text-emerald-600' : 'text-[var(--color-text-muted)]')} />
                     </div>
                     <div>
-                      <p className="text-xs font-black text-gray-900 uppercase tracking-widest">{inst.nome_instancia}</p>
+                      <p className="text-xs font-black text-[var(--color-text-primary)] uppercase tracking-widest">{inst.nome_instancia}</p>
                       {inst.numero_conectado && (
-                        <p className="text-[11px] text-gray-500 mt-0.5 flex items-center gap-1">
+                        <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 flex items-center gap-1">
                           <Phone className="w-3 h-3" /> +{inst.numero_conectado}
                         </p>
                       )}
-                      <p className="text-[10px] text-gray-300 mt-0.5">
+                      <p className="text-[10px] text-[var(--color-text-dim)] mt-0.5">
                         Criado em {new Date(inst.created_at).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -254,7 +254,7 @@ export function WhatsAppConexaoPage() {
                     {isPending && (
                       <button
                         onClick={() => handleRefreshQR(inst)}
-                        className="p-2.5 hover:bg-gray-50 rounded-xl text-gray-400 hover:text-amber-500 transition-all"
+                        className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] hover:text-amber-500 transition-all"
                         title="Atualizar QR Code"
                       >
                         <RefreshCw className="w-4 h-4" />
@@ -265,7 +265,7 @@ export function WhatsAppConexaoPage() {
                     {(inst.status === 'disconnected' || inst.status === 'error') && (
                       <button
                         onClick={() => handleReconectar(inst)}
-                        className="p-2.5 hover:bg-blue-50 rounded-xl text-gray-400 hover:text-blue-500 transition-all"
+                        className="p-2.5 hover:bg-blue-50 rounded-xl text-[var(--color-text-muted)] hover:text-blue-500 transition-all"
                         title="Reconectar"
                       >
                         <RefreshCw className="w-4 h-4" />
@@ -276,7 +276,7 @@ export function WhatsAppConexaoPage() {
                     {isConnected && (
                       <button
                         onClick={() => handleDesconectar(inst)}
-                        className="p-2.5 hover:bg-amber-50 rounded-xl text-gray-300 hover:text-amber-500 transition-all"
+                        className="p-2.5 hover:bg-amber-50 rounded-xl text-[var(--color-text-dim)] hover:text-amber-500 transition-all"
                         title="Desconectar"
                       >
                         <WifiOff className="w-4 h-4" />
@@ -286,7 +286,7 @@ export function WhatsAppConexaoPage() {
                     {/* Excluir — sempre visível */}
                     <button
                       onClick={() => handleExcluir(inst)}
-                      className="p-2.5 hover:bg-red-50 rounded-xl text-gray-300 hover:text-red-500 transition-all"
+                      className="p-2.5 hover:bg-red-50 rounded-xl text-[var(--color-text-dim)] hover:text-red-500 transition-all"
                       title="Excluir instância"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -296,11 +296,11 @@ export function WhatsAppConexaoPage() {
 
                 {/* QR Code */}
                 {isPending && inst.qr_code_base64 && (
-                  <div className="border-t border-dashed border-gray-100 p-6 flex flex-col items-center gap-4 bg-amber-50/40">
+                  <div className="border-t border-dashed border-[var(--color-border)] p-6 flex flex-col items-center gap-4 bg-amber-50/40">
                     <p className="text-xs font-black text-amber-700 uppercase tracking-widest">
                       📱 Abra o WhatsApp → Dispositivos Conectados → Escanear QR Code
                     </p>
-                    <div className="p-4 bg-white rounded-2xl shadow-lg shadow-amber-100/50 border border-amber-100">
+                    <div className="p-4 bg-[var(--color-bg-card)] rounded-2xl shadow-lg shadow-amber-100/50 border border-amber-100">
                       <img
                         src={`data:image/png;base64,${inst.qr_code_base64.replace(/^data:image\/\w+;base64,/, '')}`}
                         alt="QR Code WhatsApp"

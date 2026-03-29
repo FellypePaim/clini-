@@ -38,12 +38,12 @@ const COR_ROLE: Record<string, string> = {
   admin: 'bg-indigo-500',
   administrador: 'bg-indigo-500',
   profissional: 'bg-emerald-500',
-  recepcao: 'bg-slate-500',
+  recepcao: 'bg-[var(--color-bg-deep)]0',
 }
 
 function roleBadgeStyle(role: string) {
   if (role === 'admin' || role === 'administrador') return 'bg-indigo-100 text-indigo-700'
-  if (role === 'recepcao') return 'bg-slate-100 text-slate-600'
+  if (role === 'recepcao') return 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)]'
   return 'bg-emerald-100 text-emerald-700'
 }
 
@@ -223,14 +223,14 @@ export function ProfissionaisPage() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-card)]">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <BriefcaseMedical className="text-indigo-600" />
             Quadro Médico e Equipe
           </h2>
-          <p className="text-sm font-medium text-slate-500 mt-1">Gerencie os profissionais e seus níveis de acesso.</p>
+          <p className="text-sm font-medium text-[var(--color-text-muted)] mt-1">Gerencie os profissionais e seus níveis de acesso.</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -254,7 +254,7 @@ export function ProfissionaisPage() {
             <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
           </div>
         ) : profissionais.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+          <div className="flex flex-col items-center justify-center p-12 text-[var(--color-text-muted)]">
             <BriefcaseMedical className="w-12 h-12 mb-3 text-slate-200" />
             <p className="font-bold text-sm">Nenhum profissional cadastrado</p>
             <button onClick={() => setShowModal(true)} className="mt-3 text-indigo-600 text-sm font-medium hover:underline">
@@ -264,7 +264,7 @@ export function ProfissionaisPage() {
         ) : (
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-white border-b border-slate-200 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <tr className="bg-[var(--color-bg-card)] border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                 <th className="px-6 py-4">Profissional</th>
                 <th className="px-6 py-4">Conselho</th>
                 <th className="px-6 py-4">Nível de Acesso</th>
@@ -273,21 +273,21 @@ export function ProfissionaisPage() {
                 <th className="px-6 py-4 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm font-medium">
+            <tbody className="divide-y divide-[var(--color-border)] text-sm font-medium">
               {profissionais.map((prof) => (
-                <tr key={prof.id} className="hover:bg-slate-50 transition-colors group">
+                <tr key={prof.id} className="hover:bg-[var(--color-bg-card-hover)] transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0 border-2 border-white shadow-sm font-bold text-slate-600">
+                      <div className="w-10 h-10 rounded-full bg-[var(--color-border)] flex items-center justify-center shrink-0 border-2 border-white shadow-sm font-bold text-[var(--color-text-secondary)]">
                         {prof.nome_completo.substring(0, 2).toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="font-bold text-slate-800">{prof.nome_completo}</h3>
-                        <span className="text-xs text-slate-500">{prof.especialidade ?? '—'}</span>
+                        <h3 className="font-bold text-[var(--color-text-primary)]">{prof.nome_completo}</h3>
+                        <span className="text-xs text-[var(--color-text-muted)]">{prof.especialidade ?? '—'}</span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-500 text-xs">{prof.conselho ?? '—'}</td>
+                  <td className="px-6 py-4 text-[var(--color-text-muted)] text-xs">{prof.conselho ?? '—'}</td>
                   <td className="px-6 py-4">
                     <Badge className={`border-none tracking-widest uppercase text-[10px] ${roleBadgeStyle(prof.role)}`}>
                       {roleLabel(prof.role)}
@@ -303,7 +303,7 @@ export function ProfissionaisPage() {
                       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-widest border transition-colors disabled:opacity-50 ${
                         prof.ativo
                           ? 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                          : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200'
+                          : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200'
                       }`}
                     >
                       {toggling === prof.id ? <Loader2 size={13} className="animate-spin" /> : prof.ativo ? <Check size={14} /> : <X size={14} />}
@@ -311,10 +311,10 @@ export function ProfissionaisPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button onClick={() => setAusenciaProf(prof)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Folgas e Ausências">
+                    <button onClick={() => setAusenciaProf(prof)} className="p-2 text-[var(--color-text-muted)] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Folgas e Ausências">
                       <CalendarOff size={16} />
                     </button>
-                    <button onClick={() => openEditModal(prof)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
+                    <button onClick={() => openEditModal(prof)} className="p-2 text-[var(--color-text-muted)] hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
                       <Edit2 size={16} />
                     </button>
                   </td>
@@ -328,37 +328,37 @@ export function ProfissionaisPage() {
       {/* ── Modal Cadastrar Colaborador ──────────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                 <UserCog className="w-5 h-5 text-indigo-600" /> Novo Colaborador
               </h2>
-              <button onClick={() => { setShowModal(false); setForm(formVazio); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => { setShowModal(false); setForm(formVazio); }} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[var(--color-text-muted)]" />
               </button>
             </div>
 
             <form onSubmit={handleCadastrar} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nome completo *</label>
                 <input type="text" required className="input-base" placeholder="Dr. João Silva"
                   value={form.nome} onChange={e => setForm(f => ({ ...f, nome: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">E-mail *</label>
                 <input type="email" required className="input-base" placeholder="colaborador@clinica.com"
                   value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Senha inicial *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Senha inicial *</label>
                 <input type="password" required minLength={8} className="input-base" placeholder="Mínimo 8 caracteres"
                   value={form.senha} onChange={e => setForm(f => ({ ...f, senha: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de acesso *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nível de acesso *</label>
                 <select className="input-base" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as any }))}>
                   <option value="profissional">Profissional de Saúde</option>
                   <option value="recepcao">Recepção</option>
@@ -368,12 +368,12 @@ export function ProfissionaisPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Especialidade</label>
                   <input type="text" className="input-base" placeholder="Ex: Dermatologia"
                     value={form.especialidade} onChange={e => setForm(f => ({ ...f, especialidade: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Conselho (CRM/CRO)</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Conselho (CRM/CRO)</label>
                   <input type="text" className="input-base" placeholder="CRM-SP 12345"
                     value={form.conselho} onChange={e => setForm(f => ({ ...f, conselho: e.target.value }))} />
                 </div>
@@ -395,13 +395,13 @@ export function ProfissionaisPage() {
       {/* ── Modal Vincular por E-mail ──────────────────────────── */}
       {showLinkModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                 <LinkIcon className="w-5 h-5 text-indigo-600" /> Vincular Colaborador
               </h2>
-              <button onClick={() => { setShowLinkModal(false); setLinkForm({ email: '', role: 'profissional' }); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => { setShowLinkModal(false); setLinkForm({ email: '', role: 'profissional' }); }} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[var(--color-text-muted)]" />
               </button>
             </div>
 
@@ -414,9 +414,9 @@ export function ProfissionaisPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">E-mail do colaborador *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">E-mail do colaborador *</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
                   <input
                     type="email"
                     required
@@ -429,7 +429,7 @@ export function ProfissionaisPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Cargo na clínica *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Cargo na clínica *</label>
                 <select
                   className="input-base"
                   value={linkForm.role}
@@ -458,25 +458,25 @@ export function ProfissionaisPage() {
       {/* ── Modal Editar Perfil ──────────────────────────── */}
       {editingProf && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                 <Edit2 className="w-5 h-5 text-indigo-600" /> Editar Perfil
               </h2>
-              <button onClick={() => setEditingProf(null)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => setEditingProf(null)} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[var(--color-text-muted)]" />
               </button>
             </div>
 
             <form onSubmit={handleEditSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nome completo</label>
                 <input type="text" required className="input-base"
                   value={editForm.nome_completo} onChange={e => setEditForm(f => ({ ...f, nome_completo: e.target.value }))} />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nível de acesso</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nível de acesso</label>
                 <select className="input-base" value={editForm.role} onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}>
                   <option value="profissional">Profissional de Saúde</option>
                   <option value="recepcao">Recepção</option>
@@ -486,12 +486,12 @@ export function ProfissionaisPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Especialidade</label>
                   <input type="text" className="input-base" placeholder="Ex: Dermatologia"
                     value={editForm.especialidade} onChange={e => setEditForm(f => ({ ...f, especialidade: e.target.value }))} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Conselho (CRM/CRO)</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Conselho (CRM/CRO)</label>
                   <input type="text" className="input-base" placeholder="CRM-SP 12345"
                     value={editForm.conselho} onChange={e => setEditForm(f => ({ ...f, conselho: e.target.value }))} />
                 </div>

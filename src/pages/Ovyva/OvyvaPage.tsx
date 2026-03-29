@@ -47,8 +47,8 @@ export function OvyvaPage() {
                 <Bot className="w-6 h-6" />
              </div>
              <div>
-                <h1 className="text-2xl font-black text-gray-900 border-none uppercase tracking-widest">OVYVA</h1>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">OVYVA</h1>
+                <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                    <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Secretaria Virtual IA 24/7 Ativa
                 </p>
              </div>
@@ -65,7 +65,7 @@ export function OvyvaPage() {
        </div>
 
        {/* Main Chat Panel */}
-       <div className="flex-1 flex bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-2xl shadow-gray-200/50">
+       <div className="flex-1 flex bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] overflow-hidden shadow-2xl shadow-black/5">
           <ConversationList
             conversations={conversations}
             selectedId={selectedId}
@@ -87,11 +87,11 @@ export function OvyvaPage() {
               />
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center bg-gray-50/30 gap-6 opacity-30 select-none">
-               <div className="w-32 h-32 rounded-[48px] border-4 border-dashed border-gray-300 flex items-center justify-center text-gray-300">
+            <div className="flex-1 flex flex-col items-center justify-center bg-[var(--color-bg-deep)]/30 gap-6 opacity-30 select-none">
+               <div className="w-32 h-32 rounded-[48px] border-4 border-dashed border-gray-300 flex items-center justify-center text-[var(--color-text-dim)]">
                   <MessageSquare className="w-12 h-12" />
                </div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Selecione uma conversa para iniciar</p>
+               <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Selecione uma conversa para iniciar</p>
             </div>
           )}
        </div>
@@ -103,7 +103,7 @@ function NavButton({ icon, label, onClick }: { icon: React.ReactNode, label: str
   return (
     <button
       onClick={onClick}
-      className="px-6 py-2.5 bg-white hover:bg-gray-900 hover:text-white rounded-2xl border border-gray-100 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm"
+      className="px-6 py-2.5 bg-[var(--color-bg-card)] hover:bg-gray-900 hover:text-white rounded-2xl border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 flex items-center gap-2 shadow-sm"
     >
        {icon} {label}
     </button>

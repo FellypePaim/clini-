@@ -78,7 +78,7 @@ export function SuperSaudePage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-3xl font-black text-white">Saúde do Sistema</h1>
-          <p className="text-slate-400 font-medium">Monitoramento de infraestrutura, latência e integridade dos serviços.</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Monitoramento de infraestrutura, latência e integridade dos serviços.</p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
@@ -91,12 +91,12 @@ export function SuperSaudePage() {
         {/* Core Infrastructure */}
         <div className="lg:col-span-2 space-y-6">
            <div className="flex items-center justify-between">
-             <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+             <h3 className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
                 <Network size={16} /> CORE INFRASTRUCTURE (SUPABASE)
              </h3>
              <button
                onClick={() => { toast({ title: 'Atualizando...', description: 'Verificando status de todos os serviços.', type: 'info' }); loadData() }}
-               className="p-2 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-white transition-colors">
+               className="p-2 hover:bg-slate-800 rounded-lg text-[var(--color-text-muted)] hover:text-white transition-colors">
                 <RefreshCw size={16} />
              </button>
            </div>
@@ -115,15 +115,15 @@ export function SuperSaudePage() {
                     <h4 className="text-lg font-black text-white mb-4">{service.name}</h4>
                     <div className="space-y-3">
                        <div className="flex justify-between text-[11px] font-bold">
-                          <span className="text-slate-500 uppercase tracking-widest">Latência</span>
-                          <span className="text-slate-300">{service.latency}</span>
+                          <span className="text-[var(--color-text-muted)] uppercase tracking-widest">Latência</span>
+                          <span className="text-[var(--color-text-dim)]">{service.latency}</span>
                        </div>
                        <div className="flex justify-between text-[11px] font-bold">
-                          <span className="text-slate-500 uppercase tracking-widest">Uptime (30d)</span>
-                          <span className="text-slate-300">{service.uptime}</span>
+                          <span className="text-[var(--color-text-muted)] uppercase tracking-widest">Uptime (30d)</span>
+                          <span className="text-[var(--color-text-dim)]">{service.uptime}</span>
                        </div>
                        <div className="pt-2">
-                          <div className="flex justify-between text-[10px] font-black text-slate-600 uppercase mb-1.5">
+                          <div className="flex justify-between text-[10px] font-black text-[var(--color-text-secondary)] uppercase mb-1.5">
                              <span>Resource Load</span>
                              <span>{service.load}</span>
                           </div>
@@ -142,7 +142,7 @@ export function SuperSaudePage() {
                  <h4 className="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
                     <BarChart3 size={16} className="text-purple-400" /> Latência Média Global (ms)
                  </h4>
-                 <div className="flex items-center gap-4 text-[10px] font-black text-slate-500">
+                 <div className="flex items-center gap-4 text-[10px] font-black text-[var(--color-text-muted)]">
                     <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-purple-500" /> P99</div>
                     <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500" /> P50</div>
                  </div>
@@ -171,14 +171,14 @@ export function SuperSaudePage() {
                           </div>
                           <div className="flex flex-col">
                              <span className="text-xs font-black text-white tracking-wide">{api.name}</span>
-                             <span className="text-[10px] font-bold text-slate-500 uppercase">{api.quota === 'N/A' ? 'SLA ativo' : api.quota}</span>
+                             <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase">{api.quota === 'N/A' ? 'SLA ativo' : api.quota}</span>
                           </div>
                        </div>
                        <div className="flex flex-col items-end">
                           <span className={cn("text-[10px] font-black uppercase", api.status === 'Operacional' ? 'text-emerald-500' : 'text-amber-500')}>
                              {api.status}
                           </span>
-                          <span className="text-[10px] font-bold text-slate-600">{api.latency}</span>
+                          <span className="text-[10px] font-bold text-[var(--color-text-secondary)]">{api.latency}</span>
                        </div>
                     </div>
                  )})}
@@ -195,9 +195,9 @@ export function SuperSaudePage() {
                     <div key={log.id} className="bg-red-500/5 border border-red-500/10 p-5 rounded-3xl hover:border-red-500/30 transition-all cursor-pointer group">
                        <div className="flex justify-between items-start mb-2">
                           <Badge className="bg-red-500/10 text-red-500 border-none text-[8px] font-black py-0.5">{log.service.toUpperCase()}</Badge>
-                          <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{log.lastOccur}</span>
+                          <span className="text-[9px] font-black text-[var(--color-text-secondary)] uppercase tracking-widest">{log.lastOccur}</span>
                        </div>
-                       <p className="text-xs font-bold text-slate-300 line-clamp-2 leading-relaxed mb-3 group-hover:text-white transition-colors">
+                       <p className="text-xs font-bold text-[var(--color-text-dim)] line-clamp-2 leading-relaxed mb-3 group-hover:text-white transition-colors">
                           {log.msg}
                        </p>
                        <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export function SuperSaudePage() {
                  ))}
                  <button
                    onClick={() => toast({ title: 'Logs de Erro', description: 'Logs completos disponíveis na tabela audit_logs com filtro resultado=erro.', type: 'info' })}
-                   className="w-full py-3 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all">
+                   className="w-full py-3 text-[10px] font-black text-[var(--color-text-muted)] hover:text-white uppercase tracking-widest border border-dashed border-slate-700/50 rounded-2xl hover:border-slate-500 transition-all">
                     Ver logs de erro completos
                  </button>
               </div>

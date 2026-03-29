@@ -155,8 +155,8 @@ export function FileUpload({
       <div
         className={cn(
           "relative w-full border-2 border-dashed rounded-2xl p-8 transition-all flex flex-col items-center justify-center gap-4 text-center cursor-pointer overflow-hidden",
-          disabled ? "opacity-50 cursor-not-allowed bg-gray-50 border-gray-200" :
-          isDragging ? "border-cyan-500 bg-cyan-500/5" : "border-gray-200 hover:border-cyan-400 hover:bg-gray-50"
+          disabled ? "opacity-50 cursor-not-allowed bg-[var(--color-bg-deep)] border-[var(--color-border)]" :
+          isDragging ? "border-cyan-500 bg-cyan-500/5" : "border-[var(--color-border)] hover:border-cyan-400 hover:bg-[var(--color-bg-card-hover)]"
         )}
         onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true) }}
         onDragLeave={(e) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false) }}
@@ -176,13 +176,13 @@ export function FileUpload({
         />
         <div className={cn(
           "p-4 rounded-full transition-colors",
-          isDragging ? "bg-cyan-500/10 text-cyan-500" : "bg-white text-gray-400 shadow-sm border border-gray-100"
+          isDragging ? "bg-cyan-500/10 text-cyan-500" : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] shadow-sm border border-[var(--color-border)]"
         )}>
           <UploadCloud className="w-8 h-8" />
         </div>
         <div>
-          <p className="text-sm font-black uppercase tracking-wide text-gray-900">{label}</p>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+          <p className="text-sm font-black uppercase tracking-wide text-[var(--color-text-primary)]">{label}</p>
+          <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mt-1">
             Max {(maxBytes / 1024 / 1024).toFixed(0)}MB • {limitConfig.tipos.map(t => t.split('/')[1]).join(', ').toUpperCase()}
           </p>
         </div>
@@ -192,22 +192,22 @@ export function FileUpload({
       {uploads.length > 0 && (
         <div className="space-y-3">
           {uploads.map(u => (
-             <div key={u.id} className="relative p-3 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-between group overflow-hidden">
+             <div key={u.id} className="relative p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-sm flex items-center justify-between group overflow-hidden">
                 {/* Progress bar BG */}
                 {!u.done && (
                   <div className="absolute top-0 left-0 h-full bg-blue-50/50 transition-all duration-300" style={{ width: `${u.progress}%` }} />
                 )}
                 
                 <div className="flex items-center gap-3 relative z-10 w-full">
-                  <div className="w-10 h-10 shrink-0 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center text-gray-400">
+                  <div className="w-10 h-10 shrink-0 bg-[var(--color-bg-card)] rounded-lg overflow-hidden flex items-center justify-center text-[var(--color-text-muted)]">
                     {u.previewUrl ? (
                       <img src={u.previewUrl} alt="preview" className="w-full h-full object-cover" />
                     ) : u.file.type.startsWith('image/') ? <ImageIcon className="w-5 h-5" /> : <FileIcon className="w-5 h-5" />}
                   </div>
                   
                   <div className="flex-1 min-w-0 pr-4">
-                    <p className="text-xs font-bold text-gray-900 truncate">{u.file.name}</p>
-                    <p className="text-[10px] text-gray-500 font-medium">{(u.file.size / 1024).toFixed(0)} KB</p>
+                    <p className="text-xs font-bold text-[var(--color-text-primary)] truncate">{u.file.name}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] font-medium">{(u.file.size / 1024).toFixed(0)} KB</p>
                     
                     {u.error ? (
                       <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest flex items-center gap-1 mt-0.5"><AlertCircle className="w-3 h-3" /> {u.error}</p>
@@ -220,7 +220,7 @@ export function FileUpload({
 
                   <button 
                     onClick={(e) => { e.stopPropagation(); removeUpload(u.id); }}
-                    className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors z-20"
+                    className="p-1.5 text-[var(--color-text-muted)] hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors z-20"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -233,16 +233,16 @@ export function FileUpload({
       {/* EXISTING FILES LIST */}
       {existingFiles.length > 0 && (
         <div className="space-y-3 mt-6">
-          <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Arquivos Salvos</h4>
+          <h4 className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">Arquivos Salvos</h4>
           {existingFiles.map(file => (
-            <div key={file.id} className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm flex items-center justify-between group">
+            <div key={file.id} className="p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-sm flex items-center justify-between group">
                <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 shrink-0 bg-cyan-500/5 rounded-lg flex items-center justify-center text-cyan-500">
                     {file.mime_type.startsWith('image/') ? <ImageIcon className="w-5 h-5" /> : <FileIcon className="w-5 h-5" />}
                   </div>
                   <div className="min-w-0">
-                     <p className="text-xs font-bold text-gray-900 truncate" title={file.nome}>{file.nome}</p>
-                     <p className="text-[10px] text-gray-500 font-medium">
+                     <p className="text-xs font-bold text-[var(--color-text-primary)] truncate" title={file.nome}>{file.nome}</p>
+                     <p className="text-[10px] text-[var(--color-text-muted)] font-medium">
                        {new Date(file.created_at).toLocaleDateString()} • {(file.tamanho_bytes / 1024).toFixed(0)} KB
                      </p>
                   </div>

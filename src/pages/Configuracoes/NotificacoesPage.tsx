@@ -93,14 +93,14 @@ export function NotificacoesPage() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-slate-100 bg-slate-50/50">
-        <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
+      <div className="p-6 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]">
+        <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
           <Bell className="text-indigo-600" />
           Notificações e Comunicação
         </h2>
         <div className="flex items-center gap-3 mt-1">
-          <p className="text-sm font-medium text-slate-500">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
+          <p className="text-sm font-medium text-[var(--color-text-muted)]">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
           {lastSaved && (Date.now() - lastSaved) < 3000 && (
             <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 animate-fade-in">
               <CheckCircle2 size={12} /> Salvo
@@ -112,10 +112,10 @@ export function NotificacoesPage() {
       <div className="p-8 space-y-8">
         {/* WhatsApp → Pacientes */}
         <div>
-          <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-1 flex items-center gap-2">
             <Smartphone size={18} className="text-emerald-500" /> WhatsApp Automático (Pacientes)
           </h3>
-          <p className="text-xs text-slate-400 mb-4">Mensagens enviadas automaticamente pela OVYVA via WhatsApp para os pacientes.</p>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4">Mensagens enviadas automaticamente pela OVYVA via WhatsApp para os pacientes.</p>
 
           <div className="space-y-3 max-w-2xl">
             <ToggleRow
@@ -136,11 +136,11 @@ export function NotificacoesPage() {
               <div className="ml-4 pl-4 border-l-2 border-emerald-200">
                 <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
                   <Clock size={16} className="text-emerald-600 shrink-0" />
-                  <span className="text-sm font-medium text-slate-700">Enviar</span>
+                  <span className="text-sm font-medium text-[var(--color-text-secondary)]">Enviar</span>
                   <select
                     value={config.whatsapp_lembrete_horas}
                     onChange={e => setHoras(Number(e.target.value))}
-                    className="px-3 py-1.5 text-sm font-bold border border-emerald-200 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none"
+                    className="px-3 py-1.5 text-sm font-bold border border-emerald-200 rounded-lg bg-[var(--color-bg-card)] text-[var(--color-text-primary)] focus:ring-2 focus:ring-emerald-500 outline-none"
                   >
                     <option value={2}>2 horas</option>
                     <option value={6}>6 horas</option>
@@ -148,7 +148,7 @@ export function NotificacoesPage() {
                     <option value={24}>24 horas</option>
                     <option value={48}>48 horas</option>
                   </select>
-                  <span className="text-sm font-medium text-slate-700">antes da consulta</span>
+                  <span className="text-sm font-medium text-[var(--color-text-secondary)]">antes da consulta</span>
                 </div>
               </div>
             )}
@@ -176,10 +176,10 @@ export function NotificacoesPage() {
 
         {/* Sistema → Equipe */}
         <div className="pt-2">
-          <h3 className="text-base font-bold text-slate-800 mb-1 flex items-center gap-2">
+          <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-1 flex items-center gap-2">
             <Zap size={18} className="text-amber-500" /> Alertas do Sistema (Equipe)
           </h3>
-          <p className="text-xs text-slate-400 mb-4">Notificações visíveis no painel para administradores e recepcionistas.</p>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4">Notificações visíveis no painel para administradores e recepcionistas.</p>
 
           <div className="space-y-3 max-w-2xl">
             <ToggleRow
@@ -221,18 +221,18 @@ function ToggleRow({ label, description, value, onChange }: {
 }) {
   return (
     <div
-      className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-indigo-300 transition-colors cursor-pointer group"
+      className="flex items-center justify-between p-4 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-sm hover:border-indigo-300 transition-colors cursor-pointer group"
       onClick={onChange}
     >
       <div className="flex-1 mr-4">
-        <span className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors">{label}</span>
-        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
+        <span className="text-sm font-bold text-[var(--color-text-secondary)] group-hover:text-indigo-700 transition-colors">{label}</span>
+        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{description}</p>
       </div>
       <button
         type="button"
         className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out shrink-0 ${value ? 'bg-emerald-500' : 'bg-slate-300'}`}
       >
-        <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out ${value ? 'translate-x-6' : 'translate-x-0'}`} />
+        <div className={`w-4 h-4 rounded-full bg-[var(--color-bg-card)] shadow-sm transform transition-transform duration-200 ease-in-out ${value ? 'translate-x-6' : 'translate-x-0'}`} />
       </button>
     </div>
   )

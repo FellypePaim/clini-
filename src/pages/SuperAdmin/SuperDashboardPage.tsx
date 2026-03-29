@@ -59,7 +59,7 @@ function statusColor(status: string): { bg: string; text: string } {
     case 'suspensa':
       return { bg: 'bg-red-500/15', text: 'text-red-400' }
     default:
-      return { bg: 'bg-slate-500/15', text: 'text-slate-400' }
+      return { bg: 'bg-[var(--color-bg-deep)]0/15', text: 'text-[var(--color-text-muted)]' }
   }
 }
 
@@ -85,7 +85,7 @@ export function SuperDashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-purple-500" />
-        <p className="text-xs font-bold uppercase tracking-widest text-slate-500">
+        <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
           Carregando dashboard...
         </p>
       </div>
@@ -153,7 +153,7 @@ export function SuperDashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-white tracking-tight">Dashboard SuperAdmin</h1>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-[var(--color-text-muted)] mt-1">
           Visao geral da plataforma em tempo real
         </p>
       </div>
@@ -168,13 +168,13 @@ export function SuperDashboardPage() {
             <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center mb-4', kpi.bg)}>
               <kpi.icon className={kpi.color} size={20} />
             </div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+            <p className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1">
               {kpi.label}
             </p>
             <p className="text-2xl font-black text-white">{kpi.value}</p>
-            <p className="text-xs text-slate-500 mt-1">{kpi.sub}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-1">{kpi.sub}</p>
             <kpi.icon
-              className="absolute -bottom-3 -right-3 w-20 h-20 text-slate-700/10 group-hover:scale-110 transition-transform duration-500"
+              className="absolute -bottom-3 -right-3 w-20 h-20 text-[var(--color-text-secondary)]/10 group-hover:scale-110 transition-transform duration-500"
             />
           </div>
         ))}
@@ -192,14 +192,14 @@ export function SuperDashboardPage() {
           </div>
 
           {porDiaEntries.length === 0 ? (
-            <p className="text-sm text-slate-500 text-center py-10">Sem dados de consultas</p>
+            <p className="text-sm text-[var(--color-text-muted)] text-center py-10">Sem dados de consultas</p>
           ) : (
             <div className="flex items-end gap-3 h-48">
               {porDiaEntries.map(([dateKey, count]) => {
                 const heightPercent = (count / maxConsultas) * 100
                 return (
                   <div key={dateKey} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-xs font-bold text-slate-300">
+                    <span className="text-xs font-bold text-[var(--color-text-dim)]">
                       {formatNumber(count)}
                     </span>
                     <div className="w-full relative" style={{ height: '140px' }}>
@@ -208,7 +208,7 @@ export function SuperDashboardPage() {
                         style={{ height: `${Math.max(heightPercent, 4)}%` }}
                       />
                     </div>
-                    <span className="text-xs font-bold text-slate-500 capitalize">
+                    <span className="text-xs font-bold text-[var(--color-text-muted)] capitalize">
                       {getWeekdayShort(dateKey)}
                     </span>
                   </div>
@@ -233,7 +233,7 @@ export function SuperDashboardPage() {
                 <Cpu className="text-purple-400" size={16} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Calls</p>
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Calls</p>
                 <p className="text-lg font-black text-white">{formatNumber(data.ai.calls)}</p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export function SuperDashboardPage() {
                 <FileText className="text-indigo-400" size={16} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tokens</p>
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Tokens</p>
                 <p className="text-lg font-black text-white">{formatNumber(data.ai.tokens)}</p>
               </div>
             </div>
@@ -253,7 +253,7 @@ export function SuperDashboardPage() {
                 <Coins className="text-pink-400" size={16} />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Custo</p>
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Custo</p>
                 <p className="text-lg font-black text-white">
                   U$ {data.ai.cost.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
@@ -264,11 +264,11 @@ export function SuperDashboardPage() {
           {/* Extra counts */}
           <div className="mt-6 pt-4 border-t border-purple-500/10 grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Prescricoes</p>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Prescricoes</p>
               <p className="text-base font-black text-white">{formatNumber(data.prescricoes)}</p>
             </div>
             <div>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Evolucoes</p>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Evolucoes</p>
               <p className="text-base font-black text-white">{formatNumber(data.evolucoes)}</p>
             </div>
           </div>
@@ -285,14 +285,14 @@ export function SuperDashboardPage() {
         </div>
 
         {data.recentClinicas.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center py-8">
+          <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
             Nenhuma clinica cadastrada recentemente
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-700/50">
+                <tr className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] border-b border-slate-700/50">
                   <th className="px-6 py-4">Nome</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4">Data de Criacao</th>
@@ -327,7 +327,7 @@ export function SuperDashboardPage() {
                           {clinica.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-sm text-slate-400">
+                      <td className="px-6 py-4 text-sm text-[var(--color-text-muted)]">
                         {formatDate(clinica.created_at)}
                       </td>
                     </tr>

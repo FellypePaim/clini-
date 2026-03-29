@@ -160,7 +160,7 @@ export function AgendaPage() {
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] -m-6 overflow-hidden">
       {/* ── Barra de ferramentas ──────────────────────── */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 shrink-0">
+      <div className="bg-[var(--color-bg-card)] border-b border-[var(--color-border)] px-6 py-3 shrink-0">
         <div className="flex flex-col gap-2.5">
           {/* Linha 1: navegação + views + botão novo */}
           <div className="flex items-center justify-between gap-4">
@@ -169,7 +169,7 @@ export function AgendaPage() {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => navigate(-1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-bg-card-hover)] transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -181,15 +181,15 @@ export function AgendaPage() {
                 </button>
                 <button
                   onClick={() => navigate(1)}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[var(--color-bg-card-hover)] transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-gray-900 capitalize">{dateLabel}</h2>
-                <span className="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                <h2 className="text-base font-bold text-[var(--color-text-primary)] capitalize">{dateLabel}</h2>
+                <span className="text-xs font-medium text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-2 py-0.5 rounded-full">
                   {visibleAppointments.length} consulta{visibleAppointments.length !== 1 ? 's' : ''}
                 </span>
               </div>
@@ -197,7 +197,7 @@ export function AgendaPage() {
 
             {/* Views + botão novo */}
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+              <div className="flex items-center bg-[var(--color-bg-card)] rounded-lg p-0.5">
                 {VIEWS.map(({ key, label, icon: Icon }) => (
                   <button
                     key={key}
@@ -205,8 +205,8 @@ export function AgendaPage() {
                     className={cn(
                       'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
                       view === key
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm'
+                        : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
                     )}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -283,9 +283,9 @@ export function AgendaPage() {
               <div className="relative">
                 <button
                   onClick={() => setSelectedApt(null)}
-                  className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-sm"
+                  className="absolute -top-2 -right-2 z-10 w-6 h-6 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-full flex items-center justify-center hover:bg-[var(--color-bg-card-hover)] transition-colors shadow-sm"
                 >
-                  <X className="w-3 h-3 text-gray-500" />
+                  <X className="w-3 h-3 text-[var(--color-text-muted)]" />
                 </button>
                 <AppointmentDetailCard
                   appointment={selectedApt}

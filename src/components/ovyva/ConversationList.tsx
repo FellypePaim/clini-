@@ -43,27 +43,27 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
   }
 
   return (
-    <div className="w-80 flex flex-col border-r border-gray-100 h-full bg-white shrink-0 overflow-hidden">
+    <div className="w-80 flex flex-col border-r border-[var(--color-border)] h-full bg-[var(--color-bg-card)] shrink-0 overflow-hidden">
        {/* List Header */}
        <div className="p-6 border-b border-gray-50 shrink-0">
-          <h2 className="text-xl font-black text-gray-900 mb-6 flex items-center gap-2">
+          <h2 className="text-xl font-black text-[var(--color-text-primary)] mb-6 flex items-center gap-2">
             <MessageSquare className="w-6 h-6 text-cyan-500" />
             Mensagens
           </h2>
           
           <div className="space-y-4">
             <div className="relative group">
-               <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-cyan-500 transition-colors" />
+               <Search className="absolute left-3 top-3 w-4 h-4 text-[var(--color-text-muted)] group-hover:text-cyan-500 transition-colors" />
                <input
                 type="text"
                 placeholder="Buscar contato..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-cyan-500/10 transition-all"
+                className="w-full bg-[var(--color-bg-deep)] border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-[var(--color-text-dim)] outline-none focus:ring-2 focus:ring-cyan-500/10 transition-all"
                />
             </div>
 
-            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl">
+            <div className="flex items-center gap-1 bg-[var(--color-bg-deep)] p-1 rounded-xl">
                <FilterTab 
                 active={filter === 'all'} 
                 onClick={() => setFilter('all')} 
@@ -100,21 +100,21 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                   "w-full p-4 flex gap-4 transition-all duration-300 border-b border-gray-50 group border-l-4",
                   selectedId === conv.id 
                     ? "bg-cyan-500/5 border-l-cyan-500" 
-                    : "bg-white hover:bg-gray-50/80 border-l-transparent"
+                    : "bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)]/80 border-l-transparent"
                 )}
               >
                 <Avatar nome={avatarLetra} size="md" className="shrink-0 ring-2 ring-white shadow-sm" />
                 
                 <div className="flex-1 text-left min-w-0">
                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-black text-gray-900 truncate uppercase tracking-widest">{displayName}</span>
-                      <span className="text-[10px] text-gray-400 font-bold">{formatRelativeTime(conv.ultimo_contato)}</span>
+                      <span className="text-xs font-black text-[var(--color-text-primary)] truncate uppercase tracking-widest">{displayName}</span>
+                      <span className="text-[10px] text-[var(--color-text-muted)] font-bold">{formatRelativeTime(conv.ultimo_contato)}</span>
                    </div>
                    
                    <div className="flex items-center justify-between">
                       <p className={cn(
                         "text-[11px] truncate leading-tight flex-1",
-                        unread > 0 ? "text-gray-900 font-bold" : "text-gray-400 font-medium"
+                        unread > 0 ? "text-[var(--color-text-primary)] font-bold" : "text-[var(--color-text-muted)] font-medium"
                       )}>
                         {conv.ultima_mensagem || "Nova conversa iniciada..."}
                       </p>
@@ -157,7 +157,7 @@ export function ConversationList({ conversations, selectedId, onSelect }: Conver
                         </div>
                       )}
                       {conv.status === 'atendido_humano' && (
-                        <div className="flex items-center gap-1 text-[9px] font-black text-gray-600 uppercase tracking-widest bg-gray-100 px-1.5 py-0.5 rounded-lg border border-gray-200">
+                        <div className="flex items-center gap-1 text-[9px] font-black text-[var(--color-text-secondary)] uppercase tracking-widest bg-[var(--color-bg-card)] px-1.5 py-0.5 rounded-lg border border-[var(--color-border)]">
                           <UserCheck className="w-2.5 h-2.5" /> Atendido
                         </div>
                       )}
@@ -177,14 +177,14 @@ function FilterTab({ active, onClick, label, count }: { active: boolean, onClick
       onClick={onClick}
       className={cn(
         "flex-1 py-1.5 px-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all text-center flex items-center justify-center gap-1.5",
-        active ? "bg-white text-cyan-500 shadow-sm" : "text-gray-400 hover:text-gray-600"
+        active ? "bg-[var(--color-bg-card)] text-cyan-500 shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
       )}
     >
       {label}
       {count !== undefined && count > 0 && (
         <span className={cn(
           "px-1.5 rounded-md",
-          active ? "bg-cyan-500/10 text-cyan-500" : "bg-gray-200 text-gray-500"
+          active ? "bg-cyan-500/10 text-cyan-500" : "bg-gray-200 text-[var(--color-text-muted)]"
         )}>
           {count}
         </span>

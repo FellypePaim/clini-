@@ -123,7 +123,7 @@ export function SuperReleasesPage() {
       major: { label: 'MAJOR', cls: 'bg-indigo-500/10 text-indigo-400' },
       feature: { label: 'FEATURE', cls: 'bg-blue-500/10 text-blue-400' },
       fix: { label: 'HOTFIX', cls: 'bg-red-500/10 text-red-400' },
-      patch: { label: 'PATCH', cls: 'bg-slate-500/10 text-slate-400' },
+      patch: { label: 'PATCH', cls: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)]' },
     }
     const { label, cls } = map[type]
     return <Badge className={cn(cls, 'text-[8px] font-black border-none')}>{label}</Badge>
@@ -147,7 +147,7 @@ export function SuperReleasesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">Release Management</h1>
-          <p className="text-slate-400 font-medium">Histórico de versões, changelog e controle de deploy.</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Histórico de versões, changelog e controle de deploy.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
@@ -176,7 +176,7 @@ export function SuperReleasesPage() {
           <div key={stat.label} className="bg-slate-800/30 border border-slate-700/50 p-5 rounded-[24px]">
             <div className="flex items-center gap-2 mb-2">
               <stat.icon size={14} className={stat.color} />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{stat.label}</span>
+              <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">{stat.label}</span>
             </div>
             <span className="text-xl font-black text-white">{stat.value}</span>
           </div>
@@ -186,7 +186,7 @@ export function SuperReleasesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Timeline (Col-Span-1) */}
         <div className="space-y-4">
-          <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+          <h3 className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
             <GitBranch size={16} /> TIMELINE
           </h3>
           <div className="space-y-2">
@@ -205,7 +205,7 @@ export function SuperReleasesPage() {
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       'text-xs font-black tracking-wider',
-                      selectedRelease.version === rel.version ? 'text-indigo-400' : 'text-slate-300'
+                      selectedRelease.version === rel.version ? 'text-indigo-400' : 'text-[var(--color-text-dim)]'
                     )}>
                       {rel.version}
                     </span>
@@ -213,8 +213,8 @@ export function SuperReleasesPage() {
                   </div>
                   {getStatusIcon(rel.status)}
                 </div>
-                <p className="text-[11px] font-bold text-slate-400 line-clamp-1">{rel.title}</p>
-                <span className="text-[10px] font-bold text-slate-600">{rel.date}</span>
+                <p className="text-[11px] font-bold text-[var(--color-text-muted)] line-clamp-1">{rel.title}</p>
+                <span className="text-[10px] font-bold text-[var(--color-text-secondary)]">{rel.date}</span>
               </button>
             ))}
           </div>
@@ -240,7 +240,7 @@ export function SuperReleasesPage() {
                       <h2 className="text-xl font-black text-white">{selectedRelease.version}</h2>
                       {getTypeBadge(selectedRelease.type)}
                     </div>
-                    <p className="text-xs font-bold text-slate-500">{selectedRelease.date} &middot; por {selectedRelease.author}</p>
+                    <p className="text-xs font-bold text-[var(--color-text-muted)]">{selectedRelease.date} &middot; por {selectedRelease.author}</p>
                   </div>
                 </div>
               </div>
@@ -258,12 +258,12 @@ export function SuperReleasesPage() {
             {/* Title & Description */}
             <div>
               <h3 className="text-lg font-black text-white mb-2">{selectedRelease.title}</h3>
-              <p className="text-sm font-medium text-slate-400 leading-relaxed">{selectedRelease.description}</p>
+              <p className="text-sm font-medium text-[var(--color-text-muted)] leading-relaxed">{selectedRelease.description}</p>
             </div>
 
             {/* Changelog */}
             <div className="space-y-3">
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Changelog</h4>
+              <h4 className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">Changelog</h4>
               <div className="space-y-2">
                 {selectedRelease.changes.map((change, i) => {
                   const isFeat = change.toLowerCase().startsWith('feat')
@@ -276,11 +276,11 @@ export function SuperReleasesPage() {
                         isFeat ? 'bg-blue-500/10 text-blue-400'
                           : isFix ? 'bg-red-500/10 text-red-400'
                           : isInfra ? 'bg-amber-500/10 text-amber-400'
-                          : 'bg-slate-500/10 text-slate-400'
+                          : 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)]'
                       )}>
                         {isFeat ? 'FEAT' : isFix ? 'FIX' : isInfra ? 'INFRA' : 'MISC'}
                       </Badge>
-                      <span className="text-xs font-bold text-slate-300 leading-relaxed">
+                      <span className="text-xs font-bold text-[var(--color-text-dim)] leading-relaxed">
                         {change.replace(/^(Feat|Fix|Infra|Migration|Redeploy):\s*/i, '')}
                       </span>
                     </div>
@@ -296,13 +296,13 @@ export function SuperReleasesPage() {
                   navigator.clipboard.writeText(`${selectedRelease.version} — ${selectedRelease.title}`)
                   toast({ title: 'Copiado!', description: `${selectedRelease.version} copiado para a área de transferência.`, type: 'success' })
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-300 text-[10px] font-black uppercase rounded-xl hover:bg-slate-700 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-[var(--color-text-dim)] text-[10px] font-black uppercase rounded-xl hover:bg-slate-700 transition-all"
               >
                 <Tag size={12} /> Copiar Versão
               </button>
               <button
                 onClick={() => window.open('https://github.com/FellypePaim/clini-/commits/main', '_blank')}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-slate-300 text-[10px] font-black uppercase rounded-xl hover:bg-slate-700 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-[var(--color-text-dim)] text-[10px] font-black uppercase rounded-xl hover:bg-slate-700 transition-all"
               >
                 <ExternalLink size={12} /> Ver no GitHub
               </button>

@@ -116,9 +116,9 @@ export function OvyvaHistoryPage() {
       'ia_ativa':         { label: 'Ativo-IA',        icon: Bot,  style: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
       'aguardando_humano': { label: 'Transf. Humano',  icon: User, style: 'bg-orange-50 text-orange-700 border-orange-100' },
       'atendido_humano':  { label: 'Atendido',        icon: CheckCircle, style: 'bg-blue-50 text-blue-700 border-blue-100' },
-      'concluido':        { label: 'Concluído',       icon: CheckCircle, style: 'bg-gray-50 text-gray-500 border-gray-100' },
+      'concluido':        { label: 'Concluído',       icon: CheckCircle, style: 'bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)]' },
     }
-    return map[status] ?? { label: status, icon: Clock, style: 'bg-gray-50 text-gray-400 border-gray-100' }
+    return map[status] ?? { label: status, icon: Clock, style: 'bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border-[var(--color-border)]' }
   }
 
   return (
@@ -128,13 +128,13 @@ export function OvyvaHistoryPage() {
           <div className="flex items-center gap-6">
              <button 
               onClick={() => navigate('/ovyva')}
-              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-cyan-500"
+              className="p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl hover:bg-[var(--color-bg-card-hover)] transition-all text-[var(--color-text-muted)] hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
              <div>
-                <h1 className="text-2xl font-black text-gray-900 border-none uppercase tracking-widest">Histórico OVYVA</h1>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Histórico OVYVA</h1>
+                <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em]">
                    Conversas reais com seus pacientes via WhatsApp
                 </p>
              </div>
@@ -144,7 +144,7 @@ export function OvyvaHistoryPage() {
        {/* KPI Grid */}
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpiCards.map((kpi, idx) => (
-            <div key={idx} className="bg-white rounded-[40px] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all group overflow-hidden relative">
+            <div key={idx} className="bg-[var(--color-bg-card)] rounded-[40px] p-8 border border-[var(--color-border)] shadow-sm hover:shadow-xl hover:shadow-black/5 transition-all group overflow-hidden relative">
                <div className={cn(
                 "absolute -top-10 -right-10 w-32 h-32 blur-3xl rounded-full opacity-10 group-hover:scale-150 transition-transform",
                 kpi.color === 'blue' ? "bg-blue-500" : 
@@ -159,31 +159,31 @@ export function OvyvaHistoryPage() {
                )}>
                   {kpi.icon}
                </div>
-               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{kpi.label}</p>
+               <p className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">{kpi.label}</p>
                {loading ? (
-                 <div className="h-8 w-16 bg-gray-100 rounded animate-pulse" />
+                 <div className="h-8 w-16 bg-[var(--color-bg-card)] rounded animate-pulse" />
                ) : (
-                 <h3 className="text-3xl font-black text-gray-900 border-none">{kpi.value}</h3>
+                 <h3 className="text-3xl font-black text-[var(--color-text-primary)] border-none">{kpi.value}</h3>
                )}
             </div>
           ))}
        </div>
 
        {/* Tabela */}
-       <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+       <div className="bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] shadow-sm overflow-hidden flex flex-col min-h-[500px]">
           <div className="p-8 border-b border-gray-50 flex items-center justify-between flex-wrap gap-4">
              <div className="flex items-center gap-6">
                 <div className="relative group min-w-[280px]">
-                  <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400 group-hover:text-cyan-500 transition-colors" />
+                  <Search className="absolute left-3 top-3 w-4 h-4 text-[var(--color-text-muted)] group-hover:text-cyan-500 transition-colors" />
                   <input 
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Nome ou telefone..." 
-                    className="w-full bg-gray-50 border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-gray-300 outline-none focus:ring-2 focus:ring-cyan-500/10"
+                    className="w-full bg-[var(--color-bg-deep)] border-none rounded-2xl py-2.5 pl-10 pr-4 text-sm font-medium placeholder:text-[var(--color-text-dim)] outline-none focus:ring-2 focus:ring-cyan-500/10"
                   />
                 </div>
-                <div className="flex items-center bg-gray-50 p-1 rounded-xl">
+                <div className="flex items-center bg-[var(--color-bg-deep)] p-1 rounded-xl">
                   {(['Todas', 'Resolvidas', 'Transferidas'] as const).map((f) => (
                     <button 
                       key={f}
@@ -193,7 +193,7 @@ export function OvyvaHistoryPage() {
                         ((f === 'Todas' && activeFilter === 'all') || 
                         (f === 'Resolvidas' && activeFilter === 'resolvido') || 
                         (f === 'Transferidas' && activeFilter === 'transferido'))
-                           ? "bg-white text-gray-900 shadow-sm" : "text-gray-400 hover:text-gray-600"
+                           ? "bg-[var(--color-bg-card)] text-[var(--color-text-primary)] shadow-sm" : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
                       )}
                     >
                       {f}
@@ -208,18 +208,18 @@ export function OvyvaHistoryPage() {
               <Clock className="w-6 h-6 animate-spin text-cyan-500" />
             </div>
           ) : conversasFiltradas.length === 0 ? (
-            <div className="flex flex-col items-center justify-center flex-1 p-12 text-gray-400">
-              <MessageSquare className="w-12 h-12 mb-4 text-gray-200" />
+            <div className="flex flex-col items-center justify-center flex-1 p-12 text-[var(--color-text-muted)]">
+              <MessageSquare className="w-12 h-12 mb-4 text-[var(--color-text-dim)]" />
               <p className="text-sm font-bold uppercase tracking-widest">Nenhuma conversa encontrada</p>
               <p className="text-xs mt-1">Configure o Webhook da Evolution API para começar a receber mensagens</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                 <thead className="sticky top-0 bg-white/80 backdrop-blur-md z-10 border-b border-gray-50">
+                 <thead className="sticky top-0 bg-[var(--color-bg-card)]/80 backdrop-blur-md z-10 border-b border-gray-50">
                     <tr>
                        {['Data/Hora', 'Contato', 'Telefone', 'Status', 'Mensagens', 'Último Contato'].map(h => (
-                         <th key={h} className="px-8 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{h}</th>
+                         <th key={h} className="px-8 py-6 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em]">{h}</th>
                        ))}
                     </tr>
                  </thead>
@@ -228,14 +228,14 @@ export function OvyvaHistoryPage() {
                       const statusInfo = getStatusLabel(row.status)
                       const StatusIcon = statusInfo.icon
                       return (
-                        <tr key={row.id} className="hover:bg-gray-50/50 transition-colors group">
-                           <td className="px-8 py-5 text-xs font-black text-gray-900 uppercase tracking-widest">
+                        <tr key={row.id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors group">
+                           <td className="px-8 py-5 text-xs font-black text-[var(--color-text-primary)] uppercase tracking-widest">
                              {formatData(row.created_at)}
                            </td>
-                           <td className="px-8 py-5 text-xs font-black text-gray-900">
-                             {row.contato_nome ?? <span className="text-gray-400 italic">Sem nome</span>}
+                           <td className="px-8 py-5 text-xs font-black text-[var(--color-text-primary)]">
+                             {row.contato_nome ?? <span className="text-[var(--color-text-muted)] italic">Sem nome</span>}
                            </td>
-                           <td className="px-8 py-5 text-[11px] text-gray-500 font-mono">
+                           <td className="px-8 py-5 text-[11px] text-[var(--color-text-muted)] font-mono">
                              {row.contato_telefone}
                            </td>
                            <td className="px-8 py-5">
@@ -247,10 +247,10 @@ export function OvyvaHistoryPage() {
                                  {statusInfo.label}
                               </span>
                            </td>
-                           <td className="px-8 py-5 text-xs text-gray-500">
+                           <td className="px-8 py-5 text-xs text-[var(--color-text-muted)]">
                              {row.total_mensagens ?? 0}
                            </td>
-                           <td className="px-8 py-5 text-[11px] text-gray-500">
+                           <td className="px-8 py-5 text-[11px] text-[var(--color-text-muted)]">
                              {formatData(row.ultimo_contato)}
                            </td>
                         </tr>

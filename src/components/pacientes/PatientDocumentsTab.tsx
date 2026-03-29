@@ -33,7 +33,7 @@ const CATEGORIAS_MAP: Record<string, { label: string; color: string }> = {
   atestado: { label: 'Atestado', color: 'bg-orange-100 text-orange-700' },
   radiografia: { label: 'Radiografia', color: 'bg-cyan-100 text-cyan-700' },
   foto: { label: 'Foto', color: 'bg-pink-100 text-pink-700' },
-  outro: { label: 'Outro', color: 'bg-gray-100 text-gray-600' },
+  outro: { label: 'Outro', color: 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)]' },
 }
 
 // ─── Templates ──────────────────────────────
@@ -255,18 +255,18 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
   return (
     <div className="space-y-5">
       {/* Upload com categoria */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Upload className="w-4 h-4 text-cyan-500" />
-            <h3 className="text-sm font-bold text-gray-900">Enviar Documentos</h3>
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Enviar Documentos</h3>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-400 font-medium">Categoria:</span>
+            <span className="text-[10px] text-[var(--color-text-muted)] font-medium">Categoria:</span>
             <select
               value={uploadCategoria}
               onChange={e => setUploadCategoria(e.target.value)}
-              className="text-xs font-semibold border border-gray-200 rounded-lg px-2 py-1 bg-white outline-none focus:ring-2 focus:ring-cyan-500/20"
+              className="text-xs font-semibold border border-[var(--color-border)] rounded-lg px-2 py-1 bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-cyan-500/20"
             >
               {CATEGORIAS.filter(c => c.id !== 'todos').map(c => (
                 <option key={c.id} value={c.id}>{c.label}</option>
@@ -283,17 +283,17 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
       </div>
 
       {/* Templates */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center gap-2">
           <ClipboardList className="w-4 h-4 text-blue-500" />
-          <h3 className="text-sm font-bold text-gray-900">Gerar Documento</h3>
+          <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Gerar Documento</h3>
         </div>
         <div className="p-5 flex flex-wrap gap-2">
           {DOC_TEMPLATES.map(tpl => (
             <button
               key={tpl.id}
               onClick={() => openTemplate(tpl)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 border border-gray-200 hover:border-blue-200 rounded-lg transition-all"
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-[var(--color-bg-deep)] hover:bg-blue-50 text-[var(--color-text-secondary)] hover:text-blue-700 border border-[var(--color-border)] hover:border-blue-200 rounded-lg transition-all"
             >
               <FileText className="w-3.5 h-3.5" /> {tpl.titulo}
             </button>
@@ -302,8 +302,8 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-5 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-5 py-3 border-b border-[var(--color-border)] flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
           {/* Categorias */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {CATEGORIAS.map(c => {
@@ -312,7 +312,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
               return (
                 <button key={c.id} onClick={() => setCatFilter(c.id)}
                   className={cn('px-2.5 py-1 rounded-lg text-[10px] font-semibold border transition-all',
-                    catFilter === c.id ? c.color + ' border-transparent' : 'bg-white text-gray-500 border-gray-200')}>
+                    catFilter === c.id ? c.color + ' border-transparent' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)]')}>
                   {c.label} ({count})
                 </button>
               )
@@ -322,7 +322,7 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
           <div className="flex items-center gap-2">
             {/* Filtro data */}
             <select value={dateFilter} onChange={e => setDateFilter(e.target.value as any)}
-              className="text-[10px] font-semibold border border-gray-200 rounded-lg px-2 py-1.5 bg-white outline-none">
+              className="text-[10px] font-semibold border border-[var(--color-border)] rounded-lg px-2 py-1.5 bg-[var(--color-bg-card)] outline-none">
               <option value="todos">Todas as datas</option>
               <option value="hoje">Hoje</option>
               <option value="semana">Última semana</option>
@@ -332,9 +332,9 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
             {/* Busca */}
             {files.length > 3 && (
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-300" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--color-text-dim)]" />
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..."
-                  className="pl-7 pr-3 py-1.5 text-[10px] border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-cyan-500/20 w-36" />
+                  className="pl-7 pr-3 py-1.5 text-[10px] border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-cyan-500/20 w-36" />
               </div>
             )}
           </div>
@@ -351,10 +351,10 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
                 const isImage = file.mime_type?.startsWith('image/')
                 const preview = previewUrls[file.id]
                 return (
-                  <div key={file.id} className="group cursor-pointer bg-gray-50/50 hover:bg-white rounded-xl border border-gray-100 hover:border-cyan-500/20 hover:shadow-md transition-all overflow-hidden">
+                  <div key={file.id} className="group cursor-pointer bg-[var(--color-bg-deep)]/50 hover:bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] hover:border-cyan-500/20 hover:shadow-md transition-all overflow-hidden">
                     {/* Preview de imagem */}
                     {isImage && preview ? (
-                      <div className="h-28 bg-gray-100 overflow-hidden" onClick={() => setViewingFile(file)}>
+                      <div className="h-28 bg-[var(--color-bg-card)] overflow-hidden" onClick={() => setViewingFile(file)}>
                         <img src={preview} alt={file.nome} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       </div>
                     ) : null}
@@ -366,11 +366,11 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
                         </div>
                       ) : null}
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-xs font-semibold text-gray-900 truncate group-hover:text-cyan-600 transition-colors">{file.nome}</h4>
+                        <h4 className="text-xs font-semibold text-[var(--color-text-primary)] truncate group-hover:text-cyan-600 transition-colors">{file.nome}</h4>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className={cn('px-1.5 py-0.5 rounded text-[8px] font-semibold', cat.color)}>{cat.label}</span>
-                          <span className="text-[9px] text-gray-300">{fmtSize(file.tamanho_bytes)}</span>
-                          <span className="text-[9px] text-gray-300">{fmtDate(file.created_at)}</span>
+                          <span className="text-[9px] text-[var(--color-text-dim)]">{fmtSize(file.tamanho_bytes)}</span>
+                          <span className="text-[9px] text-[var(--color-text-dim)]">{fmtDate(file.created_at)}</span>
                         </div>
                       </div>
                     </div>
@@ -388,14 +388,14 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
             </div>
           ) : files.length > 0 ? (
             <div className="py-12 text-center">
-              <Filter className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">Nenhum arquivo corresponde aos filtros</p>
+              <Filter className="w-8 h-8 text-[var(--color-text-dim)] mx-auto mb-2" />
+              <p className="text-sm text-[var(--color-text-muted)]">Nenhum arquivo corresponde aos filtros</p>
             </div>
           ) : (
             <div className="py-16 text-center flex flex-col items-center gap-3">
               <FileText className="w-12 h-12 text-gray-100" />
-              <p className="text-sm text-gray-400 font-medium">Nenhum documento enviado</p>
-              <p className="text-xs text-gray-300">Envie exames, laudos ou fotos usando o upload acima</p>
+              <p className="text-sm text-[var(--color-text-muted)] font-medium">Nenhum documento enviado</p>
+              <p className="text-xs text-[var(--color-text-dim)]">Envie exames, laudos ou fotos usando o upload acima</p>
             </div>
           )}
         </div>
@@ -414,13 +414,13 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
       {showTemplateModal && activeTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowTemplateModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col animate-fade-in">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col animate-fade-in">
+            <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-deep)]/50 shrink-0">
               <div>
-                <h3 className="text-sm font-bold text-gray-900">{activeTemplate.titulo}</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Revise e imprima</p>
+                <h3 className="text-sm font-bold text-[var(--color-text-primary)]">{activeTemplate.titulo}</h3>
+                <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Revise e imprima</p>
               </div>
-              <button onClick={() => setShowTemplateModal(false)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400">
+              <button onClick={() => setShowTemplateModal(false)} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -428,11 +428,11 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
               <textarea
                 value={templateContent}
                 onChange={e => setTemplateContent(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/20 resize-none min-h-[300px] font-mono"
+                className="w-full bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl p-4 text-sm text-[var(--color-text-secondary)] leading-relaxed outline-none focus:ring-2 focus:ring-blue-500/20 resize-none min-h-[300px] font-mono"
               />
             </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between shrink-0">
-              <button onClick={() => setShowTemplateModal(false)} className="px-4 py-2 text-sm font-medium text-gray-500">Cancelar</button>
+            <div className="px-6 py-4 border-t border-[var(--color-border)] flex items-center justify-between shrink-0">
+              <button onClick={() => setShowTemplateModal(false)} className="px-4 py-2 text-sm font-medium text-[var(--color-text-muted)]">Cancelar</button>
               <button onClick={handlePrintTemplate}
                 className="flex items-center gap-1.5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors">
                 <Printer className="w-4 h-4" /> Imprimir

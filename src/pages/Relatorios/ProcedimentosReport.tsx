@@ -94,15 +94,15 @@ export function ProcedimentosReport() {
   const totalReceita = dados.reduce((s, d) => s + d.receita, 0)
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-5 bg-white border-b border-slate-200 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-5 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/relatorios" className="text-slate-400 hover:text-slate-600">
+          <Link to="/relatorios" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Relatórios › Clínico</p>
-            <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <p className="text-xs text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">Relatórios › Clínico</p>
+            <h1 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
               <Activity size={20} className="text-indigo-500" />
               Procedimentos Realizados
             </h1>
@@ -120,16 +120,16 @@ export function ProcedimentosReport() {
 
       <main className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full space-y-6">
         {/* Filtros */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-wrap items-end gap-4">
+        <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5 flex flex-wrap items-end gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Período</label>
+            <label className="block text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5">Período</label>
             <div className="flex gap-2">
               {PERIODOS.map(p => (
                 <button
                   key={p.value}
                   onClick={() => setPeriodo(p.value)}
                   className={`px-3 py-1.5 text-sm font-semibold rounded-lg transition-colors ${
-                    periodo === p.value ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    periodo === p.value ? 'bg-indigo-600 text-white' : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] hover:bg-[var(--color-border)]'
                   }`}
                 >
                   {p.label}
@@ -148,21 +148,21 @@ export function ProcedimentosReport() {
         </div>
 
         {dados.length === 0 && !isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <Activity size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-slate-500 font-medium">Nenhum dado no período</p>
-            <p className="text-slate-400 text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
+          <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-12 text-center">
+            <Activity size={40} className="mx-auto text-[var(--color-text-dim)] mb-3" />
+            <p className="text-[var(--color-text-muted)] font-medium">Nenhum dado no período</p>
+            <p className="text-[var(--color-text-muted)] text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
           </div>
         ) : (
           <>
             {/* KPIs */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl border border-indigo-100 p-5">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Realizados</p>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-indigo-100 p-5">
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Total Realizados</p>
                 <p className="text-3xl font-black text-indigo-700 mt-1">{totalProcedimentos}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-emerald-100 p-5">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Receita Gerada</p>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-emerald-100 p-5">
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Receita Gerada</p>
                 <p className="text-3xl font-black text-emerald-700 mt-1">
                   {totalReceita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </p>
@@ -170,38 +170,38 @@ export function ProcedimentosReport() {
             </div>
 
             {/* Tabela */}
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-[var(--color-bg-deep)] border-b border-[var(--color-border)]">
                   <tr>
-                    <th className="px-5 py-3 text-left text-xs font-bold text-slate-500 uppercase">Procedimento</th>
-                    <th className="px-5 py-3 text-center text-xs font-bold text-slate-500 uppercase">Realizados</th>
-                    <th className="px-5 py-3 text-right text-xs font-bold text-slate-500 uppercase">Receita</th>
-                    <th className="px-5 py-3 text-center text-xs font-bold text-slate-500 uppercase">Duração Média</th>
-                    <th className="px-5 py-3 text-right text-xs font-bold text-slate-500 uppercase">% do Total</th>
+                    <th className="px-5 py-3 text-left text-xs font-bold text-[var(--color-text-muted)] uppercase">Procedimento</th>
+                    <th className="px-5 py-3 text-center text-xs font-bold text-[var(--color-text-muted)] uppercase">Realizados</th>
+                    <th className="px-5 py-3 text-right text-xs font-bold text-[var(--color-text-muted)] uppercase">Receita</th>
+                    <th className="px-5 py-3 text-center text-xs font-bold text-[var(--color-text-muted)] uppercase">Duração Média</th>
+                    <th className="px-5 py-3 text-right text-xs font-bold text-[var(--color-text-muted)] uppercase">% do Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[var(--color-border)]">
                   {dados.map((d, i) => (
-                    <tr key={d.nome} className="hover:bg-slate-50">
-                      <td className="px-5 py-3 font-semibold text-slate-800">
-                        <span className="text-slate-400 font-bold mr-2">#{i + 1}</span>
+                    <tr key={d.nome} className="hover:bg-[var(--color-bg-card-hover)]">
+                      <td className="px-5 py-3 font-semibold text-[var(--color-text-primary)]">
+                        <span className="text-[var(--color-text-muted)] font-bold mr-2">#{i + 1}</span>
                         {d.nome}
                       </td>
                       <td className="px-5 py-3 text-center font-bold text-indigo-600">{d.total}</td>
                       <td className="px-5 py-3 text-right text-emerald-700 font-semibold">
                         {d.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
-                      <td className="px-5 py-3 text-center text-slate-600">{d.duracao_media} min</td>
+                      <td className="px-5 py-3 text-center text-[var(--color-text-secondary)]">{d.duracao_media} min</td>
                       <td className="px-5 py-3 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <div className="w-16 bg-slate-100 rounded-full h-1.5">
+                          <div className="w-16 bg-[var(--color-bg-card)] rounded-full h-1.5">
                             <div
                               className="bg-indigo-500 h-1.5 rounded-full"
                               style={{ width: `${Math.round((d.total / totalProcedimentos) * 100)}%` }}
                             />
                           </div>
-                          <span className="text-xs text-slate-500 w-8 text-right">
+                          <span className="text-xs text-[var(--color-text-muted)] w-8 text-right">
                             {Math.round((d.total / totalProcedimentos) * 100)}%
                           </span>
                         </div>

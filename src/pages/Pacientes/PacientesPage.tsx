@@ -149,15 +149,15 @@ export function PacientesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Pacientes</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Pacientes</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">
             {filteredPatients.length} paciente{filteredPatients.length !== 1 ? 's' : ''}
             {search && ` encontrado${filteredPatients.length !== 1 ? 's' : ''}`}
           </p>
         </div>
         {canManagePatients && (
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" onClick={() => setShowImportModal(true)}>
+            <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-bg-card-hover)] transition-colors" onClick={() => setShowImportModal(true)}>
               <Upload className="w-4 h-4" /> Importar CSV
             </button>
             <button className="btn-primary" onClick={() => setShowModal(true)}>
@@ -169,56 +169,56 @@ export function PacientesPage() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-cyan-500/5 rounded-lg flex items-center justify-center">
               <Users className="w-5 h-5 text-cyan-500" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{kpis.total}</p>
-              <p className="text-xs text-gray-500">Total de pacientes</p>
+              <p className="text-2xl font-bold text-[var(--color-text-primary)]">{kpis.total}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Total de pacientes</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
               <UserPlus className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{kpis.thisMonth}</p>
-              <p className="text-xs text-gray-500">Novos este mês</p>
+              <p className="text-2xl font-bold text-[var(--color-text-primary)]">{kpis.thisMonth}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Novos este mês</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
               <CalendarClock className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{kpis.withAppointment}</p>
-              <p className="text-xs text-gray-500">Com consultas</p>
+              <p className="text-2xl font-bold text-[var(--color-text-primary)]">{kpis.withAppointment}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Com consultas</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
               <CalendarClock className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-gray-900">{kpis.withoutReturn}</p>
-              <p className="text-xs text-gray-500">Sem retorno (+90d)</p>
+              <p className="text-2xl font-bold text-[var(--color-text-primary)]">{kpis.withoutReturn}</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Sem retorno (+90d)</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Busca e Filtros */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4 shadow-sm flex flex-wrap gap-4 items-center justify-between">
         <div className="relative w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-muted)]" />
           <input
             type="text"
             placeholder="Buscar por nome, CPF ou telefone..."
@@ -229,14 +229,14 @@ export function PacientesPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-100">
+          <div className="flex items-center bg-[var(--color-bg-deep)] rounded-lg p-1 border border-[var(--color-border)]">
             {['todos', ...convenios].map(c => (
               <button
                 key={c}
                 onClick={() => { setFilterConvenio(c); setCurrentPage(1); }}
                 className={cn(
                   'px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-200 capitalize',
-                  filterConvenio === c ? 'bg-white text-cyan-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
+                  filterConvenio === c ? 'bg-[var(--color-bg-card)] text-cyan-600 shadow-sm border border-[var(--color-border)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
                 )}
               >
                 {c === 'todos' ? 'Todos' : c}
@@ -250,17 +250,17 @@ export function PacientesPage() {
       </div>
 
       {/* Tabela de pacientes */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden">
         {isLoading && patients.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-gray-400">Carregando pacientes...</p>
+            <p className="text-sm text-[var(--color-text-muted)]">Carregando pacientes...</p>
           </div>
         ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 text-xs font-semibold text-gray-500 tracking-wider">
+              <tr className="bg-[var(--color-bg-deep)]/50 text-xs font-semibold text-[var(--color-text-muted)] tracking-wider">
                 <th className="px-5 py-3">Paciente</th>
                 <th className="px-5 py-3">Contato</th>
                 <th className="px-5 py-3">Convênio</th>
@@ -268,7 +268,7 @@ export function PacientesPage() {
                 <th className="px-5 py-3 text-center">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-[var(--color-border)]">
               {paginatedPatients.length > 0 ? (
                 paginatedPatients.map(p => {
                   const age = calcAge(p.dataNascimento)
@@ -280,7 +280,7 @@ export function PacientesPage() {
                   return (
                     <tr
                       key={p.id}
-                      className="hover:bg-gray-50/50 cursor-pointer transition-colors group"
+                      className="hover:bg-[var(--color-bg-card-hover)]/50 cursor-pointer transition-colors group"
                       onClick={() => handlePatientClick(p.id)}
                     >
                       {/* Paciente — nome, idade, CPF */}
@@ -288,10 +288,10 @@ export function PacientesPage() {
                         <div className="flex items-center gap-3">
                           <Avatar nome={p.nome} />
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 group-hover:text-cyan-500 transition-colors truncate">
+                            <p className="text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-cyan-500 transition-colors truncate">
                               {p.nome}
                             </p>
-                            <p className="text-[11px] text-gray-400">
+                            <p className="text-[11px] text-[var(--color-text-muted)]">
                               {age !== null ? `${age} anos` : ''}
                               {age !== null && p.cpf ? ' · ' : ''}
                               {p.cpf ? formatCPF(p.cpf) : ''}
@@ -305,15 +305,15 @@ export function PacientesPage() {
                       <td className="px-5 py-3.5">
                         <div className="text-sm">
                           {phone ? (
-                            <p className="text-gray-700 flex items-center gap-1.5">
-                              <Phone className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <p className="text-[var(--color-text-secondary)] flex items-center gap-1.5">
+                              <Phone className="w-3.5 h-3.5 text-[var(--color-text-muted)] shrink-0" />
                               {formatPhone(phone)}
                             </p>
                           ) : (
-                            <p className="text-gray-400 text-xs">Sem telefone</p>
+                            <p className="text-[var(--color-text-muted)] text-xs">Sem telefone</p>
                           )}
                           {p.contato?.email && (
-                            <p className="text-gray-400 text-xs truncate max-w-[200px]">{p.contato.email}</p>
+                            <p className="text-[var(--color-text-muted)] text-xs truncate max-w-[200px]">{p.contato.email}</p>
                           )}
                         </div>
                       </td>
@@ -333,19 +333,19 @@ export function PacientesPage() {
 
                       {/* Última Consulta */}
                       <td className="px-5 py-3.5">
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-[var(--color-text-secondary)]">
                           {p.ultimaConsulta ? (
                             <div className="flex flex-col">
                               <span>{new Date(p.ultimaConsulta).toLocaleDateString()}</span>
                               <span className={cn(
                                 'text-[10px] font-medium',
-                                lastDays !== null && lastDays > 90 ? 'text-amber-500' : 'text-gray-400'
+                                lastDays !== null && lastDays > 90 ? 'text-amber-500' : 'text-[var(--color-text-muted)]'
                               )}>
                                 Há {lastDays} dia{lastDays !== 1 ? 's' : ''}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-gray-400 text-xs">Nenhuma</span>
+                            <span className="text-[var(--color-text-muted)] text-xs">Nenhuma</span>
                           )}
                         </div>
                       </td>
@@ -358,7 +358,7 @@ export function PacientesPage() {
                               href={`https://wa.me/55${phone.replace(/\D/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 hover:bg-cyan-500/5 rounded-lg text-gray-400 hover:text-cyan-500 transition-colors"
+                              className="p-1.5 hover:bg-cyan-500/5 rounded-lg text-[var(--color-text-muted)] hover:text-cyan-500 transition-colors"
                               title="WhatsApp"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -367,14 +367,14 @@ export function PacientesPage() {
                           )}
                           <button
                             onClick={() => navigate(`/agenda?paciente=${p.id}`)}
-                            className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors"
+                            className="p-1.5 hover:bg-blue-50 rounded-lg text-[var(--color-text-muted)] hover:text-blue-600 transition-colors"
                             title="Agendar consulta"
                           >
                             <Calendar className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => navigate(`/pacientes/${p.id}`)}
-                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-cyan-500 transition-colors"
+                            className="p-1.5 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)] hover:text-cyan-500 transition-colors"
                             title="Ver prontuário"
                           >
                             <FileText className="w-4 h-4" />
@@ -388,8 +388,8 @@ export function PacientesPage() {
                 <tr>
                   <td colSpan={5} className="px-6 py-20 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <User className="w-12 h-12 text-gray-200" />
-                      <p className="text-gray-500 font-medium">Nenhum paciente encontrado.</p>
+                      <User className="w-12 h-12 text-[var(--color-text-dim)]" />
+                      <p className="text-[var(--color-text-muted)] font-medium">Nenhum paciente encontrado.</p>
                       <button onClick={() => setShowModal(true)} className="btn-primary mt-2 text-sm">
                         <Plus className="w-4 h-4" /> Cadastrar primeiro paciente
                       </button>
@@ -403,7 +403,7 @@ export function PacientesPage() {
         )}
 
         {/* Paginação — sempre visível */}
-        <div className="px-5 py-3 bg-gray-50/30 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+        <div className="px-5 py-3 bg-[var(--color-bg-deep)]/30 border-t border-[var(--color-border)] flex items-center justify-between text-sm text-[var(--color-text-muted)]">
           <p>
             {filteredPatients.length > 0
               ? <>Mostrando <b>{(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredPatients.length)}</b> de <b>{filteredPatients.length}</b> paciente{filteredPatients.length !== 1 ? 's' : ''}</>
@@ -411,21 +411,21 @@ export function PacientesPage() {
             }
           </p>
           {totalPages > 1 && (
-            <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-white">
+            <div className="flex items-center border border-[var(--color-border)] rounded-lg overflow-hidden bg-[var(--color-bg-card)]">
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="w-9 h-9 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 transition-colors border-r border-gray-200"
+                className="w-9 h-9 flex items-center justify-center hover:bg-[var(--color-bg-card-hover)] disabled:opacity-50 transition-colors border-r border-[var(--color-border)]"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <div className="flex items-center px-4 font-semibold text-gray-900">
+              <div className="flex items-center px-4 font-semibold text-[var(--color-text-primary)]">
                 {currentPage} / {totalPages}
               </div>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="w-9 h-9 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 transition-colors border-l border-gray-200"
+                className="w-9 h-9 flex items-center justify-center hover:bg-[var(--color-bg-card-hover)] disabled:opacity-50 transition-colors border-l border-[var(--color-border)]"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -437,17 +437,17 @@ export function PacientesPage() {
       {/* ── Modal Novo Paciente ────────────────────────────────────────── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900">Novo Paciente</h2>
-              <button onClick={() => { setShowModal(false); setForm(formVazio); }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
+          <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Novo Paciente</h2>
+              <button onClick={() => { setShowModal(false); setForm(formVazio); }} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[var(--color-text-muted)]" />
               </button>
             </div>
 
             <form onSubmit={handleSalvar} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nome completo *</label>
                 <input
                   type="text"
                   required
@@ -460,7 +460,7 @@ export function PacientesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Data de nascimento</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Data de nascimento</label>
                   <input
                     type="date"
                     className="input-base"
@@ -469,7 +469,7 @@ export function PacientesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Sexo</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Sexo</label>
                   <select
                     className="input-base"
                     value={form.sexo}
@@ -483,7 +483,7 @@ export function PacientesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">CPF</label>
                 <input
                   type="text"
                   className="input-base"
@@ -495,7 +495,7 @@ export function PacientesPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Telefone / WhatsApp</label>
                   <input
                     type="tel"
                     className="input-base"
@@ -505,7 +505,7 @@ export function PacientesPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">E-mail</label>
                   <input
                     type="email"
                     className="input-base"
@@ -517,7 +517,7 @@ export function PacientesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Convênio</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Convênio</label>
                 <select
                   className="input-base"
                   value={form.convenio}
@@ -557,18 +557,18 @@ export function PacientesPage() {
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null) }} />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col animate-fade-in">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
-              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2"><Upload className="w-4 h-4 text-cyan-500" /> Importar Pacientes (CSV)</h3>
-              <button onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null) }} className="p-2 hover:bg-gray-100 rounded-lg text-gray-400"><X className="w-4 h-4" /></button>
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col animate-fade-in">
+            <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-deep)]/50 shrink-0">
+              <h3 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2"><Upload className="w-4 h-4 text-cyan-500" /> Importar Pacientes (CSV)</h3>
+              <button onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null) }} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg text-[var(--color-text-muted)]"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {importResult ? (
                 <div className="text-center space-y-4 py-8">
                   <CheckCircle className="w-12 h-12 text-cyan-500 mx-auto" />
-                  <h4 className="text-lg font-bold text-gray-900">Importação concluída!</h4>
-                  <p className="text-sm text-gray-500">{importResult.success} paciente(s) importado(s){importResult.errors > 0 ? `, ${importResult.errors} erro(s)` : ''}</p>
+                  <h4 className="text-lg font-bold text-[var(--color-text-primary)]">Importação concluída!</h4>
+                  <p className="text-sm text-[var(--color-text-muted)]">{importResult.success} paciente(s) importado(s){importResult.errors > 0 ? `, ${importResult.errors} erro(s)` : ''}</p>
                   <button onClick={() => { setShowImportModal(false); setImportData([]); setImportResult(null); getPatients() }} className="btn-primary">Fechar</button>
                 </div>
               ) : (
@@ -604,17 +604,17 @@ export function PacientesPage() {
 
                   {importData.length > 0 && (
                     <div>
-                      <p className="text-xs font-semibold text-gray-700 mb-2">{importData.length} paciente(s) encontrado(s)</p>
-                      <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl">
+                      <p className="text-xs font-semibold text-[var(--color-text-secondary)] mb-2">{importData.length} paciente(s) encontrado(s)</p>
+                      <div className="max-h-48 overflow-y-auto border border-[var(--color-border)] rounded-xl">
                         <table className="w-full text-xs">
-                          <thead><tr className="bg-gray-50 border-b text-[10px] font-bold text-gray-400 uppercase">
+                          <thead><tr className="bg-[var(--color-bg-deep)] border-b text-[10px] font-bold text-[var(--color-text-muted)] uppercase">
                             <th className="py-2 px-3 text-left">Nome</th><th className="py-2 px-3">CPF</th><th className="py-2 px-3">Telefone</th>
                           </tr></thead>
                           <tbody>
                             {importData.slice(0, 10).map((r, i) => (
-                              <tr key={i} className="border-b border-gray-50"><td className="py-1.5 px-3 font-medium">{r.nome}</td><td className="py-1.5 px-3 text-gray-500">{r.cpf || '—'}</td><td className="py-1.5 px-3 text-gray-500">{r.telefone || '—'}</td></tr>
+                              <tr key={i} className="border-b border-gray-50"><td className="py-1.5 px-3 font-medium">{r.nome}</td><td className="py-1.5 px-3 text-[var(--color-text-muted)]">{r.cpf || '—'}</td><td className="py-1.5 px-3 text-[var(--color-text-muted)]">{r.telefone || '—'}</td></tr>
                             ))}
-                            {importData.length > 10 && <tr><td colSpan={3} className="py-1.5 px-3 text-gray-400 text-center">+{importData.length - 10} mais...</td></tr>}
+                            {importData.length > 10 && <tr><td colSpan={3} className="py-1.5 px-3 text-[var(--color-text-muted)] text-center">+{importData.length - 10} mais...</td></tr>}
                           </tbody>
                         </table>
                       </div>
@@ -625,8 +625,8 @@ export function PacientesPage() {
             </div>
 
             {!importResult && importData.length > 0 && (
-              <div className="px-6 py-4 border-t border-gray-100 flex justify-between shrink-0">
-                <button onClick={() => { setImportData([]); setShowImportModal(false) }} className="px-4 py-2 text-sm text-gray-500">Cancelar</button>
+              <div className="px-6 py-4 border-t border-[var(--color-border)] flex justify-between shrink-0">
+                <button onClick={() => { setImportData([]); setShowImportModal(false) }} className="px-4 py-2 text-sm text-[var(--color-text-muted)]">Cancelar</button>
                 <button disabled={importing} onClick={async () => {
                   setImporting(true)
                   let success = 0, errors = 0

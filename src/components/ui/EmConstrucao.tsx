@@ -27,13 +27,13 @@ export function EmConstrucao({
         </div>
         {/* Ponto pulsante */}
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-400 rounded-full flex items-center justify-center">
-          <div className="w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+          <div className="w-2.5 h-2.5 bg-[var(--color-bg-card)] rounded-full animate-pulse" />
         </div>
       </div>
 
       {/* Texto */}
-      <h2 className="text-xl font-bold text-gray-800 mb-2">{moduleName}</h2>
-      <p className="text-gray-400 text-sm max-w-xs leading-relaxed">
+      <h2 className="text-xl font-bold text-[var(--color-text-primary)] mb-2">{moduleName}</h2>
+      <p className="text-[var(--color-text-muted)] text-sm max-w-xs leading-relaxed">
         {description ?? 'Este módulo está em desenvolvimento e estará disponível em breve.'}
       </p>
 

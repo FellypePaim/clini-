@@ -94,11 +94,11 @@ export function RegrasConsumoPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+          <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <ShoppingBag className="text-indigo-600" />
             Regras de Consumo Automático
           </h2>
-          <p className="text-sm font-medium text-slate-500 mt-1">
+          <p className="text-sm font-medium text-[var(--color-text-muted)] mt-1">
             Vincule materiais aos procedimentos para baixa automática no estoque ao finalizar uma evolução.
           </p>
         </div>
@@ -110,21 +110,21 @@ export function RegrasConsumoPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           {isLoading ? (
             <div className="flex items-center justify-center p-12">
               <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
             </div>
           ) : rules.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+            <div className="flex flex-col items-center justify-center p-12 text-[var(--color-text-muted)]">
               <ShoppingBag className="w-12 h-12 mb-3 text-slate-200" />
               <p className="font-bold text-sm text-center">Nenhuma regra de consumo configurada.<br/>Adicione materiais que são gastos automaticamente em cada atendimento.</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                <tr className="bg-[var(--color-bg-deep)] border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                   <th className="px-6 py-4">Procedimento</th>
                   <th className="px-6 py-4">Material / Produto</th>
                   <th className="px-6 py-4 text-center">Qtd. Consumida</th>
@@ -132,18 +132,18 @@ export function RegrasConsumoPage() {
                   <th className="px-6 py-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-sm font-medium">
+              <tbody className="divide-y divide-[var(--color-border)] text-sm font-medium">
                 {rules.map((rule) => {
                   const product = products.find(p => p.id === rule.productId)
                   return (
-                    <tr key={rule.id} className="hover:bg-slate-50 transition-colors group">
+                    <tr key={rule.id} className="hover:bg-[var(--color-bg-card-hover)] transition-colors group">
                       <td className="px-6 py-4">
-                        <span className="font-black text-slate-700">{rule.procedureName}</span>
+                        <span className="font-black text-[var(--color-text-secondary)]">{rule.procedureName}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div>
-                          <p className="font-bold text-slate-800">{product?.name || 'Produto não encontrado'}</p>
-                          <p className="text-[10px] text-slate-400 font-mono">{product?.code}</p>
+                          <p className="font-bold text-[var(--color-text-primary)]">{product?.name || 'Produto não encontrado'}</p>
+                          <p className="text-[10px] text-[var(--color-text-muted)] font-mono">{product?.code}</p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -157,13 +157,13 @@ export function RegrasConsumoPage() {
                             <CheckCircle2 size={12} /> Ativo
                           </span>
                         ) : (
-                          <span className="text-slate-400 text-xs">Inativo</span>
+                          <span className="text-[var(--color-text-muted)] text-xs">Inativo</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button 
                           onClick={() => handleDelete(rule.id)}
-                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className="p-2 text-[var(--color-text-dim)] hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -198,34 +198,34 @@ function RuleModal({ onClose, onSave, isSaving, products }: any) {
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-in">
+      <div className="bg-[var(--color-bg-card)] rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-in">
         <div className="bg-indigo-600 p-6 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ShoppingBag />
             <h3 className="text-lg font-black">Nova Regra de Consumo</h3>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-card)]/10 rounded-xl transition-all">
             <X size={20} />
           </button>
         </div>
         
         <div className="p-8 space-y-5">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nome do Procedimento</label>
+            <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Nome do Procedimento</label>
             <input 
               type="text" 
               placeholder="Ex: Aplicação de Botox"
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
+              className="w-full p-3 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
               value={form.procedureName}
               onChange={e => setForm(p => ({ ...p, procedureName: e.target.value }))}
             />
-            <p className="text-[9px] text-slate-400 ml-1">Deve ser idêntico ao nome cadastrado no catálogo.</p>
+            <p className="text-[9px] text-[var(--color-text-muted)] ml-1">Deve ser idêntico ao nome cadastrado no catálogo.</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Produto / Material</label>
+            <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Produto / Material</label>
             <select 
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
+              className="w-full p-3 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-medium"
               value={form.productId}
               onChange={e => setForm(p => ({ ...p, productId: e.target.value }))}
             >
@@ -237,10 +237,10 @@ function RuleModal({ onClose, onSave, isSaving, products }: any) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Quantidade por Procedimento</label>
+            <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Quantidade por Procedimento</label>
             <input 
               type="number" 
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-black"
+              className="w-full p-3 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-2xl text-sm focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-black"
               value={form.quantity}
               onChange={e => setForm(p => ({ ...p, quantity: Number(e.target.value) }))}
             />
@@ -249,7 +249,7 @@ function RuleModal({ onClose, onSave, isSaving, products }: any) {
           <div className="flex gap-3 pt-4">
             <button 
               onClick={onClose}
-              className="flex-1 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
+              className="flex-1 py-3 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
             >
               Cancelar
             </button>

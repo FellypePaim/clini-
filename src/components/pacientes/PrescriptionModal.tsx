@@ -184,23 +184,23 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-md animate-fade-in" onClick={onClose} />
       
-      <div className="relative bg-white rounded-[40px] shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col animate-slide-in">
+      <div className="relative bg-[var(--color-bg-card)] rounded-[40px] shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-hidden flex flex-col animate-slide-in">
         <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
           
           {/* Form Area */}
-          <div className="flex-1 overflow-y-auto p-10 bg-gray-50/50 custom-scrollbar border-r border-gray-100">
+          <div className="flex-1 overflow-y-auto p-10 bg-[var(--color-bg-deep)]/50 custom-scrollbar border-r border-[var(--color-border)]">
              <div className="flex items-center justify-between mb-8">
                <div className="flex items-center gap-3">
                  <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-600 shadow-sm shadow-purple-500/10 border border-purple-200">
                     <ClipboardList className="w-5 h-5" />
                  </div>
                  <div>
-                   <h2 className="text-xl font-black text-gray-900 leading-none">Nova Prescrição</h2>
-                   <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1.5">Módulo de Farmacologia Digital</p>
+                   <h2 className="text-xl font-black text-[var(--color-text-primary)] leading-none">Nova Prescrição</h2>
+                   <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1.5">Módulo de Farmacologia Digital</p>
                  </div>
                </div>
                <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-xl transition-all">
-                  <X className="w-6 h-6 text-gray-400" />
+                  <X className="w-6 h-6 text-[var(--color-text-muted)]" />
                </button>
              </div>
 
@@ -224,9 +224,9 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                  <span className="text-blue-700 font-medium">Prescrição válida por 180 dias — até {validadeStr}</span>
                </div>
 
-               <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
+               <div className="bg-[var(--color-bg-card)] p-6 rounded-[32px] border border-[var(--color-border)] shadow-sm">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-black text-gray-900 border-none">Medicamentos</h3>
+                    <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none">Medicamentos</h3>
                     <button onClick={addItem} className="flex items-center gap-2 text-xs font-black text-cyan-500 hover:text-cyan-600 transition-all bg-cyan-500/5 px-3 py-2 rounded-xl">
                       <Plus className="w-4 h-4" /> Adicionar Outro
                     </button>
@@ -234,10 +234,10 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
 
                   <div className="space-y-6">
                     {items.map((item, index) => (
-                      <div key={item.id} className="relative p-6 bg-gray-50/50 rounded-2xl border border-gray-100 border-dashed animate-slide-in group">
+                      <div key={item.id} className="relative p-6 bg-[var(--color-bg-deep)]/50 rounded-2xl border border-[var(--color-border)] border-dashed animate-slide-in group">
                         <div className="flex items-center gap-2 mb-4">
-                          <span className="w-5 h-5 rounded-full bg-gray-200 text-[10px] font-black flex items-center justify-center text-gray-400">0{index + 1}</span>
-                          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Vias de Administração</span>
+                          <span className="w-5 h-5 rounded-full bg-gray-200 text-[10px] font-black flex items-center justify-center text-[var(--color-text-muted)]">0{index + 1}</span>
+                          <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Vias de Administração</span>
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -250,16 +250,16 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                               onFocus={() => setShowSuggestions(index)}
                             />
                             {showSuggestions === index && searchMed.length >= 2 && (
-                              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-20 max-h-40 overflow-y-auto">
+                              <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl shadow-xl z-20 max-h-40 overflow-y-auto">
                                 {MEDICAMENTOS_COMUNS.filter(m => m.nome.toLowerCase().includes(searchMed.toLowerCase())).map(m => (
                                   <button key={m.nome} type="button" onClick={() => selectMedicamento(index, m)}
                                     className="w-full text-left px-3 py-2 text-xs hover:bg-cyan-500/5 transition-colors border-b border-gray-50 last:border-0">
-                                    <span className="font-semibold text-gray-900">{m.nome}</span>
-                                    <span className="text-gray-400 ml-2">{m.dosagem} · {m.frequencia}</span>
+                                    <span className="font-semibold text-[var(--color-text-primary)]">{m.nome}</span>
+                                    <span className="text-[var(--color-text-muted)] ml-2">{m.dosagem} · {m.frequencia}</span>
                                   </button>
                                 ))}
                                 {MEDICAMENTOS_COMUNS.filter(m => m.nome.toLowerCase().includes(searchMed.toLowerCase())).length === 0 && (
-                                  <p className="px-3 py-2 text-xs text-gray-400">Nenhum medicamento encontrado</p>
+                                  <p className="px-3 py-2 text-xs text-[var(--color-text-muted)]">Nenhum medicamento encontrado</p>
                                 )}
                               </div>
                             )}
@@ -295,7 +295,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                         {items.length > 1 && (
                           <button 
                             onClick={() => removeItem(item.id)}
-                            className="absolute -right-2 -top-2 w-8 h-8 rounded-full bg-white border border-red-100 text-red-500 shadow-xl opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-red-50"
+                            className="absolute -right-2 -top-2 w-8 h-8 rounded-full bg-[var(--color-bg-card)] border border-red-100 text-red-500 shadow-xl opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -314,23 +314,23 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
                     <div className="flex-1 space-y-3">
                        <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10 text-cyan-400">
+                         <div className="w-10 h-10 rounded-2xl bg-[var(--color-bg-card)]/10 backdrop-blur-md flex items-center justify-center border border-white/10 text-cyan-400">
                            <Lock className="w-5 h-5" />
                          </div>
                          <h3 className="text-lg font-black leading-none">Assinatura Certificada</h3>
                        </div>
-                       <p className="text-xs text-gray-400 leading-relaxed font-medium">Esta receita será validada através de certificado digital padrão ICP-Brasil e conterá QR Code de autenticidade.</p>
+                       <p className="text-xs text-[var(--color-text-muted)] leading-relaxed font-medium">Esta receita será validada através de certificado digital padrão ICP-Brasil e conterá QR Code de autenticidade.</p>
                     </div>
 
                     <div className="w-full md:w-auto flex flex-col gap-4 min-w-[240px]">
-                       <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-2xl border border-white/10">
+                       <div className="flex items-center gap-3 px-4 py-3 bg-[var(--color-bg-card)]/5 rounded-2xl border border-white/10">
                           <input 
                             type="checkbox" 
                             checked={isSigned} 
                             onChange={(e) => setIsSigned(e.target.checked)}
                             className="w-5 h-5 rounded-lg border-white/20 bg-transparent text-cyan-500 focus:ring-cyan-500" 
                           />
-                          <span className="text-xs font-bold text-gray-300">Assinar digitalmente</span>
+                          <span className="text-xs font-bold text-[var(--color-text-dim)]">Assinar digitalmente</span>
                        </div>
                        {isSigned && (
                          <div className="animate-slide-in">
@@ -339,7 +339,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                              placeholder="Sua senha digital..."
                              value={password}
                              onChange={(e) => setPassword(e.target.value)}
-                             className="w-full px-4 py-3 bg-white border-none rounded-2xl text-xs text-gray-900 font-bold placeholder:text-gray-400 focus:ring-4 focus:ring-cyan-500/30 transition-all outline-none" 
+                             className="w-full px-4 py-3 bg-[var(--color-bg-card)] border-none rounded-2xl text-xs text-[var(--color-text-primary)] font-bold placeholder:text-[var(--color-text-muted)] focus:ring-4 focus:ring-cyan-500/30 transition-all outline-none" 
                            />
                          </div>
                        )}
@@ -356,21 +356,21 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Preview A4</span>
              </div>
              
-             <div ref={previewRef} className="w-[320px] bg-white shadow-2xl rounded-sm p-8 flex flex-col min-h-[450px] origin-top scale-110">
+             <div ref={previewRef} className="w-[320px] bg-[var(--color-bg-card)] shadow-2xl rounded-sm p-8 flex flex-col min-h-[450px] origin-top scale-110">
                 {/* PDF Header */}
                 <div className="flex flex-col items-center text-center border-b-2 border-cyan-500 pb-4 mb-6">
                    <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-white mb-2 shadow-sm">
                       <Plus className="w-5 h-5" />
                    </div>
-                   <h1 className="text-[10px] font-black uppercase text-gray-900 tracking-wider">{user?.clinicaNome || 'Clínica'}</h1>
-                   <p className="text-[7px] text-gray-400 font-bold mt-0.5">Prescrição Digital</p>
+                   <h1 className="text-[10px] font-black uppercase text-[var(--color-text-primary)] tracking-wider">{user?.clinicaNome || 'Clínica'}</h1>
+                   <p className="text-[7px] text-[var(--color-text-muted)] font-bold mt-0.5">Prescrição Digital</p>
                 </div>
 
                 {/* Patient Info */}
                 <div className="mb-6">
-                   <p className="text-[7px] font-black text-gray-400 uppercase tracking-widest mb-1">Paciente</p>
-                   <p className="text-[9px] font-black text-gray-900">{patient.nome}</p>
-                   <p className="text-[7px] text-gray-500 mt-0.5">CPF: {patient.cpf} · Data: {new Date().toLocaleDateString()}</p>
+                   <p className="text-[7px] font-black text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Paciente</p>
+                   <p className="text-[9px] font-black text-[var(--color-text-primary)]">{patient.nome}</p>
+                   <p className="text-[7px] text-[var(--color-text-muted)] mt-0.5">CPF: {patient.cpf} · Data: {new Date().toLocaleDateString()}</p>
                 </div>
 
                 {/* RX Symbol */}
@@ -379,9 +379,9 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                    <div className="space-y-4 pt-2">
                      {items.map((item, i) => (
                        <div key={item.id} className="text-[8px] leading-relaxed">
-                         <p className="font-black text-gray-900">{i + 1}. {item.medicamento || '...'}</p>
-                         <p className="text-gray-600 pl-3">· {item.dosagem || '...'} | {item.frequencia || '...'} | {item.duracao || '...'}</p>
-                         {item.observacoes && <p className="text-gray-400 pl-3 italic text-[7px]">{item.observacoes}</p>}
+                         <p className="font-black text-[var(--color-text-primary)]">{i + 1}. {item.medicamento || '...'}</p>
+                         <p className="text-[var(--color-text-secondary)] pl-3">· {item.dosagem || '...'} | {item.frequencia || '...'} | {item.duracao || '...'}</p>
+                         {item.observacoes && <p className="text-[var(--color-text-muted)] pl-3 italic text-[7px]">{item.observacoes}</p>}
                        </div>
                      ))}
                    </div>
@@ -391,12 +391,12 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                 <div className="mt-auto pt-8 flex flex-col items-center">
                    <div className="relative flex flex-col items-center">
                       <div className="w-24 h-0.5 bg-gray-200 mb-2"></div>
-                      <p className="text-[7px] font-black text-gray-900">{user?.nome || 'Profissional'}</p>
-                      {user?.crm && <p className="text-[6px] text-gray-400">{user.crm}</p>}
+                      <p className="text-[7px] font-black text-[var(--color-text-primary)]">{user?.nome || 'Profissional'}</p>
+                      {user?.crm && <p className="text-[6px] text-[var(--color-text-muted)]">{user.crm}</p>}
                       
                       {isSigned && password && (
                         <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-80 pointer-events-none">
-                           <div className="w-16 h-16 border-4 border-cyan-500 rounded-full flex items-center justify-center rotate-12 bg-white/80 p-1">
+                           <div className="w-16 h-16 border-4 border-cyan-500 rounded-full flex items-center justify-center rotate-12 bg-[var(--color-bg-card)]/80 p-1">
                               <p className="text-[6px] font-black text-cyan-500 text-center leading-tight">ASSINADO DIGITALMENTE</p>
                            </div>
                         </div>
@@ -405,7 +405,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
                    
                    <div className="mt-8 self-end">
                       <QRCodeSVG value={`${window.location.origin}/validar`} size={32} />
-                      <p className="text-[5px] text-gray-300 text-right mt-1">v.2.0.26</p>
+                      <p className="text-[5px] text-[var(--color-text-dim)] text-right mt-1">v.2.0.26</p>
                    </div>
                 </div>
              </div>
@@ -413,11 +413,11 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
         </div>
 
         {/* Action Bar */}
-        <div className="bg-white p-8 px-10 flex flex-col md:flex-row items-center justify-between border-t border-gray-100 gap-6 shrink-0 z-10">
+        <div className="bg-[var(--color-bg-card)] p-8 px-10 flex flex-col md:flex-row items-center justify-between border-t border-[var(--color-border)] gap-6 shrink-0 z-10">
            <div className="flex items-center gap-4">
               <button 
                 onClick={handleDownloadPDF}
-                className="flex items-center gap-2 px-6 py-4 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-2xl text-xs font-black transition-all active:scale-95"
+                className="flex items-center gap-2 px-6 py-4 bg-[var(--color-bg-card)] hover:bg-gray-200 text-[var(--color-text-secondary)] rounded-2xl text-xs font-black transition-all active:scale-95"
               >
                 <Download className="w-4 h-4" /> Baixar PDF
               </button>
@@ -432,7 +432,7 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
            <div className="flex items-center gap-3 w-full md:w-auto">
               <button 
                 onClick={onClose}
-                className="flex-1 md:flex-none px-6 py-4 text-sm font-bold text-gray-400 hover:text-gray-600"
+                className="flex-1 md:flex-none px-6 py-4 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
               >
                 Cancelar
               </button>
@@ -454,14 +454,14 @@ export function PrescriptionModal({ isOpen, onClose, patient, onSave }: Prescrip
 function PrescriptionField({ label, placeholder, value, onChange, onFocus }: { label: string, placeholder: string, value: string, onChange: (v: string) => void, onFocus?: () => void }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">{label}</label>
+      <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1">{label}</label>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={onFocus}
         placeholder={placeholder}
-        className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 text-xs font-medium focus:ring-4 focus:ring-purple-500/10 focus:border-purple-200 transition-all outline-none shadow-sm"
+        className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl px-4 py-2.5 text-xs font-medium focus:ring-4 focus:ring-purple-500/10 focus:border-purple-200 transition-all outline-none shadow-sm"
       />
     </div>
   )

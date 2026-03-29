@@ -51,23 +51,23 @@ export function AlertasPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="flex items-center gap-4 mb-4">
-          <Link to="/estoque" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+          <Link to="/estoque" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Alertas & Reposição</h1>
-            <p className="text-slate-500">Controle rigoroso de validades e compras pendentes</p>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Alertas & Reposição</h1>
+            <p className="text-[var(--color-text-muted)]">Controle rigoroso de validades e compras pendentes</p>
           </div>
         </div>
 
-        <div className="flex border-b border-slate-200">
+        <div className="flex border-b border-[var(--color-border)]">
           <button 
             onClick={() => setActiveTab('estoque')}
             className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === 'estoque' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              activeTab === 'estoque' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-slate-300'
             }`}
           >
             Abaixo do Mínimo <Badge className="bg-red-100 text-red-700 border-none px-1.5">{alerts.length}</Badge>
@@ -75,7 +75,7 @@ export function AlertasPage() {
           <button 
             onClick={() => setActiveTab('vencimento')}
             className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === 'vencimento' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              activeTab === 'vencimento' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-slate-300'
             }`}
           >
             Vencimentos <Badge className="bg-amber-100 text-amber-700 border-none px-1.5">{expiringProducts.length}</Badge>
@@ -83,7 +83,7 @@ export function AlertasPage() {
           <button 
             onClick={() => setActiveTab('pedidos')}
             className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors flex items-center gap-2 ${
-              activeTab === 'pedidos' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              activeTab === 'pedidos' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-slate-300'
             }`}
           >
             Pedidos de Compra
@@ -96,24 +96,24 @@ export function AlertasPage() {
         {activeTab === 'estoque' && (
           <div className="space-y-4">
             {alerts.map(product => (
-              <div key={product.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between group hover:shadow-md transition-shadow">
+              <div key={product.id} className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center justify-between group hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-4">
                   <div className={`p-3 rounded-xl border ${product.currentStock === 0 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-orange-50 text-orange-600 border-orange-200'}`}>
                     <AlertTriangle size={24} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors uppercase flex items-center gap-2">
+                    <h3 className="font-bold text-[var(--color-text-primary)] group-hover:text-indigo-600 transition-colors uppercase flex items-center gap-2">
                        {product.name}
                        {product.currentStock === 0 && <Badge className="bg-red-100 text-red-700 border-none uppercase tracking-widest text-[10px]">Zerado</Badge>}
                     </h3>
-                    <div className="flex gap-4 mt-2 text-sm text-slate-500 font-medium">
+                    <div className="flex gap-4 mt-2 text-sm text-[var(--color-text-muted)] font-medium">
                       <span>Mínimo: <strong>{product.minimumStock}</strong></span>
-                      <span className="w-px h-4 bg-slate-200" />
+                      <span className="w-px h-4 bg-[var(--color-border)]" />
                       <span className={product.currentStock === 0 ? 'text-red-500' : 'text-orange-500'}>
                         Atual: <strong>{product.currentStock}</strong>
                       </span>
-                      <span className="w-px h-4 bg-slate-200" />
-                      <span className="text-slate-400 font-mono text-xs mt-0.5">{product.code}</span>
+                      <span className="w-px h-4 bg-[var(--color-border)]" />
+                      <span className="text-[var(--color-text-muted)] font-mono text-xs mt-0.5">{product.code}</span>
                     </div>
                   </div>
                 </div>
@@ -127,10 +127,10 @@ export function AlertasPage() {
               </div>
             ))}
             {alerts.length === 0 && (
-              <div className="text-center p-12 border-2 border-dashed border-slate-200 rounded-2xl">
+              <div className="text-center p-12 border-2 border-dashed border-[var(--color-border)] rounded-2xl">
                  <CheckCircle2 size={48} className="mx-auto text-emerald-500 mb-4" />
-                 <h2 className="text-lg font-bold text-slate-800">Estoque Saudável</h2>
-                 <p className="text-slate-500 font-medium">Nenhum produto está abaixo da quantidade mínima definida.</p>
+                 <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Estoque Saudável</h2>
+                 <p className="text-[var(--color-text-muted)] font-medium">Nenhum produto está abaixo da quantidade mínima definida.</p>
               </div>
             )}
           </div>
@@ -142,20 +142,20 @@ export function AlertasPage() {
               const daysLeft = Math.floor((new Date(product.expirationDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
               const isExpired = daysLeft < 0;
               return (
-                <div key={product.id} className={`bg-white p-5 rounded-2xl border ${isExpired ? 'border-red-300 shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]' : 'border-slate-200 shadow-sm'} flex items-center justify-between group hover:shadow-md transition-shadow`}>
+                <div key={product.id} className={`bg-[var(--color-bg-card)] p-5 rounded-2xl border ${isExpired ? 'border-red-300 shadow-[0_0_15px_-3px_rgba(239,68,68,0.2)]' : 'border-[var(--color-border)] shadow-sm'} flex items-center justify-between group hover:shadow-md transition-shadow`}>
                   <div className="flex items-center gap-4">
                     <div className={`p-3 rounded-xl border ${isExpired ? 'bg-red-50 text-red-600 border-red-200' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>
                       <CalendarMinus size={24} />
                     </div>
                     <div>
-                      <h3 className="font-bold text-slate-900 group-hover:text-amber-600 transition-colors flex items-center gap-2">
+                      <h3 className="font-bold text-[var(--color-text-primary)] group-hover:text-amber-600 transition-colors flex items-center gap-2">
                         {product.name}
                         {isExpired && <Badge className="bg-red-600 text-white border-none uppercase tracking-widest text-[10px] animate-pulse">VENCIDO</Badge>}
                       </h3>
-                      <div className="flex gap-4 mt-2 text-sm text-slate-500 font-medium items-center">
-                        <span className="bg-slate-100 rounded px-2 py-0.5 flex items-center gap-1.5"><Package size={14} className="text-slate-400"/> {product.currentStock} em estoque</span>
-                        <span className="w-px h-4 bg-slate-200" />
-                        <span className="font-mono text-xs text-slate-400">{product.code}</span>
+                      <div className="flex gap-4 mt-2 text-sm text-[var(--color-text-muted)] font-medium items-center">
+                        <span className="bg-[var(--color-bg-card)] rounded px-2 py-0.5 flex items-center gap-1.5"><Package size={14} className="text-[var(--color-text-muted)]"/> {product.currentStock} em estoque</span>
+                        <span className="w-px h-4 bg-[var(--color-border)]" />
+                        <span className="font-mono text-xs text-[var(--color-text-muted)]">{product.code}</span>
                       </div>
                     </div>
                   </div>
@@ -164,7 +164,7 @@ export function AlertasPage() {
                      <span className={`block text-xl font-black ${isExpired ? 'text-red-600' : 'text-amber-600'}`}>
                         {isExpired ? 'Vencido' : `${daysLeft} dias`}
                      </span>
-                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                     <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                        {new Date(product.expirationDate!).toLocaleDateString('pt-BR')}
                      </span>
                   </div>
@@ -172,10 +172,10 @@ export function AlertasPage() {
               )
             })}
             {expiringProducts.length === 0 && (
-              <div className="text-center p-12 border-2 border-dashed border-slate-200 rounded-2xl">
+              <div className="text-center p-12 border-2 border-dashed border-[var(--color-border)] rounded-2xl">
                  <CheckCircle2 size={48} className="mx-auto text-emerald-500 mb-4" />
-                 <h2 className="text-lg font-bold text-slate-800">Sem Vencimentos Próximos</h2>
-                 <p className="text-slate-500 font-medium">Nenhum produto expira nos próximos 60 dias.</p>
+                 <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Sem Vencimentos Próximos</h2>
+                 <p className="text-[var(--color-text-muted)] font-medium">Nenhum produto expira nos próximos 60 dias.</p>
               </div>
             )}
           </div>
@@ -186,18 +186,18 @@ export function AlertasPage() {
              {purchaseOrders.map(order => {
                 const product = products.find(p => p.id === order.productId);
                 return (
-                  <div key={order.id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                  <div key={order.id} className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm flex items-center justify-between">
                     <div>
                       <div className="flex items-center gap-3 mb-1">
                         <Badge className="bg-indigo-100 text-indigo-700 tracking-widest text-[10px] font-black">{order.status}</Badge>
-                        <span className="text-xs font-bold text-slate-400 flex items-center gap-1"><Clock size={12}/> Criado em {new Date(order.createdAt).toLocaleDateString()}</span>
+                        <span className="text-xs font-bold text-[var(--color-text-muted)] flex items-center gap-1"><Clock size={12}/> Criado em {new Date(order.createdAt).toLocaleDateString()}</span>
                       </div>
-                      <h3 className="font-bold text-slate-900 text-lg uppercase">{product?.name || `PROD-${order.productId}`}</h3>
-                      <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mt-2">
+                      <h3 className="font-bold text-[var(--color-text-primary)] text-lg uppercase">{product?.name || `PROD-${order.productId}`}</h3>
+                      <div className="flex items-center gap-2 text-sm font-medium text-[var(--color-text-secondary)] mt-2">
                         <span>Fornecedor: <strong>{order.provider}</strong></span>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-[var(--color-text-dim)]">•</span>
                         <span>Quantidade: <strong>{order.quantity}</strong> un.</span>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-[var(--color-text-dim)]">•</span>
                         <span>Entrega Prevista: {new Date(order.expectedDate).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -211,16 +211,16 @@ export function AlertasPage() {
                           className="px-3 py-1.5 text-xs font-semibold text-cyan-600 bg-cyan-500/5 border border-cyan-500/20 rounded-lg hover:bg-cyan-500/10 transition-colors">Recebido</button>
                       )}
                       <button onClick={() => navigate(`/estoque/produtos?highlight=${order.productId}`)}
-                        className="px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors">Detalhes</button>
+                        className="px-3 py-1.5 text-xs font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-border)] transition-colors">Detalhes</button>
                     </div>
                   </div>
                 )
              })}
              {purchaseOrders.length === 0 && (
-              <div className="text-center p-12 border-2 border-dashed border-slate-200 rounded-2xl">
-                 <ShoppingCart size={48} className="mx-auto text-slate-300 mb-4" />
-                 <h2 className="text-lg font-bold text-slate-500">Nenhum pedido de compra</h2>
-                 <p className="text-slate-400 font-medium">Nenhum pedido foi gerado recentemente.</p>
+              <div className="text-center p-12 border-2 border-dashed border-[var(--color-border)] rounded-2xl">
+                 <ShoppingCart size={48} className="mx-auto text-[var(--color-text-dim)] mb-4" />
+                 <h2 className="text-lg font-bold text-[var(--color-text-muted)]">Nenhum pedido de compra</h2>
+                 <p className="text-[var(--color-text-muted)] font-medium">Nenhum pedido foi gerado recentemente.</p>
               </div>
             )}
           </div>

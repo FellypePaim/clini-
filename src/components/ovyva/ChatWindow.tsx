@@ -93,14 +93,14 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
   const avatarName = conversation.contato_nome ? conversation.contato_nome : "?"
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50/30 overflow-hidden h-full">
+    <div className="flex-1 flex flex-col bg-[var(--color-bg-deep)]/30 overflow-hidden h-full">
        {/* Chat Header */}
-       <div className="bg-white p-6 border-b border-gray-50 shrink-0 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-10 transition-all">
+       <div className="bg-[var(--color-bg-card)] p-6 border-b border-gray-50 shrink-0 flex items-center justify-between shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] z-10 transition-all">
           <div className="flex items-center gap-4">
-             <Avatar nome={avatarName} size="lg" className="border-4 border-white shadow-xl shadow-gray-200/50" />
+             <Avatar nome={avatarName} size="lg" className="border-4 border-white shadow-xl shadow-black/5" />
              <div className="flex flex-col">
                 <div className="flex items-center gap-2">
-                   <h3 className="text-sm font-black text-gray-900 border-none uppercase tracking-widest">{displayName}</h3>
+                   <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">{displayName}</h3>
                    {conversation.status === 'ia_ativa' && (
                      <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
                    )}
@@ -108,7 +108,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                      <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                    )}
                 </div>
-                <div className="flex items-center gap-2 text-[10px] text-gray-400 font-black uppercase tracking-widest mt-0.5">
+                <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-muted)] font-black uppercase tracking-widest mt-0.5">
                    {conversation.status === 'ia_ativa' ? (
                      <span className="flex items-center gap-1.5 text-cyan-500">
                         <Bot className="w-3.5 h-3.5" /> IA Monitorando Ativamente
@@ -118,7 +118,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                         <User className="w-3.5 h-3.5" /> Aguardando Humano
                      </span>
                    ) : (
-                     <span className="flex items-center gap-1.5 text-gray-500">
+                     <span className="flex items-center gap-1.5 text-[var(--color-text-muted)]">
                         <User className="w-3.5 h-3.5" /> Atendimento Humano
                      </span>
                    )}
@@ -142,7 +142,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                  <Bot className="w-3.5 h-3.5" /> Devolver para IA
                </button>
              )}
-             <Link to="/ovyva/config" className="p-2.5 hover:bg-gray-100 rounded-xl text-gray-400 transition-colors">
+             <Link to="/ovyva/config" className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] transition-colors">
                 <Settings className="w-5 h-5" />
              </Link>
           </div>
@@ -150,21 +150,21 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
 
        {/* Messages Area */}
        <div className="flex-1 overflow-y-auto p-12 space-y-8 custom-scrollbar relative">
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/60 backdrop-blur-md border border-white/40 px-6 py-2 rounded-full text-[10px] font-black text-gray-400 uppercase tracking-widest shadow-sm z-20">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-[var(--color-bg-card)]/60 backdrop-blur-md border border-white/40 px-6 py-2 rounded-full text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest shadow-sm z-20">
              Conversa Criptografada ponta-a-ponta
           </div>
 
           {conversation.paciente_id && (
             <div className="w-full flex justify-center mb-8">
-               <Link to={`/pacientes/${conversation.paciente_id}`} className="bg-white hover:bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-3xl shadow-lg shadow-cyan-500/5 flex items-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] group">
+               <Link to={`/pacientes/${conversation.paciente_id}`} className="bg-[var(--color-bg-card)] hover:bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-3xl shadow-lg shadow-cyan-500/5 flex items-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] group">
                  <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center text-cyan-500">
                     <User className="w-5 h-5" />
                  </div>
                  <div>
-                    <h4 className="text-sm font-black text-gray-900 group-hover:text-cyan-600 capitalize">
+                    <h4 className="text-sm font-black text-[var(--color-text-primary)] group-hover:text-cyan-600 capitalize">
                        {conversation.contato_nome}
                     </h4>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
+                    <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
                        <CalendarDays className="w-3 h-3" /> Paciente Cadastrado — Ver Prontuário &rarr;
                     </p>
                  </div>
@@ -175,7 +175,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
           {groupedSessions.map((session, sIdx) => (
              <div key={sIdx} className="space-y-6">
                 <div className="flex justify-center my-6">
-                   <div className="px-4 py-1.5 bg-gray-100 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                   <div className="px-4 py-1.5 bg-[var(--color-bg-card)] rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
                       {session.label}
                    </div>
                 </div>
@@ -188,7 +188,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
        </div>
 
        {/* Input Area */}
-       <div className="p-8 bg-white border-t border-gray-50 flex flex-col gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] z-10">
+       <div className="p-8 bg-[var(--color-bg-card)] border-t border-gray-50 flex flex-col gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)] z-10">
           {!isChatEnabled && (
              <div className="bg-yellow-50/50 border border-yellow-100 p-3 rounded-2xl flex items-center gap-3">
                 <Clock className="w-4 h-4 text-orange-400" />
@@ -208,10 +208,10 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                   className={cn(
-                    "w-full border-2 border-transparent rounded-[32px] py-4 pl-8 pr-16 text-sm font-medium placeholder:text-gray-300 outline-none transition-all shadow-inner",
+                    "w-full border-2 border-transparent rounded-[32px] py-4 pl-8 pr-16 text-sm font-medium placeholder:text-[var(--color-text-dim)] outline-none transition-all shadow-inner",
                     isChatEnabled
-                      ? "bg-gray-50 focus:bg-white focus:border-cyan-500/20 focus:ring-4 focus:ring-cyan-500/5"
-                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      ? "bg-[var(--color-bg-deep)] focus:bg-[var(--color-bg-card)] focus:border-cyan-500/20 focus:ring-4 focus:ring-cyan-500/5"
+                      : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] cursor-not-allowed"
                   )}
                 />
                 <button
@@ -219,7 +219,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                   disabled={!inputText.trim() || !isChatEnabled}
                   className={cn(
                     "absolute right-2 top-2 w-12 h-12 rounded-full flex items-center justify-center transition-all",
-                    inputText.trim() && isChatEnabled ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-90" : "bg-gray-100 text-gray-300"
+                    inputText.trim() && isChatEnabled ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 hover:scale-105 active:scale-90" : "bg-[var(--color-bg-card)] text-[var(--color-text-dim)]"
                   )}
                 >
                    <Send className="w-5 h-5" />
@@ -242,7 +242,7 @@ function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; a
     )}>
        <div className={cn(
          "p-6 rounded-[32px] text-sm leading-relaxed shadow-sm group relative",
-         isPatient ? "bg-white border border-gray-100 text-gray-600 rounded-bl-none" : 
+         isPatient ? "bg-[var(--color-bg-card)] border border-[var(--color-border)] text-[var(--color-text-secondary)] rounded-bl-none" : 
          isIA ? "bg-cyan-500/10 border border-cyan-500/20 text-cyan-800 rounded-br-none" : 
          "bg-gray-900 text-white rounded-br-none shadow-xl shadow-gray-900/10"
        )}>
@@ -273,7 +273,7 @@ function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; a
                   <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
                      <div className="h-full w-1/3 bg-cyan-500 rounded-full" />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] font-bold text-gray-400">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-[var(--color-text-muted)]">
                      <span>{message.audioDuration}</span>
                      <span>Mensagem de voz</span>
                   </div>
@@ -287,7 +287,7 @@ function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; a
             "mt-2 flex items-center gap-2 whitespace-nowrap",
             isPatient ? "justify-start" : "justify-end"
           )}>
-             <span className="text-[10px] text-gray-400 font-bold">{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+             <span className="text-[10px] text-[var(--color-text-muted)] font-bold">{new Date(message.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
              {!isPatient && <CheckCircle className="w-3 h-3 text-cyan-500" />}
           </div>
        </div>

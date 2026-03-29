@@ -141,7 +141,7 @@ export function PatientProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-3">
         <Clock className="w-10 h-10 text-cyan-500 animate-spin" />
-        <p className="text-gray-500 font-medium">Carregando prontuário...</p>
+        <p className="text-[var(--color-text-muted)] font-medium">Carregando prontuário...</p>
       </div>
     )
   }
@@ -150,7 +150,7 @@ export function PatientProfilePage() {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
         <AlertCircle className="w-16 h-16 text-red-100" />
-        <p className="text-gray-500 font-medium">Paciente não encontrado.</p>
+        <p className="text-[var(--color-text-muted)] font-medium">Paciente não encontrado.</p>
         <button className="btn-secondary" onClick={() => navigate('/pacientes')}>Voltar para lista</button>
       </div>
     )
@@ -162,31 +162,31 @@ export function PatientProfilePage() {
       <div className="flex flex-col gap-4">
         <button 
           onClick={() => navigate('/pacientes')} 
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-cyan-500 transition-colors w-fit group"
+          className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-cyan-500 transition-colors w-fit group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Voltar para Pacientes
         </button>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <Avatar nome={patient.nome} size="lg" className="border-4 border-white shadow-xl shadow-gray-200/50" />
+            <Avatar nome={patient.nome} size="lg" className="border-4 border-white shadow-xl shadow-black/5" />
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-gray-900">{patient.nome}</h1>
+                <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{patient.nome}</h1>
                 <Badge 
                   variant={patient.ativo ? 'green' : 'gray'}
-                  className={patient.ativo ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-gray-100 text-gray-500'}
+                  className={patient.ativo ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)]'}
                 >
                   {patient.ativo ? 'Ativo' : 'Inativo'}
                 </Badge>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+              <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)] mt-1">
                 <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> {patient.dataNascimento ? `${new Date(patient.dataNascimento).toLocaleDateString('pt-BR')} (${Math.floor((new Date().getTime() - new Date(patient.dataNascimento).getTime()) / (1000 * 3600 * 24 * 365.25))} anos)` : 'Data Nasc. Não Informada'}</span>
-                <span className="text-gray-300">|</span>
+                <span className="text-[var(--color-text-dim)]">|</span>
                 <span className="flex items-center gap-1.5"><FileText className="w-4 h-4" /> CPF: {patient.cpf || 'Não Informado'}</span>
                 {patient.convenio && (
                   <>
-                    <span className="text-gray-300">|</span>
+                    <span className="text-[var(--color-text-dim)]">|</span>
                     <span className="text-cyan-500 font-medium">{patient.convenio}</span>
                   </>
                 )}
@@ -201,7 +201,7 @@ export function PatientProfilePage() {
       </div>
 
       {/* Tabs Menu — recepção só vê resumo, documentos e termos */}
-      <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-100 shrink-0 overflow-x-auto">
+      <div className="flex items-center gap-1 bg-[var(--color-bg-card)]/50 p-1 rounded-xl border border-[var(--color-border)] shrink-0 overflow-x-auto">
         {(['resumo', 'anamnese', 'odontograma', 'documentos', 'financeiro', 'harmonizacao', 'termos'] as const)
           .filter(tab => !isRecepcao || ['resumo', 'documentos', 'termos'].includes(tab))
           .map(tab => (
@@ -210,7 +210,7 @@ export function PatientProfilePage() {
             onClick={() => setActiveTab(tab)}
             className={cn(
               'px-4 py-2 rounded-lg text-sm font-semibold capitalize flex items-center gap-2 transition-all duration-200 whitespace-nowrap',
-              activeTab === tab ? 'bg-white text-cyan-600 shadow-sm border border-gray-100' : 'text-gray-500 hover:text-gray-700'
+              activeTab === tab ? 'bg-[var(--color-bg-card)] text-cyan-600 shadow-sm border border-[var(--color-border)]' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]'
             )}
           >
             {tab === 'resumo' && <Activity className="w-4 h-4" />}
@@ -231,29 +231,29 @@ export function PatientProfilePage() {
           <div className="space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white rounded-xl border border-gray-100 p-4">
-                <p className="text-xs text-gray-400 font-medium">Total Consultas</p>
-                <p className="text-xl font-bold text-gray-900 mt-1">{history.length}</p>
+              <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4">
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">Total Consultas</p>
+                <p className="text-xl font-bold text-[var(--color-text-primary)] mt-1">{history.length}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4">
-                <p className="text-xs text-gray-400 font-medium">Última Visita</p>
-                <p className="text-sm font-bold text-gray-900 mt-1">
+              <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4">
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">Última Visita</p>
+                <p className="text-sm font-bold text-[var(--color-text-primary)] mt-1">
                   {history.length > 0
                     ? (() => { const d = history[0].data.split('-'); return `${d[2]}/${d[1]}/${d[0]}` })()
                     : '—'}
                 </p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4">
-                <p className="text-xs text-gray-400 font-medium">Convênio</p>
+              <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4">
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">Convênio</p>
                 <p className="text-sm font-bold text-cyan-500 mt-1">{patient.convenio || 'Particular'}</p>
               </div>
-              <div className="bg-white rounded-xl border border-gray-100 p-4">
-                <p className="text-xs text-gray-400 font-medium">Alergias</p>
+              <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-4">
+                <p className="text-xs text-[var(--color-text-muted)] font-medium">Alergias</p>
                 <p className="text-sm font-bold mt-1 truncate" title={patient.alergias?.join(', ')}>
                   {patient.alergias?.length ? (
                     <span className="text-red-600">{patient.alergias.join(', ')}</span>
                   ) : (
-                    <span className="text-gray-400">Nenhuma</span>
+                    <span className="text-[var(--color-text-muted)]">Nenhuma</span>
                   )}
                 </p>
               </div>
@@ -263,16 +263,16 @@ export function PatientProfilePage() {
               {/* Info lateral */}
               <div className="lg:col-span-1 space-y-4">
                 {/* Contato */}
-                <div className="bg-white rounded-xl border border-gray-100 p-5">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Contato</h3>
+                <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+                  <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Contato</h3>
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-cyan-500/5 flex items-center justify-center shrink-0">
                         <Phone className="w-4 h-4 text-cyan-500" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400">Telefone</p>
-                        <p className="font-medium text-gray-900">{patient.contato?.telefone || '—'}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">Telefone</p>
+                        <p className="font-medium text-[var(--color-text-primary)]">{patient.contato?.telefone || '—'}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -280,8 +280,8 @@ export function PatientProfilePage() {
                         <Mail className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-400">E-mail</p>
-                        <p className="font-medium text-gray-900 truncate">{patient.contato?.email || '—'}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">E-mail</p>
+                        <p className="font-medium text-[var(--color-text-primary)] truncate">{patient.contato?.email || '—'}</p>
                       </div>
                     </div>
                   </div>
@@ -289,9 +289,9 @@ export function PatientProfilePage() {
 
                 {/* Endereço */}
                 {patient.endereco && (patient.endereco.logradouro || patient.endereco.cidade) && (
-                  <div className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Endereço</h3>
-                    <div className="text-sm text-gray-600 space-y-1">
+                  <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+                    <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Endereço</h3>
+                    <div className="text-sm text-[var(--color-text-secondary)] space-y-1">
                       {patient.endereco.logradouro && (
                         <p>{patient.endereco.logradouro}{patient.endereco.numero ? `, ${patient.endereco.numero}` : ''}</p>
                       )}
@@ -299,19 +299,19 @@ export function PatientProfilePage() {
                         <p>{[patient.endereco.bairro, patient.endereco.cidade, patient.endereco.estado].filter(Boolean).join(' — ')}</p>
                       )}
                       {patient.endereco.cep && (
-                        <p className="text-xs text-gray-400">CEP: {patient.endereco.cep}</p>
+                        <p className="text-xs text-[var(--color-text-muted)]">CEP: {patient.endereco.cep}</p>
                       )}
                     </div>
                   </div>
                 )}
 
                 {/* Ações rápidas */}
-                <div className="bg-white rounded-xl border border-gray-100 p-5">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Ações Rápidas</h3>
+                <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+                  <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Ações Rápidas</h3>
                   <div className="space-y-2">
                     <button
                       onClick={() => navigate('/agenda')}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-deep)] hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                     >
                       <Calendar className="w-4 h-4" /> Agendar consulta
                     </button>
@@ -320,14 +320,14 @@ export function PatientProfilePage() {
                         href={`https://wa.me/${patient.contato.telefone.replace(/\D/g, '')}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-deep)] hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                       >
                         <Phone className="w-4 h-4" /> Enviar WhatsApp
                       </a>
                     )}
                     <button
                       onClick={() => setIsPrescriptionModalOpen(true)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-50 hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-deep)] hover:bg-cyan-500/5 hover:text-cyan-600 rounded-lg transition-colors"
                     >
                       <FileText className="w-4 h-4" /> Nova prescrição
                     </button>
@@ -336,16 +336,16 @@ export function PatientProfilePage() {
               </div>
 
               {/* Timeline */}
-              <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-6">
+              <div className="lg:col-span-2 bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-6">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4" /> Linha do Tempo
                   </h3>
-                  <span className="text-xs text-gray-400">{history.length} registro{history.length !== 1 ? 's' : ''}</span>
+                  <span className="text-xs text-[var(--color-text-muted)]">{history.length} registro{history.length !== 1 ? 's' : ''}</span>
                 </div>
 
                 {history.length > 0 ? (
-                  <div className="relative pl-7 space-y-6 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-gray-100">
+                  <div className="relative pl-7 space-y-6 before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-px before:bg-[var(--color-bg-card)]">
                     {history.map((apt, idx) => {
                       const dateParts = apt.data.split('-')
                       const dataFormatada = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`
@@ -355,20 +355,20 @@ export function PatientProfilePage() {
                             "absolute -left-[22px] top-1 w-5 h-5 rounded-full border-[3px] border-white flex items-center justify-center shadow-sm z-10 transition-all group-hover/apt:scale-110",
                             idx === 0 ? "bg-cyan-500 ring-2 ring-cyan-500/20" : "bg-gray-200 group-hover/apt:bg-cyan-400"
                           )}>
-                            {idx === 0 && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />}
+                            {idx === 0 && <span className="w-1.5 h-1.5 bg-[var(--color-bg-card)] rounded-full animate-pulse" />}
                           </div>
 
                           <div className="group-hover/apt:translate-x-0.5 transition-transform">
                             <div className="flex items-center justify-between mb-1.5">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-bold text-gray-900">{dataFormatada}</span>
-                                <span className="text-[10px] font-semibold text-gray-400">{apt.horaInicio}</span>
+                                <span className="text-xs font-bold text-[var(--color-text-primary)]">{dataFormatada}</span>
+                                <span className="text-[10px] font-semibold text-[var(--color-text-muted)]">{apt.horaInicio}</span>
                                 <Badge variant="gray" className="text-[10px] px-2 py-0 h-4">{apt.procedimento}</Badge>
                               </div>
                               <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                                  className="p-1.5 text-gray-400 hover:text-cyan-500 hover:bg-cyan-500/5 rounded-lg transition-colors"
+                                  className="p-1.5 text-[var(--color-text-muted)] hover:text-cyan-500 hover:bg-cyan-500/5 rounded-lg transition-colors"
                                   title="Editar evolução"
                                 >
                                   <Stethoscope className="w-3.5 h-3.5" />
@@ -380,7 +380,7 @@ export function PatientProfilePage() {
                                     const h = await getPatientHistory(id!)
                                     setHistory(h)
                                   }}
-                                  className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                  className="p-1.5 text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                   title="Excluir"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -388,16 +388,16 @@ export function PatientProfilePage() {
                               </div>
                             </div>
 
-                            <p className="text-xs text-gray-500 mb-2">
+                            <p className="text-xs text-[var(--color-text-muted)] mb-2">
                               <User className="w-3 h-3 inline mr-1" />
                               {apt.profissionalNome}
                             </p>
 
                             <div
                               onClick={() => { setSelectedApt(apt); setIsEvolutionModalOpen(true); }}
-                              className="p-3 bg-gray-50 group-hover/apt:bg-cyan-500/5 rounded-xl text-xs text-gray-600 border border-gray-100/50 leading-relaxed transition-all cursor-pointer"
+                              className="p-3 bg-[var(--color-bg-deep)] group-hover/apt:bg-cyan-500/5 rounded-xl text-xs text-[var(--color-text-secondary)] border border-[var(--color-border)]/50 leading-relaxed transition-all cursor-pointer"
                             >
-                              <p className={apt.observacoes ? '' : 'italic text-gray-400'}>
+                              <p className={apt.observacoes ? '' : 'italic text-[var(--color-text-muted)]'}>
                                 {apt.observacoes || 'Sem evolução — clique para adicionar'}
                               </p>
                             </div>
@@ -407,8 +407,8 @@ export function PatientProfilePage() {
                     })}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                    <Clock className="w-10 h-10 mb-3 text-gray-200" />
+                  <div className="flex flex-col items-center justify-center py-12 text-[var(--color-text-muted)]">
+                    <Clock className="w-10 h-10 mb-3 text-[var(--color-text-dim)]" />
                     <p className="text-sm font-medium">Nenhum atendimento registrado</p>
                     <p className="text-xs mt-1">Os atendimentos aparecerão aqui conforme forem realizados</p>
                   </div>
@@ -439,13 +439,13 @@ export function PatientProfilePage() {
             )}
 
             {/* Formulário do profissional */}
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                     <ClipboardList className="w-4 h-4 text-cyan-500" /> Anamnese Clínica
                   </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">Preenchido pelo profissional durante a consulta</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Preenchido pelo profissional durante a consulta</p>
                 </div>
                 <button
                   className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
@@ -490,8 +490,8 @@ export function PatientProfilePage() {
                     />
 
                     {/* Hábitos */}
-                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Estilo de Vida</h4>
+                    <div className="bg-[var(--color-bg-deep)] rounded-xl p-5 border border-[var(--color-border)]">
+                      <h4 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Estilo de Vida</h4>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <AnamneseToggle
@@ -508,7 +508,7 @@ export function PatientProfilePage() {
                           />
                         </div>
                         <div>
-                          <label className="text-xs font-medium text-gray-500 mb-2 block">Atividade Física</label>
+                          <label className="text-xs font-medium text-[var(--color-text-muted)] mb-2 block">Atividade Física</label>
                           <div className="flex gap-2">
                             {['Nenhuma', 'Ocasional', 'Regular'].map(l => (
                               <button
@@ -519,7 +519,7 @@ export function PatientProfilePage() {
                                   "flex-1 px-3 py-2 rounded-lg text-xs font-semibold border transition-all text-center",
                                   anamneseForm.habitos.atividadeFisica.toLowerCase() === l.toLowerCase()
                                     ? "bg-cyan-500/10 text-cyan-600 border-cyan-500/20"
-                                    : "bg-white text-gray-400 border-gray-200 hover:border-gray-300"
+                                    : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:border-gray-300"
                                 )}
                               >
                                 {l}
@@ -573,10 +573,10 @@ export function PatientProfilePage() {
       {showOrcamentoModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowOrcamentoModal(false)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-slide-in">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-gray-900">Novo Orçamento</h3>
-              <button onClick={() => setShowOrcamentoModal(false)} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+          <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-slide-in">
+            <div className="px-6 py-4 border-b border-[var(--color-border)] flex items-center justify-between">
+              <h3 className="text-lg font-bold text-[var(--color-text-primary)]">Novo Orçamento</h3>
+              <button onClick={() => setShowOrcamentoModal(false)} className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
                 <Plus className="w-5 h-5 rotate-45" />
               </button>
             </div>
@@ -590,7 +590,7 @@ export function PatientProfilePage() {
               setShowOrcamentoModal(false)
             }} className="p-6 space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Descrição</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Descrição</label>
                 <input
                   value={orcamentoForm.descricao}
                   onChange={(e) => setOrcamentoForm(p => ({ ...p, descricao: e.target.value }))}
@@ -600,7 +600,7 @@ export function PatientProfilePage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-bold text-gray-500 uppercase">Valor (R$)</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Valor (R$)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -624,9 +624,9 @@ export function PatientProfilePage() {
       {isAnamnesisModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setIsAnamnesisModalOpen(false)} />
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
+          <div className="relative bg-[var(--color-bg-card)] rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-slide-in">
             <div className="bg-cyan-500 p-8 flex flex-col items-center text-white text-center">
-              <div className="bg-white p-4 rounded-2xl shadow-xl mb-6">
+              <div className="bg-[var(--color-bg-card)] p-4 rounded-2xl shadow-xl mb-6">
                  <QRCodeSVG value={anamnesisLink} size={160} />
               </div>
               <h3 className="text-lg font-black leading-tight">Link de Anamnese Gerado!</h3>
@@ -635,12 +635,12 @@ export function PatientProfilePage() {
             
             <div className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Link de Acesso</label>
-                <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-100 rounded-xl">
-                  <input readOnly value={anamnesisLink} className="flex-1 bg-transparent text-xs text-gray-600 outline-none truncate" />
+                <label className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Link de Acesso</label>
+                <div className="flex items-center gap-2 p-3 bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-xl">
+                  <input readOnly value={anamnesisLink} className="flex-1 bg-transparent text-xs text-[var(--color-text-secondary)] outline-none truncate" />
                   <button
                     onClick={() => { navigator.clipboard.writeText(anamnesisLink); toast({ title: 'Link copiado!', description: 'Link de anamnese copiado para a área de transferência.', type: 'success' }) }}
-                    className="p-1.5 hover:bg-gray-200 rounded-lg text-gray-400 transition-colors"
+                    className="p-1.5 hover:bg-gray-200 rounded-lg text-[var(--color-text-muted)] transition-colors"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </button>
@@ -692,12 +692,12 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
   const paginated = history.slice((page - 1) * ANAMNESE_PAGE_SIZE, page * ANAMNESE_PAGE_SIZE)
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-8 shadow-sm">
-      <div className="mb-6 border-b border-gray-100 pb-4">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-8 shadow-sm">
+      <div className="mb-6 border-b border-[var(--color-border)] pb-4">
+        <h3 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
           <ClipboardList className="w-5 h-5 text-cyan-500" /> Respostas do Paciente
         </h3>
-        <p className="text-sm text-gray-400">{history.length} anamnese(s) preenchida(s) via link</p>
+        <p className="text-sm text-[var(--color-text-muted)]">{history.length} anamnese(s) preenchida(s) via link</p>
       </div>
 
       <div className="space-y-3">
@@ -710,12 +710,12 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
             : new Date(anam.created_at).toLocaleDateString('pt-BR')
 
           return (
-            <div key={anam.id || idx} className="rounded-2xl border border-gray-100 overflow-hidden">
+            <div key={anam.id || idx} className="rounded-2xl border border-[var(--color-border)] overflow-hidden">
               {/* Linha resumida - sempre visível */}
-              <div className="flex items-center justify-between p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center justify-between p-4 bg-[var(--color-bg-deep)]/50 hover:bg-[var(--color-bg-card-hover)] transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="text-xs font-bold text-cyan-600 bg-cyan-500/10 px-3 py-1 rounded-full">{dateLabel}</span>
-                  <span className="text-xs text-gray-500 truncate max-w-[250px]">{anam.queixa_principal || 'Sem queixa informada'}</span>
+                  <span className="text-xs text-[var(--color-text-muted)] truncate max-w-[250px]">{anam.queixa_principal || 'Sem queixa informada'}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-3">
                   <button
@@ -735,7 +735,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
                   {onDelete && anam.id && (
                     <button
                       onClick={() => { if (confirm('Excluir esta anamnese?')) onDelete(anam.id) }}
-                      className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg border border-gray-200 transition-colors"
+                      className="p-1.5 text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg border border-[var(--color-border)] transition-colors"
                       title="Excluir anamnese"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -749,24 +749,24 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
                 <div className="p-5 bg-cyan-500/5 border-t border-cyan-500/20 animate-fade-in">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Queixa Principal</p>
-                      <p className="text-gray-800 font-medium">{anam.queixa_principal || '—'}</p>
+                      <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Queixa Principal</p>
+                      <p className="text-[var(--color-text-primary)] font-medium">{anam.queixa_principal || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Medicamentos em Uso</p>
-                      <p className="text-gray-800 font-medium">{anam.medicamentos_uso || '—'}</p>
+                      <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Medicamentos em Uso</p>
+                      <p className="text-[var(--color-text-primary)] font-medium">{anam.medicamentos_uso || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Alergias</p>
-                      <p className="text-gray-800 font-medium">{anam.alergias || '—'}</p>
+                      <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Alergias</p>
+                      <p className="text-[var(--color-text-primary)] font-medium">{anam.alergias || '—'}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Histórico Médico</p>
-                      <p className="text-gray-800 font-medium">{anam.historico_medico || '—'}</p>
+                      <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Histórico Médico</p>
+                      <p className="text-[var(--color-text-primary)] font-medium">{anam.historico_medico || '—'}</p>
                     </div>
                     {(habitos.fuma !== undefined || habitos.alcool !== undefined || habitos.atividade_fisica) && (
                       <div className="col-span-full">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hábitos</p>
+                        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">Hábitos</p>
                         <div className="flex flex-wrap gap-2">
                           {habitos.fuma && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Fumante</span>}
                           {habitos.alcool && <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold border border-orange-100">Etilista</span>}
@@ -778,7 +778,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
                     )}
                     {(extras.alergia_medicamentos || extras.problemas_cardiacos || extras.diabetes_hipertensao) && (
                       <div className="col-span-full">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Condições Informadas</p>
+                        <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2">Condições Informadas</p>
                         <div className="flex flex-wrap gap-2">
                           {extras.alergia_medicamentos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Alergia a Medicamentos</span>}
                           {extras.problemas_cardiacos && <span className="px-2 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">Problemas Cardíacos</span>}
@@ -796,13 +796,13 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
 
       {/* Paginação */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 text-sm text-gray-500">
+        <div className="flex items-center justify-between mt-6 pt-4 border-t border-[var(--color-border)] text-sm text-[var(--color-text-muted)]">
           <p>Mostrando {(page - 1) * ANAMNESE_PAGE_SIZE + 1}–{Math.min(page * ANAMNESE_PAGE_SIZE, history.length)} de {history.length}</p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] disabled:opacity-40 transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -810,7 +810,7 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] disabled:opacity-40 transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -824,8 +824,8 @@ function AnamneseHistorySection({ history, onDelete }: { history: any[], onDelet
 function InfoRow({ label, value }: { label: string, value: string }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-gray-400 font-medium">{label}</span>
-      <span className="text-gray-900 font-bold">{value}</span>
+      <span className="text-[var(--color-text-muted)] font-medium">{label}</span>
+      <span className="text-[var(--color-text-primary)] font-bold">{value}</span>
     </div>
   )
 }
@@ -833,12 +833,12 @@ function InfoRow({ label, value }: { label: string, value: string }) {
 function AnamneseField({ label, value, onChange, placeholder }: { label: string, value: string, placeholder?: string, onChange?: (e: any) => void }) {
   return (
     <div className="space-y-1.5">
-      <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider ml-1">{label}</label>
+      <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider ml-1">{label}</label>
       <textarea 
         value={value} 
         onChange={onChange}
         placeholder={placeholder}
-        className="input-base min-h-[100px] resize-none text-sm py-3 px-4 focus:ring-4 focus:ring-cyan-500/10 placeholder:text-gray-300" 
+        className="input-base min-h-[100px] resize-none text-sm py-3 px-4 focus:ring-4 focus:ring-cyan-500/10 placeholder:text-[var(--color-text-dim)]" 
       />
     </div>
   )
@@ -847,13 +847,13 @@ function AnamneseField({ label, value, onChange, placeholder }: { label: string,
 function AnamneseToggle({ label, active, onToggle }: { label: string, active: boolean, onToggle?: () => void }) {
   return (
     <div className="flex items-center justify-between group cursor-pointer" onClick={onToggle}>
-      <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">{label}</span>
       <div className={cn(
         "w-10 h-6 rounded-full p-1 transition-all",
         active ? "bg-cyan-500" : "bg-gray-200"
       )}>
         <div className={cn(
-          "w-4 h-4 rounded-full bg-white shadow-sm transition-transform",
+          "w-4 h-4 rounded-full bg-[var(--color-bg-card)] shadow-sm transition-transform",
           active ? "translate-x-4" : "translate-x-0"
         )} />
       </div>

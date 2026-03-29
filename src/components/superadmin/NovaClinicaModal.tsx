@@ -57,19 +57,19 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
             </div>
             <h2 className="text-xl font-black text-white uppercase tracking-wider">Nova Clínica</h2>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-500 hover:text-white bg-slate-800/50 rounded-lg">
+          <button onClick={onClose} className="p-2 text-[var(--color-text-muted)] hover:text-white bg-slate-800/50 rounded-lg">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Dados da Clínica */}
-          <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest flex items-center gap-2">
+          <p className="text-[10px] font-black uppercase text-[var(--color-text-secondary)] tracking-widest flex items-center gap-2">
             <Hospital size={12} /> Dados da Clínica
           </p>
 
           <div>
-            <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Nome Oficial *</label>
+            <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Nome Oficial *</label>
             <input
               {...register('nome')}
               className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -80,7 +80,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">CNPJ</label>
+              <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">CNPJ</label>
               <input
                 {...register('cnpj')}
                 className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -88,7 +88,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
               />
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Telefone</label>
+              <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Telefone</label>
               <input
                 {...register('telefone')}
                 className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -98,7 +98,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Endereço</label>
+            <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Endereço</label>
             <input
               {...register('endereco')}
               className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -107,7 +107,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
           </div>
 
           <div>
-            <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Plano</label>
+            <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Plano</label>
             <select
               {...register('plano')}
               className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -121,13 +121,13 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
 
           {/* Dados do Admin */}
           <div className="pt-2 border-t border-slate-800">
-            <p className="text-[10px] font-black uppercase text-slate-600 tracking-widest flex items-center gap-2 mb-3">
+            <p className="text-[10px] font-black uppercase text-[var(--color-text-secondary)] tracking-widest flex items-center gap-2 mb-3">
               <Hospital size={12} /> Administrador da Clínica
             </p>
           </div>
 
           <div>
-            <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Nome do Admin *</label>
+            <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Nome do Admin *</label>
             <input
               {...register('nome_admin')}
               className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -138,7 +138,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">E-mail do Admin *</label>
+              <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">E-mail do Admin *</label>
               <input
                 {...register('email_admin')}
                 className="w-full bg-[#0F172A] border border-slate-800 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-purple-500"
@@ -147,7 +147,7 @@ export function NovaClinicaModal({ isOpen, onClose, onSuccess }: Props) {
               {errors.email_admin && <p className="text-red-400 text-xs mt-1">{errors.email_admin.message}</p>}
             </div>
             <div>
-              <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">Senha *</label>
+              <label className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-widest block mb-1.5">Senha *</label>
               <input
                 type="password"
                 {...register('senha_admin')}

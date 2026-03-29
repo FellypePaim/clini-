@@ -104,15 +104,15 @@ export function PacientesReport() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-5 bg-white border-b border-slate-200 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-5 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/relatorios" className="text-slate-400 hover:text-slate-600">
+          <Link to="/relatorios" className="text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Relatórios › Clínico</p>
-            <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <p className="text-xs text-[var(--color-text-muted)] font-semibold uppercase tracking-wider">Relatórios › Clínico</p>
+            <h1 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
               <Users size={20} className="text-indigo-500" />
               Pacientes Atendidos
             </h1>
@@ -129,7 +129,7 @@ export function PacientesReport() {
       </header>
 
       <main className="flex-1 overflow-y-auto p-6 max-w-5xl mx-auto w-full space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-end gap-4">
+        <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5 flex items-end gap-4">
           <button
             onClick={gerar}
             disabled={isLoading}
@@ -141,37 +141,37 @@ export function PacientesReport() {
         </div>
 
         {!dados && !isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-            <Users size={40} className="mx-auto text-slate-300 mb-3" />
-            <p className="text-slate-500 font-medium">Nenhum dado carregado</p>
-            <p className="text-slate-400 text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
+          <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-12 text-center">
+            <Users size={40} className="mx-auto text-[var(--color-text-dim)] mb-3" />
+            <p className="text-[var(--color-text-muted)] font-medium">Nenhum dado carregado</p>
+            <p className="text-[var(--color-text-muted)] text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
           </div>
         ) : dados && (
           <>
             {/* KPIs */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl border border-indigo-100 p-5">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total de Pacientes</p>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-indigo-100 p-5">
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Total de Pacientes</p>
                 <p className="text-3xl font-black text-indigo-700 mt-1">{dados.total}</p>
               </div>
-              <div className="bg-white rounded-2xl border border-emerald-100 p-5">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Novos Este Mês</p>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-emerald-100 p-5">
+                <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Novos Este Mês</p>
                 <p className="text-3xl font-black text-emerald-700 mt-1">{dados.novosNoMes}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Por Convênio */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                <h3 className="text-sm font-bold text-slate-700 mb-4">Por Convênio</h3>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5">
+                <h3 className="text-sm font-bold text-[var(--color-text-secondary)] mb-4">Por Convênio</h3>
                 <div className="space-y-3">
                   {dados.porConvenio.map(d => (
                     <div key={d.convenio}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-slate-600 truncate">{d.convenio}</span>
-                        <span className="font-bold text-slate-800 ml-2">{d.count}</span>
+                        <span className="text-[var(--color-text-secondary)] truncate">{d.convenio}</span>
+                        <span className="font-bold text-[var(--color-text-primary)] ml-2">{d.count}</span>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="w-full bg-[var(--color-bg-card)] rounded-full h-1.5">
                         <div className="bg-indigo-500 h-1.5 rounded-full" style={{ width: `${Math.round((d.count / dados.total) * 100)}%` }} />
                       </div>
                     </div>
@@ -180,16 +180,16 @@ export function PacientesReport() {
               </div>
 
               {/* Por Sexo */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                <h3 className="text-sm font-bold text-slate-700 mb-4">Por Sexo</h3>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5">
+                <h3 className="text-sm font-bold text-[var(--color-text-secondary)] mb-4">Por Sexo</h3>
                 <div className="space-y-3">
                   {dados.porSexo.map(d => (
                     <div key={d.sexo}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-slate-600">{d.sexo}</span>
-                        <span className="font-bold text-slate-800">{d.count}</span>
+                        <span className="text-[var(--color-text-secondary)]">{d.sexo}</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{d.count}</span>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="w-full bg-[var(--color-bg-card)] rounded-full h-1.5">
                         <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: `${Math.round((d.count / dados.total) * 100)}%` }} />
                       </div>
                     </div>
@@ -198,16 +198,16 @@ export function PacientesReport() {
               </div>
 
               {/* Faixa Etária */}
-              <div className="bg-white rounded-2xl border border-slate-200 p-5">
-                <h3 className="text-sm font-bold text-slate-700 mb-4">Faixa Etária</h3>
+              <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] p-5">
+                <h3 className="text-sm font-bold text-[var(--color-text-secondary)] mb-4">Faixa Etária</h3>
                 <div className="space-y-3">
                   {dados.faixaEtaria.map(d => (
                     <div key={d.faixa}>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-slate-600">{d.faixa} anos</span>
-                        <span className="font-bold text-slate-800">{d.count}</span>
+                        <span className="text-[var(--color-text-secondary)]">{d.faixa} anos</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{d.count}</span>
                       </div>
-                      <div className="w-full bg-slate-100 rounded-full h-1.5">
+                      <div className="w-full bg-[var(--color-bg-card)] rounded-full h-1.5">
                         <div className="bg-amber-500 h-1.5 rounded-full" style={{ width: `${Math.round((d.count / dados.total) * 100)}%` }} />
                       </div>
                     </div>

@@ -57,14 +57,14 @@ const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
   critica: { label: 'Critica', className: 'bg-red-500/10 text-red-400 ring-red-500/20' },
   alta:    { label: 'Alta',    className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
   media:   { label: 'Media',   className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
-  baixa:   { label: 'Baixa',   className: 'bg-slate-500/10 text-slate-400 ring-slate-500/20' },
+  baixa:   { label: 'Baixa',   className: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   aberto:       { label: 'Aberto',       className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
   em_andamento: { label: 'Em andamento', className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
   resolvido:    { label: 'Resolvido',    className: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20' },
-  fechado:      { label: 'Fechado',      className: 'bg-slate-500/10 text-slate-400 ring-slate-500/20' },
+  fechado:      { label: 'Fechado',      className: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 function formatDate(dateStr: string): string {
@@ -283,7 +283,7 @@ export function SuperSuportePage() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-black text-white tracking-tight">Suporte</h1>
-          <p className="text-slate-400 mt-1">Gerenciamento de tickets de suporte das clinicas.</p>
+          <p className="text-[var(--color-text-muted)] mt-1">Gerenciamento de tickets de suporte das clinicas.</p>
         </div>
       </div>
 
@@ -296,22 +296,22 @@ export function SuperSuportePage() {
             <div className="flex flex-col items-center p-2 rounded-xl bg-slate-800/40">
               <LifeBuoy size={14} className="text-purple-400 mb-1" />
               <span className="text-lg font-black text-white">{kpis.total}</span>
-              <span className="text-[10px] text-slate-500">Total</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">Total</span>
             </div>
             <div className="flex flex-col items-center p-2 rounded-xl bg-slate-800/40">
               <AlertCircle size={14} className="text-blue-400 mb-1" />
               <span className="text-lg font-black text-white">{kpis.abertos}</span>
-              <span className="text-[10px] text-slate-500">Abertos</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">Abertos</span>
             </div>
             <div className="flex flex-col items-center p-2 rounded-xl bg-slate-800/40">
               <Clock size={14} className="text-amber-400 mb-1" />
               <span className="text-lg font-black text-white">{kpis.emAndamento}</span>
-              <span className="text-[10px] text-slate-500">Andamento</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">Andamento</span>
             </div>
             <div className="flex flex-col items-center p-2 rounded-xl bg-slate-800/40">
               <CheckCircle2 size={14} className="text-emerald-400 mb-1" />
               <span className="text-lg font-black text-white">{kpis.resolvidos}</span>
-              <span className="text-[10px] text-slate-500">Resolvidos</span>
+              <span className="text-[10px] text-[var(--color-text-muted)]">Resolvidos</span>
             </div>
           </div>
 
@@ -329,22 +329,22 @@ export function SuperSuportePage() {
           {/* Search + Filters */}
           <div className="p-3 space-y-2 border-b border-slate-700/50">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por assunto ou clinica..."
-                className="w-full pl-9 pr-3 py-2 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all"
+                className="w-full pl-9 pr-3 py-2 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all"
               />
             </div>
             <div className="flex gap-2">
               <div className="flex items-center gap-1.5 flex-1">
-                <Filter size={12} className="text-slate-500 shrink-0" />
+                <Filter size={12} className="text-[var(--color-text-muted)] shrink-0" />
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="flex-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                  className="flex-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
                 >
                   <option value="todos">Todas Prioridades</option>
                   <option value="critica">Critica</option>
@@ -356,7 +356,7 @@ export function SuperSuportePage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                className="flex-1 px-2 py-1.5 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
               >
                 <option value="todos">Todos Status</option>
                 <option value="aberto">Aberto</option>
@@ -370,8 +370,8 @@ export function SuperSuportePage() {
           {/* Ticket List */}
           <div className="flex-1 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-                <Inbox size={40} className="mb-3 text-slate-600" />
+              <div className="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)]">
+                <Inbox size={40} className="mb-3 text-[var(--color-text-secondary)]" />
                 <p className="text-sm font-medium">Nenhum ticket encontrado</p>
               </div>
             ) : (
@@ -395,14 +395,14 @@ export function SuperSuportePage() {
                       <PriorityBadge prioridade={ticket.prioridade} />
                     </div>
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-slate-400 truncate">{ticket.clinica_nome}</span>
+                      <span className="text-xs text-[var(--color-text-muted)] truncate">{ticket.clinica_nome}</span>
                       <StatusBadge status={ticket.status} />
                     </div>
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-[11px] text-[var(--color-text-muted)]">
                         {formatDateTime(ticket.created_at)}
                       </span>
-                      <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
+                      <span className="inline-flex items-center gap-1 text-[11px] text-[var(--color-text-muted)]">
                         <MessageSquare size={11} />
                         {ticket.total_mensagens}
                       </span>
@@ -417,8 +417,8 @@ export function SuperSuportePage() {
         {/* RIGHT PANEL — Chat */}
         <div className="w-[60%] flex flex-col min-h-0 bg-slate-900/40 border border-slate-700/50 rounded-2xl overflow-hidden">
           {!selectedTicket ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
-              <MessageSquare size={48} className="mb-4 text-slate-600" />
+            <div className="flex-1 flex flex-col items-center justify-center text-[var(--color-text-muted)]">
+              <MessageSquare size={48} className="mb-4 text-[var(--color-text-secondary)]" />
               <p className="text-sm font-medium">Selecione um ticket</p>
             </div>
           ) : (
@@ -428,16 +428,16 @@ export function SuperSuportePage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <h2 className="text-lg font-bold text-white truncate">{selectedTicket.assunto}</h2>
-                    <p className="text-xs text-slate-400 mt-0.5">{selectedTicket.clinica_nome}</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{selectedTicket.clinica_nome}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-slate-500 uppercase">Status:</label>
+                    <label className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase">Status:</label>
                     <select
                       value={selectedTicket.status}
                       onChange={(e) => handleUpdateTicket('status', e.target.value)}
-                      className="px-2 py-1 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                      className="px-2 py-1 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
                     >
                       <option value="aberto">Aberto</option>
                       <option value="em_andamento">Em andamento</option>
@@ -446,11 +446,11 @@ export function SuperSuportePage() {
                     </select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <label className="text-[11px] font-medium text-slate-500 uppercase">Prioridade:</label>
+                    <label className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase">Prioridade:</label>
                     <select
                       value={selectedTicket.prioridade}
                       onChange={(e) => handleUpdateTicket('prioridade', e.target.value)}
-                      className="px-2 py-1 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                      className="px-2 py-1 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-xs rounded-lg cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
                     >
                       <option value="critica">Critica</option>
                       <option value="alta">Alta</option>
@@ -468,8 +468,8 @@ export function SuperSuportePage() {
                     <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-                    <MessageSquare size={32} className="mb-2 text-slate-600" />
+                  <div className="flex flex-col items-center justify-center py-12 text-[var(--color-text-muted)]">
+                    <MessageSquare size={32} className="mb-2 text-[var(--color-text-secondary)]" />
                     <p className="text-sm">Sem mensagens ainda</p>
                   </div>
                 ) : (
@@ -493,13 +493,13 @@ export function SuperSuportePage() {
                               isSuperAdmin ? 'flex-row-reverse' : 'flex-row',
                             )}
                           >
-                            <span className="text-xs font-semibold text-slate-300">{authorName}</span>
+                            <span className="text-xs font-semibold text-[var(--color-text-dim)]">{authorName}</span>
                             <span
                               className={cn(
                                 'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1 ring-inset',
                                 isSuperAdmin
                                   ? 'bg-purple-500/10 text-purple-400 ring-purple-500/20'
-                                  : 'bg-slate-500/10 text-slate-400 ring-slate-500/20',
+                                  : 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20',
                               )}
                             >
                               {isSuperAdmin ? (
@@ -526,7 +526,7 @@ export function SuperSuportePage() {
                         >
                           {msg.conteudo}
                         </div>
-                        <span className="text-[10px] text-slate-500 mt-1 px-1">
+                        <span className="text-[10px] text-[var(--color-text-muted)] mt-1 px-1">
                           {formatDate(msg.created_at)} {formatTime(msg.created_at)}
                         </span>
                       </div>
@@ -539,7 +539,7 @@ export function SuperSuportePage() {
               {/* Message Input */}
               <div className="p-3 border-t border-slate-700/50">
                 {isChatDisabled ? (
-                  <div className="text-center py-2 text-sm text-slate-500">
+                  <div className="text-center py-2 text-sm text-[var(--color-text-muted)]">
                     Ticket {selectedTicket.status === 'fechado' ? 'fechado' : 'resolvido'} - mensagens desabilitadas
                   </div>
                 ) : (
@@ -550,7 +550,7 @@ export function SuperSuportePage() {
                       onKeyDown={handleMessageKeyDown}
                       placeholder="Digite sua mensagem..."
                       rows={2}
-                      className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all resize-none"
+                      className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
                     />
                     <button
                       onClick={handleSendMessage}
@@ -559,7 +559,7 @@ export function SuperSuportePage() {
                         'p-3 rounded-xl transition-colors shrink-0',
                         messageText.trim() && !sendingMessage
                           ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                          : 'bg-slate-800/60 text-slate-600 cursor-not-allowed',
+                          : 'bg-slate-800/60 text-[var(--color-text-secondary)] cursor-not-allowed',
                       )}
                     >
                       {sendingMessage ? (
@@ -584,7 +584,7 @@ export function SuperSuportePage() {
               <h2 className="text-xl font-bold text-white">Novo Ticket</h2>
               <button
                 onClick={() => setShowNewTicketModal(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1.5 rounded-lg hover:bg-slate-800 text-[var(--color-text-muted)] hover:text-white transition-colors"
               >
                 <X size={18} />
               </button>
@@ -592,34 +592,34 @@ export function SuperSuportePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Assunto</label>
+                <label className="block text-sm font-medium text-[var(--color-text-dim)] mb-1.5">Assunto</label>
                 <input
                   type="text"
                   value={newTicketForm.assunto}
                   onChange={(e) => setNewTicketForm((f) => ({ ...f, assunto: e.target.value }))}
                   placeholder="Assunto do ticket..."
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Descricao</label>
+                <label className="block text-sm font-medium text-[var(--color-text-dim)] mb-1.5">Descricao</label>
                 <textarea
                   value={newTicketForm.descricao}
                   onChange={(e) => setNewTicketForm((f) => ({ ...f, descricao: e.target.value }))}
                   placeholder="Descreva o problema..."
                   rows={3}
-                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-slate-500 transition-all resize-none"
+                  className="w-full px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Prioridade</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-dim)] mb-1.5">Prioridade</label>
                   <select
                     value={newTicketForm.prioridade}
                     onChange={(e) => setNewTicketForm((f) => ({ ...f, prioridade: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-sm rounded-xl cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-sm rounded-xl cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
                   >
                     <option value="baixa">Baixa</option>
                     <option value="media">Media</option>
@@ -629,11 +629,11 @@ export function SuperSuportePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Clinica</label>
+                  <label className="block text-sm font-medium text-[var(--color-text-dim)] mb-1.5">Clinica</label>
                   <select
                     value={newTicketForm.clinica_id}
                     onChange={(e) => setNewTicketForm((f) => ({ ...f, clinica_id: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/50 text-slate-300 text-sm rounded-xl cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
+                    className="w-full px-3 py-2.5 bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-dim)] text-sm rounded-xl cursor-pointer outline-none focus:ring-1 focus:ring-purple-500/50"
                   >
                     <option value="">Nenhuma</option>
                     {clinics.map((c) => (
@@ -649,7 +649,7 @@ export function SuperSuportePage() {
             <div className="flex items-center justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowNewTicketModal(false)}
-                className="px-4 py-2.5 text-sm font-medium text-slate-400 hover:text-white transition-colors"
+                className="px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-white transition-colors"
               >
                 Cancelar
               </button>
@@ -660,7 +660,7 @@ export function SuperSuportePage() {
                   'flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl transition-colors',
                   newTicketForm.assunto.trim() && !creatingTicket
                     ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                    : 'bg-slate-800 text-slate-600 cursor-not-allowed',
+                    : 'bg-slate-800 text-[var(--color-text-secondary)] cursor-not-allowed',
                 )}
               >
                 {creatingTicket && <Loader2 size={14} className="animate-spin" />}

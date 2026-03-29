@@ -24,7 +24,7 @@ interface LeadCardProps {
 
 const ORIGIN_ICONS = {
   'WhatsApp OVYVA': <Smartphone size={14} className="text-emerald-500" />,
-  'Manual': <User size={14} className="text-slate-400" />,
+  'Manual': <User size={14} className="text-[var(--color-text-muted)]" />,
   'Indicação': <ExternalLink size={14} className="text-indigo-400" />,
   'Instagram': <Instagram size={14} className="text-pink-500" />
 }
@@ -56,8 +56,8 @@ export function LeadCard({ lead, onEdit, onAction, isDragging, onClick }: LeadCa
       {...listeners}
       onClick={() => onClick?.(lead.id)}
       className={`
-        relative group p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none
-        ${isDragging ? 'opacity-50 ring-2 ring-indigo-500 z-50' : 'border-slate-200'}
+        relative group p-4 bg-[var(--color-bg-card)] border rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing select-none
+        ${isDragging ? 'opacity-50 ring-2 ring-indigo-500 z-50' : 'border-[var(--color-border)]'}
         ${isUrgent ? 'border-l-4 border-l-red-500' : 'border-l-4 border-l-transparent'}
       `}
     >
@@ -68,10 +68,10 @@ export function LeadCard({ lead, onEdit, onAction, isDragging, onClick }: LeadCa
             className="w-9 h-9 border border-indigo-100 bg-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-700"
           />
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-slate-800 line-clamp-1">{lead.name}</span>
+            <span className="text-sm font-bold text-[var(--color-text-primary)] line-clamp-1">{lead.name}</span>
             <div className="flex items-center gap-1.5 mt-0.5">
               {ORIGIN_ICONS[lead.origin]}
-              <span className="text-[10px] text-slate-500 font-medium uppercase tracking-tight">{lead.origin}</span>
+              <span className="text-[10px] text-[var(--color-text-muted)] font-medium uppercase tracking-tight">{lead.origin}</span>
             </div>
           </div>
         </div>
@@ -85,15 +85,15 @@ export function LeadCard({ lead, onEdit, onAction, isDragging, onClick }: LeadCa
 
       <div className="space-y-2 mb-4">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-600 truncate mr-2">{lead.procedure}</span>
-          <span className="text-xs font-bold text-slate-900 whitespace-nowrap">
+          <span className="text-xs font-medium text-[var(--color-text-secondary)] truncate mr-2">{lead.procedure}</span>
+          <span className="text-xs font-bold text-[var(--color-text-primary)] whitespace-nowrap">
             {lead.estimatedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
           </span>
         </div>
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-        <div className="flex items-center gap-1 text-[10px] text-slate-400 font-medium">
+        <div className="flex items-center gap-1 text-[10px] text-[var(--color-text-muted)] font-medium">
           <Clock size={10} />
           {diffDays === 0 ? 'Atualizado hoje' : `há ${diffDays} dias`}
         </div>
@@ -117,7 +117,7 @@ export function LeadCard({ lead, onEdit, onAction, isDragging, onClick }: LeadCa
           </button>
           <button 
             type="button"
-            className="p-1.5 text-slate-400 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+            className="p-1.5 text-[var(--color-text-muted)] bg-[var(--color-bg-deep)] rounded-lg hover:bg-[var(--color-bg-card)] transition-colors"
             onClick={(e) => { e.stopPropagation(); onEdit?.(lead.id); }}
             title="Editar"
           >

@@ -56,14 +56,14 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
     <div className="flex-1 overflow-auto px-4 py-4">
       {/* Navegação de mês inline */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-gray-800 capitalize">
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)] capitalize">
           {MESES_LABELS[viewMonth]} {viewYear}
         </h3>
         <div className="flex gap-1">
-          <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+          <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)]">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500">
+          <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)]">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -72,17 +72,17 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
       {/* Cabeçalho dias da semana */}
       <div className="grid grid-cols-7 mb-1">
         {DIAS_SEMANA.map(d => (
-          <div key={d} className="text-[11px] font-semibold text-gray-400 text-center py-1">
+          <div key={d} className="text-[11px] font-semibold text-[var(--color-text-muted)] text-center py-1">
             {d}
           </div>
         ))}
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+      <div className="grid grid-cols-7 gap-px bg-[var(--color-bg-card)] rounded-xl overflow-hidden border border-[var(--color-border)]">
         {days.map((day, idx) => {
           if (!day) return (
-            <div key={`empty-${idx}`} className="bg-gray-50 min-h-24" />
+            <div key={`empty-${idx}`} className="bg-[var(--color-bg-deep)] min-h-24" />
           )
 
           const dateStr  = toDateStr(day)
@@ -96,15 +96,15 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
               key={dateStr}
               onClick={() => onDayClick(dateStr)}
               className={cn(
-                'bg-white min-h-24 p-1.5 cursor-pointer hover:bg-cyan-500/5 transition-colors flex flex-col',
-                !isCurrentMonth && 'bg-gray-50/60',
+                'bg-[var(--color-bg-card)] min-h-24 p-1.5 cursor-pointer hover:bg-cyan-500/5 transition-colors flex flex-col',
+                !isCurrentMonth && 'bg-[var(--color-bg-deep)]/60',
               )}
             >
               {/* Número do dia */}
               <div className="flex items-center justify-between mb-1">
                 <span className={cn(
                   'w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold',
-                  isToday ? 'bg-cyan-600 text-white' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
+                  isToday ? 'bg-cyan-600 text-white' : isCurrentMonth ? 'text-[var(--color-text-secondary)]' : 'text-[var(--color-text-dim)]'
                 )}>
                   {day.getDate()}
                 </span>
@@ -133,7 +133,7 @@ export function MonthView({ currentDate, appointments, onDayClick, onCardClick }
                   )
                 })}
                 {dayApts.length > MAX_VISIBLE && (
-                  <div className="text-[9px] text-gray-400 font-medium px-1.5 py-0.5">
+                  <div className="text-[9px] text-[var(--color-text-muted)] font-medium px-1.5 py-0.5">
                     +{dayApts.length - MAX_VISIBLE} mais
                   </div>
                 )}

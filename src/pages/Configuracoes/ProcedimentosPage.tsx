@@ -25,9 +25,9 @@ function categoriaBadgeStyle(cat: string) {
     'Estético': 'bg-fuchsia-100 text-fuchsia-700',
     'Odontológico': 'bg-indigo-100 text-indigo-700',
     'Exame': 'bg-orange-100 text-orange-700',
-    'Outro': 'bg-slate-100 text-slate-600',
+    'Outro': 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)]',
   }
-  return map[cat] ?? 'bg-slate-100 text-slate-600'
+  return map[cat] ?? 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)]'
 }
 
 // Modal inline para adicionar/editar procedimento
@@ -52,46 +52,46 @@ function ProcedimentoModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-2xl w-full max-w-lg p-8">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-bold text-slate-900">{procedimento ? 'Editar' : 'Novo'} Procedimento</h3>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors"><X size={18} /></button>
+          <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{procedimento ? 'Editar' : 'Novo'} Procedimento</h3>
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-card)] rounded-lg transition-colors"><X size={18} /></button>
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Nome do Procedimento</label>
+            <label className="block text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Nome do Procedimento</label>
             <input type="text" value={form.nome} onChange={e => u('nome', e.target.value)}
-              className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+              className="w-full p-3 border border-[var(--color-border)] rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
           </div>
           <div className="grid grid-cols-1 md: gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Categoria</label>
+              <label className="block text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Categoria</label>
               <select value={form.categoria} onChange={e => u('categoria', e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                className="w-full p-3 border border-[var(--color-border)] rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 {CATEGORIAS.filter(c => c !== 'Todos').map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Duração (min)</label>
+              <label className="block text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Duração (min)</label>
               <input type="number" value={form.duracao} onChange={e => u('duracao', Number(e.target.value))}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                className="w-full p-3 border border-[var(--color-border)] rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
           </div>
           <div className="grid grid-cols-1 md: gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Valor (R$)</label>
+              <label className="block text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Valor (R$)</label>
               <input type="number" value={form.valor} onChange={e => u('valor', Number(e.target.value))}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                className="w-full p-3 border border-[var(--color-border)] rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Código TUSS</label>
+              <label className="block text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-wider mb-1">Código TUSS</label>
               <input type="text" value={form.codigo_tuss} onChange={e => u('codigo_tuss', e.target.value)}
-                className="w-full p-3 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                className="w-full p-3 border border-[var(--color-border)] rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
             </div>
           </div>
         </div>
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-5 py-2.5 border border-slate-200 text-slate-600 font-bold rounded-xl hover:bg-slate-50 text-sm">Cancelar</button>
+          <button onClick={onClose} className="px-5 py-2.5 border border-[var(--color-border)] text-[var(--color-text-secondary)] font-bold rounded-xl hover:bg-[var(--color-bg-card-hover)] text-sm">Cancelar</button>
           <button
             onClick={() => { if (form.nome.trim()) onSave(form) }}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 text-sm"
@@ -197,14 +197,14 @@ export function ProcedimentosPage() {
         />
       )}
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-card)]">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                <ClipboardList className="text-indigo-600" />
                Catálogo de Procedimentos
             </h2>
-            <p className="text-sm font-medium text-slate-500 mt-1">Defina durações de agenda, valores e tipos de serviço que a IA pode agendar.</p>
+            <p className="text-sm font-medium text-[var(--color-text-muted)] mt-1">Defina durações de agenda, valores e tipos de serviço que a IA pode agendar.</p>
           </div>
           <button 
             onClick={() => setModal({ open: true, item: null })}
@@ -214,15 +214,15 @@ export function ProcedimentosPage() {
           </button>
         </div>
 
-        <div className="p-4 border-b border-slate-100 flex items-center gap-4 bg-white flex-wrap">
+        <div className="p-4 border-b border-[var(--color-border)] flex items-center gap-4 bg-[var(--color-bg-card)] flex-wrap">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={16} />
             <input 
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Buscar por nome ou TUSS..." 
-              className="w-full pl-9 pr-3 py-2 text-sm font-medium border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
+              className="w-full pl-9 pr-3 py-2 text-sm font-medium border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
             />
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -233,7 +233,7 @@ export function ProcedimentosPage() {
                 className={`whitespace-nowrap px-3 py-1.5 text-xs font-bold rounded-lg border transition-all ${
                   filtroCategoria === cat
                    ? 'bg-slate-800 text-white border-slate-800 shadow-md'
-                   : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                   : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)]'
                 }`}
               >
                 {cat}
@@ -248,7 +248,7 @@ export function ProcedimentosPage() {
               <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-slate-400">
+            <div className="flex flex-col items-center justify-center p-12 text-[var(--color-text-muted)]">
               <ClipboardList className="w-12 h-12 mb-3 text-slate-200" />
               <p className="font-bold text-sm">
                 {procedimentos.length === 0 ? 'Nenhum procedimento cadastrado' : 'Nenhum resultado encontrado'}
@@ -265,7 +265,7 @@ export function ProcedimentosPage() {
           ) : (
             <table className="w-full text-left border-collapse min-w-[750px]">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                <tr className="bg-[var(--color-bg-deep)] border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">
                   <th className="px-6 py-4">TUSS</th>
                   <th className="px-6 py-4">Procedimento e Categoria</th>
                   <th className="px-6 py-4 text-center">Duração</th>
@@ -273,20 +273,20 @@ export function ProcedimentosPage() {
                   <th className="px-6 py-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-sm font-medium">
+              <tbody className="divide-y divide-[var(--color-border)] text-sm font-medium">
                 {filtered.map((proc) => (
-                  <tr key={proc.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-6 py-4 font-mono text-xs text-slate-500 font-bold">{proc.codigo_tuss || '—'}</td>
+                  <tr key={proc.id} className="hover:bg-[var(--color-bg-card-hover)] transition-colors group">
+                    <td className="px-6 py-4 font-mono text-xs text-[var(--color-text-muted)] font-bold">{proc.codigo_tuss || '—'}</td>
                     <td className="px-6 py-4">
                       <div>
-                        <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{proc.nome}</h3>
+                        <h3 className="font-bold text-[var(--color-text-primary)] group-hover:text-indigo-600 transition-colors">{proc.nome}</h3>
                         <Badge className={`mt-1 border-none tracking-widest uppercase text-[10px] ${categoriaBadgeStyle(proc.categoria)}`}>
                           {proc.categoria}
                         </Badge>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                       <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded font-bold text-xs">{proc.duracao} min</span>
+                       <span className="bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] px-2.5 py-1 rounded font-bold text-xs">{proc.duracao} min</span>
                     </td>
                     <td className="px-6 py-4 text-right font-black text-emerald-600">
                       {proc.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -294,11 +294,11 @@ export function ProcedimentosPage() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => setModal({ open: true, item: proc })}
-                          className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar">
+                          className="p-2 text-[var(--color-text-muted)] hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar">
                           <Edit2 size={18} />
                         </button>
                         <button onClick={() => handleArchive(proc.id)}
-                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Arquivar">
+                          className="p-2 text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Arquivar">
                           <Archive size={18} />
                         </button>
                       </div>

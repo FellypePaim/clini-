@@ -45,15 +45,15 @@ export function IntegracoesPage() {
   return (
     <div className="space-y-6">
       {/* WhatsApp */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 flex items-start gap-6 group hover:border-indigo-200 hover:shadow-md transition-all">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm p-8 flex items-start gap-6 group hover:border-indigo-200 hover:shadow-md transition-all">
         <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0 group-hover:bg-emerald-100 transition-colors">
           <Smartphone size={32} />
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">WhatsApp & Agente OVYVA</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)] group-hover:text-indigo-600 transition-colors">WhatsApp & Agente OVYVA</h3>
             {whatsappStatus === 'carregando' ? (
-              <Badge className="bg-slate-100 text-slate-500 font-bold border-none px-2.5 py-1">
+              <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-muted)] font-bold border-none px-2.5 py-1">
                 <Loader2 size={14} className="mr-1 inline-block animate-spin" /> Verificando...
               </Badge>
             ) : whatsappStatus === 'conectado' ? (
@@ -66,20 +66,20 @@ export function IntegracoesPage() {
               </Badge>
             )}
           </div>
-          <p className="text-sm text-slate-500 font-medium mb-4">
+          <p className="text-sm text-[var(--color-text-muted)] font-medium mb-4">
             Conecte seu WhatsApp para que a assistente OVYVA atenda seus pacientes automaticamente — agende, cancele e reagende consultas via mensagens.
           </p>
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center justify-between">
+          <div className="bg-[var(--color-bg-deep)] p-4 rounded-xl border border-[var(--color-border)] flex items-center justify-between">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Número Vinculado</span>
-              <span className="text-base font-black text-slate-800">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Número Vinculado</span>
+              <span className="text-base font-black text-[var(--color-text-primary)]">
                 {whatsappStatus === 'conectado' ? (whatsappNumero || '—') : 'Não conectado'}
               </span>
             </div>
             {whatsappStatus === 'conectado' && (
               <div className="flex flex-col gap-1 items-end">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Status</span>
+                <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Status</span>
                 <span className="text-sm font-bold text-emerald-600 flex items-center gap-1">
                   <CheckCircle2 size={14} /> Ativo
                 </span>
@@ -87,7 +87,7 @@ export function IntegracoesPage() {
             )}
             <a
               href="/ovyva"
-              className="flex items-center gap-2 px-4 py-2 font-bold text-slate-600 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 font-bold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg shadow-sm hover:bg-[var(--color-bg-card-hover)] transition-colors"
             >
               <RefreshCw size={16} /> Gerenciar
             </a>

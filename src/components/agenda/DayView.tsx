@@ -112,15 +112,15 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
   return (
     <div className="flex-1 overflow-auto">
       {/* Data header */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3">
+      <div className="sticky top-0 z-10 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] px-4 py-3">
         <div className="flex items-baseline gap-2">
           <span className={cn(
             'text-3xl font-bold',
-            isToday ? 'text-cyan-500' : 'text-gray-800'
+            isToday ? 'text-cyan-500' : 'text-[var(--color-text-primary)]'
           )}>
             {date.getDate()}
           </span>
-          <span className="text-sm text-gray-400 capitalize">
+          <span className="text-sm text-[var(--color-text-muted)] capitalize">
             {date.toLocaleDateString('pt-BR', { weekday: 'long', month: 'long', year: 'numeric' })}
           </span>
           {isToday && (
@@ -129,7 +129,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
             </span>
           )}
         </div>
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-[var(--color-text-muted)] mt-1">
           {appointments.length} consulta{appointments.length !== 1 ? 's' : ''} agendada{appointments.length !== 1 ? 's' : ''}
         </p>
       </div>
@@ -143,7 +143,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
               className="absolute flex items-start justify-end pr-3 pt-1"
               style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT, left: 0, right: 0 }}
             >
-              <span className="text-[11px] text-gray-300 font-medium">{String(h).padStart(2,'0')}:00</span>
+              <span className="text-[11px] text-[var(--color-text-dim)] font-medium">{String(h).padStart(2,'0')}:00</span>
             </div>
           ))}
         </div>
@@ -151,7 +151,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
         {/* Grade + Appointments */}
         <div
           ref={gridRef}
-          className="flex-1 relative border-l border-gray-100"
+          className="flex-1 relative border-l border-[var(--color-border)]"
           style={{ height: totalHeight }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -161,7 +161,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute left-0 right-0 border-t border-gray-100 cursor-pointer hover:bg-cyan-500/5 transition-colors group"
+              className="absolute left-0 right-0 border-t border-[var(--color-border)] cursor-pointer hover:bg-cyan-500/5 transition-colors group"
               style={{ top: (h - 7) * SLOT_HEIGHT, height: SLOT_HEIGHT }}
               onClick={() => onSlotClick(h)}
             >
@@ -188,7 +188,7 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
             >
               <div className="w-2.5 h-2.5 rounded-full bg-cyan-500 -ml-1.5 shrink-0" />
               <div className="flex-1 h-px bg-cyan-500" />
-              <span className="text-[10px] text-cyan-500 font-semibold ml-1 bg-white px-1 rounded">
+              <span className="text-[10px] text-cyan-500 font-semibold ml-1 bg-[var(--color-bg-card)] px-1 rounded">
                 {now.getHours().toString().padStart(2,'0')}:{now.getMinutes().toString().padStart(2,'0')}
               </span>
             </div>
@@ -217,8 +217,8 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
             const d = dateStr
             return a.data_inicio <= d && a.data_fim >= d
           }).length! > 0 && (
-            <div className="absolute inset-x-0 top-0 bottom-0 bg-slate-200/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
-              <span className="text-xs font-bold text-slate-500 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm flex items-center gap-1.5">
+            <div className="absolute inset-x-0 top-0 bottom-0 bg-[var(--color-border)]/40 border-2 border-dashed border-slate-300 rounded-lg z-[5] flex items-start justify-center pt-8 pointer-events-none">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-3 py-1.5 rounded-full border border-[var(--color-border)] shadow-sm flex items-center gap-1.5">
                 Profissional ausente
               </span>
             </div>

@@ -78,12 +78,12 @@ export function SuperAdminLayout() {
                     "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative",
                     isActive 
                       ? "bg-purple-600 text-white shadow-lg shadow-purple-600/20" 
-                      : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                      : "text-[var(--color-text-muted)] hover:bg-slate-800 hover:text-slate-200"
                   )}
                 >
-                  <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-500 group-hover:text-purple-400")} />
+                  <item.icon size={20} className={cn(isActive ? "text-white" : "text-[var(--color-text-muted)] group-hover:text-purple-400")} />
                   <span className="text-sm font-bold">{item.label}</span>
-                  {isActive && <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                  {isActive && <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-[var(--color-bg-card)] animate-pulse" />}
                 </Link>
               )
             })}
@@ -101,7 +101,7 @@ export function SuperAdminLayout() {
               </div>
               <button 
                 onClick={logout}
-                className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                className="p-2 text-[var(--color-text-muted)] hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
                 title="Sair"
               >
                 <LogOut size={18} />
@@ -119,12 +119,12 @@ export function SuperAdminLayout() {
           <div className="flex items-center gap-3 md:gap-4">
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white"
+              className="md:hidden p-2 -ml-2 text-[var(--color-text-muted)] hover:text-white"
             >
               <Menu size={24} />
             </button>
             <div className="hidden sm:flex items-center gap-2">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ambiente:</span>
+              <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Ambiente:</span>
               {import.meta.env.MODE === 'production' ? (
                 <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-black border border-emerald-500/20">PRODU&#199;&#195;O</span>
               ) : (
@@ -136,7 +136,7 @@ export function SuperAdminLayout() {
           <div className="flex items-center gap-6">
             <div className="flex flex-col items-end">
               <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">Plataforma</span>
-              <span className="text-xs font-bold text-slate-300">v2.1.0-alpha</span>
+              <span className="text-xs font-bold text-[var(--color-text-dim)]">v2.1.0-alpha</span>
             </div>
             <div className="w-px h-8 bg-slate-800" />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-600/10 border border-purple-500/20">

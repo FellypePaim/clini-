@@ -25,7 +25,7 @@ const TIPO_COLORS: Record<Ausencia['tipo'], string> = {
   folga: 'bg-blue-50 text-blue-700 border-blue-200',
   atestado: 'bg-red-50 text-red-700 border-red-200',
   ferias: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  outro: 'bg-gray-50 text-gray-700 border-gray-200',
+  outro: 'bg-[var(--color-bg-deep)] text-[var(--color-text-secondary)] border-[var(--color-border)]',
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -143,24 +143,24 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
+      <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
               <CalendarOff size={18} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-gray-900">Ausências</h2>
-              <p className="text-xs text-gray-500">{profissional.nome_completo}</p>
+              <h2 className="text-sm font-bold text-[var(--color-text-primary)]">Ausências</h2>
+              <p className="text-xs text-[var(--color-text-muted)]">{profissional.nome_completo}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+            className="w-8 h-8 rounded-lg hover:bg-[var(--color-bg-card-hover)] flex items-center justify-center transition-colors"
           >
-            <X size={16} className="text-gray-400" />
+            <X size={16} className="text-[var(--color-text-muted)]" />
           </button>
         </div>
 
@@ -171,7 +171,7 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
           {view === 'list' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-widest">
                   Histórico de Ausências
                 </p>
                 <button
@@ -185,18 +185,18 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
 
               {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 size={20} className="animate-spin text-gray-400" />
+                  <Loader2 size={20} className="animate-spin text-[var(--color-text-muted)]" />
                 </div>
               ) : ausencias.length === 0 ? (
                 <div className="text-center py-12">
-                  <CalendarOff size={32} className="mx-auto text-gray-300 mb-3" />
-                  <p className="text-sm text-gray-400">Nenhuma ausência registrada</p>
+                  <CalendarOff size={32} className="mx-auto text-[var(--color-text-dim)] mb-3" />
+                  <p className="text-sm text-[var(--color-text-muted)]">Nenhuma ausência registrada</p>
                 </div>
               ) : (
-                <div className="border border-gray-100 rounded-xl overflow-hidden">
+                <div className="border border-[var(--color-border)] rounded-xl overflow-hidden">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-gray-50/80 text-gray-500 uppercase tracking-wider">
+                      <tr className="bg-[var(--color-bg-deep)]/80 text-[var(--color-text-muted)] uppercase tracking-wider">
                         <th className="text-left px-4 py-2.5 font-semibold">Início</th>
                         <th className="text-left px-4 py-2.5 font-semibold">Fim</th>
                         <th className="text-left px-4 py-2.5 font-semibold">Tipo</th>
@@ -207,15 +207,15 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                       {ausencias.map(a => (
-                        <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                          <td className="px-4 py-3 text-gray-700">{fmtDate(a.data_inicio)}</td>
-                          <td className="px-4 py-3 text-gray-700">{fmtDate(a.data_fim)}</td>
+                        <tr key={a.id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors">
+                          <td className="px-4 py-3 text-[var(--color-text-secondary)]">{fmtDate(a.data_inicio)}</td>
+                          <td className="px-4 py-3 text-[var(--color-text-secondary)]">{fmtDate(a.data_fim)}</td>
                           <td className="px-4 py-3">
                             <span className={`inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold border ${TIPO_COLORS[a.tipo]}`}>
                               {TIPO_LABELS[a.tipo]}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-gray-500 max-w-[140px] truncate">
+                          <td className="px-4 py-3 text-[var(--color-text-muted)] max-w-[140px] truncate">
                             {a.motivo || '—'}
                           </td>
                           <td className="px-4 py-3 text-center">
@@ -228,7 +228,7 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                                 Cancelado s/ notif.
                               </span>
                             ) : (
-                              <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-50 text-gray-400 border border-gray-200">
+                              <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold bg-[var(--color-bg-deep)] text-[var(--color-text-muted)] border border-[var(--color-border)]">
                                 Sem conflitos
                               </span>
                             )}
@@ -237,7 +237,7 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                             <button
                               onClick={() => handleDelete(a.id)}
                               disabled={isLoading}
-                              className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors text-gray-400 hover:text-red-500"
+                              className="w-7 h-7 rounded-lg hover:bg-red-50 flex items-center justify-center transition-colors text-[var(--color-text-muted)] hover:text-red-500"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -256,43 +256,43 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
             <div className="space-y-5">
               <button
                 onClick={() => { resetForm(); setView('list') }}
-                className="text-xs text-gray-500 hover:text-gray-700 font-medium transition-colors"
+                className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] font-medium transition-colors"
               >
                 &larr; Voltar para lista
               </button>
 
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+              <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-widest">
                 Nova Ausência
               </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Data Início</label>
+                  <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5">Data Início</label>
                   <input
                     type="date"
                     value={formDataInicio}
                     onChange={e => setFormDataInicio(e.target.value)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
+                    className="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1.5">Data Fim</label>
+                  <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5">Data Fim</label>
                   <input
                     type="date"
                     value={formDataFim}
                     onChange={e => setFormDataFim(e.target.value)}
                     min={formDataInicio || undefined}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
+                    className="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tipo</label>
+                <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5">Tipo</label>
                 <select
                   value={formTipo}
                   onChange={e => setFormTipo(e.target.value as Ausencia['tipo'])}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
+                  className="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all"
                 >
                   <option value="folga">Folga</option>
                   <option value="atestado">Atestado</option>
@@ -302,15 +302,15 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">
-                  Motivo <span className="text-gray-400 font-normal">(opcional)</span>
+                <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5">
+                  Motivo <span className="text-[var(--color-text-muted)] font-normal">(opcional)</span>
                 </label>
                 <textarea
                   value={formMotivo}
                   onChange={e => setFormMotivo(e.target.value)}
                   rows={3}
                   placeholder="Ex: Consulta médica, viagem..."
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all resize-none"
+                  className="w-full border border-[var(--color-border)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 transition-all resize-none"
                 />
               </div>
 
@@ -346,10 +346,10 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
               </div>
 
               {/* Conflict table */}
-              <div className="border border-gray-100 rounded-xl overflow-hidden">
+              <div className="border border-[var(--color-border)] rounded-xl overflow-hidden">
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-gray-50/80 text-gray-500 uppercase tracking-wider">
+                    <tr className="bg-[var(--color-bg-deep)]/80 text-[var(--color-text-muted)] uppercase tracking-wider">
                       <th className="text-left px-4 py-2.5 font-semibold">Paciente</th>
                       <th className="text-left px-4 py-2.5 font-semibold">Telefone</th>
                       <th className="text-left px-4 py-2.5 font-semibold">Data/Hora</th>
@@ -358,11 +358,11 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {conflitos.map(c => (
-                      <tr key={c.id} className="hover:bg-gray-50/50 transition-colors">
-                        <td className="px-4 py-3 text-gray-700 font-medium">{c.paciente_nome}</td>
-                        <td className="px-4 py-3 text-gray-500">{c.paciente_telefone || '—'}</td>
-                        <td className="px-4 py-3 text-gray-500">{fmtDateTime(c.data_hora_inicio)}</td>
-                        <td className="px-4 py-3 text-gray-500">{c.procedimento || 'Consulta'}</td>
+                      <tr key={c.id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors">
+                        <td className="px-4 py-3 text-[var(--color-text-secondary)] font-medium">{c.paciente_nome}</td>
+                        <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.paciente_telefone || '—'}</td>
+                        <td className="px-4 py-3 text-[var(--color-text-muted)]">{fmtDateTime(c.data_hora_inicio)}</td>
+                        <td className="px-4 py-3 text-[var(--color-text-muted)]">{c.procedimento || 'Consulta'}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -400,7 +400,7 @@ export function AusenciasModal({ profissional, onClose }: AusenciasModalProps) {
                 <button
                   onClick={handleApenasMarcarFolga}
                   disabled={isLoading}
-                  className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-gray-600 bg-gray-50 hover:bg-gray-100 border border-gray-200 disabled:opacity-50 px-4 py-2.5 rounded-xl transition-colors"
+                  className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-deep)] hover:bg-[var(--color-bg-card-hover)] border border-[var(--color-border)] disabled:opacity-50 px-4 py-2.5 rounded-xl transition-colors"
                 >
                   <CalendarOff size={16} />
                   Apenas Marcar Folga

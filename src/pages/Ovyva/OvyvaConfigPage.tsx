@@ -120,7 +120,7 @@ export function OvyvaConfigPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4 text-gray-400">
+        <div className="flex flex-col items-center gap-4 text-[var(--color-text-muted)]">
           <Clock className="w-8 h-8 animate-spin text-cyan-500" />
           <p className="text-xs font-bold uppercase tracking-widest">Carregando configurações...</p>
         </div>
@@ -135,13 +135,13 @@ export function OvyvaConfigPage() {
           <div className="flex items-center gap-6">
              <button 
               onClick={() => navigate('/ovyva')}
-              className="p-3 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all text-gray-400 hover:text-cyan-500"
+              className="p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl hover:bg-[var(--color-bg-card-hover)] transition-all text-[var(--color-text-muted)] hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
              <div>
-                <h1 className="text-2xl font-black text-gray-900 border-none uppercase tracking-widest">Configurações OVYVA</h1>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Configurações OVYVA</h1>
+                <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                    Calibrando o cérebro da sua assistente virtual IA
                 </p>
              </div>
@@ -192,14 +192,14 @@ export function OvyvaConfigPage() {
                 <p className="text-xs font-black uppercase tracking-widest leading-relaxed">Status da IA</p>
                 <div className="flex items-center gap-2 mt-2">
                    <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                   <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Ativa (24h)</span>
+                   <span className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest">Ativa (24h)</span>
                 </div>
-                <p className="text-[10px] text-gray-500 mt-3">Assistente: <span className="text-cyan-400 font-bold">{form.nome_assistente}</span></p>
+                <p className="text-[10px] text-[var(--color-text-muted)] mt-3">Assistente: <span className="text-cyan-400 font-bold">{form.nome_assistente}</span></p>
              </div>
           </div>
 
           {/* Form Content Area */}
-          <div className="flex-1 bg-white rounded-[40px] border border-gray-100 p-10 shadow-sm shadow-gray-200/50 min-h-[600px] animate-slide-in">
+          <div className="flex-1 bg-[var(--color-bg-card)] rounded-[40px] border border-[var(--color-border)] p-10 shadow-sm shadow-black/5 min-h-[600px] animate-slide-in">
              
              {/* ── PERSONALIDADE ── */}
              {activeTab === 'personality' && (
@@ -230,7 +230,7 @@ export function OvyvaConfigPage() {
                      </FormField>
                   </div>
 
-                  <div className="h-px bg-gray-100" />
+                  <div className="h-px bg-[var(--color-bg-card)]" />
 
                   <ConfigHeader title="Disponibilidade Autônoma" desc="Horários que a IA responderá sozinha" />
                   
@@ -340,12 +340,12 @@ function SectionTab({ icon, label, active, onClick }: { icon: React.ReactNode, l
       onClick={onClick}
       className={cn(
         "w-full p-6 h-20 rounded-[32px] flex items-center gap-6 transition-all duration-300 border border-transparent group",
-        active ? "bg-white shadow-xl shadow-gray-200/40 border-gray-100 text-cyan-500" : "hover:bg-gray-100/50 text-gray-400"
+        active ? "bg-[var(--color-bg-card)] shadow-xl shadow-black/5 border-[var(--color-border)] text-cyan-500" : "hover:bg-[var(--color-bg-card-hover)]/50 text-[var(--color-text-muted)]"
       )}
     >
        <div className={cn(
         "w-12 h-12 rounded-2xl flex items-center justify-center transition-all",
-        active ? "bg-cyan-500/5 text-cyan-500 scale-110" : "bg-gray-50 text-gray-300 group-hover:bg-white"
+        active ? "bg-cyan-500/5 text-cyan-500 scale-110" : "bg-[var(--color-bg-deep)] text-[var(--color-text-dim)] group-hover:bg-[var(--color-bg-card)]"
        )}>
           {icon}
        </div>
@@ -357,8 +357,8 @@ function SectionTab({ icon, label, active, onClick }: { icon: React.ReactNode, l
 function ConfigHeader({ title, desc }: { title: string, desc: string }) {
   return (
     <div className="space-y-1">
-       <h3 className="text-sm font-black text-gray-900 border-none uppercase tracking-widest">{title}</h3>
-       <p className="text-[10px] text-gray-400 font-bold tracking-widest">{desc}</p>
+       <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">{title}</h3>
+       <p className="text-[10px] text-[var(--color-text-muted)] font-bold tracking-widest">{desc}</p>
     </div>
   )
 }
@@ -367,10 +367,10 @@ function FormField({ label, desc, children }: { label: string, desc?: string, ch
   return (
     <div className="space-y-2">
        <div className="flex items-center gap-2 mb-1">
-         <label className="text-[11px] font-black text-gray-600 uppercase tracking-widest leading-none">{label}</label>
+         <label className="text-[11px] font-black text-[var(--color-text-secondary)] uppercase tracking-widest leading-none">{label}</label>
          {desc && (
             <div className="group relative cursor-help">
-               <HelpCircle className="w-3.5 h-3.5 text-gray-300" />
+               <HelpCircle className="w-3.5 h-3.5 text-[var(--color-text-dim)]" />
                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-900 text-[9px] text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                   {desc}
                </div>

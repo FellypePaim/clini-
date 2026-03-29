@@ -66,12 +66,12 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
         onClick={onClose}
       />
       
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-lg font-bold text-slate-900">Nova Transação</h2>
+      <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+          <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Nova Transação</h2>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
@@ -82,7 +82,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Tipo</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Tipo</label>
                 <select 
                   {...register('tipo')}
                   className="input-base"
@@ -93,7 +93,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Status</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Status</label>
                 <select 
                   {...register('status')}
                   className="input-base"
@@ -105,7 +105,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Descrição</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Descrição</label>
               <input 
                 {...register('descricao')}
                 className={cn('input-base', errors.descricao && 'border-red-400')}
@@ -116,7 +116,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Valor Máximo (R$)</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Valor Máximo (R$)</label>
                 <input 
                   type="number"
                   step="0.01"
@@ -127,7 +127,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Data</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Data</label>
                 <input 
                   type="date"
                   {...register('dataConsolidacao')}
@@ -137,7 +137,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Categoria</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Categoria</label>
               <select
                 {...register('categoriaId')}
                 className="input-base"
@@ -165,7 +165,7 @@ export function NovaTransacaoModal({ isOpen, onClose }: NovaTransacaoModalProps)
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Forma de Pagamento</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Forma de Pagamento</label>
               <select 
                 {...register('formaPagamento')}
                 className="input-base"

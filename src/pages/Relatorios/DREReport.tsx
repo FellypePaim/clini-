@@ -219,18 +219,18 @@ export function DREReport() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-6 bg-white border-b border-slate-200">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-6 bg-[var(--color-bg-card)] border-b border-[var(--color-border)]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link to="/relatorios" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+            <Link to="/relatorios" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <div className="flex gap-2 items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
+              <div className="flex gap-2 items-center text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-1">
                 Relatórios <ArrowLeft size={10} className="rotate-180" /> Financeiro
               </div>
-              <h1 className="text-2xl font-black text-slate-900 uppercase">DRE Simplificado</h1>
+              <h1 className="text-2xl font-black text-[var(--color-text-primary)] uppercase">DRE Simplificado</h1>
             </div>
           </div>
 
@@ -238,7 +238,7 @@ export function DREReport() {
             <button
               onClick={exportPDF}
               disabled={isLoading || lancamentos.length === 0}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-100 font-black text-[11px] uppercase tracking-widest text-slate-600 rounded-2xl hover:bg-slate-200 transition-all border border-slate-200 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-bg-card)] font-black text-[11px] uppercase tracking-widest text-[var(--color-text-secondary)] rounded-2xl hover:bg-[var(--color-border)] transition-all border border-[var(--color-border)] disabled:opacity-50"
             >
               <Download size={16} /> Exportar PDF
             </button>
@@ -247,13 +247,13 @@ export function DREReport() {
 
         <div className="flex gap-4">
           <div className="flex flex-col gap-1.5 min-w-[300px]">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Período de Análise</label>
+            <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Período de Análise</label>
             <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-4 h-4" />
               <select
                 value={periodo}
                 onChange={(e) => setPeriodo(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 text-xs font-black text-slate-800 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest appearance-none"
+                className="w-full pl-11 pr-4 py-3 text-xs font-black text-[var(--color-text-primary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest appearance-none"
               >
                 <option value="mes_atual">Este Mês ({new Date().toLocaleDateString('pt-BR', { month: 'short' })})</option>
                 <option value="mes_anterior">Mês Passado</option>
@@ -269,9 +269,9 @@ export function DREReport() {
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="p-6 rounded-3xl border shadow-sm bg-white border-slate-100 flex flex-col justify-between h-[160px]">
+          <div className="p-6 rounded-3xl border shadow-sm bg-[var(--color-bg-card)] border-[var(--color-border)] flex flex-col justify-between h-[160px]">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Receita Bruta</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Receita Bruta</span>
               <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600"><TrendingUp size={20} /></div>
             </div>
             <div>
@@ -282,9 +282,9 @@ export function DREReport() {
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl border shadow-sm bg-white border-slate-100 flex flex-col justify-between h-[160px]">
+          <div className="p-6 rounded-3xl border shadow-sm bg-[var(--color-bg-card)] border-[var(--color-border)] flex flex-col justify-between h-[160px]">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Total Despesas</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Total Despesas</span>
               <div className="p-2.5 rounded-xl bg-rose-50 text-rose-600"><TrendingDown size={20} /></div>
             </div>
             <div>
@@ -300,7 +300,7 @@ export function DREReport() {
               <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${resultado >= 0 ? 'text-emerald-200' : 'text-rose-200'}`}>
                 {resultado >= 0 ? 'Lucro Líquido' : 'Prejuízo Líquido'}
               </span>
-              <div className="p-2.5 rounded-xl bg-white/10 text-white">
+              <div className="p-2.5 rounded-xl bg-[var(--color-bg-card)]/10 text-white">
                 <DollarSign size={20} />
               </div>
             </div>
@@ -312,13 +312,13 @@ export function DREReport() {
             </div>
           </div>
 
-          <div className="p-6 rounded-3xl border shadow-sm bg-white border-slate-100 flex flex-col justify-between h-[160px]">
+          <div className="p-6 rounded-3xl border shadow-sm bg-[var(--color-bg-card)] border-[var(--color-border)] flex flex-col justify-between h-[160px]">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Margem Líquida</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--color-text-muted)]">Margem Líquida</span>
               <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600"><BarChart2 size={20} /></div>
             </div>
             <div>
-              <span className={`text-3xl font-black block leading-none ${margem >= 0 ? 'text-slate-900' : 'text-rose-600'}`}>
+              <span className={`text-3xl font-black block leading-none ${margem >= 0 ? 'text-[var(--color-text-primary)]' : 'text-rose-600'}`}>
                 {margem.toFixed(1)}%
               </span>
               <p className="text-[10px] font-bold mt-2 uppercase tracking-wide opacity-60">Sobre a Receita Bruta</p>
@@ -327,33 +327,33 @@ export function DREReport() {
         </div>
 
         {/* Gráfico Evolução */}
-        <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] p-8 rounded-[32px] border border-[var(--color-border)] shadow-sm">
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Receitas vs. Despesas</h3>
-              <p className="text-[11px] text-slate-400 font-bold mt-1 uppercase tracking-tight">Evolução semanal comparativa no período</p>
+              <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Receitas vs. Despesas</h3>
+              <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-1 uppercase tracking-tight">Evolução semanal comparativa no período</p>
             </div>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Receitas</span>
+                <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Receitas</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-rose-400" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Despesas</span>
+                <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Despesas</span>
               </div>
             </div>
           </div>
 
           <div className="h-[360px] w-full">
             {isLoading ? (
-              <div className="h-full w-full bg-slate-50 rounded-3xl animate-pulse flex items-center justify-center">
+              <div className="h-full w-full bg-[var(--color-bg-deep)] rounded-3xl animate-pulse flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-300" />
               </div>
             ) : evolucao.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-50 rounded-3xl">
+              <div className="h-full flex flex-col items-center justify-center text-[var(--color-text-dim)] border-2 border-dashed border-slate-50 rounded-3xl">
                 <BarChart2 className="w-16 h-16 mb-4 opacity-20" />
-                <p className="font-black text-slate-400 uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
+                <p className="font-black text-[var(--color-text-muted)] uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -404,10 +404,10 @@ export function DREReport() {
         </div>
 
         {/* Tabela DRE Estruturada */}
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-[var(--color-bg-card)] rounded-[32px] border border-[var(--color-border)] shadow-sm overflow-hidden">
           <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Estrutura DRE por Categoria</h3>
-            <Badge className="bg-slate-100 text-slate-600 font-black border-none px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest">
+            <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Estrutura DRE por Categoria</h3>
+            <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] font-black border-none px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest">
               {lancamentos.length} Lançamentos
             </Badge>
           </div>
@@ -415,7 +415,7 @@ export function DREReport() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <tr className="bg-[var(--color-bg-card)] border-b border-slate-50 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                   <th className="px-8 py-5">Descrição</th>
                   <th className="px-8 py-5 text-center">Qtd.</th>
                   <th className="px-8 py-5 text-center">% Participação</th>
@@ -424,13 +424,13 @@ export function DREReport() {
               </thead>
               <tbody className="divide-y divide-slate-50 font-bold">
                 {isLoading ? (
-                  <tr><td colSpan={4} className="p-8 text-center text-slate-300">Carregando...</td></tr>
+                  <tr><td colSpan={4} className="p-8 text-center text-[var(--color-text-dim)]">Carregando...</td></tr>
                 ) : categorias.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="p-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <BarChart2 className="w-10 h-10 text-slate-200" />
-                        <p className="font-black text-slate-300 uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
+                        <p className="font-black text-[var(--color-text-dim)] uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
                       </div>
                     </td>
                   </tr>
@@ -443,9 +443,9 @@ export function DREReport() {
                       </td>
                     </tr>
                     {categorias.filter(c => c.tipo === 'receita').map((row) => (
-                      <tr key={`rec-${row.categoria}`} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-8 py-4 text-slate-700 text-sm pl-12 group-hover:text-emerald-600 transition-colors">{row.categoria}</td>
-                        <td className="px-8 py-4 text-center text-slate-500 text-sm">{row.quantidade}</td>
+                      <tr key={`rec-${row.categoria}`} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors group">
+                        <td className="px-8 py-4 text-[var(--color-text-secondary)] text-sm pl-12 group-hover:text-emerald-600 transition-colors">{row.categoria}</td>
+                        <td className="px-8 py-4 text-center text-[var(--color-text-muted)] text-sm">{row.quantidade}</td>
                         <td className="px-8 py-4 text-center">
                           <Badge className="bg-emerald-50 text-emerald-600 font-black border-none text-[10px] uppercase tracking-widest">
                             {receitaBruta > 0 ? ((row.valor / receitaBruta) * 100).toFixed(1) : '0.0'}%
@@ -474,9 +474,9 @@ export function DREReport() {
                       </td>
                     </tr>
                     {categorias.filter(c => c.tipo === 'despesa').map((row) => (
-                      <tr key={`desp-${row.categoria}`} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-8 py-4 text-slate-700 text-sm pl-12 group-hover:text-rose-600 transition-colors">{row.categoria}</td>
-                        <td className="px-8 py-4 text-center text-slate-500 text-sm">{row.quantidade}</td>
+                      <tr key={`desp-${row.categoria}`} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors group">
+                        <td className="px-8 py-4 text-[var(--color-text-secondary)] text-sm pl-12 group-hover:text-rose-600 transition-colors">{row.categoria}</td>
+                        <td className="px-8 py-4 text-center text-[var(--color-text-muted)] text-sm">{row.quantidade}</td>
                         <td className="px-8 py-4 text-center">
                           <Badge className="bg-rose-50 text-rose-600 font-black border-none text-[10px] uppercase tracking-widest">
                             {receitaBruta > 0 ? ((row.valor / receitaBruta) * 100).toFixed(1) : '0.0'}%

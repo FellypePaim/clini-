@@ -22,7 +22,7 @@ export function ProfissionalFilter({ selected, onChange, profissionais }: Profis
           'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border',
           selected === 'todos'
             ? 'bg-gray-900 text-white border-gray-900'
-            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-800'
+            : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-gray-300 hover:text-[var(--color-text-primary)]'
         )}
       >
         <span className="w-2 h-2 rounded-full bg-gray-400" />
@@ -37,7 +37,7 @@ export function ProfissionalFilter({ selected, onChange, profissionais }: Profis
             'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border',
             selected === prof.id
               ? 'text-white border-transparent'
-              : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+              : 'bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:border-gray-300'
           )}
           style={selected === prof.id ? { background: prof.cor, borderColor: prof.cor } : {}}
         >
@@ -48,7 +48,7 @@ export function ProfissionalFilter({ selected, onChange, profissionais }: Profis
           {prof.nome}
           <span className={cn(
             'text-[10px] font-normal',
-            selected === prof.id ? 'text-white/70' : 'text-gray-400'
+            selected === prof.id ? 'text-white/70' : 'text-[var(--color-text-muted)]'
           )}>
             {prof.especialidade}
           </span>

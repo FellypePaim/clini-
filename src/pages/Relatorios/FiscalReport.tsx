@@ -159,12 +159,12 @@ export function FiscalReport() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Relatório Fiscal</h1>
-          <p className="text-sm text-gray-500">Resumo para DARF/RPA — Lucro Presumido</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Relatório Fiscal</h1>
+          <p className="text-sm text-[var(--color-text-muted)]">Resumo para DARF/RPA — Lucro Presumido</p>
         </div>
         <div className="flex items-center gap-3">
           <input type="month" value={mesAno} onChange={e => setMesAno(e.target.value)}
-            className="px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-cyan-500/20" />
+            className="px-3 py-2 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-cyan-500/20" />
           <button onClick={handleExportPDF} disabled={!dados}
             className="flex items-center gap-1.5 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50">
             <Download className="w-4 h-4" /> Exportar PDF
@@ -178,28 +178,28 @@ export function FiscalReport() {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="text-xs text-gray-400">Receita Bruta</p>
-              <p className="text-xl font-bold text-gray-900 mt-1">{fmtMoney(dados.totalReceitas)}</p>
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+              <p className="text-xs text-[var(--color-text-muted)]">Receita Bruta</p>
+              <p className="text-xl font-bold text-[var(--color-text-primary)] mt-1">{fmtMoney(dados.totalReceitas)}</p>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="text-xs text-gray-400">Recebido</p>
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+              <p className="text-xs text-[var(--color-text-muted)]">Recebido</p>
               <p className="text-xl font-bold text-cyan-500 mt-1">{fmtMoney(dados.totalReceitasPagas)}</p>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="text-xs text-gray-400">Despesas</p>
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+              <p className="text-xs text-[var(--color-text-muted)]">Despesas</p>
               <p className="text-xl font-bold text-red-600 mt-1">{fmtMoney(dados.totalDespesas)}</p>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-5">
-              <p className="text-xs text-gray-400">Lucro Líquido Est.</p>
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-5">
+              <p className="text-xs text-[var(--color-text-muted)]">Lucro Líquido Est.</p>
               <p className={cn("text-xl font-bold mt-1", dados.lucroLiquido >= 0 ? "text-cyan-500" : "text-red-600")}>{fmtMoney(dados.lucroLiquido)}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Por forma de pagamento */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-6">
+              <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <CreditCard className="w-4 h-4" /> Receita por Forma de Pagamento
               </h3>
               <div className="space-y-3">
@@ -208,22 +208,22 @@ export function FiscalReport() {
                   return (
                     <div key={forma}>
                       <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700">{FORMAS_LABEL[forma] || forma}</span>
-                        <span className="font-bold text-gray-900">{fmtMoney(valor as number)}</span>
+                        <span className="font-medium text-[var(--color-text-secondary)]">{FORMAS_LABEL[forma] || forma}</span>
+                        <span className="font-bold text-[var(--color-text-primary)]">{fmtMoney(valor as number)}</span>
                       </div>
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-[var(--color-bg-card)] rounded-full overflow-hidden">
                         <div className="h-full bg-cyan-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   )
                 })}
-                {Object.keys(dados.porForma).length === 0 && <p className="text-sm text-gray-400 italic">Nenhum recebimento no período.</p>}
+                {Object.keys(dados.porForma).length === 0 && <p className="text-sm text-[var(--color-text-muted)] italic">Nenhum recebimento no período.</p>}
               </div>
             </div>
 
             {/* Estimativa de impostos */}
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-6">
+              <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <Building2 className="w-4 h-4" /> Estimativa de Impostos (Lucro Presumido)
               </h3>
               <div className="space-y-2">
@@ -235,12 +235,12 @@ export function FiscalReport() {
                   { label: 'COFINS (3%)', valor: dados.impostos.cofins },
                 ].map(imp => (
                   <div key={imp.label} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                    <span className="text-sm text-gray-600">{imp.label}</span>
-                    <span className="text-sm font-semibold text-gray-900">{fmtMoney(imp.valor)}</span>
+                    <span className="text-sm text-[var(--color-text-secondary)]">{imp.label}</span>
+                    <span className="text-sm font-semibold text-[var(--color-text-primary)]">{fmtMoney(imp.valor)}</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                  <span className="text-sm font-bold text-gray-900">Total Impostos</span>
+                <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
+                  <span className="text-sm font-bold text-[var(--color-text-primary)]">Total Impostos</span>
                   <span className="text-base font-bold text-red-600">{fmtMoney(dados.totalImpostos)}</span>
                 </div>
               </div>
@@ -253,15 +253,15 @@ export function FiscalReport() {
 
           {/* Por categoria */}
           {Object.keys(dados.porCategoria).length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 p-6">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] p-6">
+              <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-4 flex items-center gap-2">
                 <DollarSign className="w-4 h-4" /> Receita por Categoria
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {Object.entries(dados.porCategoria).map(([cat, valor]) => (
-                  <div key={cat} className="p-3 bg-gray-50 rounded-xl text-center">
-                    <p className="text-xs text-gray-400 capitalize">{cat}</p>
-                    <p className="text-sm font-bold text-gray-900 mt-1">{fmtMoney(valor as number)}</p>
+                  <div key={cat} className="p-3 bg-[var(--color-bg-deep)] rounded-xl text-center">
+                    <p className="text-xs text-[var(--color-text-muted)] capitalize">{cat}</p>
+                    <p className="text-sm font-bold text-[var(--color-text-primary)] mt-1">{fmtMoney(valor as number)}</p>
                   </div>
                 ))}
               </div>

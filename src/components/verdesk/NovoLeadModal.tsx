@@ -66,12 +66,12 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
         onClick={onClose}
       />
       
-      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-lg font-bold text-slate-900">Novo Lead</h2>
+      <div className="relative bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)]">
+          <h2 className="text-lg font-bold text-[var(--color-text-primary)]">Novo Lead</h2>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
@@ -81,7 +81,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
           <div className="space-y-4">
             
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">Nome / Lead</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Nome / Lead</label>
               <input 
                 {...register('name')}
                 className={cn('input-base', errors.name && 'border-red-400')}
@@ -92,7 +92,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Telefone / WhatsApp</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Telefone / WhatsApp</label>
                 <input 
                   {...register('phone')}
                   className={cn('input-base', errors.phone && 'border-red-400')}
@@ -102,7 +102,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Origem</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Origem</label>
                 <select 
                   {...register('origin')}
                   className="input-base"
@@ -116,7 +116,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase">E-mail (opcional)</label>
+              <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">E-mail (opcional)</label>
               <input 
                 {...register('email')}
                 className={cn('input-base', errors.email && 'border-red-400')}
@@ -127,7 +127,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Em que ele tem interesse?</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Em que ele tem interesse?</label>
                 <input 
                   {...register('procedure')}
                   className={cn('input-base', errors.procedure && 'border-red-400')}
@@ -137,7 +137,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Valor Estimado (R$)</label>
+                <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Valor Estimado (R$)</label>
                 <input 
                   type="number"
                   step="0.01"

@@ -62,23 +62,23 @@ export function MovimentacoesPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-4 bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="flex items-center gap-4 mb-4">
-          <Link to="/estoque" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+          <Link to="/estoque" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Movimentações</h1>
-            <p className="text-slate-500">Histórico de fluxo de estoque e regras de baixa</p>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Movimentações</h1>
+            <p className="text-[var(--color-text-muted)]">Histórico de fluxo de estoque e regras de baixa</p>
           </div>
         </div>
 
-        <div className="flex border-b border-slate-200">
+        <div className="flex border-b border-[var(--color-border)]">
           <button 
             onClick={() => setActiveTab('historico')}
             className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
-              activeTab === 'historico' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              activeTab === 'historico' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-slate-300'
             }`}
           >
             Histórico Cronológico
@@ -86,7 +86,7 @@ export function MovimentacoesPage() {
           <button 
             onClick={() => setActiveTab('automacao')}
             className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
-              activeTab === 'automacao' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              activeTab === 'automacao' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:border-slate-300'
             }`}
           >
             Baixas Automáticas (PEP)
@@ -99,9 +99,9 @@ export function MovimentacoesPage() {
         {activeTab === 'historico' && (
           <div className="max-w-4xl mx-auto space-y-4">
              {/* Filtros Simplificados */}
-             <div className="flex flex-wrap items-center gap-3 mb-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+             <div className="flex flex-wrap items-center gap-3 mb-6 bg-[var(--color-bg-card)] p-3 rounded-xl border border-[var(--color-border)] shadow-sm">
               <div className="relative flex-1 min-w-[200px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={16} />
                 <input
                   type="text"
                   placeholder="Buscar produto ou motivo..."
@@ -110,17 +110,17 @@ export function MovimentacoesPage() {
                   className="w-full pl-9 pr-3 py-1.5 text-sm outline-none bg-transparent"
                 />
               </div>
-              <div className="w-px h-6 bg-slate-200 mx-2" />
+              <div className="w-px h-6 bg-[var(--color-border)] mx-2" />
               <button
                 onClick={() => setFilterType('all')}
-                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === 'all' ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
+                className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === 'all' ? 'text-indigo-700 bg-indigo-100' : 'text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] hover:bg-[var(--color-border)]'}`}>
                 <Calendar size={14} /> Todos
               </button>
               {([{ key: 'entrada', label: 'Entrada' }, { key: 'saida', label: 'Saída' }, { key: 'ajuste', label: 'Ajuste' }] as const).map(tipo => (
                 <button
                   key={tipo.key}
                   onClick={() => setFilterType(prev => prev === tipo.key ? 'all' : tipo.key as any)}
-                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === tipo.key ? 'text-indigo-700 bg-indigo-100' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'}`}>
+                  className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg ${filterType === tipo.key ? 'text-indigo-700 bg-indigo-100' : 'text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] hover:bg-[var(--color-border)]'}`}>
                   <Filter size={14} /> {tipo.label}
                 </button>
               ))}
@@ -128,12 +128,12 @@ export function MovimentacoesPage() {
 
             {/* Feed Chronological */}
             {filteredMovimentos.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-xl border border-slate-200 shadow-sm">
-                <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
-                  <ArrowDownRight size={28} className="text-slate-400" />
+              <div className="flex flex-col items-center justify-center py-16 text-center bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] shadow-sm">
+                <div className="w-14 h-14 bg-[var(--color-bg-card)] rounded-2xl flex items-center justify-center mb-4">
+                  <ArrowDownRight size={28} className="text-[var(--color-text-muted)]" />
                 </div>
-                <h3 className="text-base font-bold text-slate-700 mb-1">Nenhuma movimentação registrada</h3>
-                <p className="text-sm text-slate-400 max-w-sm">
+                <h3 className="text-base font-bold text-[var(--color-text-secondary)] mb-1">Nenhuma movimentação registrada</h3>
+                <p className="text-sm text-[var(--color-text-muted)] max-w-sm">
                   {products.length === 0
                     ? 'Cadastre produtos no Catálogo primeiro. Depois, entradas e saídas aparecerão aqui automaticamente.'
                     : 'Registre entradas e saídas pelo Catálogo de Produtos. O histórico completo aparecerá aqui.'}
@@ -147,17 +147,17 @@ export function MovimentacoesPage() {
               </div>
             )}
             {filteredMovimentos.map(mov => (
-              <div key={mov.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
+              <div key={mov.id} className="bg-[var(--color-bg-card)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm flex items-start gap-4 hover:shadow-md transition-shadow">
                 <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 border-2 ${getTipoConfig(mov.type).bg} ${getTipoConfig(mov.type).textColors} border-transparent`}>
                    {getTipoConfig(mov.type).icon}
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <h3 className="text-base font-bold text-slate-900 truncate">
+                    <h3 className="text-base font-bold text-[var(--color-text-primary)] truncate">
                       {mov.quantity}x {mov.productName}
                     </h3>
-                    <span className="text-xs font-semibold text-slate-400">
+                    <span className="text-xs font-semibold text-[var(--color-text-muted)]">
                       {new Date(mov.date).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
@@ -166,14 +166,14 @@ export function MovimentacoesPage() {
                     <Badge className={`text-[10px] uppercase font-black tracking-widest px-2 py-0.5 border ${getTipoConfig(mov.type).bg} ${getTipoConfig(mov.type).textColors}`}>
                       {getTipoConfig(mov.type).label}
                     </Badge>
-                    <span className="text-sm font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                    <span className="text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-deep)] px-2 py-0.5 rounded border border-[var(--color-border)]">
                       {mov.reason}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-4 text-xs mt-3 text-slate-500 font-medium">
-                    <span className="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-md">
-                      <User size={14} className="text-slate-400" /> {mov.responsible}
+                  <div className="flex items-center gap-4 text-xs mt-3 text-[var(--color-text-muted)] font-medium">
+                    <span className="flex items-center gap-1.5 bg-[var(--color-bg-card)] px-2 py-1 rounded-md">
+                      <User size={14} className="text-[var(--color-text-muted)]" /> {mov.responsible}
                     </span>
                     {mov.linkedTo && (
                       <span className="flex items-center gap-1 text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">
@@ -199,34 +199,34 @@ export function MovimentacoesPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-[var(--color-bg-deep)] border-b border-[var(--color-border)] text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                     <th className="px-6 py-4">Procedimento Médico</th>
                     <th className="px-6 py-4">Produto a Consumir</th>
                     <th className="px-6 py-4">Qtd</th>
                     <th className="px-6 py-4 text-center">Status Ativação</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm">
+                <tbody className="divide-y divide-[var(--color-border)] text-sm">
                   {consumptionRules.map(rule => {
                     const product = products.find(p => p.id === rule.productId)
                     return (
-                      <tr key={rule.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-6 py-4 font-bold text-slate-800">
+                      <tr key={rule.id} className="hover:bg-[var(--color-bg-card-hover)] transition-colors">
+                        <td className="px-6 py-4 font-bold text-[var(--color-text-primary)]">
                           {rule.procedureName}
                         </td>
-                        <td className="px-6 py-4 text-slate-600 font-medium font-mono text-xs">
+                        <td className="px-6 py-4 text-[var(--color-text-secondary)] font-medium font-mono text-xs">
                           {product ? product.name : `PROD-${rule.productId}`}
                         </td>
                         <td className="px-6 py-4">
-                          <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{rule.quantity}</span>
+                          <span className="font-bold text-[var(--color-text-primary)] bg-[var(--color-bg-card)] px-2 py-0.5 rounded">{rule.quantity}</span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button 
                             onClick={() => toggleConsumptionRule(rule.id)}
-                            className={`p-1 rounded-full transition-colors ${rule.isActive ? 'text-emerald-500 hover:text-emerald-600' : 'text-slate-300 hover:text-slate-400'}`}
+                            className={`p-1 rounded-full transition-colors ${rule.isActive ? 'text-emerald-500 hover:text-emerald-600' : 'text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)]'}`}
                           >
                             {rule.isActive ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
                           </button>
@@ -254,32 +254,32 @@ export function MovimentacoesPage() {
       {/* Modal Nova Regra */}
       {showNovaRegra && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
-            <div className="flex items-center justify-between p-6 border-b border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <div className="bg-[var(--color-bg-card)] rounded-2xl shadow-xl w-full max-w-md">
+            <div className="flex items-center justify-between p-6 border-b border-[var(--color-border)]">
+              <h2 className="text-lg font-bold text-[var(--color-text-primary)] flex items-center gap-2">
                 <Plus className="w-5 h-5 text-indigo-600" /> Nova Regra de Baixa Automática
               </h2>
-              <button onClick={() => setShowNovaRegra(false)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-gray-500" />
+              <button onClick={() => setShowNovaRegra(false)} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[var(--color-text-muted)]" />
               </button>
             </div>
             <form onSubmit={handleCriarRegra} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Procedimento *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Nome do Procedimento *</label>
                 <input
                   type="text"
                   required
-                  className="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Ex: Botox Glabela"
                   value={novaRegra.procedureName}
                   onChange={e => setNovaRegra(r => ({ ...r, procedureName: e.target.value }))}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Produto a Consumir *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Produto a Consumir *</label>
                 <select
                   required
-                  className="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-indigo-500"
                   value={novaRegra.productId}
                   onChange={e => setNovaRegra(r => ({ ...r, productId: e.target.value }))}
                 >
@@ -290,19 +290,19 @@ export function MovimentacoesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade a Debitar *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Quantidade a Debitar *</label>
                 <input
                   type="number"
                   required
                   min={1}
-                  className="w-full p-2.5 text-sm border border-slate-200 rounded-lg bg-white outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2.5 text-sm border border-[var(--color-border)] rounded-lg bg-[var(--color-bg-card)] outline-none focus:ring-2 focus:ring-indigo-500"
                   value={novaRegra.quantity}
                   onChange={e => setNovaRegra(r => ({ ...r, quantity: Number(e.target.value) }))}
                 />
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowNovaRegra(false)}
-                  className="flex-1 px-4 py-2.5 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                  className="flex-1 px-4 py-2.5 font-bold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] hover:bg-[var(--color-border)] rounded-xl transition-colors">
                   Cancelar
                 </button>
                 <button type="submit" disabled={savingRegra}

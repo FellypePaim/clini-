@@ -167,18 +167,18 @@ export function RetornoReport() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-6 bg-white border-b border-slate-200">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-6 bg-[var(--color-bg-card)] border-b border-[var(--color-border)]">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link to="/relatorios" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+            <Link to="/relatorios" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <div className="flex gap-2 items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">
+              <div className="flex gap-2 items-center text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-1">
                 Relatórios <ArrowLeft size={10} className="rotate-180" /> Pacientes
               </div>
-              <h1 className="text-2xl font-black text-slate-900 uppercase">Taxa de Retorno de Pacientes</h1>
+              <h1 className="text-2xl font-black text-[var(--color-text-primary)] uppercase">Taxa de Retorno de Pacientes</h1>
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export function RetornoReport() {
             <button
               onClick={exportPDF}
               disabled={isLoading || pacientes.length === 0}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-100 font-black text-[11px] uppercase tracking-widest text-slate-600 rounded-2xl hover:bg-slate-200 transition-all border border-slate-200 disabled:opacity-50"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--color-bg-card)] font-black text-[11px] uppercase tracking-widest text-[var(--color-text-secondary)] rounded-2xl hover:bg-[var(--color-border)] transition-all border border-[var(--color-border)] disabled:opacity-50"
             >
               <Download size={16} /> Exportar PDF
             </button>
@@ -195,13 +195,13 @@ export function RetornoReport() {
 
         <div className="flex gap-4">
           <div className="flex flex-col gap-1.5 min-w-[300px]">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Período de Análise</label>
+            <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Período de Análise</label>
             <div className="relative">
-              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] w-4 h-4" />
               <select
                 value={periodo}
                 onChange={(e) => setPeriodo(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 text-xs font-black text-slate-800 bg-white border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest appearance-none"
+                className="w-full pl-11 pr-4 py-3 text-xs font-black text-[var(--color-text-primary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest appearance-none"
               >
                 <option value="mes_atual">Este Mês ({new Date().toLocaleDateString('pt-BR', { month: 'short' })})</option>
                 <option value="trimestre">Trimestre Atual</option>
@@ -222,10 +222,10 @@ export function RetornoReport() {
             { label: 'Taxa de Retorno', valor: `${taxaRetorno.toFixed(1)}%`, icon: <UserCheck size={20} />, color: 'indigo', sub: 'Fidelização geral', dark: true },
             { label: 'Média de Consultas', valor: mediaConsultas.toFixed(1), icon: <Star size={20} />, color: 'amber', sub: 'Por paciente', dark: false },
           ].map((kpi, i) => (
-            <div key={i} className={`p-6 rounded-3xl border shadow-sm relative overflow-hidden flex flex-col justify-between h-[160px] ${kpi.dark ? 'bg-indigo-900 border-indigo-900 text-white' : 'bg-white border-slate-100'}`}>
+            <div key={i} className={`p-6 rounded-3xl border shadow-sm relative overflow-hidden flex flex-col justify-between h-[160px] ${kpi.dark ? 'bg-indigo-900 border-indigo-900 text-white' : 'bg-[var(--color-bg-card)] border-[var(--color-border)]'}`}>
               <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${kpi.dark ? 'text-indigo-200' : 'text-slate-400'}`}>{kpi.label}</span>
-                <div className={`p-2.5 rounded-xl ${kpi.dark ? 'bg-white/10 text-white' : `bg-${kpi.color}-50 text-${kpi.color}-600`}`}>{kpi.icon}</div>
+                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${kpi.dark ? 'text-indigo-200' : 'text-[var(--color-text-muted)]'}`}>{kpi.label}</span>
+                <div className={`p-2.5 rounded-xl ${kpi.dark ? 'bg-[var(--color-bg-card)]/10 text-white' : `bg-${kpi.color}-50 text-${kpi.color}-600`}`}>{kpi.icon}</div>
               </div>
               <div>
                 <span className="text-3xl font-black block leading-none">{kpi.valor}</span>
@@ -236,27 +236,27 @@ export function RetornoReport() {
         </div>
 
         {/* Gráfico de Distribuição */}
-        <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
+        <div className="bg-[var(--color-bg-card)] p-8 rounded-[32px] border border-[var(--color-border)] shadow-sm">
           <div className="mb-8 flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Distribuição por Número de Visitas</h3>
-              <p className="text-[11px] text-slate-400 font-bold mt-1 uppercase tracking-tight">Segmentação de pacientes por frequência de consultas</p>
+              <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Distribuição por Número de Visitas</h3>
+              <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-1 uppercase tracking-tight">Segmentação de pacientes por frequência de consultas</p>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-indigo-500" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Pacientes</span>
+              <span className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Pacientes</span>
             </div>
           </div>
 
           <div className="h-[360px] w-full">
             {isLoading ? (
-              <div className="h-full w-full bg-slate-50 rounded-3xl animate-pulse flex items-center justify-center">
+              <div className="h-full w-full bg-[var(--color-bg-deep)] rounded-3xl animate-pulse flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-indigo-300" />
               </div>
             ) : distribuicao.every(d => d.quantidade === 0) ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-50 rounded-3xl">
+              <div className="h-full flex flex-col items-center justify-center text-[var(--color-text-dim)] border-2 border-dashed border-slate-50 rounded-3xl">
                 <BarChart2 className="w-16 h-16 mb-4 opacity-20" />
-                <p className="font-black text-slate-400 uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
+                <p className="font-black text-[var(--color-text-muted)] uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -288,9 +288,9 @@ export function RetornoReport() {
         </div>
 
         {/* Tabela Top 10 */}
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+        <div className="bg-[var(--color-bg-card)] rounded-[32px] border border-[var(--color-border)] shadow-sm overflow-hidden">
           <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
-            <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Pacientes com Mais Consultas</h3>
+            <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Pacientes com Mais Consultas</h3>
             <Badge className="bg-indigo-50 text-indigo-700 font-black border-none px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest">
               Top {Math.min(10, top10.length)}
             </Badge>
@@ -299,7 +299,7 @@ export function RetornoReport() {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <tr className="bg-[var(--color-bg-card)] border-b border-slate-50 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                   <th className="px-8 py-5">#</th>
                   <th className="px-8 py-5">Paciente</th>
                   <th className="px-8 py-5">Convênio</th>
@@ -309,22 +309,22 @@ export function RetornoReport() {
               </thead>
               <tbody className="divide-y divide-slate-50 font-bold">
                 {isLoading ? (
-                  <tr><td colSpan={5} className="p-8 text-center text-slate-300">Carregando...</td></tr>
+                  <tr><td colSpan={5} className="p-8 text-center text-[var(--color-text-dim)]">Carregando...</td></tr>
                 ) : top10.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <Users className="w-10 h-10 text-slate-200" />
-                        <p className="font-black text-slate-300 uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
+                        <p className="font-black text-[var(--color-text-dim)] uppercase tracking-widest text-xs">Nenhum dado encontrado para o período selecionado.</p>
                       </div>
                     </td>
                   </tr>
                 ) : top10.map((p, i) => (
-                  <tr key={p.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-8 py-4 font-mono text-[11px] text-slate-400">{i + 1}</td>
-                    <td className="px-8 py-4 text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">{p.nome_completo}</td>
+                  <tr key={p.id} className="hover:bg-[var(--color-bg-card-hover)]/50 transition-colors group">
+                    <td className="px-8 py-4 font-mono text-[11px] text-[var(--color-text-muted)]">{i + 1}</td>
+                    <td className="px-8 py-4 text-[var(--color-text-primary)] text-sm group-hover:text-indigo-600 transition-colors">{p.nome_completo}</td>
                     <td className="px-8 py-4">
-                      <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded-lg">
+                      <span className="text-[10px] text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-2 py-1 rounded-lg">
                         {p.convenio || 'Particular'}
                       </span>
                     </td>
@@ -335,12 +335,12 @@ export function RetornoReport() {
                           ? 'bg-emerald-50 text-emerald-700'
                           : p.total_consultas >= 2
                           ? 'bg-indigo-50 text-indigo-700'
-                          : 'bg-slate-100 text-slate-500'
+                          : 'bg-[var(--color-bg-card)] text-[var(--color-text-muted)]'
                       )}>
                         {p.total_consultas} {p.total_consultas === 1 ? 'consulta' : 'consultas'}
                       </Badge>
                     </td>
-                    <td className="px-8 py-4 text-right font-mono text-[11px] text-slate-400">
+                    <td className="px-8 py-4 text-right font-mono text-[11px] text-[var(--color-text-muted)]">
                       {p.ultima_consulta
                         ? new Date(p.ultima_consulta + 'T00:00').toLocaleDateString('pt-BR')
                         : '—'}

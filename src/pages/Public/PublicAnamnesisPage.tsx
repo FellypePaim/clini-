@@ -122,20 +122,20 @@ export function PublicAnamnesisPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
         <Activity className="w-10 h-10 text-cyan-500 animate-spin" />
-        <p className="text-gray-500 font-bold">Iniciando anamnese...</p>
+        <p className="text-[var(--color-text-muted)] font-bold">Iniciando anamnese...</p>
       </div>
     )
   }
 
   if (isSubmitted) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center gap-6 bg-white animate-fade-in">
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center gap-6 bg-[var(--color-bg-card)] animate-fade-in">
         <div className="w-20 h-20 rounded-full bg-cyan-500 flex items-center justify-center text-white shadow-2xl shadow-cyan-500/20">
           <CheckCircle className="w-10 h-10" />
         </div>
         <div>
-          <h1 className="text-2xl font-black text-gray-900 leading-tight">Pronto, {patient?.nome.split(' ')[0]}!</h1>
-          <p className="text-gray-500 text-sm mt-3 leading-relaxed">Suas informações foram recebidas e agora fazem parte do seu prontuário digital seguro.</p>
+          <h1 className="text-2xl font-black text-[var(--color-text-primary)] leading-tight">Pronto, {patient?.nome.split(' ')[0]}!</h1>
+          <p className="text-[var(--color-text-muted)] text-sm mt-3 leading-relaxed">Suas informações foram recebidas e agora fazem parte do seu prontuário digital seguro.</p>
         </div>
         <div className="w-full bg-cyan-500/5 rounded-2xl p-5 border border-cyan-500/20 flex items-start gap-4 text-left">
           <Info className="w-5 h-5 text-cyan-500 mt-0.5" />
@@ -149,11 +149,11 @@ export function PublicAnamnesisPage() {
 
   if (termoId && activeTemplate) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center pb-20 overflow-x-hidden">
+      <div className="min-h-screen bg-[var(--color-bg-deep)] flex flex-col items-center pb-20 overflow-x-hidden">
         <div className="w-full bg-blue-600 px-6 pt-12 pb-24 text-white relative">
           <div className="max-w-md mx-auto">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
+              <div className="p-2.5 bg-[var(--color-bg-card)]/20 backdrop-blur-md rounded-xl">
                 <FileCheck className="w-6 h-6" />
               </div>
               <div>
@@ -163,21 +163,21 @@ export function PublicAnamnesisPage() {
             </div>
             <p className="text-sm font-medium text-blue-50 leading-relaxed">Olá, <b>{patient?.nome}</b>! Por favor, leia e assine o termo eletronicamente abaixo.</p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-12 bg-gray-50 rounded-t-[40px]" />
+          <div className="absolute bottom-0 left-0 right-0 h-12 bg-[var(--color-bg-deep)] rounded-t-[40px]" />
         </div>
 
         <div className="w-full max-w-md px-6 -mt-6 relative z-10 space-y-6">
-          <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm text-xs text-gray-500 leading-relaxed font-medium">
+          <div className="bg-[var(--color-bg-card)] p-6 rounded-[32px] border border-[var(--color-border)] shadow-sm text-xs text-[var(--color-text-muted)] leading-relaxed font-medium">
              {activeTemplate.desc} <br/><br/>
              Ao assinar abaixo, o paciente {patient?.nome} confirma ter lido e compreendido todos os riscos e benefícios do procedimento descrito acima. A assinatura será criptografada e armazenada com segurança em seu prontuário.
           </div>
 
           <div className="space-y-4">
              <div className="flex items-center justify-between px-2">
-                <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest">Sua Assinatura</label>
+                <label className="text-[11px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Sua Assinatura</label>
                 <button type="button" onClick={clearSig} className="text-[10px] font-black text-red-400 uppercase tracking-widest hover:text-red-600">Limpar</button>
              </div>
-             <div className="bg-white rounded-3xl border-2 border-gray-200 h-64 overflow-hidden touch-none relative group shadow-inner">
+             <div className="bg-[var(--color-bg-card)] rounded-3xl border-2 border-[var(--color-border)] h-64 overflow-hidden touch-none relative group shadow-inner">
                 <SignatureCanvas 
                   ref={sigPad}
                   penColor='#111827'
@@ -208,12 +208,12 @@ export function PublicAnamnesisPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center pb-20 overflow-x-hidden">
+    <div className="min-h-screen bg-[var(--color-bg-deep)] flex flex-col items-center pb-20 overflow-x-hidden">
       {/* Wave Header */}
       <div className="w-full bg-cyan-600 px-6 pt-12 pb-24 text-white relative">
         <div className="max-w-md mx-auto">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-white/20 backdrop-blur-md rounded-xl">
+            <div className="p-2.5 bg-[var(--color-bg-card)]/20 backdrop-blur-md rounded-xl">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
@@ -225,7 +225,7 @@ export function PublicAnamnesisPage() {
         </div>
         
         {/* Curvas decorativas */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gray-50 rounded-t-[40px]" />
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-[var(--color-bg-deep)] rounded-t-[40px]" />
       </div>
 
       <div className="w-full max-w-md px-6 -mt-6 relative z-10 space-y-6">
@@ -292,14 +292,14 @@ export function PublicAnamnesisPage() {
           <Section icon={<Stethoscope className="w-4 h-4" />} title="Motivo Principal">
              <div className="space-y-4">
                <div>
-                 <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">O que você está sentindo hoje?</label>
+                 <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1 mb-2 block">O que você está sentindo hoje?</label>
                   <textarea
                     name="queixa"
                     rows={3}
                     value={formState.queixa}
                     onChange={(e) => setFormState(s => ({ ...s, queixa: e.target.value }))}
                     placeholder="Aperte aqui para escrever..."
-                    className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none resize-none shadow-sm"
+                    className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none resize-none shadow-sm"
                   />
                </div>
              </div>
@@ -312,12 +312,12 @@ export function PublicAnamnesisPage() {
                <RadioToggle label="Problemas Cardíacos?" value={formState.problemasCardiacos} onChange={(v) => setFormState(s => ({ ...s, problemasCardiacos: v }))} />
                <RadioToggle label="Diabetes ou Hipertensão?" value={formState.diabetesHipertensao} onChange={(v) => setFormState(s => ({ ...s, diabetesHipertensao: v }))} />
                <div>
-                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Medicamentos em uso?</label>
+                  <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1 mb-2 block">Medicamentos em uso?</label>
                    <input
                      name="medicamentos"
                      value={formState.medicamentos}
                      onChange={(e) => setFormState(s => ({ ...s, medicamentos: e.target.value }))}
-                     className="w-full bg-white border border-gray-200 rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none shadow-sm"
+                     className="w-full bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl p-4 text-sm focus:ring-4 focus:ring-cyan-500/10 focus:border-cyan-500 transition-all outline-none shadow-sm"
                      placeholder="Ex: AAS, Glifage..."
                    />
                </div>
@@ -330,7 +330,7 @@ export function PublicAnamnesisPage() {
                <RadioToggle label="Você fuma?" value={formState.fuma} onChange={(v) => setFormState(s => ({ ...s, fuma: v }))} />
                <RadioToggle label="Ingere álcool regularmente?" value={formState.alcool} onChange={(v) => setFormState(s => ({ ...s, alcool: v }))} />
                <div>
-                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 mb-2 block">Atividade Física?</label>
+                  <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1 mb-2 block">Atividade Física?</label>
                   <div className="flex gap-2">
                     {['Nenhuma', '1-2x semana', 'Todos os dias'].map(l => (
                       <button
@@ -341,7 +341,7 @@ export function PublicAnamnesisPage() {
                           "flex-1 py-3 px-2 border rounded-xl text-[10px] font-bold transition-all active:scale-95 shadow-sm",
                           formState.atividadeFisica === l
                             ? "bg-cyan-600 text-white border-cyan-500"
-                            : "bg-white border-gray-200 text-gray-500"
+                            : "bg-[var(--color-bg-card)] border-[var(--color-border)] text-[var(--color-text-muted)]"
                         )}
                       >{l}</button>
                     ))}
@@ -364,7 +364,7 @@ export function PublicAnamnesisPage() {
          <div className="w-10 h-10 bg-gray-300 rounded-xl flex items-center justify-center text-white">
            <Heart className="w-6 h-6 fill-current" />
          </div>
-         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[.2em]">Prontuário Verde · 2026</p>
+         <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[.2em]">Prontuário Verde · 2026</p>
       </footer>
     </div>
   )
@@ -378,7 +378,7 @@ function Section({ icon, title, children }: { icon: React.ReactNode, title: stri
            {icon} {title}
          </span>
        </div>
-       <div className="bg-gray-100/50 p-6 rounded-[32px] border border-gray-100 shadow-inner">
+       <div className="bg-[var(--color-bg-card)]/50 p-6 rounded-[32px] border border-[var(--color-border)] shadow-inner">
          {children}
        </div>
     </div>
@@ -388,14 +388,14 @@ function Section({ icon, title, children }: { icon: React.ReactNode, title: stri
 function RadioToggle({ label, value, onChange }: { label: string, value: boolean, onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm font-bold text-gray-700">{label}</span>
-      <div className="flex items-center gap-2 bg-white/50 p-1.5 rounded-2xl border border-gray-100">
+      <span className="text-sm font-bold text-[var(--color-text-secondary)]">{label}</span>
+      <div className="flex items-center gap-2 bg-[var(--color-bg-card)]/50 p-1.5 rounded-2xl border border-[var(--color-border)]">
         <button
           type="button"
           onClick={() => onChange(true)}
           className={cn(
             "w-10 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-            value ? "bg-cyan-500 text-white shadow-xl shadow-cyan-500/20" : "text-gray-400 hover:bg-gray-50"
+            value ? "bg-cyan-500 text-white shadow-xl shadow-cyan-500/20" : "text-[var(--color-text-muted)] hover:bg-[var(--color-bg-card-hover)]"
           )}
         >SIM</button>
         <button
@@ -403,7 +403,7 @@ function RadioToggle({ label, value, onChange }: { label: string, value: boolean
           onClick={() => onChange(false)}
           className={cn(
             "w-10 py-1.5 rounded-xl text-[10px] font-bold transition-all",
-            !value ? "bg-gray-400 text-white" : "text-gray-400 hover:bg-gray-50"
+            !value ? "bg-gray-400 text-white" : "text-[var(--color-text-muted)] hover:bg-[var(--color-bg-card-hover)]"
           )}
         >NÃO</button>
       </div>

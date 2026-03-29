@@ -99,11 +99,11 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in">
+      <div className="relative bg-[var(--color-bg-card)] rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-in">
         {/* Header */}
         <div className="bg-cyan-600 p-6 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+            <div className="w-12 h-12 rounded-2xl bg-[var(--color-bg-card)]/20 backdrop-blur-md flex items-center justify-center border border-white/20">
               <Stethoscope className="w-6 h-6" />
             </div>
             <div>
@@ -111,7 +111,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
               <p className="text-xs text-cyan-100/70 font-medium">Paciente: <b>{appointment.pacienteNome}</b> · {new Date(appointment.data).toLocaleDateString()}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-xl transition-all">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--color-bg-card)]/10 rounded-xl transition-all">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -123,7 +123,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
             <div className="lg:col-span-2 space-y-6">
               <div className="space-y-3">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Anotações da Consulta</label>
+                  <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Anotações da Consulta</label>
                   
                   {/* AI Actions */}
                   <div className="flex items-center gap-2">
@@ -133,8 +133,8 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border shrink-0",
                         isTranscribing 
-                          ? "bg-gray-100 text-gray-400 border-gray-100 animate-pulse" 
-                          : "bg-white text-blue-600 border-blue-100 hover:bg-blue-50"
+                          ? "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)] animate-pulse" 
+                          : "bg-[var(--color-bg-card)] text-blue-600 border-blue-100 hover:bg-blue-50"
                       )}
                     >
                       {isTranscribing ? <Activity className="w-3 h-3" /> : <Mic className="w-3 h-3" />}
@@ -147,8 +147,8 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border shrink-0",
                         isSummarizing 
-                          ? "bg-gray-100 text-gray-400 border-gray-100 animate-pulse" 
-                          : "bg-white text-purple-600 border-purple-100 hover:bg-purple-50 disabled:opacity-30"
+                          ? "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-[var(--color-border)] animate-pulse" 
+                          : "bg-[var(--color-bg-card)] text-purple-600 border-purple-100 hover:bg-purple-50 disabled:opacity-30"
                       )}
                     >
                       <Sparkles className="w-3 h-3" />
@@ -157,28 +157,28 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                   </div>
                 </div>
 
-                <div className="quill-wrapper rounded-[32px] border border-gray-200 overflow-hidden shadow-inner bg-gray-50/20 p-6 min-h-[300px] flex flex-col">
-                  <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-100 shrink-0">
-                    <button className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-gray-900 transition-all font-black text-xs uppercase tracking-widest">B</button>
-                    <button className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-gray-900 transition-all italic font-serif">I</button>
-                    <button className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-gray-900 transition-all underline">U</button>
+                <div className="quill-wrapper rounded-[32px] border border-[var(--color-border)] overflow-hidden shadow-inner bg-[var(--color-bg-deep)]/20 p-6 min-h-[300px] flex flex-col">
+                  <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[var(--color-border)] shrink-0">
+                    <button className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all font-black text-xs uppercase tracking-widest">B</button>
+                    <button className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all italic font-serif">I</button>
+                    <button className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all underline">U</button>
                     <div className="w-px h-4 bg-gray-200 mx-2" />
-                    <button className="p-2 hover:bg-white rounded-xl text-gray-400 hover:text-gray-900 transition-all font-black text-xs uppercase tracking-widest">Lista</button>
+                    <button className="p-2 hover:bg-[var(--color-bg-card)] rounded-xl text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-all font-black text-xs uppercase tracking-widest">Lista</button>
                   </div>
                   <textarea 
                     value={content} 
                     onChange={(e) => setContent(e.target.value)} 
                     placeholder="Inicie a evolução do paciente aqui..."
-                    className="flex-1 w-full bg-transparent resize-none outline-none text-sm text-gray-600 leading-relaxed font-serif italic"
+                    className="flex-1 w-full bg-transparent resize-none outline-none text-sm text-[var(--color-text-secondary)] leading-relaxed font-serif italic"
                   />
                 </div>
               </div>
 
               {/* CID-10 Search */}
               <div className="space-y-2 relative">
-                <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1">Classificação ICD-10 (CID)</label>
+                <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1">Classificação ICD-10 (CID)</label>
                 <div className="relative group">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
                   <input 
                     type="text" 
                     placeholder="Pesquisar por código ou diagnóstico..."
@@ -188,19 +188,19 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                   />
                   
                   {cidSearch && !selectedCid && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl border border-gray-100 shadow-2xl z-20 py-2 animate-slide-in">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-2xl z-20 py-2 animate-slide-in">
                       {filteredCids.length > 0 ? filteredCids.map(cid => (
                         <button 
                           key={cid.codigo}
                           onClick={() => { setSelectedCid(cid); setCidSearch(cid.codigo); }}
                           className="w-full px-4 py-3 hover:bg-cyan-500/5 text-left flex items-center gap-3 group/item transition-colors"
                         >
-                          <span className="text-xs font-black text-cyan-500 bg-cyan-500/5 px-2 py-1 rounded-md group-hover/item:bg-white">{cid.codigo}</span>
-                          <span className="text-sm font-medium text-gray-700">{cid.nome}</span>
+                          <span className="text-xs font-black text-cyan-500 bg-cyan-500/5 px-2 py-1 rounded-md group-hover/item:bg-[var(--color-bg-card)]">{cid.codigo}</span>
+                          <span className="text-sm font-medium text-[var(--color-text-secondary)]">{cid.nome}</span>
                         </button>
                       )) : (
-                        <div className="px-4 py-6 text-center text-gray-400 text-xs italic flex flex-col items-center gap-2">
-                           <AlertCircle className="w-5 h-5 text-gray-200" />
+                        <div className="px-4 py-6 text-center text-[var(--color-text-muted)] text-xs italic flex flex-col items-center gap-2">
+                           <AlertCircle className="w-5 h-5 text-[var(--color-text-dim)]" />
                            Nenhum diagnóstico encontrado para "{cidSearch}"
                         </div>
                       )}
@@ -219,9 +219,9 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
               </div>
 
               {/* Signature Section */}
-              <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="space-y-3 pt-4 border-t border-[var(--color-border)]">
                 <div className="flex items-center justify-between mb-1">
-                   <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                   <label className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-widest ml-1 flex items-center gap-2">
                      <PenTool className="w-3.5 h-3.5" /> Assinatura Eletrônica 
                    </label>
                    {signature && (
@@ -240,10 +240,10 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
 
             {/* AI Summary Sidebar */}
             <div className="space-y-6">
-               <div className="p-6 bg-gray-50/50 rounded-[32px] border border-gray-100 shadow-inner h-full flex flex-col gap-6">
+               <div className="p-6 bg-[var(--color-bg-deep)]/50 rounded-[32px] border border-[var(--color-border)] shadow-inner h-full flex flex-col gap-6">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-5 h-5 text-purple-500" />
-                    <h3 className="text-sm font-black text-gray-900 border-none">Análise da IA</h3>
+                    <h3 className="text-sm font-black text-[var(--color-text-primary)] border-none">Análise da IA</h3>
                   </div>
 
                   {summary ? (
@@ -253,19 +253,19 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
                        <SummarySection label="Conduta" value={summary.conduta} />
                        <SummarySection label="Retorno" value={summary.retorno} isLast />
                        
-                       <div className="pt-4 border-t border-gray-200/50">
-                         <div className="p-4 bg-white/70 rounded-2xl flex items-center gap-3">
+                       <div className="pt-4 border-t border-[var(--color-border)]/50">
+                         <div className="p-4 bg-[var(--color-bg-card)]/70 rounded-2xl flex items-center gap-3">
                             <Activity className="w-5 h-5 text-cyan-500" />
-                            <p className="text-[10px] text-gray-500 leading-relaxed italic">"Resumo gerado automaticamente com base nas anotações clínicas."</p>
+                            <p className="text-[10px] text-[var(--color-text-muted)] leading-relaxed italic">"Resumo gerado automaticamente com base nas anotações clínicas."</p>
                          </div>
                        </div>
                     </div>
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-                       <div className="w-16 h-16 bg-white rounded-3xl shadow-xl flex items-center justify-center mb-4 ring-8 ring-gray-100/50">
-                          <ClipboardList className="w-8 h-8 text-gray-200" />
+                       <div className="w-16 h-16 bg-[var(--color-bg-card)] rounded-3xl shadow-xl flex items-center justify-center mb-4 ring-8 ring-gray-100/50">
+                          <ClipboardList className="w-8 h-8 text-[var(--color-text-dim)]" />
                        </div>
-                       <p className="text-xs text-gray-400 font-medium leading-relaxed">Clique em <b>Resumo Automático</b> para extrair as principais seções da evolução.</p>
+                       <p className="text-xs text-[var(--color-text-muted)] font-medium leading-relaxed">Clique em <b>Resumo Automático</b> para extrair as principais seções da evolução.</p>
                     </div>
                   )}
                </div>
@@ -274,10 +274,10 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50/80 p-6 px-8 flex items-center justify-between border-t border-gray-200 shrink-0">
+        <div className="bg-[var(--color-bg-deep)]/80 p-6 px-8 flex items-center justify-between border-t border-[var(--color-border)] shrink-0">
           <button 
             onClick={onGeneratePrescription}
-            className="flex items-center gap-2 px-5 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-2xl text-sm font-bold border border-gray-200 shadow-sm transition-all active:scale-95"
+            className="flex items-center gap-2 px-5 py-3 bg-[var(--color-bg-card)] hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-secondary)] rounded-2xl text-sm font-bold border border-[var(--color-border)] shadow-sm transition-all active:scale-95"
           >
             <ClipboardList className="w-4 h-4 text-purple-500" /> Gerar Prescrição
           </button>
@@ -285,7 +285,7 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
           <div className="flex items-center gap-3">
              <button 
                onClick={onClose}
-               className="px-6 py-3 text-sm font-bold text-gray-400 hover:text-gray-600"
+               className="px-6 py-3 text-sm font-bold text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
              >
                Cancelar
              </button>
@@ -307,8 +307,8 @@ export function EvolutionModal({ isOpen, onClose, onSave, onGeneratePrescription
 function SummarySection({ label, value, isLast = false }: { label: string, value: string, isLast?: boolean }) {
   return (
     <div className={cn("space-y-1", !isLast && "pb-4")}>
-      <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{label}</p>
-      <p className="text-xs text-gray-700 font-semibold leading-relaxed">{value}</p>
+      <p className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">{label}</p>
+      <p className="text-xs text-[var(--color-text-secondary)] font-semibold leading-relaxed">{value}</p>
     </div>
   )
 }

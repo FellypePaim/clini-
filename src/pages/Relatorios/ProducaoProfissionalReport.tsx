@@ -168,18 +168,18 @@ export function ProducaoProfissionalReport() {
   const chartData = stats.map(s => ({ nome: s.profissional.split(' ').slice(0, 2).join(' '), atendimentos: s.atendimentos }))
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50">
-      <header className="px-6 py-6 bg-white border-b border-slate-200 sticky top-0 z-10">
+    <div className="flex flex-col h-full bg-[var(--color-bg-card)]">
+      <header className="px-6 py-6 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link to="/relatorios" className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+            <Link to="/relatorios" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <div className="flex gap-2 items-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
+              <div className="flex gap-2 items-center text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">
                 Relatórios › Clínico
               </div>
-              <h1 className="text-2xl font-bold text-slate-900">Produção por Profissional</h1>
+              <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Produção por Profissional</h1>
             </div>
           </div>
 
@@ -187,7 +187,7 @@ export function ProducaoProfissionalReport() {
             <button
               onClick={exportPDF}
               disabled={isLoading || stats.length === 0}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 shadow-sm transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-card-hover)] shadow-sm transition-all disabled:opacity-50"
             >
               <Download size={18} /> Exportar PDF
             </button>
@@ -196,11 +196,11 @@ export function ProducaoProfissionalReport() {
 
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-slate-500 uppercase">Período</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Período</label>
             <select
               value={periodo}
               onChange={e => setPeriodo(e.target.value)}
-              className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-2.5 text-sm font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option>Hoje</option>
               <option>Esta semana</option>
@@ -211,11 +211,11 @@ export function ProducaoProfissionalReport() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-bold text-slate-500 uppercase">Profissional</label>
+            <label className="text-xs font-bold text-[var(--color-text-muted)] uppercase">Profissional</label>
             <select
               value={filterProfId}
               onChange={e => setFilterProfId(e.target.value)}
-              className="p-2.5 text-sm font-semibold text-slate-800 bg-white border border-slate-200 rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-2.5 text-sm font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl min-w-[200px] outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="">Todos os profissionais</option>
               {profissionais.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
@@ -239,7 +239,7 @@ export function ProducaoProfissionalReport() {
             <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
           </div>
         ) : stats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+          <div className="flex flex-col items-center justify-center py-24 text-[var(--color-text-muted)]">
             <Stethoscope className="w-16 h-16 mb-4 text-slate-200" />
             <p className="font-bold text-lg">Nenhum dado no período</p>
             <p className="text-sm mt-1">Clique em "Gerar Relatório" para buscar os dados.</p>
@@ -248,22 +248,22 @@ export function ProducaoProfissionalReport() {
           <>
             {/* KPIs */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
                 <Stethoscope size={20} className="text-indigo-600 mb-3" />
-                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Total Atendimentos</span>
-                <span className="text-3xl font-black text-slate-900">{totals.atendimentos}</span>
+                <span className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Total Atendimentos</span>
+                <span className="text-3xl font-black text-[var(--color-text-primary)]">{totals.atendimentos}</span>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
                 <DollarSign size={20} className="text-emerald-600 mb-3" />
-                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Receita Gerada</span>
-                <span className="text-3xl font-black text-slate-900">
+                <span className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Receita Gerada</span>
+                <span className="text-3xl font-black text-[var(--color-text-primary)]">
                   {totals.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
                 </span>
               </div>
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
                 <Award size={20} className="text-amber-600 mb-3" />
-                <span className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Ticket Médio</span>
-                <span className="text-3xl font-black text-slate-900">
+                <span className="block text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1">Ticket Médio</span>
+                <span className="text-3xl font-black text-[var(--color-text-primary)]">
                   {totals.ticketMedio.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </span>
               </div>
@@ -271,8 +271,8 @@ export function ProducaoProfissionalReport() {
 
             {/* Gráfico */}
             {chartData.length > 0 && (
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 className="text-base font-bold text-slate-800 mb-6">Atendimentos por Profissional</h3>
+              <div className="bg-[var(--color-bg-card)] p-6 rounded-2xl border border-[var(--color-border)] shadow-sm">
+                <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-6">Atendimentos por Profissional</h3>
                 <div className="h-[260px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
@@ -291,33 +291,33 @@ export function ProducaoProfissionalReport() {
             )}
 
             {/* Tabela */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-5 border-b border-slate-200 bg-slate-50">
-                <h3 className="text-base font-bold text-slate-800">Detalhamento Analítico</h3>
+            <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] shadow-sm overflow-hidden">
+              <div className="p-5 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]">
+                <h3 className="text-base font-bold text-[var(--color-text-primary)]">Detalhamento Analítico</h3>
               </div>
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-[var(--color-bg-card)] border-b border-[var(--color-border)] text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                     <th className="px-6 py-4">Profissional</th>
                     <th className="px-6 py-4">Especialidade</th>
                     <th className="px-6 py-4 text-center">Atendimentos</th>
                     <th className="px-6 py-4 text-right">Receita Gerada</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm font-medium">
+                <tbody className="divide-y divide-[var(--color-border)] text-sm font-medium">
                   {stats.map((row) => (
-                    <tr key={row.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 font-bold text-slate-800">{row.profissional}</td>
-                      <td className="px-6 py-4 text-slate-500">{row.especialidade}</td>
+                    <tr key={row.id} className="hover:bg-[var(--color-bg-card-hover)] transition-colors">
+                      <td className="px-6 py-4 font-bold text-[var(--color-text-primary)]">{row.profissional}</td>
+                      <td className="px-6 py-4 text-[var(--color-text-muted)]">{row.especialidade}</td>
                       <td className="px-6 py-4 text-center">
-                        <span className="bg-slate-100 px-2.5 py-1 rounded text-slate-700 font-bold">{row.atendimentos}</span>
+                        <span className="bg-[var(--color-bg-card)] px-2.5 py-1 rounded text-[var(--color-text-secondary)] font-bold">{row.atendimentos}</span>
                       </td>
                       <td className="px-6 py-4 text-right font-black text-emerald-600">
                         {row.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                       </td>
                     </tr>
                   ))}
-                  <tr className="bg-slate-50 border-t-2 border-slate-200 font-black text-slate-900">
+                  <tr className="bg-[var(--color-bg-deep)] border-t-2 border-[var(--color-border)] font-black text-[var(--color-text-primary)]">
                     <td className="px-6 py-4 uppercase text-xs tracking-widest" colSpan={2}>Total Geral</td>
                     <td className="px-6 py-4 text-center">{totals.atendimentos}</td>
                     <td className="px-6 py-4 text-right text-emerald-700">

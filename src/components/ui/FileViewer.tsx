@@ -72,18 +72,18 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
       />
 
       <div className={cn(
-        "relative flex flex-col w-full max-w-5xl max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95",
+        "relative flex flex-col w-full max-w-5xl max-h-[90vh] bg-[var(--color-bg-card)] rounded-3xl shadow-2xl overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95",
         !isSupportedPreview && "max-w-md"
       )}>
         {/* HEADER */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/50 backdrop-blur-xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-card)]/50 backdrop-blur-xl">
           <div className="flex items-center gap-3 w-full pr-4">
             <div className="p-2 bg-cyan-500/5 rounded-xl text-cyan-500">
               {isImage ? <ImageIcon className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
             </div>
             <div className="min-w-0">
-               <h3 className="text-sm font-black text-gray-900 truncate" title={file.nome}>{file.nome}</h3>
-               <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mt-0.5">
+               <h3 className="text-sm font-black text-[var(--color-text-primary)] truncate" title={file.nome}>{file.nome}</h3>
+               <p className="text-[10px] uppercase tracking-widest text-[var(--color-text-muted)] font-bold mt-0.5">
                  {new Date(file.created_at).toLocaleDateString()} • {(file.tamanho_bytes / 1024).toFixed(0)} KB • {file.mime_type}
                </p>
             </div>
@@ -93,7 +93,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
               <>
                 <button
                   onClick={handleDownload}
-                  className="p-2 text-gray-400 hover:text-cyan-500 hover:bg-cyan-500/5 rounded-full transition-colors group"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-cyan-500 hover:bg-cyan-500/5 rounded-full transition-colors group"
                   title="Fazer Download"
                 >
                   <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -102,7 +102,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
                   href={signedUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors group"
+                  className="p-2 text-[var(--color-text-muted)] hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors group"
                   title="Abrir em Nova Guia"
                 >
                   <ExternalLink className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -117,7 +117,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                className="p-2 text-[var(--color-text-muted)] hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
                 title="Deletar Arquivo"
               >
                 {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash className="w-5 h-5" />}
@@ -126,7 +126,7 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
             
             <button
               onClick={onClose}
-              className="p-2 ml-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2 ml-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-card-hover)] rounded-full transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
@@ -134,19 +134,19 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
         </div>
 
         {/* CONTENT */}
-        <div className="flex-1 overflow-auto bg-gray-50 flex flex-col items-center justify-center p-4 min-h-[300px] relative">
+        <div className="flex-1 overflow-auto bg-[var(--color-bg-deep)] flex flex-col items-center justify-center p-4 min-h-[300px] relative">
           
           {isLoading && (
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm gap-3">
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[var(--color-bg-card)]/80 backdrop-blur-sm gap-3">
               <Loader2 className="w-8 h-8 text-cyan-500 animate-spin" />
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Carregando Mídia Segura...</p>
+              <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Carregando Mídia Segura...</p>
             </div>
           )}
 
           {error && !isLoading && (
-             <div className="text-center p-6 bg-white rounded-2xl shadow-sm border border-red-100 w-full max-w-sm">
+             <div className="text-center p-6 bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-red-100 w-full max-w-sm">
                 <p className="text-red-600 font-bold uppercase tracking-widest text-[10px] mb-2">Erro de Acesso</p>
-                <p className="text-sm text-gray-700">{error}</p>
+                <p className="text-sm text-[var(--color-text-secondary)]">{error}</p>
              </div>
           )}
 
@@ -166,16 +166,16 @@ export function FileViewer({ file, onClose, onDelete, isAdmin = true }: FileView
               ) : isPDF ? (
                 <iframe 
                   src={signedUrl}
-                  className="w-full h-full min-h-[70vh] rounded-xl border border-gray-200 bg-white"
+                  className="w-full h-full min-h-[70vh] rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)]"
                   title={file.nome}
                 />
               ) : (
-                <div className="text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-200">
+                <div className="text-center p-8 bg-[var(--color-bg-card)] rounded-2xl shadow-sm border border-[var(--color-border)]">
                   <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
                     <FileText className="w-10 h-10" />
                   </div>
-                  <h4 className="text-base font-black text-gray-900 mb-2">Visualização não suportada</h4>
-                  <p className="text-sm text-gray-500 mb-6">Este tipo de arquivo não pode ser visualizado diretamente no navegador.</p>
+                  <h4 className="text-base font-black text-[var(--color-text-primary)] mb-2">Visualização não suportada</h4>
+                  <p className="text-sm text-[var(--color-text-muted)] mb-6">Este tipo de arquivo não pode ser visualizado diretamente no navegador.</p>
                   
                   <button 
                     onClick={handleDownload}

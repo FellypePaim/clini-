@@ -49,7 +49,7 @@ function statusBadge(status: string) {
     trial: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'TRIAL' },
     suspensa: { bg: 'bg-red-500/10', text: 'text-red-400', label: 'SUSPENSA' },
   }
-  const s = map[status] ?? { bg: 'bg-slate-500/10', text: 'text-slate-400', label: status.toUpperCase() }
+  const s = map[status] ?? { bg: 'bg-[var(--color-bg-deep)]0/10', text: 'text-[var(--color-text-muted)]', label: status.toUpperCase() }
   return (
     <span
       className={cn(
@@ -74,7 +74,7 @@ function MetricCard({
 }) {
   return (
     <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/30">
-      <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+      <div className="flex items-center gap-1.5 text-[var(--color-text-muted)] mb-1">
         <Icon size={13} />
         <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
       </div>
@@ -171,7 +171,7 @@ export function SuperClinicasPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">Gestao de Clinicas</h1>
-          <p className="text-slate-400 font-medium">
+          <p className="text-[var(--color-text-muted)] font-medium">
             Controle total sobre as clinicas cadastradas na plataforma.
           </p>
         </div>
@@ -188,7 +188,7 @@ export function SuperClinicasPage() {
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative group">
           <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] group-focus-within:text-purple-400 transition-colors"
             size={20}
           />
           <input
@@ -196,13 +196,13 @@ export function SuperClinicasPage() {
             placeholder="Buscar por nome, CNPJ ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
+            className="w-full bg-slate-800/40 border border-slate-700/50 rounded-2xl py-3 pl-12 pr-4 text-white placeholder:text-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:bg-slate-800/60 transition-all font-medium"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+          className="px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-[var(--color-text-dim)] font-bold rounded-2xl hover:bg-slate-800/60 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-500/50"
         >
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -222,11 +222,11 @@ export function SuperClinicasPage() {
       {/* Empty state */}
       {!isLoading && filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-32 bg-slate-800/20 border border-dashed border-slate-700/50 rounded-3xl text-center">
-          <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-slate-600 mb-6">
+          <div className="w-16 h-16 bg-slate-800 rounded-2xl flex items-center justify-center text-[var(--color-text-secondary)] mb-6">
             <Building2 size={32} />
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Nenhuma clinica encontrada</h3>
-          <p className="text-slate-500">Tente ajustar seus filtros ou busca.</p>
+          <p className="text-[var(--color-text-muted)]">Tente ajustar seus filtros ou busca.</p>
         </div>
       )}
 
@@ -255,19 +255,19 @@ export function SuperClinicasPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Building2 className="text-slate-500" size={24} />
+                      <Building2 className="text-[var(--color-text-muted)]" size={24} />
                     )}
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-lg font-black text-white truncate">{clinic.nome}</h3>
-                    <p className="text-xs font-medium text-slate-500 truncate">
+                    <p className="text-xs font-medium text-[var(--color-text-muted)] truncate">
                       {clinic.cnpj ? `CNPJ: ${clinic.cnpj}` : 'CNPJ nao informado'}
                     </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5 shrink-0 ml-3">
                   {statusBadge(clinic.status)}
-                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-wider">
                     Desde {new Date(clinic.created_at).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
@@ -291,7 +291,7 @@ export function SuperClinicasPage() {
               {/* WhatsApp indicator */}
               <div className="flex items-center gap-2 mb-5 px-1">
                 <MessageCircle size={14} className="text-emerald-400" />
-                <span className="text-xs font-bold text-slate-400">
+                <span className="text-xs font-bold text-[var(--color-text-muted)]">
                   WhatsApp: {clinic.whatsapp.online}/{clinic.whatsapp.total} online
                 </span>
                 {clinic.whatsapp.online > 0 && (

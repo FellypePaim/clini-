@@ -15,7 +15,7 @@ export const STATUS_CONFIG: Record<AppointmentStatus, {
   confirmado:     { label: 'Confirmado',     dot: 'bg-emerald-500',  bg: 'bg-emerald-50',  border: 'border-emerald-200', text: 'text-emerald-800',  badgeBg: 'bg-emerald-100',  badgeText: 'text-emerald-800' },
   agendado:       { label: 'Pendente',       dot: 'bg-yellow-400', bg: 'bg-yellow-50', border: 'border-yellow-200',text: 'text-yellow-800', badgeBg: 'bg-yellow-100', badgeText: 'text-yellow-800' },
   em_atendimento: { label: 'Em atendimento', dot: 'bg-blue-500',   bg: 'bg-blue-50',   border: 'border-blue-200',  text: 'text-blue-800',   badgeBg: 'bg-blue-100',   badgeText: 'text-blue-800' },
-  concluido:      { label: 'Concluído',      dot: 'bg-gray-400',   bg: 'bg-gray-50',   border: 'border-gray-200',  text: 'text-gray-600',   badgeBg: 'bg-gray-100',   badgeText: 'text-gray-600' },
+  concluido:      { label: 'Concluído',      dot: 'bg-gray-400',   bg: 'bg-[var(--color-bg-deep)]',   border: 'border-[var(--color-border)]',  text: 'text-[var(--color-text-secondary)]',   badgeBg: 'bg-[var(--color-bg-card)]',   badgeText: 'text-[var(--color-text-secondary)]' },
   cancelado:      { label: 'Cancelado',      dot: 'bg-red-400',    bg: 'bg-red-50',    border: 'border-red-200',   text: 'text-red-700',    badgeBg: 'bg-red-100',    badgeText: 'text-red-700' },
   faltou:         { label: 'Faltou',         dot: 'bg-orange-400', bg: 'bg-orange-50', border: 'border-orange-200',text: 'text-orange-700', badgeBg: 'bg-orange-100', badgeText: 'text-orange-700' },
 }
@@ -78,17 +78,17 @@ export function AppointmentCard({ appointment: apt, compact = false, onClick, on
         {!compact && (
           <>
             {/* Horário + procedimento */}
-            <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {apt.horaInicio} – {apt.horaFim}
               </span>
-              <span className="text-gray-300">·</span>
+              <span className="text-[var(--color-text-dim)]">·</span>
               <span>{PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}</span>
             </div>
 
             {/* Profissional */}
-            <div className="flex items-center gap-1 text-xs text-gray-400">
+            <div className="flex items-center gap-1 text-xs text-[var(--color-text-muted)]">
               <User className="w-3 h-3" />
               <span
                 className="font-medium"
@@ -96,14 +96,14 @@ export function AppointmentCard({ appointment: apt, compact = false, onClick, on
               >
                 {apt.profissionalNome.replace('Dr. ', '').replace('Dra. ', '')}
               </span>
-              <span className="text-gray-300">·</span>
+              <span className="text-[var(--color-text-dim)]">·</span>
               <span>{apt.profissionalEspecialidade}</span>
             </div>
           </>
         )}
 
         {compact && (
-          <div className="text-[10px] text-gray-500 truncate">
+          <div className="text-[10px] text-[var(--color-text-muted)] truncate">
             {apt.horaInicio} · {PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}
           </div>
         )}
@@ -125,13 +125,13 @@ export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onS
   const cfg = STATUS_CONFIG[apt.status]
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden w-80 shadow-xl shadow-gray-100/50">
+    <div className="bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)] overflow-hidden w-80 shadow-xl shadow-black/5">
       {/* Header colorido */}
       <div className="px-5 pt-5 pb-4" style={{ background: `${apt.profissionalCor}12` }}>
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-medium text-gray-400 mb-0.5">{PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}</p>
-            <h3 className="text-base font-bold text-gray-900">{apt.pacienteNome}</h3>
+            <p className="text-xs font-medium text-[var(--color-text-muted)] mb-0.5">{PROCEDIMENTO_LABEL[apt.procedimento] || apt.procedimento}</p>
+            <h3 className="text-base font-bold text-[var(--color-text-primary)]">{apt.pacienteNome}</h3>
           </div>
           <span className={cn('px-2 py-1 rounded-full text-xs font-semibold', cfg.badgeBg, cfg.badgeText)}>
             {cfg.label}
@@ -145,7 +145,7 @@ export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onS
         </InfoRow>
         <InfoRow icon={<User className="w-3.5 h-3.5" />} label="Profissional">
           <span style={{ color: apt.profissionalCor }}>{apt.profissionalNome}</span>
-          <span className="text-gray-400 ml-1">· {apt.profissionalEspecialidade}</span>
+          <span className="text-[var(--color-text-muted)] ml-1">· {apt.profissionalEspecialidade}</span>
         </InfoRow>
         {apt.valor && (
           <InfoRow icon={<span className="text-xs font-bold">R$</span>} label="Valor">
@@ -153,7 +153,7 @@ export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onS
           </InfoRow>
         )}
         {apt.observacoes && (
-          <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 leading-relaxed">
+          <div className="bg-[var(--color-bg-deep)] rounded-lg p-3 text-xs text-[var(--color-text-secondary)] leading-relaxed">
             {apt.observacoes}
           </div>
         )}
@@ -195,10 +195,10 @@ export function AppointmentDetailCard({ appointment: apt, onClose: _onClose, onS
 function InfoRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2.5">
-      <span className="text-gray-300 mt-0.5">{icon}</span>
+      <span className="text-[var(--color-text-dim)] mt-0.5">{icon}</span>
       <div>
-        <p className="text-[10px] text-gray-400 leading-none mb-0.5">{label}</p>
-        <div className="text-gray-700 text-xs leading-snug">{children}</div>
+        <p className="text-[10px] text-[var(--color-text-muted)] leading-none mb-0.5">{label}</p>
+        <div className="text-[var(--color-text-secondary)] text-xs leading-snug">{children}</div>
       </div>
     </div>
   )

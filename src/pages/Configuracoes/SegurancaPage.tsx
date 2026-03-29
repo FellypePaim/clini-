@@ -101,24 +101,24 @@ export function SegurancaPage() {
   return (
     <div className="space-y-6">
       {/* Políticas de Autenticação */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50">
+          <h2 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <Shield className="w-4 h-4 text-indigo-600" /> Autenticação e Segurança
           </h2>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Políticas de Senha</h3>
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Políticas de Senha</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Mínimo 6 caracteres (Supabase Auth)</span></div>
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Hash bcrypt no banco</span></div>
-              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-gray-600">Recuperação de senha por e-mail</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-[var(--color-text-secondary)]">Mínimo 6 caracteres (Supabase Auth)</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-[var(--color-text-secondary)]">Hash bcrypt no banco</span></div>
+              <div className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-cyan-500" /><span className="text-[var(--color-text-secondary)]">Recuperação de senha por e-mail</span></div>
             </div>
           </div>
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">2FA (Autenticação em 2 Fatores)</h3>
-            <p className="text-sm text-gray-500">O 2FA pode ser ativado pelo painel do Supabase em Authentication → MFA.</p>
+            <h3 className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">2FA (Autenticação em 2 Fatores)</h3>
+            <p className="text-sm text-[var(--color-text-muted)]">O 2FA pode ser ativado pelo painel do Supabase em Authentication → MFA.</p>
             <button onClick={() => toast({ title: '2FA', description: 'Acesse o Dashboard do Supabase → Authentication → MFA para ativar.', type: 'info' })}
               className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors">
               <Key className="w-3.5 h-3.5" /> Instruções 2FA
@@ -128,20 +128,20 @@ export function SegurancaPage() {
       </div>
 
       {/* Sessão Atual */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50">
+          <h2 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <MonitorPlay className="w-4 h-4 text-indigo-600" /> Sessão Atual
           </h2>
         </div>
         <div className="p-6">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="flex items-center justify-between p-4 bg-[var(--color-bg-deep)] rounded-xl border border-[var(--color-border)]">
             <div>
-              <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+              <h4 className="font-semibold text-[var(--color-text-primary)] text-sm flex items-center gap-2">
                 {user?.email}
                 <Badge className="bg-emerald-100 text-emerald-700 px-1.5 border-none text-[10px]">ATIVA</Badge>
               </h4>
-              <p className="text-xs text-gray-500 mt-0.5">{user?.nome} · {user?.role}</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{user?.nome} · {user?.role}</p>
             </div>
             <button onClick={async () => { await supabase.auth.signOut(); logout() }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-colors">
@@ -152,14 +152,14 @@ export function SegurancaPage() {
       </div>
 
       {/* LGPD — Export de Dados */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-cyan-500" /> Conformidade LGPD
           </h2>
         </div>
         <div className="p-6 space-y-4">
-          <p className="text-sm text-gray-500">A Lei Geral de Proteção de Dados (13.709/2018) garante ao titular o direito de acessar, corrigir e exportar seus dados pessoais.</p>
+          <p className="text-sm text-[var(--color-text-muted)]">A Lei Geral de Proteção de Dados (13.709/2018) garante ao titular o direito de acessar, corrigir e exportar seus dados pessoais.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button onClick={handleExportLGPD} disabled={exportingLGPD}
@@ -190,12 +190,12 @@ export function SegurancaPage() {
       </div>
 
       {/* Log de Atividade */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-gray-400" /> Log de Atividade
+      <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] overflow-hidden">
+        <div className="px-6 py-4 border-b border-[var(--color-border)] bg-[var(--color-bg-deep)]/50 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+            <Shield className="w-4 h-4 text-[var(--color-text-muted)]" /> Log de Atividade
           </h2>
-          <button onClick={loadAuditLogs} disabled={loadingLogs} className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400">
+          <button onClick={loadAuditLogs} disabled={loadingLogs} className="p-2 hover:bg-[var(--color-bg-card-hover)] rounded-lg transition-colors text-[var(--color-text-muted)]">
             <RefreshCw className={cn("w-4 h-4", loadingLogs && "animate-spin")} />
           </button>
         </div>
@@ -205,7 +205,7 @@ export function SegurancaPage() {
           ) : auditLogs.length > 0 ? (
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-b border-gray-100 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <tr className="border-b border-[var(--color-border)] text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                   <th className="text-left py-3 px-4">Data</th>
                   <th className="text-left py-3 px-4">Hora</th>
                   <th className="text-left py-3 px-4">Tipo</th>
@@ -216,24 +216,24 @@ export function SegurancaPage() {
               </thead>
               <tbody>
                 {auditLogs.map(log => (
-                  <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50/50">
-                    <td className="py-2.5 px-4 text-gray-700 font-medium">{fmtDate(log.created_at)}</td>
-                    <td className="py-2.5 px-4 text-gray-500">{fmtTime(log.created_at)}</td>
+                  <tr key={log.id} className="border-b border-gray-50 hover:bg-[var(--color-bg-card-hover)]/50">
+                    <td className="py-2.5 px-4 text-[var(--color-text-secondary)] font-medium">{fmtDate(log.created_at)}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)]">{fmtTime(log.created_at)}</td>
                     <td className="py-2.5 px-4">
                       <span className={cn("px-1.5 py-0.5 rounded text-[9px] font-semibold",
                         log.tipo === 'audit' ? "bg-indigo-100 text-indigo-700" : "bg-purple-100 text-purple-700")}>
                         {log.tipo === 'audit' ? 'AUDIT' : 'IA'}
                       </span>
                     </td>
-                    <td className="py-2.5 px-4 text-gray-700">{log.acao}</td>
-                    <td className="py-2.5 px-4 text-gray-500 max-w-[200px] truncate">{log.recurso}</td>
-                    <td className="py-2.5 px-4 text-gray-400 font-mono text-[10px]">{log.usuario}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-secondary)]">{log.acao}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)] max-w-[200px] truncate">{log.recurso}</td>
+                    <td className="py-2.5 px-4 text-[var(--color-text-muted)] font-mono text-[10px]">{log.usuario}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div className="py-12 text-center text-gray-400 text-sm">Nenhum log de atividade registrado.</div>
+            <div className="py-12 text-center text-[var(--color-text-muted)] text-sm">Nenhum log de atividade registrado.</div>
           )}
         </div>
       </div>

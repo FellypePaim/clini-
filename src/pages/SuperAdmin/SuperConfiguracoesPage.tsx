@@ -45,7 +45,7 @@ export function SuperConfiguracoesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">Configurações da Plataforma</h1>
-          <p className="text-slate-400 font-medium">Gestão global de parâmetros, chaves de API e políticas do sistema.</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Gestão global de parâmetros, chaves de API e políticas do sistema.</p>
         </div>
         <button
           onClick={() => toast({ title: 'Em desenvolvimento', description: 'A persist\u00eancia de configura\u00e7\u00f5es ainda est\u00e1 em desenvolvimento. As altera\u00e7\u00f5es n\u00e3o foram salvas.', type: 'info' })}
@@ -61,7 +61,7 @@ export function SuperConfiguracoesPage() {
         <div className="space-y-2 lg:col-span-1">
            {settingsGroups.map((group, _idx) => (
              <div key={group.title} className="mb-6 last:mb-0">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-4 mb-3 flex items-center gap-2">
+                <h3 className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] px-4 mb-3 flex items-center gap-2">
                    <group.icon size={14} className="text-purple-400" /> {group.title}
                 </h3>
                 <div className="space-y-1">
@@ -71,7 +71,7 @@ export function SuperConfiguracoesPage() {
                        onClick={() => setActiveSettingItem(item)}
                        className={cn(
                         "w-full text-left px-4 py-3 text-xs font-bold rounded-xl transition-all flex items-center justify-between group",
-                        activeSettingItem === item ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" : "text-slate-400 hover:bg-slate-800/40 hover:text-white"
+                        activeSettingItem === item ? "bg-purple-600/10 text-purple-400 border border-purple-500/20" : "text-[var(--color-text-muted)] hover:bg-slate-800/40 hover:text-white"
                      )}>
                         {item}
                         <ChevronRight size={14} className={cn(
@@ -95,30 +95,30 @@ export function SuperConfiguracoesPage() {
                  </div>
                  <div>
                     <h3 className="text-xl font-black text-white">Domínio & Identidade</h3>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Configurações principais de branding e acesso</p>
+                    <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Configurações principais de branding e acesso</p>
                  </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome da Plataforma</label>
+                    <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Nome da Plataforma</label>
                     <input type="text" defaultValue="Prontuário Verde" className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all font-bold" />
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">URL de Produção</label>
+                    <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">URL de Produção</label>
                     <input type="text" defaultValue="https://app.prontuarioverde.com.br" className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all font-bold" />
                  </div>
               </div>
 
               <div className="space-y-2 relative z-10">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Logo Principal (SVG/PNG)</label>
+                 <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Logo Principal (SVG/PNG)</label>
                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-dashed border-slate-700 flex items-center justify-center text-slate-600 hover:border-purple-500/50 transition-all cursor-pointer">
+                    <div className="w-16 h-16 bg-slate-900 rounded-2xl border border-dashed border-slate-700 flex items-center justify-center text-[var(--color-text-secondary)] hover:border-purple-500/50 transition-all cursor-pointer">
                        <Cloud size={24} />
                     </div>
                     <div className="flex flex-col gap-1">
-                       <span className="text-xs font-bold text-slate-300">prontuario-verde-logo.svg</span>
-                       <span className="text-[10px] font-bold text-slate-500">Formato SVG recomendado, máx 2MB.</span>
+                       <span className="text-xs font-bold text-[var(--color-text-dim)]">prontuario-verde-logo.svg</span>
+                       <span className="text-[10px] font-bold text-[var(--color-text-muted)]">Formato SVG recomendado, máx 2MB.</span>
                     </div>
                  </div>
               </div>
@@ -137,7 +137,7 @@ export function SuperConfiguracoesPage() {
                  </div>
                  <div>
                     <h3 className="text-xl font-black text-white">Segredos de Infraestrutura</h3>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Chaves de integração e webhooks protegidos</p>
+                    <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Chaves de integração e webhooks protegidos</p>
                  </div>
               </div>
 
@@ -151,10 +151,10 @@ export function SuperConfiguracoesPage() {
                        <Badge className="bg-emerald-500/10 text-emerald-500 border-none text-[9px] font-black px-3 py-1">CONECTADO</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                       <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-slate-500 font-mono" />
+                       <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-[var(--color-text-muted)] font-mono" />
                        <button
                          onClick={() => toast({ title: 'Alterar API Key', description: 'Para alterar a chave do Gemini, acesse o Supabase Dashboard → Edge Functions → Secrets.', type: 'info' })}
-                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Alterar Key</button>
+                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-[var(--color-text-dim)] font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Alterar Key</button>
                     </div>
                  </div>
 
@@ -169,10 +169,10 @@ export function SuperConfiguracoesPage() {
                          className="text-[10px] font-black text-indigo-400 hover:text-white transition-colors uppercase tracking-widest">Rotate Credentials</button>
                     </div>
                     <div className="flex items-center gap-2">
-                       <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-slate-500 font-mono" />
+                       <input type="password" value="****************************************" disabled className="flex-1 bg-slate-800/50 border border-slate-700/30 rounded-lg px-4 py-2.5 text-xs text-[var(--color-text-muted)] font-mono" />
                        <button
                          onClick={() => toast({ title: 'Acesso Restrito', description: 'A visualização de secrets é bloqueada por segurança. Acesse o Supabase Dashboard.', type: 'info' })}
-                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Visualizar</button>
+                         className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-[var(--color-text-dim)] font-black text-[10px] uppercase tracking-widest rounded-lg transition-all">Visualizar</button>
                     </div>
                  </div>
               </div>
@@ -186,7 +186,7 @@ export function SuperConfiguracoesPage() {
                  </div>
                  <div>
                     <h3 className="text-xl font-black text-white">Rollout e Feature Flags</h3>
-                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Controle de ativação de novas funcionalidades</p>
+                    <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest">Controle de ativação de novas funcionalidades</p>
                  </div>
               </div>
 
@@ -198,7 +198,7 @@ export function SuperConfiguracoesPage() {
                    )}>
                       <div className="flex flex-col gap-0.5">
                          <span className="text-xs font-black text-white tracking-widest uppercase">{flag.name}</span>
-                         <span className="text-[10px] font-bold text-slate-500 leading-tight">{flag.info}</span>
+                         <span className="text-[10px] font-bold text-[var(--color-text-muted)] leading-tight">{flag.info}</span>
                       </div>
                       <div className="flex items-center gap-4">
                          <span className={cn("text-[9px] font-black uppercase tracking-[0.2em]", flag.active ? 'text-emerald-500' : 'text-red-500')}>
@@ -210,7 +210,7 @@ export function SuperConfiguracoesPage() {
                              "w-12 h-6 rounded-full p-1 relative transition-all cursor-pointer",
                              flag.active ? "bg-emerald-600" : "bg-slate-700"
                            )}>
-                            <div className={cn("w-4 h-4 bg-white rounded-full transition-all", flag.active ? "translate-x-6" : "translate-x-0")} />
+                            <div className={cn("w-4 h-4 bg-[var(--color-bg-card)] rounded-full transition-all", flag.active ? "translate-x-6" : "translate-x-0")} />
                          </button>
                       </div>
                    </div>

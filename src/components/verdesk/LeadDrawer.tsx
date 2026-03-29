@@ -40,7 +40,7 @@ const INTERACTION_ICONS = {
   stage_change: <History size={16} className="text-indigo-500" />,
   message: <MessageSquare size={16} className="text-emerald-500" />,
   appointment: <Calendar size={16} className="text-blue-500" />,
-  system: <AlertTriangle size={16} className="text-slate-400" />
+  system: <AlertTriangle size={16} className="text-[var(--color-text-muted)]" />
 }
 
 export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
@@ -91,42 +91,42 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
         className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 transition-opacity" 
         onClick={onClose} 
       />
-      <div className="fixed right-0 top-0 bottom-0 w-[500px] bg-white shadow-2xl z-50 flex flex-col transform transition-transform border-l border-slate-200">
+      <div className="fixed right-0 top-0 bottom-0 w-[500px] bg-[var(--color-bg-card)] shadow-2xl z-50 flex flex-col transform transition-transform border-l border-[var(--color-border)]">
         
         {/* Header */}
-        <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div className="px-6 py-5 border-b border-[var(--color-border)] flex items-center justify-between bg-[var(--color-bg-deep)]">
           <div className="flex items-center gap-4">
             <Avatar 
                nome={lead.name}
                className="w-12 h-12 border-2 border-indigo-100 bg-indigo-50 flex items-center justify-center text-lg font-bold text-indigo-700" 
             />
             <div>
-              <h2 className="text-xl font-bold text-slate-900">{lead.name}</h2>
-              <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
+              <h2 className="text-xl font-bold text-[var(--color-text-primary)]">{lead.name}</h2>
+              <div className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] font-medium">
                 <span className="flex items-center gap-1"><Phone size={14} /> {lead.phone}</span>
-                <span className="text-slate-300">•</span>
+                <span className="text-[var(--color-text-dim)]">•</span>
                 <span className="text-indigo-600">{lead.procedure}</span>
               </div>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors"
+            className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-border)] rounded-full transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/50">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[var(--color-bg-card)]">
           
           {/* Quick Actions & Status */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1 block">Estágio Atual</span>
+            <div className="bg-[var(--color-bg-card)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-1 block">Estágio Atual</span>
               <select
                 value={lead.stage}
                 onChange={(e) => moveLead(lead.id, e.target.value as LeadStage)}
-                className="w-full text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                className="w-full text-sm font-semibold text-[var(--color-text-primary)] bg-[var(--color-bg-deep)] border border-[var(--color-border)] rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
               >
                 {STAGES.map(stage => (
                   <option key={stage} value={stage}>{stage}</option>
@@ -134,8 +134,8 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
               </select>
             </div>
             
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ações</span>
+            <div className="bg-[var(--color-bg-card)] p-4 rounded-xl border border-[var(--color-border)] shadow-sm flex flex-col justify-between">
+              <span className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-widest mb-2 block">Ações</span>
               <div className="flex gap-2">
                 <button
                   onClick={() => window.open(`https://wa.me/${lead.phone?.replace(/\D/g, '')}`, '_blank')}
@@ -165,35 +165,35 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
           </div>
 
           {/* Details */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm mb-8 overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-              <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
-                <User size={16} className="text-slate-400" /> Detalhes do Lead
+          <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)] shadow-sm mb-8 overflow-hidden">
+            <div className="px-4 py-3 bg-[var(--color-bg-deep)] border-b border-[var(--color-border)]">
+              <h3 className="text-sm font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                <User size={16} className="text-[var(--color-text-muted)]" /> Detalhes do Lead
               </h3>
             </div>
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 text-sm">
               <div>
-                <span className="block text-xs font-medium text-slate-500 mb-1">Valor Estimado</span>
-                <span className="font-bold text-slate-800">
+                <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Valor Estimado</span>
+                <span className="font-bold text-[var(--color-text-primary)]">
                   {lead.estimatedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </span>
               </div>
               <div>
-                <span className="block text-xs font-medium text-slate-500 mb-1">Origem</span>
-                <Badge className="bg-slate-100 text-slate-700 font-semibold border-none rounded">
+                <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Origem</span>
+                <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-secondary)] font-semibold border-none rounded">
                   {lead.origin}
                 </Badge>
               </div>
               <div>
-                <span className="block text-xs font-medium text-slate-500 mb-1">Criado em</span>
-                <span className="font-medium text-slate-700 flex items-center gap-1">
-                  <Clock size={14} className="text-slate-400" />
+                <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">Criado em</span>
+                <span className="font-medium text-[var(--color-text-secondary)] flex items-center gap-1">
+                  <Clock size={14} className="text-[var(--color-text-muted)]" />
                   {new Date(lead.createdAt).toLocaleDateString('pt-BR')}
                 </span>
               </div>
               {lead.origin === 'WhatsApp OVYVA' && lead.ovyvaId && (
                 <div>
-                  <span className="block text-xs font-medium text-slate-500 mb-1">OVYVA Link</span>
+                  <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">OVYVA Link</span>
                   <a href={`/ovyva/historico?id=${lead.ovyvaId}`} className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
                     <LinkIcon size={14} /> Ver Conversa
                   </a>
@@ -204,22 +204,22 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
 
           {/* Timeline */}
           <div>
-            <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
-              <History size={16} className="text-slate-400" /> Histórico de Interações
+            <h3 className="text-sm font-bold text-[var(--color-text-primary)] mb-4 flex items-center gap-2">
+              <History size={16} className="text-[var(--color-text-muted)]" /> Histórico de Interações
             </h3>
             
-            <div className="relative border-l-2 border-slate-200 ml-4 space-y-6 pb-6 pt-2">
+            <div className="relative border-l-2 border-[var(--color-border)] ml-4 space-y-6 pb-6 pt-2">
               {/* Add Note Input inside timeline */}
               <div className="relative pl-6 -ml-[13px] group">
-                <div className="absolute top-1 left-0 w-6 h-6 rounded-full bg-white border-2 border-indigo-200 flex items-center justify-center z-10">
+                <div className="absolute top-1 left-0 w-6 h-6 rounded-full bg-[var(--color-bg-card)] border-2 border-indigo-200 flex items-center justify-center z-10">
                   <EditIcon className="text-indigo-500" />
                 </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
+                <div className="bg-[var(--color-bg-card)] p-3 rounded-xl border border-[var(--color-border)] shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all">
                   <textarea
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Adicionar nota ou registro..."
-                    className="w-full text-sm resize-none outline-none min-h-[60px] text-slate-700 bg-transparent placeholder-slate-400"
+                    className="w-full text-sm resize-none outline-none min-h-[60px] text-[var(--color-text-secondary)] bg-transparent placeholder-slate-400"
                   />
                   <div className="flex justify-end mt-2">
                     <button
@@ -236,21 +236,21 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
               {/* Interactions List */}
               {lead.interactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((interaction) => (
                 <div key={interaction.id} className="relative pl-6 -ml-[11px] group">
-                  <div className="absolute top-1 left-0 w-[22px] h-[22px] rounded-full bg-slate-50 border-2 border-white flex items-center justify-center shadow-sm z-10 ring-1 ring-slate-200">
+                  <div className="absolute top-1 left-0 w-[22px] h-[22px] rounded-full bg-[var(--color-bg-deep)] border-2 border-white flex items-center justify-center shadow-sm z-10 ring-1 ring-slate-200">
                     {INTERACTION_ICONS[interaction.type]}
                   </div>
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-100 shadow-sm group-hover:shadow-md transition-shadow">
+                  <div className="bg-[var(--color-bg-card)] p-3.5 rounded-xl border border-[var(--color-border)] shadow-sm group-hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold text-slate-700 uppercase tracking-tight">
+                      <span className="text-xs font-bold text-[var(--color-text-secondary)] uppercase tracking-tight">
                         {interaction.author || 'Sistema'}
                       </span>
-                      <span className="text-[10px] font-semibold text-slate-400">
+                      <span className="text-[10px] font-semibold text-[var(--color-text-muted)]">
                         {new Date(interaction.date).toLocaleString('pt-BR', {
                           day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
                         })}
                       </span>
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                    <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed font-medium">
                       {interaction.content}
                     </p>
                   </div>

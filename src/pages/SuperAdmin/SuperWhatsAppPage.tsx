@@ -51,12 +51,12 @@ export function SuperWhatsAppPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">Monitoramento WhatsApp</h1>
-          <p className="text-slate-400 font-medium">Controle de instâncias Evolution API e métricas de conversação OVYVA.</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Controle de instâncias Evolution API e métricas de conversação OVYVA.</p>
         </div>
         <div className="flex items-center gap-3">
            <button
              onClick={() => { toast({ title: 'Sincronizando...', description: 'Verificando status de todas as instâncias Evolution.', type: 'info' }); loadData() }}
-             className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-slate-300 font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
+             className="flex items-center gap-2 px-5 py-3 bg-slate-800/40 border border-slate-700/50 text-[var(--color-text-dim)] font-bold rounded-2xl hover:bg-slate-800/60 transition-all">
               <RefreshCw size={18} /> Sync All
            </button>
            <button
@@ -81,14 +81,14 @@ export function SuperWhatsAppPage() {
                   <Icon size={24} />
                 </div>
                 <div>
-                   <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] mb-1">{stat.label}</p>
+                   <p className="text-[10px] font-black uppercase text-[var(--color-text-muted)] tracking-[0.2em] mb-1">{stat.label}</p>
                    <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-black text-white">{stat.value}</span>
                       <span className={cn("text-[10px] font-black", stat.color)}>{stat.trend}</span>
                    </div>
                 </div>
              </div>
-             <Icon size={120} className="absolute -bottom-8 -right-8 text-slate-700/5 group-hover:scale-110 transition-transform duration-700" />
+             <Icon size={120} className="absolute -bottom-8 -right-8 text-[var(--color-text-secondary)]/5 group-hover:scale-110 transition-transform duration-700" />
           </div>
         )})}
       </div>
@@ -98,11 +98,11 @@ export function SuperWhatsAppPage() {
         {/* Gestão de Instâncias */}
         <div className="lg:col-span-2 space-y-6">
            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+              <h3 className="text-xs font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] flex items-center gap-2">
                  <Smartphone size={16} /> INSTÂNCIAS EVOLUTION (CORE)
               </h3>
               <div className="relative group">
-                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
+                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]" size={14} />
                  <input
                    type="text"
                    placeholder="Filtrar número ou clínica..."
@@ -116,7 +116,7 @@ export function SuperWhatsAppPage() {
            <div className="bg-slate-800/40 border border-slate-700/50 rounded-[40px] overflow-hidden shadow-2xl">
               <table className="w-full text-left border-collapse">
                  <thead>
-                    <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    <tr className="bg-slate-900/50 border-b border-slate-800 text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">
                        <th className="px-8 py-6">Clínica / Instância</th>
                        <th className="px-8 py-6">Número Conectado</th>
                        <th className="px-8 py-6">Msgs</th>
@@ -130,12 +130,12 @@ export function SuperWhatsAppPage() {
                           <td className="px-8 py-5">
                              <div className="flex flex-col">
                                 <span className="text-sm font-black text-slate-200 group-hover:text-emerald-400 transition-colors">{item.clinica}</span>
-                                <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{item.instance}</span>
+                                <span className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-widest">{item.instance}</span>
                              </div>
                           </td>
-                          <td className="px-8 py-5 font-mono text-xs text-slate-400">{item.phone}</td>
+                          <td className="px-8 py-5 font-mono text-xs text-[var(--color-text-muted)]">{item.phone}</td>
                           <td className="px-8 py-5">
-                             <span className="text-xs font-black text-slate-300">{item.msgs}</span>
+                             <span className="text-xs font-black text-[var(--color-text-dim)]">{item.msgs}</span>
                           </td>
                           <td className="px-8 py-5">
                              <div className="flex items-center gap-2">
@@ -158,19 +158,19 @@ export function SuperWhatsAppPage() {
                                 <button
                                   disabled
                                   onClick={() => toast({ title: 'Em desenvolvimento', description: 'Visualiza\u00e7\u00e3o de conversas ainda em desenvolvimento.', type: 'info' })}
-                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Ver conversas (em desenvolvimento)">
+                                  className="p-2 bg-slate-900/50 text-[var(--color-text-secondary)] rounded-lg cursor-not-allowed opacity-50" title="Ver conversas (em desenvolvimento)">
                                    <MessageSquare size={14} />
                                 </button>
                                 <button
                                   disabled
                                   onClick={() => toast({ title: 'Em desenvolvimento', description: 'Gera\u00e7\u00e3o de QR Code via painel ainda em desenvolvimento.', type: 'info' })}
-                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Gerar QR Code (em desenvolvimento)">
+                                  className="p-2 bg-slate-900/50 text-[var(--color-text-secondary)] rounded-lg cursor-not-allowed opacity-50" title="Gerar QR Code (em desenvolvimento)">
                                    <QrCode size={14} />
                                 </button>
                                 <button
                                   disabled
                                   onClick={() => toast({ title: 'Em desenvolvimento', description: 'Desconex\u00e3o via painel ainda em desenvolvimento.', type: 'info' })}
-                                  className="p-2 bg-slate-900/50 text-slate-600 rounded-lg cursor-not-allowed opacity-50" title="Desconectar (em desenvolvimento)">
+                                  className="p-2 bg-slate-900/50 text-[var(--color-text-secondary)] rounded-lg cursor-not-allowed opacity-50" title="Desconectar (em desenvolvimento)">
                                    <Power size={14} />
                                 </button>
                              </div>
@@ -192,7 +192,7 @@ export function SuperWhatsAppPage() {
               
               <div className="space-y-6 relative z-10">
                  <div className="flex justify-between items-center text-[10px] font-black">
-                    <span className="text-slate-500 uppercase">Incoming Events (24h)</span>
+                    <span className="text-[var(--color-text-muted)] uppercase">Incoming Events (24h)</span>
                     <span className="text-emerald-400">99.98% Success</span>
                  </div>
                  <div className="h-2 bg-slate-900 rounded-full flex overflow-hidden">
@@ -203,11 +203,11 @@ export function SuperWhatsAppPage() {
                  
                  <div className="grid grid-cols-2 gap-4">
                     <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">PICO (HOJE)</span>
+                       <span className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">PICO (HOJE)</span>
                        <span className="text-sm font-black text-white">45 req/sec</span>
                     </div>
                     <div className="p-4 bg-slate-900/50 rounded-2xl border border-slate-800/50">
-                       <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">LATÊNCIA</span>
+                       <span className="text-[9px] font-black text-[var(--color-text-muted)] uppercase tracking-widest block mb-1">LATÊNCIA</span>
                        <span className="text-sm font-black text-white">125ms</span>
                     </div>
                  </div>
@@ -236,8 +236,8 @@ export function SuperWhatsAppPage() {
                          alert.type === 'error' ? 'bg-red-500' : alert.type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
                        )} />
                        <div>
-                          <p className="text-[10px] font-black uppercase text-slate-500 mb-0.5 tracking-tight">{alert.clinica} • {alert.time}</p>
-                          <p className="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors">{alert.msg}</p>
+                          <p className="text-[10px] font-black uppercase text-[var(--color-text-muted)] mb-0.5 tracking-tight">{alert.clinica} • {alert.time}</p>
+                          <p className="text-[11px] font-bold text-[var(--color-text-dim)] group-hover:text-white transition-colors">{alert.msg}</p>
                        </div>
                     </div>
                  ))}
