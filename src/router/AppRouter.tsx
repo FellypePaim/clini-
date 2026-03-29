@@ -26,6 +26,9 @@ import { RegisterPage } from '../pages/Login/RegisterPage'
 import { WaitingApprovalPage } from '../pages/Login/WaitingApprovalPage'
 import { NotFoundPage } from '../pages/NotFoundPage'
 
+// ─── Páginas lazy — Landing ───────────────────────────
+const LandingPage = lazyNamed(() => import('../pages/Landing/LandingPage'), 'LandingPage')
+
 // ─── Páginas lazy — Core ───────────────────────────────
 const DashboardPage = lazyNamed(() => import('../pages/Dashboard/DashboardPage'), 'DashboardPage')
 const AgendaPage = lazyNamed(() => import('../pages/Agenda/AgendaPage'), 'AgendaPage')
@@ -145,6 +148,9 @@ export function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
+        {/* Landing pública */}
+        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+
         {/* Rotas públicas */}
         <Route
           path="/login"
