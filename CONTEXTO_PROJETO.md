@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.6.0** (OVYVA v3 — agendamento real + CRM automático — 28/03/2026)
+- Versão: **v1.7.0** (Segurança RBAC + melhorias por role — 29/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -31,6 +31,7 @@
 - Fase 19: ✅ **Gestão de Ausências de Profissionais (25/03/2026)**
 - Fase 20: ✅ **SuperAdmin v2 — 100% dados reais, sem hardcode (27/03/2026)**
 - Fase 21: ✅ **OVYVA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
+- Fase 22: ✅ **Segurança RBAC + Melhorias por Role (29/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -264,7 +265,59 @@ Actions:
 - Mensagens diferenciadas por remetente (superadmin=roxo direita, clínica=cinza esquerda)
 - Chat desabilitado em tickets fechados/resolvidos
 
-## 15. MIGRATIONS ADICIONAIS
+## 15. FASE 22 — SEGURANÇA RBAC + MELHORIAS (29/03/2026)
+
+### RequireRole Guard (AppRouter.tsx)
+- Componente `RequireRole` protege rotas por array de roles permitidos
+- `/financeiro`, `/estoque/*`, `/prescricoes`, `/relatorios/*` → admin + profissional
+- `/configuracoes/*` → admin only
+- `/ovyva/configuracoes` → admin only
+- `/ovyva/historico` → admin + profissional
+- Recepção redireciona para `/dashboard` se tentar acessar URL restrita
+
+### usePermissions Reforçado (authStore.ts)
+- Expõe permissões granulares: `canViewFinancial`, `canManageStock`, `canManagePatients`, `canWritePrescriptions`, `canViewReports`, `canManageUsers`, `canViewAllSchedules`
+- Helper `hasRole(...roles)` para checks pontuais
+
+### Correções por Módulo
+- **Dashboard**: personalizado por role (recepção sem gráficos/insights), filtro de período (Hoje/Semana/Mês), barras KPI com % real, cálculo de data corrigido
+- **Agenda**: profissional só vê suas consultas, verificação de ausências antes de agendar, profissionais carregados do banco (não dos appointments), recorrência funcional (semanal/quinzenal/mensal), drag-drop com lock anti-double
+- **Pacientes**: botões criar/importar ocultos para recepção, perfil com tabs filtrados por role (recepção só vê resumo/docs/termos)
+- **OVYVA**: config protegida (admin only), clinica_id em takeover/return, metadata do atendente salva, label dinâmico por role, realtime estabilizado
+- **Verdesk**: profissional é somente leitura (sem criar leads, sem drag-drop)
+- **Financeiro**: profissional só vê seus lançamentos, categorias customizáveis da config da clínica
+- **Estoque**: custos ocultos para profissional (mostra "Produtos Ativos" em vez de "Valor em Estoque")
+- **Prescrições**: só dono ou admin pode editar/cancelar/excluir
+- **Configurações**: anti-escalação (non-admin não pode criar admin), LGPD export só admin, não pode desativar própria conta, CNPJ validado com algoritmo real
+- **Header**: alertas filtrados por role, dismissals persistem em localStorage, links admin ocultos para non-admin
+
+### Arquivos Alterados (22 arquivos, 4 commits)
+- `src/router/AppRouter.tsx` — RequireRole guard
+- `src/store/authStore.ts` — usePermissions reforçado
+- `src/components/dashboard/KpiCards.tsx` — filtro período + barras reais
+- `src/components/dashboard/PacientesRecentes.tsx` — N+1 fix + clinica_id
+- `src/components/dashboard/ProcedimentosPieChart.tsx` — cálculo data fix
+- `src/components/dashboard/ConsultasChart.tsx` — error handling
+- `src/components/layout/Header.tsx` — alertas filtrados + dismiss persistente
+- `src/components/layout/Sidebar.tsx` — versão 1.7.0
+- `src/components/ovyva/ChatWindow.tsx` — label dinâmico
+- `src/hooks/useAgenda.ts` — filtro profissional + ausências + recorrência
+- `src/hooks/useOVYVA.ts` — clinica_id + metadata + realtime fix
+- `src/hooks/useFinanceiro.ts` — filtro profissional
+- `src/hooks/usePrescricoes.ts` — canModify() check
+- `src/pages/Dashboard/DashboardPage.tsx` — personalizado por role + filtro período
+- `src/pages/Agenda/AgendaPage.tsx` — profissionais do banco + drag lock
+- `src/pages/Pacientes/PacientesPage.tsx` — canManagePatients
+- `src/pages/Pacientes/PatientProfilePage.tsx` — tabs filtrados por role
+- `src/pages/Ovyva/OvyvaPage.tsx` — botões config/histórico por role
+- `src/pages/Verdesk/VerdeskPage.tsx` — permissões por role
+- `src/pages/Financeiro/FinanceiroPage.tsx` — categorias customizáveis
+- `src/pages/Estoque/EstoquePage.tsx` — custos ocultos
+- `src/pages/Configuracoes/ProfissionaisPage.tsx` — anti-escalação
+- `src/pages/Configuracoes/SegurancaPage.tsx` — LGPD guard
+- `src/pages/Configuracoes/ClinicaPage.tsx` — CNPJ validação
+
+## 16. MIGRATIONS ADICIONAIS
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
 
@@ -272,5 +325,5 @@ Actions:
 1. Deploy final em produção (Vercel)
 2. UI para clínicas abrirem tickets de suporte (lado do admin da clínica)
 3. Busca Global (Ctrl+K)
-4. Chat OVYVA: mensagens enviadas pelo painel chegarem no WhatsApp do paciente
+4. Tela "Meu Perfil" acessível por todos os roles (sem Configurações)
 5. Upload de imagens no suporte
