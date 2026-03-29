@@ -68,7 +68,7 @@ const InadimplenciaReport = lazyNamed(() => import('../pages/Relatorios/Inadimpl
 const DREReport = lazyNamed(() => import('../pages/Relatorios/DREReport'), 'DREReport')
 const CampanhasReport = lazyNamed(() => import('../pages/Relatorios/CampanhasReport'), 'CampanhasReport')
 const OrigemReport = lazyNamed(() => import('../pages/Relatorios/OrigemReport'), 'OrigemReport')
-const LYRAReport = lazyNamed(() => import('../pages/Relatorios/LYRAReport'), 'LYRAReport')
+const LYRAReport = lazyNamed(() => import('../pages/Relatorios/LyraReport'), 'LYRAReport')
 const FiscalReport = lazyNamed(() => import('../pages/Relatorios/FiscalReport'), 'FiscalReport')
 
 // ─── Páginas lazy — Financeiro ─────────────────────────
