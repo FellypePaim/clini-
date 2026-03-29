@@ -54,9 +54,13 @@ export function SegurancaPage() {
 
   useEffect(() => { loadAuditLogs() }, [loadAuditLogs])
 
-  // Export LGPD — todos os dados do paciente
+  // Export LGPD — todos os dados do paciente (somente admin)
   const handleExportLGPD = async () => {
     if (!clinicaId) return
+    if (user?.role !== 'administrador') {
+      toast({ title: 'Acesso negado', description: 'Somente administradores podem exportar dados LGPD.', type: 'error' })
+      return
+    }
     setExportingLGPD(true)
     try {
       const [pacientes, consultas, prescricoes, termos, evolucoes, anamneses] = await Promise.all([

@@ -11,6 +11,8 @@ export function useAgenda() {
   const [error, setError] = useState<string | null>(null)
 
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
+  const userId = useAuthStore(state => state.user?.id)
+  const userRole = useAuthStore(state => state.user?.role)
   const { toast } = useToast()
 
   // ── Buscar consultas com filtros ──────────────────────────────────────
@@ -47,7 +49,10 @@ export function useAgenda() {
           `)
           .eq('clinica_id', clinicaId)
 
-        if (filtros?.profissionalId && filtros.profissionalId !== 'todos') {
+        // Profissional só vê as próprias consultas por padrão
+        if (userRole === 'profissional' && (!filtros?.profissionalId || filtros.profissionalId === 'todos')) {
+          query = query.eq('profissional_id', userId!)
+        } else if (filtros?.profissionalId && filtros.profissionalId !== 'todos') {
           query = query.eq('profissional_id', filtros.profissionalId)
         }
         if (filtros?.status && filtros.status !== 'todos') {
@@ -87,7 +92,7 @@ export function useAgenda() {
         setIsLoading(false)
       }
     },
-    [clinicaId, toast]
+    [clinicaId, userId, userRole, toast]
   )
 
   // ── Buscar ausências de profissionais ────────────────────────────────────
@@ -169,6 +174,19 @@ export function useAgenda() {
 
         if (count && count > 0) {
           throw new Error('Já existe consulta agendada neste horário.')
+        }
+
+        // Verificar se profissional está ausente nesta data
+        const { data: ausenciasProf } = await supabase
+          .from('profissional_ausencias')
+          .select('id')
+          .eq('profissional_id', data.profissionalId)
+          .lte('data_inicio', data.data)
+          .gte('data_fim', data.data)
+          .limit(1)
+
+        if (ausenciasProf && ausenciasProf.length > 0) {
+          throw new Error('Profissional está ausente nesta data (folga/atestado/férias).')
         }
 
         // Buscar procedimento_id real se informado

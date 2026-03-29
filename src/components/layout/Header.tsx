@@ -23,7 +23,7 @@ import {
   PackageX,
   X,
 } from 'lucide-react'
-import { useAuthStore } from '../../store/authStore'
+import { useAuthStore, usePermissions } from '../../store/authStore'
 import { supabase } from '../../lib/supabase'
 
 // ─── Mapa de rota → breadcrumb ────────────────────────
@@ -68,10 +68,16 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
   const location = useLocation()
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+  const { canManageStock, canViewFinancial, isAdmin } = usePermissions()
   const [showUserMenu, setShowUserMenu] = React.useState(false)
   const [showNotifications, setShowNotifications] = React.useState(false)
   const [alerts, setAlerts] = React.useState<SystemAlert[]>([])
-  const [dismissedIds, setDismissedIds] = React.useState<Set<string>>(new Set())
+  const [dismissedIds, setDismissedIds] = React.useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem('pv-dismissed-alerts')
+      return saved ? new Set(JSON.parse(saved)) : new Set()
+    } catch { return new Set() }
+  })
 
   // ── Carregar alertas de sistema ───────────────────────
   React.useEffect(() => {
@@ -162,8 +168,8 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
           }
         }
 
-        // 4. Estoque abaixo do mínimo
-        if (config.sistema_estoque_baixo !== false) {
+        // 4. Estoque abaixo do mínimo (somente se user tem acesso a estoque)
+        if (config.sistema_estoque_baixo !== false && canManageStock) {
           const { data: produtosBaixos } = await supabase
             .from('produtos_estoque')
             .select('id, nome, estoque_atual, estoque_minimo')
@@ -201,7 +207,11 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
   const alertCount = visibleAlerts.length
 
   const dismiss = (id: string) => {
-    setDismissedIds(prev => new Set(prev).add(id))
+    setDismissedIds(prev => {
+      const next = new Set(prev).add(id)
+      try { localStorage.setItem('pv-dismissed-alerts', JSON.stringify([...next])) } catch { /* ignore */ }
+      return next
+    })
   }
 
   const currentRoute = Object.entries(ROUTE_INFO).find(([path]) =>
@@ -314,14 +324,16 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                   )}
                 </div>
 
-                <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
-                  <button
-                    onClick={() => { navigate('/configuracoes/notificacoes'); setShowNotifications(false) }}
-                    className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
-                  >
-                    Configurar notificações
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
+                    <button
+                      onClick={() => { navigate('/configuracoes/notificacoes'); setShowNotifications(false) }}
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                    >
+                      Configurar notificações
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -370,14 +382,16 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                     <User className="w-4 h-4" />
                     Meu Perfil
                   </button>
-                  <button
-                    onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
-                               hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Configurações
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
+                                 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                    >
+                      <Settings className="w-4 h-4" />
+                      Configurações
+                    </button>
+                  )}
                 </div>
                 <div className="border-t border-gray-100 py-1">
                   <button

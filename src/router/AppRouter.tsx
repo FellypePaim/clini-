@@ -118,6 +118,16 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+// ─── Guard de Role ─────────────────────────────────────
+function RequireRole({ children, roles }: { children: React.ReactNode; roles: string[] }) {
+  const { isAuthenticated, user } = useAuthStore()
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!user?.role || !roles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />
+  }
+  return <>{children}</>
+}
+
 // ─── Guard de SuperAdmin ───────────────────────────────
 function RequireSuperAdmin({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, user } = useAuthStore()
@@ -172,45 +182,45 @@ export function AppRouter() {
 
           {/* Módulo OVYVA */}
           <Route path="/ovyva" element={<OvyvaPage />} />
-          <Route path="/ovyva/configuracoes" element={<OvyvaConfigPage />} />
-          <Route path="/ovyva/historico" element={<OvyvaHistoryPage />} />
+          <Route path="/ovyva/configuracoes" element={<RequireRole roles={['administrador']}><OvyvaConfigPage /></RequireRole>} />
+          <Route path="/ovyva/historico" element={<RequireRole roles={['administrador', 'profissional']}><OvyvaHistoryPage /></RequireRole>} />
 
           {/* Módulo Verdesk CRM */}
           <Route path="/verdesk" element={<VerdeskPage />} />
           <Route path="/verdesk/performance" element={<PerformancePage />} />
           <Route path="/verdesk/campanhas" element={<CampanhasPage />} />
 
-          {/* Módulo Estoque */}
-          <Route path="/estoque" element={<EstoquePage />} />
-          <Route path="/estoque/produtos" element={<ProdutosPage />} />
-          <Route path="/estoque/movimentacoes" element={<MovimentacoesPage />} />
-          <Route path="/estoque/alertas" element={<AlertasPage />} />
-          <Route path="/estoque/regras" element={<RegrasConsumoPage />} />
+          {/* Módulo Estoque — admin + profissional */}
+          <Route path="/estoque" element={<RequireRole roles={['administrador', 'profissional']}><EstoquePage /></RequireRole>} />
+          <Route path="/estoque/produtos" element={<RequireRole roles={['administrador', 'profissional']}><ProdutosPage /></RequireRole>} />
+          <Route path="/estoque/movimentacoes" element={<RequireRole roles={['administrador', 'profissional']}><MovimentacoesPage /></RequireRole>} />
+          <Route path="/estoque/alertas" element={<RequireRole roles={['administrador', 'profissional']}><AlertasPage /></RequireRole>} />
+          <Route path="/estoque/regras" element={<RequireRole roles={['administrador', 'profissional']}><RegrasConsumoPage /></RequireRole>} />
 
-          {/* Módulo Relatórios */}
-          <Route path="/relatorios" element={<RelatoriosPage />} />
-          <Route path="/relatorios/producao-profissional" element={<ProducaoProfissionalReport />} />
-          <Route path="/relatorios/faturamento" element={<FaturamentoReport />} />
-          <Route path="/relatorios/funil-leads" element={<FunilLeadsReport />} />
-          <Route path="/relatorios/procedimentos" element={<ProcedimentosReport />} />
-          <Route path="/relatorios/pacientes" element={<PacientesReport />} />
-          <Route path="/relatorios/retorno" element={<RetornoReport />} />
-          <Route path="/relatorios/convenios" element={<ConvenioReport />} />
-          <Route path="/relatorios/inadimplencia" element={<InadimplenciaReport />} />
-          <Route path="/relatorios/dre" element={<DREReport />} />
-          <Route path="/relatorios/campanhas" element={<CampanhasReport />} />
-          <Route path="/relatorios/origem" element={<OrigemReport />} />
-          <Route path="/relatorios/ovyva" element={<OVYVAReport />} />
-          <Route path="/relatorios/fiscal" element={<FiscalReport />} />
+          {/* Módulo Relatórios — admin + profissional */}
+          <Route path="/relatorios" element={<RequireRole roles={['administrador', 'profissional']}><RelatoriosPage /></RequireRole>} />
+          <Route path="/relatorios/producao-profissional" element={<RequireRole roles={['administrador', 'profissional']}><ProducaoProfissionalReport /></RequireRole>} />
+          <Route path="/relatorios/faturamento" element={<RequireRole roles={['administrador', 'profissional']}><FaturamentoReport /></RequireRole>} />
+          <Route path="/relatorios/funil-leads" element={<RequireRole roles={['administrador', 'profissional']}><FunilLeadsReport /></RequireRole>} />
+          <Route path="/relatorios/procedimentos" element={<RequireRole roles={['administrador', 'profissional']}><ProcedimentosReport /></RequireRole>} />
+          <Route path="/relatorios/pacientes" element={<RequireRole roles={['administrador', 'profissional']}><PacientesReport /></RequireRole>} />
+          <Route path="/relatorios/retorno" element={<RequireRole roles={['administrador', 'profissional']}><RetornoReport /></RequireRole>} />
+          <Route path="/relatorios/convenios" element={<RequireRole roles={['administrador', 'profissional']}><ConvenioReport /></RequireRole>} />
+          <Route path="/relatorios/inadimplencia" element={<RequireRole roles={['administrador', 'profissional']}><InadimplenciaReport /></RequireRole>} />
+          <Route path="/relatorios/dre" element={<RequireRole roles={['administrador', 'profissional']}><DREReport /></RequireRole>} />
+          <Route path="/relatorios/campanhas" element={<RequireRole roles={['administrador', 'profissional']}><CampanhasReport /></RequireRole>} />
+          <Route path="/relatorios/origem" element={<RequireRole roles={['administrador', 'profissional']}><OrigemReport /></RequireRole>} />
+          <Route path="/relatorios/ovyva" element={<RequireRole roles={['administrador', 'profissional']}><OVYVAReport /></RequireRole>} />
+          <Route path="/relatorios/fiscal" element={<RequireRole roles={['administrador', 'profissional']}><FiscalReport /></RequireRole>} />
 
-          {/* Módulo Financeiro */}
-          <Route path="/financeiro" element={<FinanceiroPage />} />
+          {/* Módulo Financeiro — admin + profissional */}
+          <Route path="/financeiro" element={<RequireRole roles={['administrador', 'profissional']}><FinanceiroPage /></RequireRole>} />
 
-          {/* Módulo Prescrições */}
-          <Route path="/prescricoes" element={<PrescricoesPage />} />
+          {/* Módulo Prescrições — admin + profissional */}
+          <Route path="/prescricoes" element={<RequireRole roles={['administrador', 'profissional']}><PrescricoesPage /></RequireRole>} />
 
-          {/* Módulo Configurações */}
-          <Route path="/configuracoes" element={<ConfiguracoesLayout />}>
+          {/* Módulo Configurações — admin only */}
+          <Route path="/configuracoes" element={<RequireRole roles={['administrador']}><ConfiguracoesLayout /></RequireRole>}>
              <Route path="clinica" element={<ClinicaPage />} />
              <Route path="profissionais" element={<ProfissionaisPage />} />
              <Route path="procedimentos" element={<ProcedimentosPage />} />

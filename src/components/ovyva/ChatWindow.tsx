@@ -256,7 +256,11 @@ function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; a
           {!isPatient && !isIA && (
             <div className="flex items-center gap-2 mb-3 opacity-40">
                <User className="w-4 h-4" />
-               <span className="text-[10px] font-black uppercase tracking-widest">Atendimento Recepção</span>
+               <span className="text-[10px] font-black uppercase tracking-widest">
+                 Atendimento {(message.metadata as any)?.atendente_role === 'administrador' ? 'Admin'
+                   : (message.metadata as any)?.atendente_role === 'profissional' ? 'Profissional'
+                   : 'Humano'}
+               </span>
             </div>
           )}
 

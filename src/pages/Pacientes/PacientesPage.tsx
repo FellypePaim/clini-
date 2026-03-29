@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, Filter, ChevronLeft, ChevronRight, User, X, Upload, Loader2, FileText, CheckCircle, Users, UserPlus, CalendarClock, Phone, MessageCircle, Calendar } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
+import { usePermissions } from '../../store/authStore'
 import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
@@ -62,6 +63,7 @@ function isThisMonth(dateStr: string): boolean {
 export function PacientesPage() {
   const navigate = useNavigate()
   const { patients, getPatients, createPatient, isLoading } = usePatients()
+  const { canManagePatients } = usePermissions()
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [filterConvenio, setFilterConvenio] = useState('todos')
@@ -153,14 +155,16 @@ export function PacientesPage() {
             {search && ` encontrado${filteredPatients.length !== 1 ? 's' : ''}`}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" onClick={() => setShowImportModal(true)}>
-            <Upload className="w-4 h-4" /> Importar CSV
-          </button>
-          <button className="btn-primary" onClick={() => setShowModal(true)}>
-            <Plus className="w-5 h-5" /> Novo Paciente
-          </button>
-        </div>
+        {canManagePatients && (
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors" onClick={() => setShowImportModal(true)}>
+              <Upload className="w-4 h-4" /> Importar CSV
+            </button>
+            <button className="btn-primary" onClick={() => setShowModal(true)}>
+              <Plus className="w-5 h-5" /> Novo Paciente
+            </button>
+          </div>
+        )}
       </div>
 
       {/* KPI Cards */}

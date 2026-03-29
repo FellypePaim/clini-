@@ -61,6 +61,7 @@ export function ProfissionaisPage() {
   const { toast } = useToast()
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
+  const isAdmin = user?.role === 'administrador'
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -98,11 +99,16 @@ export function ProfissionaisPage() {
   useEffect(() => { loadProfissionais() }, [loadProfissionais])
 
   const toggleStatus = async (id: string, current: boolean) => {
+    if (id === user?.id) {
+      toast({ title: 'Atenção', description: 'Você não pode desativar sua própria conta.', type: 'warning' })
+      return
+    }
     setToggling(id)
     const { error } = await supabase
       .from('profiles')
       .update({ ativo: !current })
       .eq('id', id)
+      .eq('clinica_id', clinicaId)
 
     if (error) {
       toast({ title: 'Erro', description: error.message, type: 'error' })
@@ -356,7 +362,7 @@ export function ProfissionaisPage() {
                 <select className="input-base" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value as any }))}>
                   <option value="profissional">Profissional de Saúde</option>
                   <option value="recepcao">Recepção</option>
-                  <option value="admin">Administrador</option>
+                  {isAdmin && <option value="admin">Administrador</option>}
                 </select>
               </div>
 
@@ -431,7 +437,7 @@ export function ProfissionaisPage() {
                 >
                   <option value="profissional">Profissional de Saúde</option>
                   <option value="recepcao">Recepção</option>
-                  <option value="admin">Administrador</option>
+                  {isAdmin && <option value="admin">Administrador</option>}
                 </select>
               </div>
 
@@ -474,7 +480,7 @@ export function ProfissionaisPage() {
                 <select className="input-base" value={editForm.role} onChange={e => setEditForm(f => ({ ...f, role: e.target.value }))}>
                   <option value="profissional">Profissional de Saúde</option>
                   <option value="recepcao">Recepção</option>
-                  <option value="admin">Administrador</option>
+                  {isAdmin && <option value="admin">Administrador</option>}
                 </select>
               </div>
 

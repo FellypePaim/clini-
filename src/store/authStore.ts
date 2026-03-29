@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { User, Role } from '../types'
+import { ROLE_PERMISSIONS } from '../types'
 import { supabase } from '../lib/supabase'
 
 // ─── Interface do Store ────────────────────────────────
@@ -99,12 +100,23 @@ export const useAuthStore = create<AuthState>()(
 export const usePermissions = () => {
   const { user } = useAuthStore()
   const role: Role | null = user?.role ?? null
+  const perms = role ? ROLE_PERMISSIONS[role] : null
 
   return {
     isAdmin: role === 'administrador',
     isProfissional: role === 'profissional',
     isRecepcao: role === 'recepção',
+    isSuperAdmin: role === 'superadmin',
     role,
+    // Permissões granulares
+    canViewAllSchedules: perms?.canViewAllSchedules ?? false,
+    canManagePatients: perms?.canManagePatients ?? false,
+    canViewFinancial: perms?.canViewFinancial ?? false,
+    canManageStock: perms?.canManageStock ?? false,
+    canManageUsers: perms?.canManageUsers ?? false,
+    canViewReports: perms?.canViewReports ?? false,
+    canWritePrescriptions: perms?.canWritePrescriptions ?? false,
+    hasRole: (...roles: Role[]) => role !== null && roles.includes(role),
   }
 }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import type { OvyvaConversation, OvyvaConfig, OvyvaMessage } from '../types/ovyva'
@@ -29,6 +29,13 @@ export function useOVYVA() {
         mensagens: []
       }))
       setConversations(mapped)
+      // Sincronizar activeConversation com metadata atualizada (preservando mensagens)
+      setActiveConversation(prev => {
+        if (!prev) return null
+        const updated = mapped.find((c: any) => c.id === prev.id)
+        if (!updated) return prev
+        return { ...updated, mensagens: prev.mensagens }
+      })
     }
     setIsLoading(false)
   }, [clinica_id])
@@ -94,15 +101,18 @@ export function useOVYVA() {
     }
   }, [clinica_id])
 
-  // Realtime subscription
+  // Realtime subscription — estável (não depende de activeConversation para evitar recriação)
+  const activeConvIdRef = React.useRef<string | null>(null)
+  useEffect(() => { activeConvIdRef.current = activeConversation?.id ?? null }, [activeConversation])
+
   useEffect(() => {
     if (!clinica_id) return
     const sub = supabase
       .channel('ovyva_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_mensagens' }, () => {
         fetchConversations()
-        if (activeConversation) {
-          loadMessages(activeConversation.id)
+        if (activeConvIdRef.current) {
+          loadMessages(activeConvIdRef.current)
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_conversas' }, () => {
@@ -110,7 +120,7 @@ export function useOVYVA() {
       })
       .subscribe()
     return () => { supabase.removeChannel(sub) }
-  }, [clinica_id, activeConversation, fetchConversations, loadMessages])
+  }, [clinica_id, fetchConversations, loadMessages])
 
   // Selecionar conversa
   const selectConversation = useCallback((conv: OvyvaConversation) => {
@@ -127,12 +137,17 @@ export function useOVYVA() {
     const nomeAtendente = user?.nome?.split(' ')[0] || 'Atendente'
     const textoComAssinatura = `*${nomeAtendente}:*\n${texto}`
 
-    // 1. Salvar no banco
+    // 1. Salvar no banco com metadata do atendente
     await supabase.from('ovyva_mensagens').insert({
       conversa_id: conversationId,
       remetente: 'humano',
       conteudo: textoComAssinatura,
       lida: true,
+      metadata: {
+        atendente_id: user?.id,
+        atendente_nome: user?.nome,
+        atendente_role: user?.role,
+      },
     })
 
     // 2. Enviar via WhatsApp real (usando supabase.functions.invoke)
@@ -155,22 +170,24 @@ export function useOVYVA() {
   }, [conversations, loadMessages, clinica_id, user])
 
   const takeoverConversation = useCallback(async (conversationId: string) => {
+    if (!clinica_id) return
     await supabase.from('ovyva_conversas').update({
       status: 'atendido_humano',
       atendente_id: user?.id || null,
-    }).eq('id', conversationId)
+    }).eq('id', conversationId).eq('clinica_id', clinica_id)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'atendido_humano' } : c))
     setActiveConversation(prev => prev?.id === conversationId ? { ...prev, status: 'atendido_humano' } : prev)
-  }, [user])
+  }, [user, clinica_id])
 
   const returnToAI = useCallback(async (conversationId: string) => {
+    if (!clinica_id) return
     await supabase.from('ovyva_conversas').update({
       status: 'ia_ativa',
       atendente_id: null,
-    }).eq('id', conversationId)
+    }).eq('id', conversationId).eq('clinica_id', clinica_id)
     setConversations(prev => prev.map(c => c.id === conversationId ? { ...c, status: 'ia_ativa' } : c))
     setActiveConversation(prev => prev?.id === conversationId ? { ...prev, status: 'ia_ativa' } : prev)
-  }, [])
+  }, [clinica_id])
 
   const updateAIConfig = useCallback(async (newConfig: Partial<OvyvaConfig>) => {
     setConfig(prev => prev ? { ...prev, ...newConfig } : null)

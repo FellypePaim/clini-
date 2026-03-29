@@ -39,10 +39,10 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/pacientes',    label: 'Pacientes / PEP',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/ovyva',        label: 'OVYVA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
   { path: '/verdesk',      label: 'Verdesk CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador'] },
+  { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/estoque',      label: 'Estoque',      icon: Package,         group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
-  { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao',    roles: ['administrador'] },
+  { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao',    roles: ['administrador', 'profissional'] },
   { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema',   roles: ['administrador'] },
 ]
 

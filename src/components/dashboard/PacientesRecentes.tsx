@@ -37,19 +37,26 @@ export function PacientesRecentes() {
       .limit(5)
 
     if (!error && data) {
-      // Buscar contagem real de consultas por paciente
-      const pacientesComConsultas = await Promise.all(data.map(async (p: any) => {
-        const { count } = await supabase
-          .from('consultas')
-          .select('*', { count: 'exact', head: true })
-          .eq('paciente_id', p.id)
-        return {
-          id: p.id,
-          nome_completo: p.nome_completo,
-          contato: { telefone: p.whatsapp },
-          totalConsultas: count ?? 0,
-          ultimaConsulta: p.updated_at ? p.updated_at.split('T')[0] : null,
-        }
+      // Buscar contagem de consultas em uma única query agrupada
+      const ids = data.map((p: any) => p.id)
+      const { data: consultasData } = await supabase
+        .from('consultas')
+        .select('paciente_id')
+        .eq('clinica_id', clinicaId)
+        .in('paciente_id', ids)
+
+      // Agrupar contagem por paciente
+      const countMap = new Map<string, number>()
+      for (const c of consultasData || []) {
+        countMap.set(c.paciente_id, (countMap.get(c.paciente_id) || 0) + 1)
+      }
+
+      const pacientesComConsultas = data.map((p: any) => ({
+        id: p.id,
+        nome_completo: p.nome_completo,
+        contato: { telefone: p.whatsapp },
+        totalConsultas: countMap.get(p.id) || 0,
+        ultimaConsulta: p.updated_at ? p.updated_at.split('T')[0] : null,
       }))
       setPacientes(pacientesComConsultas)
     }
