@@ -5,6 +5,7 @@ import { FeaturesSection } from './FeaturesSection'
 import { OvyvaSection } from './OvyvaSection'
 import { BenefitsSection } from './BenefitsSection'
 import { TestimonialsSection } from './TestimonialsSection'
+import { QuizSection } from './QuizSection'
 import { FooterSection } from './FooterSection'
 
 export function LandingPage() {
@@ -17,6 +18,7 @@ export function LandingPage() {
       <OvyvaSection />
       <BenefitsSection />
       <TestimonialsSection />
+      <QuizSection />
       <FooterSection />
     </div>
   )
