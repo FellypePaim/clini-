@@ -2,6 +2,10 @@ import { LandingNavbar } from './LandingNavbar'
 import { HeroSection } from './HeroSection'
 import { SocialProofSection } from './SocialProofSection'
 import { FeaturesSection } from './FeaturesSection'
+import { OvyvaSection } from './OvyvaSection'
+import { BenefitsSection } from './BenefitsSection'
+import { TestimonialsSection } from './TestimonialsSection'
+import { FooterSection } from './FooterSection'
 
 export function LandingPage() {
   return (
@@ -10,6 +14,10 @@ export function LandingPage() {
       <HeroSection />
       <SocialProofSection />
       <FeaturesSection />
+      <OvyvaSection />
+      <BenefitsSection />
+      <TestimonialsSection />
+      <FooterSection />
     </div>
   )
 }
