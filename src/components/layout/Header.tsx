@@ -225,22 +225,23 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
 
   return (
     <header
-      className="fixed top-0 right-0 left-0 md:left-[240px] h-16 bg-white border-b border-gray-100 flex items-center px-4 md:px-6 z-20 transition-all duration-200"
+      className="fixed top-0 right-0 left-0 md:left-[240px] h-16 border-b border-[var(--color-border)] flex items-center px-4 md:px-6 z-20 transition-all duration-200"
+      style={{ background: 'var(--color-bg-sidebar)' }}
     >
       <div className="flex items-center gap-2 text-sm flex-1">
         {onMenuClick && (
           <button
             onClick={onMenuClick}
-            className="md:hidden p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+            className="md:hidden p-2 -ml-2 text-[var(--color-text-muted)] hover:bg-[var(--color-bg-card-hover)] rounded-lg"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
-        <span className="text-gray-400 hidden sm:inline">{user?.clinicaNome || 'Clínica'}</span>
-        <ChevronRight className="w-3.5 h-3.5 text-gray-300 hidden sm:block" />
+        <span className="text-[var(--color-text-muted)] hidden sm:inline">{user?.clinicaNome || 'Clínica'}</span>
+        <ChevronRight className="w-3.5 h-3.5 text-[var(--color-text-dim)] hidden sm:block" />
         {routeInfo && (
-          <div className="flex items-center gap-1.5 text-gray-700 font-medium">
-            <routeInfo.icon className="w-4 h-4 text-green-600" />
+          <div className="flex items-center gap-1.5 text-[var(--color-text-secondary)] font-medium">
+            <routeInfo.icon className="w-4 h-4 text-cyan-500" />
             <span className="truncate max-w-[120px] sm:max-w-none">{routeInfo.label}</span>
           </div>
         )}
@@ -251,13 +252,13 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         {/* Busca rápida */}
         <button
           id="header-search"
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200
-                     text-gray-500 text-sm hover:border-green-300 hover:text-green-700
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--color-border)]
+                     text-[var(--color-text-muted)] text-sm hover:border-cyan-500/30 hover:text-cyan-500
                      transition-all duration-150 hidden sm:flex"
         >
           <Search className="w-3.5 h-3.5" />
-          <span className="text-xs text-gray-400">Buscar...</span>
-          <kbd className="text-[10px] text-gray-300 border border-gray-200 rounded px-1">⌘K</kbd>
+          <span className="text-xs text-[var(--color-text-muted)]">Buscar...</span>
+          <kbd className="text-[10px] text-[var(--color-text-dim)] border border-[var(--color-border)] rounded px-1">⌘K</kbd>
         </button>
 
         {/* Notificações */}
@@ -266,7 +267,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
             id="header-notifications"
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative w-9 h-9 flex items-center justify-center rounded-lg
-                       hover:bg-gray-100 transition-colors text-gray-500"
+                       hover:bg-[var(--color-bg-card-hover)] transition-colors text-[var(--color-text-muted)]"
           >
             <Bell className="w-[18px] h-[18px]" />
             {alertCount > 0 && (
@@ -280,9 +281,9 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
           {showNotifications && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
-              <div className="absolute right-0 top-12 w-80 bg-white border border-gray-100 rounded-xl z-50 shadow-xl shadow-gray-200/50 animate-fade-in overflow-hidden">
-                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-gray-800">Alertas do Sistema</h3>
+              <div className="absolute right-0 top-12 w-80 border border-[var(--color-border)] rounded-xl z-50 shadow-xl shadow-black/10 animate-fade-in overflow-hidden" style={{ background: 'var(--color-bg-card)' }}>
+                <div className="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-[var(--color-text-primary)]">Alertas do Sistema</h3>
                   {alertCount > 0 && (
                     <span className="text-[10px] font-bold text-white bg-red-500 rounded-full px-2 py-0.5">
                       {alertCount}
@@ -293,14 +294,14 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                 <div className="max-h-80 overflow-y-auto">
                   {visibleAlerts.length === 0 ? (
                     <div className="px-4 py-8 text-center">
-                      <Bell className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400 font-medium">Nenhum alerta no momento</p>
-                      <p className="text-xs text-gray-300 mt-1">Tudo está funcionando normalmente</p>
+                      <Bell className="w-8 h-8 text-[var(--color-text-dim)] mx-auto mb-2" />
+                      <p className="text-sm text-[var(--color-text-muted)] font-medium">Nenhum alerta no momento</p>
+                      <p className="text-xs text-[var(--color-text-dim)] mt-1">Tudo está funcionando normalmente</p>
                     </div>
                   ) : (
                     visibleAlerts.map(alert => (
                       <div key={alert.id}
-                        className="px-4 py-3 border-b border-gray-50 hover:bg-gray-50/50 transition-colors flex items-start gap-3 group"
+                        className="px-4 py-3 border-b border-[var(--color-border)] hover:bg-[var(--color-bg-card-hover)] transition-colors flex items-start gap-3 group"
                       >
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${alert.color}`}>
                           <alert.icon className="w-4 h-4" />
@@ -309,12 +310,12 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                           className="flex-1 min-w-0 cursor-pointer"
                           onClick={() => { navigate(alert.link); setShowNotifications(false) }}
                         >
-                          <p className="text-sm font-semibold text-gray-800">{alert.title}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{alert.description}</p>
+                          <p className="text-sm font-semibold text-[var(--color-text-primary)]">{alert.title}</p>
+                          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{alert.description}</p>
                         </div>
                         <button
                           onClick={() => dismiss(alert.id)}
-                          className="p-1 text-gray-300 hover:text-gray-500 rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                          className="p-1 text-[var(--color-text-dim)] hover:text-[var(--color-text-muted)] rounded opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                           title="Dispensar"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -325,7 +326,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                 </div>
 
                 {isAdmin && (
-                  <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50">
+                  <div className="px-4 py-2.5 border-t border-[var(--color-border)]" style={{ background: 'var(--color-bg-deep)' }}>
                     <button
                       onClick={() => { navigate('/configuracoes/notificacoes'); setShowNotifications(false) }}
                       className="text-xs font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
@@ -345,17 +346,17 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
             id="header-user-menu"
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl
-                       hover:bg-gray-50 transition-colors cursor-pointer border border-transparent
-                       hover:border-gray-200"
+                       hover:bg-[var(--color-bg-card-hover)] transition-colors cursor-pointer border border-transparent
+                       hover:border-[var(--color-border)]"
           >
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-cyan-600 to-indigo-500 rounded-lg flex items-center justify-center">
               <span className="text-xs font-bold text-white">{initials}</span>
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-xs font-semibold text-gray-800 leading-none truncate max-w-[120px]">
+              <p className="text-xs font-semibold text-[var(--color-text-primary)] leading-none truncate max-w-[120px]">
                 {user?.nome.split(' ')[0] + ' ' + user?.nome.split(' ').slice(-1)[0]}
               </p>
-              <p className="text-[10px] text-gray-400 leading-none mt-0.5">
+              <p className="text-[10px] text-[var(--color-text-muted)] leading-none mt-0.5">
                 {user?.role ? ROLE_LABELS[user.role] : ''}
               </p>
             </div>
@@ -368,26 +369,26 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                 className="fixed inset-0 z-40"
                 onClick={() => setShowUserMenu(false)}
               />
-              <div className="absolute right-0 top-12 w-56 bg-white border border-gray-100 rounded-xl py-1 z-50 shadow-lg shadow-gray-100/50 animate-fade-in">
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm font-semibold text-gray-800">{user?.nome}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{user?.email}</p>
+              <div className="absolute right-0 top-12 w-56 border border-[var(--color-border)] rounded-xl py-1 z-50 shadow-lg shadow-black/10 animate-fade-in" style={{ background: 'var(--color-bg-card)' }}>
+                <div className="px-4 py-3 border-b border-[var(--color-border)]">
+                  <p className="text-sm font-semibold text-[var(--color-text-primary)]">{user?.nome}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] mt-0.5 truncate">{user?.email}</p>
                 </div>
                 <div className="py-1">
                   {isAdmin && (
                     <>
                       <button
                         onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
-                                   hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-secondary)]
+                                   hover:bg-[var(--color-bg-card-hover)] hover:text-[var(--color-text-primary)] transition-colors"
                       >
                         <User className="w-4 h-4" />
                         Meu Perfil
                       </button>
                       <button
                         onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
-                                   hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-secondary)]
+                                   hover:bg-[var(--color-bg-card-hover)] hover:text-[var(--color-text-primary)] transition-colors"
                       >
                         <Settings className="w-4 h-4" />
                         Configurações
@@ -395,7 +396,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                     </>
                   )}
                 </div>
-                <div className="border-t border-gray-100 py-1">
+                <div className="border-t border-[var(--color-border)] py-1">
                   <button
                     id="header-logout"
                     onClick={async () => { await logout(); navigate('/login') }}
