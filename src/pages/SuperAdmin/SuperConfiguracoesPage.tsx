@@ -102,7 +102,7 @@ export function SuperConfiguracoesPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">Nome da Plataforma</label>
-                    <input type="text" defaultValue="Prontuário Verde" className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all font-bold" />
+                    <input type="text" defaultValue="CliniPlus" className="w-full bg-slate-900/50 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all font-bold" />
                  </div>
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-widest">URL de Produção</label>

@@ -220,10 +220,10 @@ export function PatientDocumentsTab({ pacienteId }: { pacienteId: string }) {
       .titulo { text-align: center; font-size: 15px; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; margin-bottom: 30px; }
       .footer { margin-top: 50px; text-align: center; font-size: 8px; color: #bbb; }
     </style></head><body>
-      <div class="header"><h1>${user?.clinicaNome || 'Prontuário Verde'}</h1><small>Sistema de Gestão Clínica</small></div>
+      <div class="header"><h1>${user?.clinicaNome || 'CliniPlus'}</h1><small>CliniPlus — Gestão Inteligente</small></div>
       <div class="titulo">${activeTemplate.titulo}</div>
       ${templateContent}
-      <div class="footer">Gerado pelo sistema Prontuário Verde</div>
+      <div class="footer">Gerado pelo sistema CliniPlus</div>
     </body></html>`)
     win.document.close()
     setTimeout(() => win.print(), 600)

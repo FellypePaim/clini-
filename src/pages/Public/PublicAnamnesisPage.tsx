@@ -217,7 +217,7 @@ export function PublicAnamnesisPage() {
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] uppercase font-black tracking-widest text-cyan-100/70">Prontuário Verde</p>
+              <p className="text-[10px] uppercase font-black tracking-widest text-cyan-100/70">CliniPlus</p>
               <h1 className="text-xl font-black">Ficha de Anamnese</h1>
             </div>
           </div>
@@ -364,7 +364,7 @@ export function PublicAnamnesisPage() {
          <div className="w-10 h-10 bg-gray-300 rounded-xl flex items-center justify-center text-white">
            <Heart className="w-6 h-6 fill-current" />
          </div>
-         <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[.2em]">Prontuário Verde · 2026</p>
+         <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[.2em]">CliniPlus · 2026</p>
       </footer>
     </div>
   )

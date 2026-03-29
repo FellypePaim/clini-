@@ -116,7 +116,7 @@ export function SignaturePad({ onSave, onClear }: SignaturePadProps) {
           <Eraser className="w-4 h-4" />
         </button>
       </div>
-      <p className="text-[10px] text-[var(--color-text-muted)] text-center uppercase font-black tracking-tighter">Assinatura digital válida exclusivamente para uso interno nesta plataforma médica Clini+</p>
+      <p className="text-[10px] text-[var(--color-text-muted)] text-center uppercase font-black tracking-tighter">Assinatura digital válida exclusivamente para uso interno nesta plataforma CliniPlus</p>
     </div>
   )
 }

@@ -139,7 +139,7 @@ export function FooterSection() {
 
         {/* Copyright */}
         <p className="text-center text-gray-600 text-sm">
-          &copy; 2026 Clini+ — Prontuario Verde. Todos os direitos reservados.
+          &copy; 2026 Clini+ — CliniPlus. Todos os direitos reservados.
         </p>
       </div>
     </footer>

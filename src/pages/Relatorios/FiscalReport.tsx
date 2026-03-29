@@ -148,7 +148,7 @@ export function FiscalReport() {
     pdf.setFontSize(7)
     pdf.setTextColor(180, 180, 180)
     pdf.text('* Valores estimados para Lucro Presumido — consulte seu contador para cálculos oficiais.', m, y)
-    pdf.text('Gerado pelo sistema Prontuário Verde', w / 2, 285, { align: 'center' })
+    pdf.text('Gerado pelo sistema CliniPlus', w / 2, 285, { align: 'center' })
 
     pdf.save(`relatorio_fiscal_${mesAno}.pdf`)
     toast({ title: 'PDF exportado', type: 'success' })

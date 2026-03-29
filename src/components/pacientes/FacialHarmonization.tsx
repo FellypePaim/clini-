@@ -289,7 +289,7 @@ export function FacialHarmonization({ pacienteId, onSave, initialZones = [] }: F
 
     pdf.setFontSize(6)
     pdf.setTextColor(180, 180, 180)
-    pdf.text('Gerado pelo sistema Prontuário Verde', w / 2, 285, { align: 'center' })
+    pdf.text('Gerado pelo sistema CliniPlus', w / 2, 285, { align: 'center' })
     pdf.save(`mapa_facial_${pacienteId.substring(0, 8)}.pdf`)
     toast({ title: 'PDF gerado', type: 'success' })
   }

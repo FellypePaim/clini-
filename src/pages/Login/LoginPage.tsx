@@ -3,7 +3,8 @@ import { useForm } from 'react-hook-form'
 import { useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, LogIn, Stethoscope, AlertCircle, Loader2, UserPlus, KeyRound, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, AlertCircle, Loader2, UserPlus, KeyRound, CheckCircle } from 'lucide-react'
+import { CliniPlusLogo } from '../../components/ui/CliniPlusLogo'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { supabase } from '../../lib/supabase'
@@ -120,13 +121,7 @@ export function LoginPage() {
         <div className="w-full max-w-md animate-fade-in">
           {/* Logo mobile */}
           <div className="flex items-center gap-3 mb-8 lg:hidden">
-            <div className="w-10 h-10 bg-gradient-to-br from-cyan-600 to-indigo-500 rounded-xl flex items-center justify-center">
-              <Stethoscope className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <span className="text-[#f1f5f9] text-xl font-bold">Prontuário</span>
-              <span className="text-cyan-500 text-xl font-light"> Verde</span>
-            </div>
+            <CliniPlusLogo size={40} textSize="lg" theme="dark" />
           </div>
 
           {/* Login card with glassmorphism */}
@@ -299,7 +294,7 @@ export function LoginPage() {
           )}
 
           <p className="text-center text-xs text-[#64748b] mt-8">
-            Prontuário Verde &copy; {new Date().getFullYear()} &middot; Todos os direitos reservados
+            CliniPlus &copy; {new Date().getFullYear()} &middot; Todos os direitos reservados
           </p>
         </div>
       </div>

@@ -13,7 +13,6 @@ import {
   ClipboardList,
   BarChart3,
   Settings,
-  Stethoscope,
   ChevronRight,
   Activity,
   Database,
@@ -21,6 +20,7 @@ import {
   Moon
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { CliniPlusLogo } from '../ui/CliniPlusLogo'
 
 interface SidebarProps {
   collapsed?: boolean
@@ -75,17 +75,15 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
       {/* ── Logo ────────────────────────────────────── */}
       <div className={cn(
         'flex items-center border-b border-[var(--color-border)] shrink-0',
-        collapsed ? 'h-16 justify-center px-0' : 'h-16 gap-3 px-5'
+        collapsed ? 'h-16 justify-center px-0' : 'h-16 px-4'
       )}>
-        <div className="w-8 h-8 bg-gradient-to-br from-cyan-600 to-indigo-500 rounded-lg flex items-center justify-center shrink-0">
-          <Stethoscope className="w-4 h-4 text-white" />
-        </div>
-        {!collapsed && (
-          <div className="leading-none">
-            <div className="text-sm font-bold text-[var(--color-text-primary)]">Prontuário</div>
-            <div className="text-sm font-light text-cyan-500">Verde</div>
-          </div>
-        )}
+        <CliniPlusLogo
+          size={34}
+          showText={true}
+          collapsed={collapsed}
+          textSize="sm"
+          theme={theme}
+        />
       </div>
 
       {/* ── Navegação ───────────────────────────────── */}
@@ -178,7 +176,7 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
             </span>
           </button>
           <p className="text-[10px] text-[var(--color-text-dim)] text-center w-full">
-            v2.1.0 · Prontuário Verde
+            v2.1.0 · CliniPlus
           </p>
         </div>
       )}

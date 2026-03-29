@@ -34,6 +34,7 @@
 - Fase 22: ✅ **Segurança RBAC + Melhorias por Role (29/03/2026)**
 - Fase 23: ✅ **Dark Clinical Redesign — UI/UX v2.0 (29/03/2026)**
 - Fase 24: ✅ **Landing Page — 8 seções + Quiz WhatsApp (29/03/2026)**
+- Fase 25: ✅ **Rebranding OVYVA → LYRA e VERDESK → NEXUS — frontend + DB + funções (29/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -304,7 +305,7 @@ Actions:
 - `src/components/layout/Sidebar.tsx` — versão 1.7.0
 - `src/components/lyra/ChatWindow.tsx` — label dinâmico
 - `src/hooks/useAgenda.ts` — filtro profissional + ausências + recorrência
-- `src/hooks/useLYRA.ts` — clinica_id + metadata + realtime fix
+- `src/hooks/useLyra.ts` — clinica_id + metadata + realtime fix
 - `src/hooks/useFinanceiro.ts` — filtro profissional
 - `src/hooks/usePrescricoes.ts` — canModify() check
 - `src/pages/Dashboard/DashboardPage.tsx` — personalizado por role + filtro período
@@ -376,6 +377,7 @@ Actions:
 ## 18. MIGRATIONS ADICIONAIS
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
+- `20260329000001_rename_ovyva_to_lyra.sql` — Rename tabelas lyra_*, view, RLS policies, JSON config key (clinicas.configuracoes.ovyva → lyra), leads.origem
 
 ## 16. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)

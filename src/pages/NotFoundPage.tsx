@@ -13,7 +13,7 @@ export function NotFoundPage() {
         <h1 className="text-3xl font-black text-[var(--color-text-primary)] mb-4 tracking-tight">Página não encontrada</h1>
         <p className="text-[var(--color-text-muted)] font-medium mb-8">
           A rota que você tentou acessar não existe ou foi movida. 
-          Use o botão abaixo para retornar à tela inicial segura do Prontuário Verde.
+          Use o botão abaixo para retornar à tela inicial segura do CliniPlus.
         </p>
         
         <Link 

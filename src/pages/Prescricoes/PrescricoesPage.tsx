@@ -79,7 +79,7 @@ export function PrescricoesPage() {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(16)
     pdf.setTextColor(17, 24, 39)
-    pdf.text(user?.clinicaNome || 'Prontuário Verde', m, y + 7)
+    pdf.text(user?.clinicaNome || 'CliniPlus', m, y + 7)
     pdf.setFontSize(8)
     pdf.setTextColor(156, 163, 175)
     pdf.text('Prescrição Médica Digital', w - m, y + 7, { align: 'right' })
@@ -154,7 +154,7 @@ export function PrescricoesPage() {
     // Footer
     pdf.setFontSize(6)
     pdf.setTextColor(180, 180, 180)
-    pdf.text('Gerado pelo sistema Prontuário Verde. Possui validade jurídica conforme Lei 14.063/2020.', w / 2, 288, { align: 'center' })
+    pdf.text('Gerado pelo sistema CliniPlus. Possui validade jurídica conforme Lei 14.063/2020.', w / 2, 288, { align: 'center' })
 
     return pdf
   }
@@ -185,7 +185,7 @@ export function PrescricoesPage() {
       .assinatura .selo { color: #16a34a; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; margin-top: 8px; }
       .footer { text-align: center; font-size: 8px; color: #bbb; margin-top: 40px; border-top: 1px solid #eee; padding-top: 12px; }
     </style></head><body>
-      <div class="header"><h1>${user?.clinicaNome || 'Prontuário Verde'}</h1><small>Prescrição Médica Digital</small></div>
+      <div class="header"><h1>${user?.clinicaNome || 'CliniPlus'}</h1><small>Prescrição Médica Digital</small></div>
       <div class="titulo">Prescrição Médica</div>
       <div class="barra"></div>
       <div class="info">
@@ -202,7 +202,7 @@ export function PrescricoesPage() {
         <div style="font-size:11px;margin-top:4px;">${p.profissional_nome}</div>
         <div style="font-size:10px;color:#999;">${user?.crm || ''}</div>
       </div>
-      <div class="footer">Gerado pelo sistema Prontuário Verde. Válido conforme Lei 14.063/2020.</div>
+      <div class="footer">Gerado pelo sistema CliniPlus. Válido conforme Lei 14.063/2020.</div>
     </body></html>`)
     win.document.close()
     setTimeout(() => win.print(), 600)
@@ -473,7 +473,7 @@ export function PrescricoesPage() {
             <div className="flex-1 overflow-y-auto p-8 flex justify-center">
               <div className="bg-[var(--color-bg-card)] w-full max-w-xl shadow-xl rounded-sm border border-[var(--color-border)]" style={{ minHeight: '500px' }}>
                 <div className="border-b-2 border-cyan-500 p-8 pb-6">
-                  <h2 className="text-xl font-black text-[var(--color-text-primary)]">{user?.clinicaNome || 'Prontuário Verde'}</h2>
+                  <h2 className="text-xl font-black text-[var(--color-text-primary)]">{user?.clinicaNome || 'CliniPlus'}</h2>
                   <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Prescrição Médica Digital</p>
                 </div>
                 <div className="px-8 pt-8 pb-4 text-center">
@@ -499,7 +499,7 @@ export function PrescricoesPage() {
                   <p className="text-[10px] text-[var(--color-text-muted)]">{user?.crm || ''}</p>
                 </div>
                 <div className="px-8 py-3 bg-[var(--color-bg-deep)] border-t border-[var(--color-border)] text-center">
-                  <p className="text-[8px] text-[var(--color-text-muted)]">Válido por 180 dias. Gerado pelo sistema Prontuário Verde. Lei 14.063/2020.</p>
+                  <p className="text-[8px] text-[var(--color-text-muted)]">Válido por 180 dias. Gerado pelo sistema CliniPlus. Lei 14.063/2020.</p>
                 </div>
               </div>
             </div>

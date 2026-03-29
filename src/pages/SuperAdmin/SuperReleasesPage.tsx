@@ -98,7 +98,7 @@ const RELEASES: Release[] = [
   {
     version: 'v1.0.0',
     date: '15/03/2026',
-    title: 'Launch — Prontuário Verde',
+    title: 'Launch — CliniPlus',
     description: 'Versão inicial com agenda, prontuário eletrônico, cadastro de pacientes e dashboard.',
     type: 'major',
     status: 'production',

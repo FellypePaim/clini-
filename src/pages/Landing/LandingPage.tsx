@@ -11,7 +11,7 @@ import { FooterSection } from './FooterSection'
 
 export function LandingPage() {
   useEffect(() => {
-    document.title = 'Clini+ | Prontuario Verde — Sistema para Clinicas'
+    document.title = 'Clini+ | CliniPlus — Sistema para Clinicas'
     // Enable smooth scroll for anchor links
     document.documentElement.style.scrollBehavior = 'smooth'
     return () => {

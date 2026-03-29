@@ -197,7 +197,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
     pdf.setFont('helvetica', 'bold')
     pdf.setFontSize(16)
     pdf.setTextColor(17, 24, 39)
-    pdf.text(user?.clinicaNome || 'Prontuário Verde', m, y + 7)
+    pdf.text(user?.clinicaNome || 'CliniPlus', m, y + 7)
     pdf.setFontSize(8)
     pdf.setTextColor(156, 163, 175)
     pdf.text(orc.status === 'aprovado' ? 'RECIBO DE PAGAMENTO' : 'ORÇAMENTO', w - m, y + 7, { align: 'right' })
@@ -267,7 +267,7 @@ export function PatientFinancialTab({ pacienteId }: { pacienteId: string }) {
     // Footer
     pdf.setFontSize(6)
     pdf.setTextColor(180, 180, 180)
-    pdf.text('Gerado pelo sistema Prontuário Verde', w / 2, 285, { align: 'center' })
+    pdf.text('Gerado pelo sistema CliniPlus', w / 2, 285, { align: 'center' })
 
     pdf.save(`${orc.status === 'aprovado' ? 'recibo' : 'orcamento'}_${pacienteId.substring(0, 8)}.pdf`)
     toast({ title: 'PDF gerado', type: 'success' })

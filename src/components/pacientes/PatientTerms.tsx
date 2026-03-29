@@ -291,10 +291,10 @@ Responda APENAS com JSON válido nesta estrutura:
       pdf.setFont('helvetica', 'bold')
       pdf.setFontSize(18)
       pdf.setTextColor(17, 24, 39)
-      pdf.text(user?.clinicaNome || 'Prontuário Verde', margin, y + 8)
+      pdf.text(user?.clinicaNome || 'CliniPlus', margin, y + 8)
       pdf.setFontSize(8)
       pdf.setTextColor(156, 163, 175)
-      pdf.text('Sistema de Gestão Clínica', margin, y + 14)
+      pdf.text('CliniPlus — Gestão Inteligente', margin, y + 14)
 
       pdf.setFontSize(8)
       pdf.text('Documento Digital', w - margin, y + 8, { align: 'right' })
@@ -413,7 +413,7 @@ Responda APENAS com JSON válido nesta estrutura:
       pdf.rect(0, 282, w, 15, 'F')
       pdf.setFontSize(6)
       pdf.setTextColor(156, 163, 175)
-      pdf.text('Este documento foi gerado eletronicamente pelo sistema Prontuário Verde. Possui validade jurídica conforme Lei 14.063/2020.', w / 2, 288, { align: 'center' })
+      pdf.text('Este documento foi gerado eletronicamente pelo sistema CliniPlus. Possui validade jurídica conforme Lei 14.063/2020.', w / 2, 288, { align: 'center' })
 
       pdf.save(`${titulo.replace(/\s+/g, '_')}.pdf`)
       toast({ title: 'PDF gerado', description: 'Download iniciado.', type: 'success' })
@@ -446,7 +446,7 @@ Responda APENAS com JSON válido nesta estrutura:
       @media print { body { margin: 20px; } }
     </style></head><body>
       <div class="header">
-        <div><h1>${user?.clinicaNome || 'Prontuário Verde'}</h1><small>Sistema de Gestão Clínica</small></div>
+        <div><h1>${user?.clinicaNome || 'CliniPlus'}</h1><small>CliniPlus — Gestão Inteligente</small></div>
         <div style="text-align:right"><small>Documento Digital</small><br><small>ID: ${viewingTermo?.id?.substring(0, 8) || '—'}</small></div>
       </div>
       <div class="titulo">${viewingTermo?.titulo || 'Termo de Consentimento'}</div>
@@ -462,7 +462,7 @@ Responda APENAS com JSON válido nesta estrutura:
         <small style="color:#9ca3af;text-transform:uppercase;letter-spacing:2px;font-weight:bold;">Assinatura Digital do Paciente</small><br><br>
         ${resolvedSignUrl ? `<img src="${resolvedSignUrl}" /><div class="selo">Documento Assinado Digitalmente</div>` : '<p style="color:#eab308">Aguardando assinatura</p>'}
       </div>
-      <div class="footer">Este documento foi gerado eletronicamente pelo sistema Prontuário Verde. Possui validade jurídica conforme Lei 14.063/2020.</div>
+      <div class="footer">Este documento foi gerado eletronicamente pelo sistema CliniPlus. Possui validade jurídica conforme Lei 14.063/2020.</div>
     </body></html>`)
     win.document.close()
     setTimeout(() => { win.print() }, 800)
@@ -499,8 +499,8 @@ Responda APENAS com JSON válido nesta estrutura:
       .footer { margin-top: 40px; text-align: center; font-size: 8px; color: #bbb; border-top: 1px solid #eee; padding-top: 12px; }
     </style></head><body>
       <div class="header">
-        <h1>${user?.clinicaNome || 'Prontuário Verde'}</h1>
-        <small>Sistema de Gestão Clínica</small>
+        <h1>${user?.clinicaNome || 'CliniPlus'}</h1>
+        <small>CliniPlus — Gestão Inteligente</small>
       </div>
       <div class="titulo">${titulo}</div>
       <div class="barra"></div>
@@ -525,7 +525,7 @@ Responda APENAS com JSON válido nesta estrutura:
           </div>
         </div>
       </div>
-      <div class="footer">Este documento foi gerado pelo sistema Prontuário Verde. Válido conforme Lei 14.063/2020.</div>
+      <div class="footer">Este documento foi gerado pelo sistema CliniPlus. Válido conforme Lei 14.063/2020.</div>
     </body></html>`)
     win.document.close()
     setTimeout(() => { win.print() }, 600)
@@ -784,7 +784,7 @@ Responda APENAS com JSON válido nesta estrutura:
                 <div className="border-b-2 border-cyan-500 p-8 pb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h2 className="text-xl font-black text-[var(--color-text-primary)] leading-tight">Prontuario Verde</h2>
+                      <h2 className="text-xl font-black text-[var(--color-text-primary)] leading-tight">CliniPlus</h2>
                       <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-widest mt-1">Sistema de Gestao Clinica</p>
                     </div>
                     <div className="text-right">
@@ -860,7 +860,7 @@ Responda APENAS com JSON válido nesta estrutura:
                 {/* Footer */}
                 <div className="px-8 py-4 bg-[var(--color-bg-deep)] border-t border-[var(--color-border)] text-center">
                   <p className="text-[8px] text-[var(--color-text-muted)] leading-relaxed">
-                    Este documento foi gerado eletronicamente pelo sistema Prontuario Verde.
+                    Este documento foi gerado eletronicamente pelo sistema CliniPlus.
                     Possui validade juridica conforme Lei 14.063/2020.
                   </p>
                 </div>
