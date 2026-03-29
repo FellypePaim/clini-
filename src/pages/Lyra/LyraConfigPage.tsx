@@ -13,7 +13,7 @@ import { WhatsAppConexaoPage } from './WhatsAppConexaoPage'
 type ConfigSection = 'personality' | 'scheduling' | 'knowledge' | 'whatsapp'
 
 // Tipos locais para o formulário
-interface OvyvaConfigForm {
+interface LyraConfigForm {
   nome_assistente: string
   tom_voz: string
   horario_inicio: string
@@ -23,7 +23,7 @@ interface OvyvaConfigForm {
   antecedencia_minima: number
 }
 
-export function OvyvaConfigPage() {
+export function LyraConfigPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { user } = useAuthStore()
@@ -33,7 +33,7 @@ export function OvyvaConfigPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  const [form, setForm] = useState<OvyvaConfigForm>({
+  const [form, setForm] = useState<LyraConfigForm>({
     nome_assistente: 'Sofia',
     tom_voz: 'cordial',
     horario_inicio: '08:00',
@@ -52,17 +52,17 @@ export function OvyvaConfigPage() {
       .eq('id', clinicaId)
       .single()
       .then(({ data, error }) => {
-        if (error) { console.error('Erro ao carregar config OVYVA:', error.message) }
-        const ovyva = (data?.configuracoes as any)?.ovyva
-        if (ovyva) {
+        if (error) { console.error('Erro ao carregar config LYRA:', error.message) }
+        const lyra = (data?.configuracoes as any)?.lyra
+        if (lyra) {
           setForm({
-            nome_assistente: ovyva.nome_assistente ?? 'Sofia',
-            tom_voz: ovyva.tom_voz ?? 'cordial',
-            horario_inicio: ovyva.horario_inicio ?? '08:00',
-            horario_fim: ovyva.horario_fim ?? '18:00',
-            acao_fora_horario: ovyva.acao_fora_horario ?? 'padrao',
-            base_conhecimento: ovyva.base_conhecimento ?? '',
-            antecedencia_minima: ovyva.antecedencia_minima ?? 24,
+            nome_assistente: lyra.nome_assistente ?? 'Sofia',
+            tom_voz: lyra.tom_voz ?? 'cordial',
+            horario_inicio: lyra.horario_inicio ?? '08:00',
+            horario_fim: lyra.horario_fim ?? '18:00',
+            acao_fora_horario: lyra.acao_fora_horario ?? 'padrao',
+            base_conhecimento: lyra.base_conhecimento ?? '',
+            antecedencia_minima: lyra.antecedencia_minima ?? 24,
           })
         }
         setIsLoading(false)
@@ -90,8 +90,8 @@ export function OvyvaConfigPage() {
         .update({
           configuracoes: {
             ...configAtual,
-            ovyva: {
-              ...(configAtual.ovyva ?? {}),
+            lyra: {
+              ...(configAtual.lyra ?? {}),
               nome_assistente: form.nome_assistente,
               tom_voz: form.tom_voz,
               horario_inicio: form.horario_inicio,
@@ -114,7 +114,7 @@ export function OvyvaConfigPage() {
     }
   }
 
-  const update = (field: keyof OvyvaConfigForm, value: any) =>
+  const update = (field: keyof LyraConfigForm, value: any) =>
     setForm(prev => ({ ...prev, [field]: value }))
 
   if (isLoading) {
@@ -134,13 +134,13 @@ export function OvyvaConfigPage() {
        <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
              <button 
-              onClick={() => navigate('/ovyva')}
+              onClick={() => navigate('/lyra')}
               className="p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl hover:bg-[var(--color-bg-card-hover)] transition-all text-[var(--color-text-muted)] hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
              <div>
-                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Configurações OVYVA</h1>
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Configurações LYRA</h1>
                 <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                    Calibrando o cérebro da sua assistente virtual IA
                 </p>
@@ -212,13 +212,13 @@ export function OvyvaConfigPage() {
                           type="text"
                           value={form.nome_assistente}
                           onChange={e => update('nome_assistente', e.target.value)}
-                          className="input-ovyva"
+                          className="input-lyra"
                         />
                      </FormField>
 
                      <FormField label="Tom de Voz" desc="Formalidade e cordialidade no atendimento">
                         <select
-                          className="input-ovyva capitalize"
+                          className="input-lyra capitalize"
                           value={form.tom_voz}
                           onChange={e => update('tom_voz', e.target.value)}
                         >
@@ -240,7 +240,7 @@ export function OvyvaConfigPage() {
                           type="time"
                           value={form.horario_inicio}
                           onChange={e => update('horario_inicio', e.target.value)}
-                          className="input-ovyva"
+                          className="input-lyra"
                         />
                      </FormField>
                      <FormField label="Fim do Turno">
@@ -248,12 +248,12 @@ export function OvyvaConfigPage() {
                           type="time"
                           value={form.horario_fim}
                           onChange={e => update('horario_fim', e.target.value)}
-                          className="input-ovyva"
+                          className="input-lyra"
                         />
                      </FormField>
                      <FormField label="Fora do Horário">
                         <select
-                          className="input-ovyva"
+                          className="input-lyra"
                           value={form.acao_fora_horario}
                           onChange={e => update('acao_fora_horario', e.target.value)}
                         >
@@ -274,7 +274,7 @@ export function OvyvaConfigPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                      <FormField label="Antecedência Mínima" desc="Tempo mínimo para agendar sem aprovação humana">
                         <select
-                          className="input-ovyva"
+                          className="input-lyra"
                           value={form.antecedencia_minima}
                           onChange={e => update('antecedencia_minima', Number(e.target.value))}
                         >
@@ -303,7 +303,7 @@ export function OvyvaConfigPage() {
                     desc="Endereço, horários, valores, política de cancelamento, etc."
                   >
                      <textarea
-                        className="input-ovyva min-h-[240px] resize-none leading-relaxed"
+                        className="input-lyra min-h-[240px] resize-none leading-relaxed"
                         placeholder={`Exemplos:\n- Atendemos segunda a sexta das 8h às 18h e sábados das 8h às 12h\n- Estamos na Rua das Flores, 123, Centro\n- Valor da consulta: R$ 150,00\n- Cancelamento com 24h de antecedência`}
                         value={form.base_conhecimento}
                         onChange={e => update('base_conhecimento', e.target.value)}

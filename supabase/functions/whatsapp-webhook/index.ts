@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     // Atualizar nome do contato se temos pushName e ainda não tem
     if (pushName && conversaId) {
-      await supabase.from("ovyva_conversas")
+      await supabase.from("lyra_conversas")
         .update({ contato_nome: pushName, ultimo_contato: new Date().toISOString() })
         .eq("id", conversaId)
         .is("contato_nome", null)
@@ -98,7 +98,7 @@ Deno.serve(async (req) => {
 
     // Deduplicação simples: mesma conversa + mesmo texto + últimos 60s
     const umMinutoAtras = new Date(Date.now() - 60000).toISOString()
-    const { count: duplicateCount } = await supabase.from("ovyva_mensagens")
+    const { count: duplicateCount } = await supabase.from("lyra_mensagens")
       .select("id", { count: "exact", head: true })
       .eq("conversa_id", conversaId)
       .eq("remetente", "paciente")
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
     }
 
     // Salvar mensagem
-    await supabase.from("ovyva_mensagens").insert({
+    await supabase.from("lyra_mensagens").insert({
       conversa_id: conversaId,
       remetente: "paciente",
       conteudo: textContent || "[Imagem enviada]",
@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
 
     // 3.5 Verificar status da conversa
     const { data: conversa } = await supabase
-      .from("ovyva_conversas")
+      .from("lyra_conversas")
       .select("status")
       .eq("id", conversaId)
       .single()
@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}` },
         body: JSON.stringify({
-          action: "ovyva_respond",
+          action: "lyra_respond",
           clinica_id,
           payload: {
             numero_whatsapp: whatsappNumber,
@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
         } catch (sendErr: any) {
           console.error("[webhook] Send error:", sendErr.message)
         }
-        await supabase.from("ovyva_mensagens").insert({ conversa_id: conversaId, remetente: "ia", conteudo: parte })
+        await supabase.from("lyra_mensagens").insert({ conversa_id: conversaId, remetente: "ia", conteudo: parte })
     }
 
     return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } })
@@ -188,11 +188,11 @@ Deno.serve(async (req) => {
 })
 
 async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: string, pushName?: string | null) {
-    const { data } = await supabase.from("ovyva_conversas").select("id").eq("clinica_id", clinica_id).eq("contato_telefone", phone).single()
+    const { data } = await supabase.from("lyra_conversas").select("id").eq("clinica_id", clinica_id).eq("contato_telefone", phone).single()
     if (data?.id) return data.id
 
     // Criar conversa
-    const { data: nova, error } = await supabase.from("ovyva_conversas").insert({
+    const { data: nova, error } = await supabase.from("lyra_conversas").insert({
       clinica_id, contato_telefone: phone, status: "ia_ativa",
       contato_nome: pushName || null,
     }).select("id").single()
@@ -209,7 +209,7 @@ async function getOuCriarConversaId(supabase: any, clinica_id: string, phone: st
         nome: pushName || `Contato ${phone}`,
         telefone: phone,
         estagio: "perguntou_valor",
-        origem: "WhatsApp OVYVA",
+        origem: "WhatsApp LYRA",
         conversa_id: nova.id,
         ultimo_contato: new Date().toISOString(),
       })

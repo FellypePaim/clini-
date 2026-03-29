@@ -36,7 +36,7 @@ export function LandingNavbar() {
         {/* Links */}
         <div className="hidden md:flex items-center gap-8">
           <button onClick={() => scrollTo('features')} className="text-sm text-gray-400 hover:text-white transition-colors">Funcionalidades</button>
-          <button onClick={() => scrollTo('ovyva')} className="text-sm text-gray-400 hover:text-white transition-colors">OVYVA</button>
+          <button onClick={() => scrollTo('lyra')} className="text-sm text-gray-400 hover:text-white transition-colors">LYRA</button>
           <button onClick={() => scrollTo('quiz')} className="text-sm text-gray-400 hover:text-white transition-colors">Quiz</button>
         </div>
 

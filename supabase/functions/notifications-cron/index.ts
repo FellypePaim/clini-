@@ -102,18 +102,18 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Se não tem paciente cadastrado, buscar na conversa do OVYVA
+      // Se não tem paciente cadastrado, buscar na conversa do LYRA
       if (!telefonePaciente) {
-        const { data: conversaOvyva } = await supabase.from("ovyva_conversas")
+        const { data: conversaLyra } = await supabase.from("lyra_conversas")
           .select("contato_telefone, contato_nome")
           .eq("clinica_id", consulta.clinica_id)
           .not("contato_telefone", "is", null)
           .order("ultimo_contato", { ascending: false })
           .limit(1)
           .single()
-        if (conversaOvyva) {
-          telefonePaciente = conversaOvyva.contato_telefone
-          nomePaciente = conversaOvyva.contato_nome || nomePaciente
+        if (conversaLyra) {
+          telefonePaciente = conversaLyra.contato_telefone
+          nomePaciente = conversaLyra.contato_nome || nomePaciente
         }
       }
 

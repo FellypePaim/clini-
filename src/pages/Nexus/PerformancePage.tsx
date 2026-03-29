@@ -29,7 +29,7 @@ export function PerformancePage() {
     totalLeads: 0,
     conversionRate: '0.0',
     avgTicket: 0,
-    ovyvaPercentage: 0
+    lyraPercentage: 0
   })
   
   const [funnelData, setFunnelData] = React.useState<any[]>([])
@@ -61,13 +61,13 @@ export function PerformancePage() {
         const conversionRate = total ? (agendados / total) * 100 : 0
         const totalValue = leads.reduce((acc, l) => acc + (l.valor_estimado || 0), 0)
         const avgTicket = total ? totalValue / total : 0
-        const ovyvaLeads = leads.filter(l => l.origem === 'WhatsApp OVYVA').length
+        const lyraLeads = leads.filter(l => l.origem === 'WhatsApp LYRA').length
         
         setStats({
           totalLeads: total,
           conversionRate: conversionRate.toFixed(1),
           avgTicket,
-          ovyvaPercentage: total ? (ovyvaLeads / total) * 100 : 0
+          lyraPercentage: total ? (lyraLeads / total) * 100 : 0
         })
 
         // Funil
@@ -120,7 +120,7 @@ export function PerformancePage() {
   const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
 
   if (isLoading) {
-    return <div className="p-8 text-center text-[var(--color-text-muted)]">Carregando métricas de performance do Verdesk...</div>
+    return <div className="p-8 text-center text-[var(--color-text-muted)]">Carregando métricas de performance do Nexus...</div>
   }
 
   if (error) {
@@ -131,12 +131,12 @@ export function PerformancePage() {
     <div className="flex flex-col h-full bg-[var(--color-bg-card)] overflow-y-auto">
       <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10">
         <div className="flex items-center gap-4 mb-4">
-          <Link to="/verdesk" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
+          <Link to="/nexus" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>
             <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Dashboard de Performance</h1>
-            <p className="text-[var(--color-text-muted)]">Métricas e acompanhamento do CRM Verdesk</p>
+            <p className="text-[var(--color-text-muted)]">Métricas e acompanhamento do CRM Nexus</p>
           </div>
         </div>
 
@@ -182,11 +182,11 @@ export function PerformancePage() {
           {/* Card 4 */}
           <div className="bg-[var(--color-bg-card)] p-5 rounded-2xl border border-[var(--color-border)] shadow-sm">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Leads por OVYVA</span>
+              <span className="text-sm font-semibold text-[var(--color-text-muted)]">Leads por LYRA</span>
               <div className="p-2 bg-pink-50 text-pink-600 rounded-lg"><PieChartIcon size={18} /></div>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.ovyvaPercentage.toFixed(0)}%</span>
+              <span className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.lyraPercentage.toFixed(0)}%</span>
               <span className="text-xs font-bold text-[var(--color-text-muted)]">do total gerado</span>
             </div>
           </div>

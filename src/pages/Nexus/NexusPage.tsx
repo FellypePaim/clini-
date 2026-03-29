@@ -21,12 +21,12 @@ import {
   Loader2
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { useVerdesk } from '../../hooks/useVerdesk'
+import { useNexus } from '../../hooks/useNexus'
 import { usePermissions } from '../../store/authStore'
-import type { LeadStage, LeadOrigin } from '../../types/verdesk'
-import { KanbanColumn } from '../../components/verdesk/KanbanColumn'
-import { LeadCard } from '../../components/verdesk/LeadCard'
-import { LeadDrawer } from '../../components/verdesk/LeadDrawer'
+import type { LeadStage, LeadOrigin } from '../../types/nexus'
+import { KanbanColumn } from '../../components/nexus/KanbanColumn'
+import { LeadCard } from '../../components/nexus/LeadCard'
+import { LeadDrawer } from '../../components/nexus/LeadDrawer'
 
 const STAGES: LeadStage[] = [
   'Perguntou Valor',
@@ -56,8 +56,8 @@ const formVazio: NovoLeadForm = {
   stage: 'Perguntou Valor',
 }
 
-export function VerdeskPage() {
-  const { leads, moveLead, createLead } = useVerdesk()
+export function NexusPage() {
+  const { leads, moveLead, createLead } = useNexus()
   const { isAdmin, isRecepcao } = usePermissions()
   const canManageLeads = isAdmin || isRecepcao // profissional é somente leitura
   const [activeId, setActiveId] = useState<string | null>(null)
@@ -171,20 +171,20 @@ export function VerdeskPage() {
       <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)]">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Verdesk CRM</h1>
+            <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Nexus CRM</h1>
             <p className="text-[var(--color-text-muted)]">Gestão conversacional e funil de vendas</p>
           </div>
           
           <div className="flex items-center gap-3">
             <Link 
-              to="/verdesk/performance" 
+              to="/nexus/performance" 
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-card-hover)] transition-all shadow-sm"
             >
               <BarChart2 size={18} />
               Performance
             </Link>
             <Link 
-              to="/verdesk/campanhas" 
+              to="/nexus/campanhas" 
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg hover:bg-[var(--color-bg-card-hover)] transition-all shadow-sm"
             >
               <Megaphone size={18} />
@@ -344,7 +344,7 @@ export function VerdeskPage() {
                   <select className="w-full p-2.5 text-sm border border-[var(--color-border)] rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                     value={form.origin} onChange={e => setForm(f => ({ ...f, origin: e.target.value as LeadOrigin }))}>
                     <option value="Manual">Manual</option>
-                    <option value="WhatsApp OVYVA">WhatsApp OVYVA</option>
+                    <option value="WhatsApp LYRA">WhatsApp LYRA</option>
                     <option value="Instagram">Instagram</option>
                     <option value="Indicação">Indicação</option>
                   </select>

@@ -175,7 +175,7 @@ export function SuperIAPage() {
                  <div className="flex gap-3">
                     <span className="text-emerald-500 shrink-0">11:15:45</span>
                     <span className="text-[var(--color-text-muted)]">[INFO]</span>
-                    <span className="text-[var(--color-text-dim)]">ovyva_respond: generating reply (clinic_id: clinica-001) tokens: 420</span>
+                    <span className="text-[var(--color-text-dim)]">lyra_respond: generating reply (clinic_id: clinica-001) tokens: 420</span>
                  </div>
                  <div className="flex gap-3">
                     <span className="text-amber-500 shrink-0">11:16:02</span>

@@ -488,7 +488,7 @@ Run: `npx vite dev`
 - Abrir no browser
 - Verificar dark mode (padrao)
 - Clicar toggle na sidebar para light mode
-- Navegar por Dashboard, Agenda, Pacientes, OVYVA, Financeiro
+- Navegar por Dashboard, Agenda, Pacientes, LYRA, Financeiro
 - Verificar contraste de texto em ambos os modos
 
 - [ ] **Step 5: Commit final**

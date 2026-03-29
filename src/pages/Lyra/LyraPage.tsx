@@ -1,17 +1,17 @@
 import { useState, useCallback } from 'react'
-import { ConversationList } from '../../components/ovyva/ConversationList'
-import { ChatWindow } from '../../components/ovyva/ChatWindow'
-import { ContactContext } from '../../components/ovyva/ContactContext'
-import { useOVYVA } from '../../hooks/useOVYVA'
+import { ConversationList } from '../../components/lyra/ConversationList'
+import { ChatWindow } from '../../components/lyra/ChatWindow'
+import { ContactContext } from '../../components/lyra/ContactContext'
+import { useLyra } from '../../hooks/useLyra'
 import { usePermissions } from '../../store/authStore'
 import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-export function OvyvaPage() {
+export function LyraPage() {
   const {
     conversations, selectConversation, activeConversation, config,
     sendMessage, takeoverConversation, returnToAI, refreshConversations,
-  } = useOVYVA()
+  } = useLyra()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const navigate = useNavigate()
   const { isAdmin, isProfissional } = usePermissions()
@@ -40,14 +40,14 @@ export function OvyvaPage() {
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col gap-6 animate-fade-in">
-       {/* OVYVA Header */}
+       {/* LYRA Header */}
        <div className="flex items-center justify-between shrink-0">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 rounded-2xl bg-cyan-500 flex items-center justify-center text-white shadow-xl shadow-cyan-500/20">
                 <Bot className="w-6 h-6" />
              </div>
              <div>
-                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">OVYVA</h1>
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">LYRA</h1>
                 <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                    <Sparkles className="w-3.5 h-3.5 text-blue-500" /> Secretaria Virtual IA 24/7 Ativa
                 </p>
@@ -56,10 +56,10 @@ export function OvyvaPage() {
 
           <div className="flex items-center gap-3">
              {(isAdmin || isProfissional) && (
-               <NavButton icon={<History className="w-4 h-4" />} label="Historico" onClick={() => navigate('/ovyva/historico')} />
+               <NavButton icon={<History className="w-4 h-4" />} label="Historico" onClick={() => navigate('/lyra/historico')} />
              )}
              {isAdmin && (
-               <NavButton icon={<Settings className="w-4 h-4" />} label="Configuracoes" onClick={() => navigate('/ovyva/configuracoes')} />
+               <NavButton icon={<Settings className="w-4 h-4" />} label="Configuracoes" onClick={() => navigate('/lyra/configuracoes')} />
              )}
           </div>
        </div>

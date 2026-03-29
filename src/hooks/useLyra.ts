@@ -1,15 +1,15 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
-import type { OvyvaConversation, OvyvaConfig, OvyvaMessage } from '../types/ovyva'
+import type { LyraConversation, LyraConfig, LyraMessage } from '../types/lyra'
 
-export function useOVYVA() {
+export function useLyra() {
   const { user } = useAuthStore()
   const clinica_id = user?.clinicaId  // corrigido: usar clinicaId do store, não user_metadata
 
-  const [conversations, setConversations] = useState<OvyvaConversation[]>([])
-  const [activeConversation, setActiveConversation] = useState<OvyvaConversation | null>(null)
-  const [config, setConfig] = useState<OvyvaConfig | null>(null)
+  const [conversations, setConversations] = useState<LyraConversation[]>([])
+  const [activeConversation, setActiveConversation] = useState<LyraConversation | null>(null)
+  const [config, setConfig] = useState<LyraConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Buscar todas as conversas da view
@@ -17,7 +17,7 @@ export function useOVYVA() {
     if (!clinica_id) return
     setIsLoading(true)
     const { data, error } = await supabase
-      .from('ovyva_conversas_com_preview' as any)
+      .from('lyra_conversas_com_preview' as any)
       .select('*')
       .eq('clinica_id', clinica_id)
       .order('ultimo_contato', { ascending: false })
@@ -40,7 +40,7 @@ export function useOVYVA() {
     setIsLoading(false)
   }, [clinica_id])
 
-  // Buscar configuração OVYVA
+  // Buscar configuração LYRA
   const fetchConfig = useCallback(async () => {
     if (!clinica_id) return
     const { data: clinica } = await supabase
@@ -49,17 +49,17 @@ export function useOVYVA() {
       .eq('id', clinica_id)
       .single()
 
-    const ovyvaConf = (clinica?.configuracoes as any)?.ovyva
-    if (ovyvaConf) {
+    const lyraConf = (clinica?.configuracoes as any)?.lyra
+    if (lyraConf) {
       setConfig({
-        aiName: ovyvaConf.nome_assistente || 'Sofia',
-        toneOfVoice: ovyvaConf.tom_voz || 'cordial',
+        aiName: lyraConf.nome_assistente || 'Sofia',
+        toneOfVoice: lyraConf.tom_voz || 'cordial',
         workingHours: { start: '08:00', end: '18:00' },
         offHoursAction: 'padrao',
         availableProfessionalsIds: [],
         enabledAppointmentTypes: [],
         minLeadTimeHours: 2,
-        clinicInfo: ovyvaConf.base_conhecimento || '',
+        clinicInfo: lyraConf.base_conhecimento || '',
         faqs: [],
         templates: []
       })
@@ -71,13 +71,13 @@ export function useOVYVA() {
     fetchConfig()
   }, [fetchConversations, fetchConfig])
 
-  // Buscar mensagens — corrigido: filtra por clinica_id via JOIN com ovyva_conversas
+  // Buscar mensagens — corrigido: filtra por clinica_id via JOIN com lyra_conversas
   const loadMessages = useCallback(async (conversa_id: string) => {
     if (!clinica_id) return
 
     // Verifica que a conversa pertence à clínica antes de buscar mensagens
     const { data: conv } = await supabase
-      .from('ovyva_conversas')
+      .from('lyra_conversas')
       .select('id')
       .eq('id', conversa_id)
       .eq('clinica_id', clinica_id)
@@ -86,17 +86,17 @@ export function useOVYVA() {
     if (!conv) return // conversa não pertence a esta clínica
 
     const { data } = await supabase
-      .from('ovyva_mensagens')
+      .from('lyra_mensagens')
       .select('*')
       .eq('conversa_id', conversa_id)
       .order('created_at', { ascending: true })
 
     if (data) {
       const mappedData = data.map((m: any) => ({ ...m, conteudo: m.conteudo || '' }))
-      setConversations(prev => prev.map(c => c.id === conversa_id ? { ...c, mensagens: mappedData as OvyvaMessage[] } : c))
+      setConversations(prev => prev.map(c => c.id === conversa_id ? { ...c, mensagens: mappedData as LyraMessage[] } : c))
       const unreadIds = data.filter(m => !m.lida && m.remetente === 'paciente').map(m => m.id)
       if (unreadIds.length > 0) {
-        supabase.from('ovyva_mensagens').update({ lida: true }).in('id', unreadIds).then(() => { }).catch(() => { })
+        supabase.from('lyra_mensagens').update({ lida: true }).in('id', unreadIds).then(() => { }).catch(() => { })
       }
     }
   }, [clinica_id])
@@ -108,14 +108,14 @@ export function useOVYVA() {
   useEffect(() => {
     if (!clinica_id) return
     const sub = supabase
-      .channel('ovyva_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_mensagens' }, () => {
+      .channel('lyra_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lyra_mensagens' }, () => {
         fetchConversations()
         if (activeConvIdRef.current) {
           loadMessages(activeConvIdRef.current)
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_conversas' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lyra_conversas' }, () => {
         fetchConversations()
       })
       .subscribe()
@@ -123,7 +123,7 @@ export function useOVYVA() {
   }, [clinica_id, fetchConversations, loadMessages])
 
   // Selecionar conversa
-  const selectConversation = useCallback((conv: OvyvaConversation) => {
+  const selectConversation = useCallback((conv: LyraConversation) => {
     setActiveConversation(conv)
     loadMessages(conv.id)
   }, [loadMessages])
@@ -138,7 +138,7 @@ export function useOVYVA() {
     const textoComAssinatura = `*${nomeAtendente}:*\n${texto}`
 
     // 1. Salvar no banco com metadata do atendente
-    await supabase.from('ovyva_mensagens').insert({
+    await supabase.from('lyra_mensagens').insert({
       conversa_id: conversationId,
       remetente: 'humano',
       conteudo: textoComAssinatura,
@@ -171,7 +171,7 @@ export function useOVYVA() {
 
   const takeoverConversation = useCallback(async (conversationId: string) => {
     if (!clinica_id) return
-    await supabase.from('ovyva_conversas').update({
+    await supabase.from('lyra_conversas').update({
       status: 'atendido_humano',
       atendente_id: user?.id || null,
     }).eq('id', conversationId).eq('clinica_id', clinica_id)
@@ -181,7 +181,7 @@ export function useOVYVA() {
 
   const returnToAI = useCallback(async (conversationId: string) => {
     if (!clinica_id) return
-    await supabase.from('ovyva_conversas').update({
+    await supabase.from('lyra_conversas').update({
       status: 'ia_ativa',
       atendente_id: null,
     }).eq('id', conversationId).eq('clinica_id', clinica_id)
@@ -189,7 +189,7 @@ export function useOVYVA() {
     setActiveConversation(prev => prev?.id === conversationId ? { ...prev, status: 'ia_ativa' } : prev)
   }, [clinica_id])
 
-  const updateAIConfig = useCallback(async (newConfig: Partial<OvyvaConfig>) => {
+  const updateAIConfig = useCallback(async (newConfig: Partial<LyraConfig>) => {
     setConfig(prev => prev ? { ...prev, ...newConfig } : null)
   }, [])
 

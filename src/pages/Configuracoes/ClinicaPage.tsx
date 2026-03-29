@@ -119,7 +119,7 @@ export function ClinicaPage() {
         if (data) {
           const c = data as any
           const conf = c.configuracoes ?? {}
-          const ovyva = conf.ovyva ?? {}
+          const lyra = conf.lyra ?? {}
           const horario = c.horario_funcionamento ?? {}
           const loaded: ClinicaForm = {
             nome: c.nome ?? '',
@@ -135,8 +135,8 @@ export function ClinicaPage() {
             whatsapp: c.whatsapp ?? '',
             email: c.email ?? '',
             site: c.site ?? '',
-            horario_inicio: ovyva.horario_inicio ?? horario.inicio ?? '08:00',
-            horario_fim: ovyva.horario_fim ?? horario.fim ?? '18:00',
+            horario_inicio: lyra.horario_inicio ?? horario.inicio ?? '08:00',
+            horario_fim: lyra.horario_fim ?? horario.fim ?? '18:00',
             dias_funcionamento: horario.dias ?? ['seg', 'ter', 'qua', 'qui', 'sex'],
           }
           setForm(loaded)
@@ -244,8 +244,8 @@ export function ClinicaPage() {
           },
           configuracoes: {
             ...confAtual,
-            ovyva: {
-              ...(confAtual.ovyva ?? {}),
+            lyra: {
+              ...(confAtual.lyra ?? {}),
               horario_inicio: form.horario_inicio,
               horario_fim: form.horario_fim,
             },
@@ -352,7 +352,7 @@ export function ClinicaPage() {
                 className={INPUT} />
             </div>
           </div>
-          <p className="text-xs text-[var(--color-text-muted)]">Usado pela OVYVA (IA) para sugerir horários de agendamento aos pacientes.</p>
+          <p className="text-xs text-[var(--color-text-muted)]">Usado pela LYRA (IA) para sugerir horários de agendamento aos pacientes.</p>
         </div>
 
         {/* Endereço */}

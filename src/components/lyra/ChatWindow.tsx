@@ -3,12 +3,12 @@ import {
   Send, Bot, User, Settings, Clock, CheckCircle, Play, CalendarDays
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import type { OvyvaConversation, OvyvaMessage } from '../../types/ovyva'
+import type { LyraConversation, LyraMessage } from '../../types/lyra'
 import { Avatar } from '../ui/Avatar'
 import { Link } from 'react-router-dom'
 
 interface ChatWindowProps {
-  conversation: OvyvaConversation
+  conversation: LyraConversation
   onSend: (text: string) => void
   onTakeover: () => void
   onReturnToAI: () => void
@@ -38,11 +38,11 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
 
   // Agrupar mensagens por sessao_id ou data aproximada
   const groupedSessions = useMemo(() => {
-    const groups: { label: string, date: Date, msgs: OvyvaMessage[] }[] = []
+    const groups: { label: string, date: Date, msgs: LyraMessage[] }[] = []
     
     // Fallback simple grouper by date/session
     let _currentGroupId: string | null = null
-    let currentGroup: OvyvaMessage[] = []
+    let currentGroup: LyraMessage[] = []
     let lastDate: Date = new Date(0)
 
     conversation.mensagens.forEach((msg, idx) => {
@@ -142,7 +142,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                  <Bot className="w-3.5 h-3.5" /> Devolver para IA
                </button>
              )}
-             <Link to="/ovyva/config" className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] transition-colors">
+             <Link to="/lyra/config" className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] transition-colors">
                 <Settings className="w-5 h-5" />
              </Link>
           </div>
@@ -231,7 +231,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
   )
 }
 
-function MessageBubble({ message, aiName = 'Sofia' }: { message: OvyvaMessage; aiName?: string }) {
+function MessageBubble({ message, aiName = 'Sofia' }: { message: LyraMessage; aiName?: string }) {
   const isPatient = message.remetente === 'paciente'
   const isIA      = message.remetente === 'ia'
 

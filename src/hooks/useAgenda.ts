@@ -155,9 +155,9 @@ export function useAgenda() {
 
         // Validar horário da clínica
         const { data: clinicaConfig } = await supabase.from('clinicas').select('configuracoes').eq('id', clinicaId).single()
-        const ovyvaConfig = (clinicaConfig?.configuracoes as any)?.ovyva
-        const horaAbr = ovyvaConfig?.horario_inicio || '07:00'
-        const horaFec = ovyvaConfig?.horario_fim || '21:00'
+        const lyraConfig = (clinicaConfig?.configuracoes as any)?.lyra
+        const horaAbr = lyraConfig?.horario_inicio || '07:00'
+        const horaFec = lyraConfig?.horario_fim || '21:00'
         if (data.horaInicio < horaAbr || data.horaFim > horaFec) {
           throw new Error(`Horário fora do funcionamento da clínica (${horaAbr} — ${horaFec}).`)
         }

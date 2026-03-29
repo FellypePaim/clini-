@@ -6,8 +6,8 @@ const MODULES = [
   { icon: LayoutDashboard, title: 'Dashboard', desc: 'Visao completa da clinica em tempo real', color: '#0891b2' },
   { icon: Calendar, title: 'Agenda', desc: 'Drag-and-drop com recorrencia e conflitos', color: '#6366f1' },
   { icon: Users, title: 'Pacientes / PEP', desc: 'Prontuario eletronico completo', color: '#10b981' },
-  { icon: MessageSquare, title: 'OVYVA (IA)', desc: 'Secretaria virtual 24/7 via WhatsApp', color: '#f59e0b' },
-  { icon: Briefcase, title: 'Verdesk CRM', desc: 'Kanban de leads e campanhas', color: '#ec4899' },
+  { icon: MessageSquare, title: 'LYRA (IA)', desc: 'Secretaria virtual 24/7 via WhatsApp', color: '#f59e0b' },
+  { icon: Briefcase, title: 'Nexus CRM', desc: 'Kanban de leads e campanhas', color: '#ec4899' },
   { icon: DollarSign, title: 'Financeiro', desc: 'Receitas, despesas e DRE', color: '#14b8a6' },
 ]
 
@@ -110,7 +110,7 @@ function PacientesMock({ color }: { color: string }) {
   )
 }
 
-function OvyvaMock({ color }: { color: string }) {
+function LyraMock({ color }: { color: string }) {
   const messages = [
     { from: 'user', text: 'Ola, gostaria de agendar uma consulta' },
     { from: 'bot', text: 'Claro! Temos horarios disponiveis na quarta e quinta. Qual prefere?' },
@@ -138,7 +138,7 @@ function OvyvaMock({ color }: { color: string }) {
   )
 }
 
-function VerdeskMock({ color }: { color: string }) {
+function NexusMock({ color }: { color: string }) {
   const columns = [
     { title: 'Novo', count: 3 },
     { title: 'Contato', count: 2 },
@@ -212,7 +212,7 @@ function FinanceiroMock({ color }: { color: string }) {
   )
 }
 
-const MOCK_COMPONENTS = [DashboardMock, AgendaMock, PacientesMock, OvyvaMock, VerdeskMock, FinanceiroMock]
+const MOCK_COMPONENTS = [DashboardMock, AgendaMock, PacientesMock, LyraMock, NexusMock, FinanceiroMock]
 
 export function FeaturesSection() {
   const [active, setActive] = useState(0)

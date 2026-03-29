@@ -1,6 +1,6 @@
 export type MessageSender = 'paciente' | 'ia' | 'humano';
 
-export interface OvyvaMessage {
+export interface LyraMessage {
   id: string;
   conteudo: string; // was texto
   remetente: MessageSender; // was sender
@@ -13,7 +13,7 @@ export interface OvyvaMessage {
   audioDuration?: string;
 }
 
-export interface OvyvaConversation {
+export interface LyraConversation {
   id: string;
   clinica_id?: string;
   contato_telefone: string;
@@ -25,17 +25,17 @@ export interface OvyvaConversation {
   metadata?: any;
   sessao_atual_id?: string;
   
-  // From the View `ovyva_conversas_com_preview`
+  // From the View `lyra_conversas_com_preview`
   ultima_mensagem?: string;
   ultima_mensagem_em?: string;
   ultimo_remetente?: MessageSender;
   mensagens_nao_lidas?: number;
   
   // Local state helper for UI
-  mensagens: OvyvaMessage[];
+  mensagens: LyraMessage[];
 }
 
-export interface OvyvaConfig {
+export interface LyraConfig {
   aiName: string;
   toneOfVoice: 'formal' | 'cordial' | 'informal' | 'atenciosa';
   workingHours: {

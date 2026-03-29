@@ -156,7 +156,7 @@ export function SuperClinicasPage() {
 
   async function handleResetConversations(clinic: Clinic) {
     const confirmed = window.confirm(
-      `Zerar TODAS as conversas da OVYVA da clinica "${clinic.nome}"?\n\nIsso apaga todo o historico de mensagens. A IA vai atender todos os contatos como se fosse a primeira vez.`,
+      `Zerar TODAS as conversas da LYRA da clinica "${clinic.nome}"?\n\nIsso apaga todo o historico de mensagens. A IA vai atender todos os contatos como se fosse a primeira vez.`,
     )
     if (!confirmed) return
     setActionLoadingId(clinic.id)
@@ -350,10 +350,10 @@ export function SuperClinicasPage() {
                   disabled={actionLoadingId === clinic.id}
                   onClick={() => handleResetConversations(clinic)}
                   className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white font-bold text-[10px] rounded-xl transition-all disabled:opacity-50 w-full justify-center"
-                  title="Zerar historico de conversas OVYVA"
+                  title="Zerar historico de conversas LYRA"
                 >
                   <MessageCircle size={14} />
-                  Zerar Conversas OVYVA
+                  Zerar Conversas LYRA
                 </button>
               </div>
 

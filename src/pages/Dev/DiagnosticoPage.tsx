@@ -23,15 +23,15 @@ export function DiagnosticoPage() {
   const [isResetting, setIsResetting] = useState(false)
 
   const handleResetChat = async () => {
-    if (!confirm("Tem certeza que deseja apagar TODO o histórico de conversas do OVYVA?")) return
+    if (!confirm("Tem certeza que deseja apagar TODO o histórico de conversas do LYRA?")) return
     
     setIsResetting(true)
     try {
       // Deleta mensagens e depois conversas
-      const { error: errM } = await supabase.from('ovyva_mensagens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      const { error: errM } = await supabase.from('lyra_mensagens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       if (errM) throw errM
       
-      const { error: errC } = await supabase.from('ovyva_conversas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      const { error: errC } = await supabase.from('lyra_conversas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       if (errC) throw errC
 
       // Limpar metadados de leads se houver vínculo
@@ -189,16 +189,16 @@ export function DiagnosticoPage() {
        if (error) throw error
     }},
 
-    // OVYVA
-    { id: 'ovv-1', module: 'OVYVA', name: 'Realtime e Select Conversas', status: 'idle', fn: async () => {
-       const { error } = await supabase.from('ovyva_conversas').select('id').limit(1)
+    // LYRA
+    { id: 'ovv-1', module: 'LYRA', name: 'Realtime e Select Conversas', status: 'idle', fn: async () => {
+       const { error } = await supabase.from('lyra_conversas').select('id').limit(1)
        if (error) throw error
-       const chan = supabase.channel('diagnostico-ovyva').on('postgres_changes', { event: '*', schema: 'public', table: 'ovyva_conversas' }, () => {}).subscribe()
+       const chan = supabase.channel('diagnostico-lyra').on('postgres_changes', { event: '*', schema: 'public', table: 'lyra_conversas' }, () => {}).subscribe()
        supabase.removeChannel(chan)
     }},
 
-    // Verdesk
-    { id: 'crm-1', module: 'Verdesk (CRM)', name: 'Leads CRUD e Realtime', status: 'idle', fn: async () => {
+    // Nexus
+    { id: 'crm-1', module: 'Nexus (CRM)', name: 'Leads CRUD e Realtime', status: 'idle', fn: async () => {
        const { data: session } = await supabase.auth.getSession()
        const clinicaId = (await supabase.from('profiles').select('clinica_id').eq('id', session?.session?.user?.id || '').single())?.data?.clinica_id
        if (!clinicaId) throw new Error("Sem clinica_id")

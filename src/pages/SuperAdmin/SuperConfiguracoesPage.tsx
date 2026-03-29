@@ -22,7 +22,7 @@ export function SuperConfiguracoesPage() {
   const { toast } = useToast()
   const [activeSettingItem, setActiveSettingItem] = React.useState<string>('Domínio Principal')
   const [flags, setFlags] = React.useState([
-    { id: 'ovyva_audio', name: 'Processamento de Áudio OVYVA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
+    { id: 'lyra_audio', name: 'Processamento de Áudio LYRA', active: true, info: 'Ativa transcrição automática em todas as clínicas' },
     { id: 'super_admin_panel', name: 'Beta: Novo Painel SuperAdmin', active: true, info: 'Acesso às novas rotas administrativas globais' },
     { id: 'telemed_v3', name: 'Telemedicina v3 (WebRTC)', active: false, info: 'Nova stack de vídeo em ambiente de testes' },
   ])

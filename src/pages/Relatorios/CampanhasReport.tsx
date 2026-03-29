@@ -241,7 +241,7 @@ export function CampanhasReport() {
               <div className="h-full flex flex-col items-center justify-center text-[var(--color-text-dim)] border-2 border-dashed border-[var(--color-border)] rounded-3xl">
                 <Megaphone className="w-16 h-16 mb-4 opacity-20" />
                 <p className="font-black text-[var(--color-text-muted)] uppercase tracking-widest text-xs text-center px-8">
-                  Nenhuma campanha encontrada. Crie sua primeira campanha no módulo Verdesk.
+                  Nenhuma campanha encontrada. Crie sua primeira campanha no módulo Nexus.
                 </p>
               </div>
             ) : (
@@ -302,7 +302,7 @@ export function CampanhasReport() {
                 ) : campanhas.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="p-12 text-center text-[var(--color-text-muted)] uppercase tracking-widest text-xs">
-                      Nenhuma campanha encontrada. Crie sua primeira campanha no módulo Verdesk.
+                      Nenhuma campanha encontrada. Crie sua primeira campanha no módulo Nexus.
                     </td>
                   </tr>
                 ) : campanhas.map((row) => (

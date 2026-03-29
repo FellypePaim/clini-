@@ -78,8 +78,8 @@ Deno.serve(async (req) => {
       case "generate_summary":
         result = await handleSummary(payload)
         break
-      case "ovyva_respond":
-        result = await handleOVYVA(payload, clinica_id, supabaseAdmin)
+      case "lyra_respond":
+        result = await handleLYRA(payload, clinica_id, supabaseAdmin)
         break
       case "dashboard_insights":
         result = await handleDashboardInsights(clinica_id, supabaseAdmin)
@@ -246,13 +246,13 @@ async function handleSummary(payload: any) {
 }
 
 // ─────────────────────────────────────────
-// HANDLER: OVYVA RESPOND
+// HANDLER: LYRA RESPOND
 // ─────────────────────────────────────────
-async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
+async function handleLYRA(payload: any, clinica_id: string, supabase: any) {
   const { numero_whatsapp, mensagem_atual, image_base64, mime_type } = payload
 
   if (!numero_whatsapp || !mensagem_atual) {
-    throw new Error("Campos 'numero_whatsapp' e 'mensagem_atual' são obrigatórios para ovyva_respond")
+    throw new Error("Campos 'numero_whatsapp' e 'mensagem_atual' são obrigatórios para lyra_respond")
   }
 
   // 1. Buscar ou criar conversa
@@ -271,7 +271,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   if (aguardandoNome) {
     const nome = mensagem_atual.trim()
 
-    await supabase.from("ovyva_conversas").update({
+    await supabase.from("lyra_conversas").update({
       contato_nome: nome,
       metadata: { aguardando_nome: false },
     }).eq("id", conversa.id)
@@ -285,17 +285,17 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       .limit(3)
 
     if (pacientes?.length === 1) {
-      await supabase.from("ovyva_conversas")
+      await supabase.from("lyra_conversas")
         .update({ paciente_id: pacientes[0].id })
         .eq("id", conversa.id)
     }
 
-    // Criar/atualizar lead no Verdesk
+    // Criar/atualizar lead no Nexus
     await supabase.from("leads").upsert({
       clinica_id,
       nome,
       telefone: numero_whatsapp,
-      origem: "ovyva",
+      origem: "lyra",
       estagio: "perguntou_valor",
       conversa_id: conversa.id,
     }, { onConflict: "clinica_id,telefone" })
@@ -305,7 +305,7 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
 
   // 3. Buscar histórico da conversa (últimas 20 mensagens)
   const { data: historico } = await supabase
-    .from("ovyva_mensagens")
+    .from("lyra_mensagens")
     .select("remetente, conteudo, created_at")
     .eq("conversa_id", conversa.id)
     .order("created_at", { ascending: true })
@@ -378,14 +378,14 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
   const ausenciasData = ausenciasRes.data || []
   const profissionais = profissionaisRes.data || []
 
-  const ovyvaConfig = clinicaData?.configuracoes?.ovyva ?? {}
+  const lyraConfig = clinicaData?.configuracoes?.lyra ?? {}
   const config = {
-    nome_assistente: ovyvaConfig.nome_assistente ?? "Sofia",
-    tom_voz: ovyvaConfig.tom_voz ?? "cordial",
+    nome_assistente: lyraConfig.nome_assistente ?? "Sofia",
+    tom_voz: lyraConfig.tom_voz ?? "cordial",
     nome_clinica: clinicaData?.nome ?? "Clínica",
-    base_conhecimento: ovyvaConfig.base_conhecimento ?? "",
-    horario_inicio: ovyvaConfig.horario_inicio ?? "08:00",
-    horario_fim: ovyvaConfig.horario_fim ?? "18:00",
+    base_conhecimento: lyraConfig.base_conhecimento ?? "",
+    horario_inicio: lyraConfig.horario_inicio ?? "08:00",
+    horario_fim: lyraConfig.horario_fim ?? "18:00",
   }
 
   // 6. Calcular SLOTS LIVRES reais para os próximos 7 dias úteis
@@ -498,15 +498,15 @@ async function handleOVYVA(payload: any, clinica_id: string, supabase: any) {
       return `- ${dt[0]?.split("-").reverse().join("/") ?? "?"} as ${dt[1]?.substring(0,5) ?? "?"} (${c.status})`
     })
   } else {
-    // Buscar por observações da OVYVA (contatos não cadastrados)
-    const { data: consultasOvyva } = await supabase.from("consultas")
+    // Buscar por observações da LYRA (contatos não cadastrados)
+    const { data: consultasLyra } = await supabase.from("consultas")
       .select("data_hora_inicio, status, observacoes")
       .eq("clinica_id", clinica_id)
       .ilike("observacoes", `%${conversa.contato_nome || conversa.contato_telefone}%`)
       .in("status", ["agendado", "confirmado"])
       .gte("data_hora_inicio", `${todayBR}T00:00:00`)
       .order("data_hora_inicio")
-    consultasDoContato = (consultasOvyva ?? []).map((c: any) => {
+    consultasDoContato = (consultasLyra ?? []).map((c: any) => {
       const dt = c.data_hora_inicio?.split("T") ?? []
       return `- ${dt[0]?.split("-").reverse().join("/") ?? "?"} as ${dt[1]?.substring(0,5) ?? "?"} (${c.status})`
     })
@@ -566,15 +566,15 @@ JSON obrigatório:
   }
   userContent.push({ text: mensagem_atual })
 
-  console.log(`[OVYVA] Chamando Gemini. Historico: ${chatHistory.length} msgs. Slots: ${slotsLivres.length} dias.`)
+  console.log(`[LYRA] Chamando Gemini. Historico: ${chatHistory.length} msgs. Slots: ${slotsLivres.length} dias.`)
 
   let result, usage, resposta
   try {
     result = await chat.sendMessage(userContent)
     usage = result.response.usageMetadata
-    console.log(`[OVYVA] Gemini respondeu. Tokens: ${usage?.promptTokenCount}/${usage?.candidatesTokenCount}`)
+    console.log(`[LYRA] Gemini respondeu. Tokens: ${usage?.promptTokenCount}/${usage?.candidatesTokenCount}`)
     let rawText = result.response.text()
-    console.log("[OVYVA] Raw response:", rawText?.substring(0, 300))
+    console.log("[LYRA] Raw response:", rawText?.substring(0, 300))
 
     // Limpar markdown code blocks se houver
     rawText = rawText?.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim() || ''
@@ -589,7 +589,7 @@ JSON obrigatório:
       }
 
       if (!resposta) {
-        console.error("[OVYVA] JSON parse falhou, usando texto como resposta")
+        console.error("[LYRA] JSON parse falhou, usando texto como resposta")
         resposta = {
           resposta: rawText || "Desculpe, tive um problema. Pode repetir?",
           intencao_detectada: "outro",
@@ -600,7 +600,7 @@ JSON obrigatório:
       }
     }
   } catch (geminiErr: any) {
-    console.error("[OVYVA] Gemini error:", geminiErr.message)
+    console.error("[LYRA] Gemini error:", geminiErr.message)
     return {
       data: {
         resposta: "Desculpe, estou com dificuldade para processar. Pode repetir sua mensagem?",
@@ -628,12 +628,12 @@ JSON obrigatório:
 
         if (existente) {
           // Paciente já existe — vincular à conversa
-          await supabase.from("ovyva_conversas").update({
+          await supabase.from("lyra_conversas").update({
             paciente_id: existente.id,
             contato_nome: nomeCompleto,
           }).eq("id", conversa.id)
           conversa.paciente_id = existente.id
-          console.log(`[OVYVA] Paciente existente vinculado: ${existente.id}`)
+          console.log(`[LYRA] Paciente existente vinculado: ${existente.id}`)
         } else {
           // Criar novo paciente
           const { data: novoPaciente } = await supabase.from("pacientes").insert({
@@ -641,34 +641,34 @@ JSON obrigatório:
             nome_completo: nomeCompleto,
             telefone: conversa.contato_telefone,
             whatsapp: conversa.contato_telefone,
-            como_conheceu: "WhatsApp OVYVA",
+            como_conheceu: "WhatsApp LYRA",
             ativo: true,
           }).select("id").single()
 
           if (novoPaciente) {
-            await supabase.from("ovyva_conversas").update({
+            await supabase.from("lyra_conversas").update({
               paciente_id: novoPaciente.id,
               contato_nome: nomeCompleto,
             }).eq("id", conversa.id)
             conversa.paciente_id = novoPaciente.id
-            console.log(`[OVYVA] Paciente auto-cadastrado: ${nomeCompleto} (${novoPaciente.id})`)
+            console.log(`[LYRA] Paciente auto-cadastrado: ${nomeCompleto} (${novoPaciente.id})`)
           }
         }
       } catch (e: any) {
-        console.error("[OVYVA] Erro no auto-cadastro:", e.message)
+        console.error("[LYRA] Erro no auto-cadastro:", e.message)
       }
     }
   }
 
   // Atualizar nome do contato se IA informou
   if (resposta.nome_completo && conversa.contato_nome !== resposta.nome_completo) {
-    await supabase.from("ovyva_conversas").update({
+    await supabase.from("lyra_conversas").update({
       contato_nome: resposta.nome_completo,
     }).eq("id", conversa.id)
   }
 
   // 8b. Atualizar ultimo_contato + intent
-  await supabase.from("ovyva_conversas").update({
+  await supabase.from("lyra_conversas").update({
     ultimo_contato: new Date().toISOString(),
     total_mensagens: (conversa.total_mensagens ?? 0) + 2,
     metadata: {
@@ -679,7 +679,7 @@ JSON obrigatório:
 
   // 9. Processar ação sugerida
   if (resposta.acao_sugerida === "transferir_humano") {
-    await supabase.from("ovyva_conversas")
+    await supabase.from("lyra_conversas")
       .update({ status: "aguardando_humano" })
       .eq("id", conversa.id)
   }
@@ -707,8 +707,8 @@ JSON obrigatório:
     if (!horaAg.includes(':')) horaAg = `${horaAg}:00`
   }
 
-  console.log(`[OVYVA] RESPOSTA COMPLETA:`, JSON.stringify(resposta).substring(0, 500))
-  console.log(`[OVYVA] Ação: ${resposta.acao_sugerida}, Data: ${dataAg}, Hora: ${horaAg}, Prof: ${resposta.dados_agendamento?.profissional_nome}, Proced: ${resposta.dados_agendamento?.procedimento}`)
+  console.log(`[LYRA] RESPOSTA COMPLETA:`, JSON.stringify(resposta).substring(0, 500))
+  console.log(`[LYRA] Ação: ${resposta.acao_sugerida}, Data: ${dataAg}, Hora: ${horaAg}, Prof: ${resposta.dados_agendamento?.profissional_nome}, Proced: ${resposta.dados_agendamento?.procedimento}`)
 
   // ── AÇÃO: AGENDAR ──
   if ((resposta.acao_sugerida === "agendar" || resposta.acao_sugerida === "reagendar") && conversa.id) {
@@ -738,7 +738,7 @@ JSON obrigatório:
       const { data: consultaAnterior } = await cancelQuery.single()
       if (consultaAnterior) {
         await supabase.from("consultas")
-          .update({ status: "cancelado", observacoes: "[REAGENDADO POR OVYVA] Paciente solicitou nova data via WhatsApp." })
+          .update({ status: "cancelado", observacoes: "[REAGENDADO POR LYRA] Paciente solicitou nova data via WhatsApp." })
           .eq("id", consultaAnterior.id)
 
         // Notificar profissional do cancelamento
@@ -746,12 +746,12 @@ JSON obrigatório:
         await notificarProfissional(supabase, clinica_id, consultaAnterior.profissional_id, "reagendamento",
           `Consulta REAGENDADA via WhatsApp:\nPaciente: ${conversa.contato_nome || "Contato"}\nAnterior: ${dtOld?.[0]?.split("-").reverse().join("/") ?? "?"} as ${dtOld?.[1]?.substring(0, 5) ?? "?"}\nNova: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}`
         )
-        console.log(`[OVYVA] Reagendamento: cancelou consulta ${consultaAnterior.id}`)
+        console.log(`[LYRA] Reagendamento: cancelou consulta ${consultaAnterior.id}`)
       }
     }
 
     // Criar pré-agendamento se tiver data/hora (aceita pacientes vinculados OU não)
-    console.log(`[OVYVA] Verificando se pode criar consulta: dataAg="${dataAg}" horaAg="${horaAg}" (truthy: ${!!dataAg && !!horaAg})`)
+    console.log(`[LYRA] Verificando se pode criar consulta: dataAg="${dataAg}" horaAg="${horaAg}" (truthy: ${!!dataAg && !!horaAg})`)
     if (dataAg && horaAg) {
       // Adicionar timezone BR (-03:00) para Supabase salvar corretamente
       const dataHoraInicio = `${dataAg}T${horaAg}:00-03:00`
@@ -775,14 +775,14 @@ JSON obrigatório:
         profissionalId = profissionais[0].id
       }
 
-      console.log(`[OVYVA] Criando consulta: ${dataHoraInicio} prof=${profissionalId} proced=${(matchProced as any)?.id}`)
+      console.log(`[LYRA] Criando consulta: ${dataHoraInicio} prof=${profissionalId} proced=${(matchProced as any)?.id}`)
 
       // paciente_id e profissional_id são obrigatórios na tabela consultas
       if (!conversa.paciente_id) {
-        console.error("[OVYVA] Não é possível agendar: paciente_id é null (contato não cadastrado)")
+        console.error("[LYRA] Não é possível agendar: paciente_id é null (contato não cadastrado)")
       }
       if (!profissionalId) {
-        console.error("[OVYVA] Não é possível agendar: profissional_id é null")
+        console.error("[LYRA] Não é possível agendar: profissional_id é null")
       }
 
       const insertPayload: any = {
@@ -793,12 +793,12 @@ JSON obrigatório:
         data_hora_inicio: dataHoraInicio,
         data_hora_fim: dataHoraFim,
         status: "agendado",
-        observacoes: `[AGENDAMENTO OVYVA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp.`,
+        observacoes: `[AGENDAMENTO LYRA] ${conversa.contato_nome || "Contato WhatsApp"} — via WhatsApp.`,
       }
 
       // Só inserir se tem os campos obrigatórios
       if (!conversa.paciente_id || !profissionalId) {
-        console.error("[OVYVA] Insert abortado: campos obrigatórios faltando")
+        console.error("[LYRA] Insert abortado: campos obrigatórios faltando")
       } else {
         // Verificar duplicata: mesma data/hora + mesmo paciente
         const { count: existing } = await supabase.from("consultas")
@@ -808,13 +808,13 @@ JSON obrigatório:
           .eq("data_hora_inicio", dataHoraInicio)
           .in("status", ["agendado", "confirmado"])
         if ((existing ?? 0) > 0) {
-          console.log("[OVYVA] Consulta duplicada detectada, pulando insert")
+          console.log("[LYRA] Consulta duplicada detectada, pulando insert")
         } else {
         const { error: insertErr } = await supabase.from("consultas").insert(insertPayload)
         if (insertErr) {
-          console.error("[OVYVA] Erro ao criar agendamento:", JSON.stringify(insertErr))
+          console.error("[LYRA] Erro ao criar agendamento:", JSON.stringify(insertErr))
         } else {
-          console.log("[OVYVA] CONSULTA CRIADA COM SUCESSO!")
+          console.log("[LYRA] CONSULTA CRIADA COM SUCESSO!")
           await notificarProfissional(supabase, clinica_id, profissionalId, "agendamento",
             `Nova consulta agendada via WhatsApp:\nPaciente: ${conversa.contato_nome || "Novo contato"}\nData: ${dataAg?.split("-").reverse().join("/")} as ${horaAg}\nProcedimento: ${(matchProced as any)?.nome || "Avaliacao"}`
           )
@@ -857,13 +857,13 @@ JSON obrigatório:
           nome: conversa.contato_nome || `Contato ${conversa.contato_telefone}`,
           telefone: conversa.contato_telefone,
           estagio: novoEstagio,
-          origem: "WhatsApp OVYVA",
+          origem: "WhatsApp LYRA",
           conversa_id: conversa.id,
           ultimo_contato: new Date().toISOString(),
         }).select("estagio, id").single()
         if (newLead) {
           currentLead = newLead
-          console.log(`[OVYVA] Lead criado via ai-gateway fallback: ${newLead.id}`)
+          console.log(`[LYRA] Lead criado via ai-gateway fallback: ${newLead.id}`)
         }
       }
 
@@ -873,7 +873,7 @@ JSON obrigatório:
         if (newIdx > currentIdx) {
           leadUpdate.estagio = novoEstagio
           // Atualizar metadata da conversa com o estágio do CRM
-          await supabase.from("ovyva_conversas").update({
+          await supabase.from("lyra_conversas").update({
             metadata: { ...(conversa.metadata ?? {}), lead_stage: novoEstagio, intent: resposta.intencao_detectada },
           }).eq("id", conversa.id)
           // Registrar mudança no histórico
@@ -881,7 +881,7 @@ JSON obrigatório:
             lead_id: currentLead.id,
             estagio_anterior: currentLead.estagio,
             estagio_novo: novoEstagio,
-            anotacao: `[OVYVA IA] Intenção: ${resposta.intencao_detectada}`,
+            anotacao: `[LYRA IA] Intenção: ${resposta.intencao_detectada}`,
           }).catch(() => {})
         }
         if (resposta.dados_agendamento?.procedimento) {
@@ -910,7 +910,7 @@ JSON obrigatório:
     const { data: consultaCancel } = await cancelQuery.single()
     if (consultaCancel) {
       await supabase.from("consultas")
-        .update({ status: "cancelado", observacoes: "[CANCELADO POR OVYVA] Paciente solicitou cancelamento via WhatsApp." })
+        .update({ status: "cancelado", observacoes: "[CANCELADO POR LYRA] Paciente solicitou cancelamento via WhatsApp." })
         .eq("id", consultaCancel.id)
 
       // Notificar profissional
@@ -1005,7 +1005,7 @@ async function handleDashboardInsights(clinica_id: string, supabase: any) {
 async function getOuCriarConversa(supabase: any, clinica_id: string, numero_whatsapp: string) {
   // Tentar buscar conversa existente
   const { data: existente } = await supabase
-    .from("ovyva_conversas")
+    .from("lyra_conversas")
     .select("*")
     .eq("clinica_id", clinica_id)
     .eq("contato_telefone", numero_whatsapp)
@@ -1015,7 +1015,7 @@ async function getOuCriarConversa(supabase: any, clinica_id: string, numero_what
 
   // Criar nova conversa (primeiro contato)
   const { data: nova, error } = await supabase
-    .from("ovyva_conversas")
+    .from("lyra_conversas")
     .insert({
       clinica_id,
       contato_telefone: numero_whatsapp,

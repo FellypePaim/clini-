@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { Lead, Campaign, LeadStage, LeadOrigin, LeadInteraction } from '../types/verdesk'
+import type { Lead, Campaign, LeadStage, LeadOrigin, LeadInteraction } from '../types/nexus'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
 import { useToast } from './useToast'
 
-export function useVerdesk() {
+export function useNexus() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(false)

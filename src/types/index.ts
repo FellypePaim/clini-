@@ -222,7 +222,7 @@ export interface Transacao {
 }
 
 // ─────────────────────────────────────────────
-// CRM LEAD (Verdesk)
+// CRM LEAD (Nexus)
 // ─────────────────────────────────────────────
 export type LeadStatus = 'novo' | 'em_contato' | 'proposta' | 'ganho' | 'perdido'
 

@@ -4,13 +4,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { cn } from '../../lib/utils'
-import { useVerdesk } from '../../hooks/useVerdesk'
+import { useNexus } from '../../hooks/useNexus'
 
 const leadSchema = z.object({
   name: z.string().min(3, 'Nome muito curto'),
   phone: z.string().min(10, 'Telefone inválido'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
-  origin: z.enum(['Instagram', 'WhatsApp OVYVA', 'Indicação', 'Manual']),
+  origin: z.enum(['Instagram', 'WhatsApp LYRA', 'Indicação', 'Manual']),
   procedure: z.string().min(2, 'Informe o procedimento de interesse'),
   estimatedValue: z.number().min(0).optional(),
   stage: z.enum(['Perguntou Valor', 'Demonstrou Interesse', 'Quase Fechando', 'Agendado', 'Perdido'])
@@ -24,13 +24,13 @@ interface NovoLeadModalProps {
 }
 
 export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
-  const { createLead } = useVerdesk()
+  const { createLead } = useNexus()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
-      origin: 'WhatsApp OVYVA',
+      origin: 'WhatsApp LYRA',
       stage: 'Perguntou Valor',
       estimatedValue: 0,
       procedure: ''
@@ -107,7 +107,7 @@ export function NovoLeadModal({ isOpen, onClose }: NovoLeadModalProps) {
                   {...register('origin')}
                   className="input-base"
                 >
-                  <option value="WhatsApp OVYVA">WhatsApp OVYVA</option>
+                  <option value="WhatsApp LYRA">WhatsApp LYRA</option>
                   <option value="Instagram">Instagram</option>
                   <option value="Indicação">Indicação</option>
                   <option value="Manual">Outro (Manual)</option>

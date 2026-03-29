@@ -38,15 +38,15 @@ const PacientesPage = lazyNamed(() => import('../pages/Pacientes/PacientesPage')
 const PatientProfilePage = lazyNamed(() => import('../pages/Pacientes/PatientProfilePage'), 'PatientProfilePage')
 const PublicAnamnesisPage = lazyNamed(() => import('../pages/Public/PublicAnamnesisPage'), 'PublicAnamnesisPage')
 
-// ─── Páginas lazy — OVYVA ──────────────────────────────
-const OvyvaPage = lazyNamed(() => import('../pages/Ovyva/OvyvaPage'), 'OvyvaPage')
-const OvyvaConfigPage = lazyNamed(() => import('../pages/Ovyva/OvyvaConfigPage'), 'OvyvaConfigPage')
-const OvyvaHistoryPage = lazyNamed(() => import('../pages/Ovyva/OvyvaHistoryPage'), 'OvyvaHistoryPage')
+// ─── Páginas lazy — LYRA ──────────────────────────────
+const LyraPage = lazyNamed(() => import('../pages/Lyra/LyraPage'), 'LyraPage')
+const LyraConfigPage = lazyNamed(() => import('../pages/Lyra/LyraConfigPage'), 'LyraConfigPage')
+const LyraHistoryPage = lazyNamed(() => import('../pages/Lyra/LyraHistoryPage'), 'LyraHistoryPage')
 
-// ─── Páginas lazy — Verdesk CRM ────────────────────────
-const VerdeskPage = lazyNamed(() => import('../pages/Verdesk/VerdeskPage'), 'VerdeskPage')
-const PerformancePage = lazyNamed(() => import('../pages/Verdesk/PerformancePage'), 'PerformancePage')
-const CampanhasPage = lazyNamed(() => import('../pages/Verdesk/CampanhasPage'), 'CampanhasPage')
+// ─── Páginas lazy — Nexus CRM ────────────────────────
+const NexusPage = lazyNamed(() => import('../pages/Nexus/NexusPage'), 'NexusPage')
+const PerformancePage = lazyNamed(() => import('../pages/Nexus/PerformancePage'), 'PerformancePage')
+const CampanhasPage = lazyNamed(() => import('../pages/Nexus/CampanhasPage'), 'CampanhasPage')
 
 // ─── Páginas lazy — Estoque ────────────────────────────
 const EstoquePage = lazyNamed(() => import('../pages/Estoque/EstoquePage'), 'EstoquePage')
@@ -68,7 +68,7 @@ const InadimplenciaReport = lazyNamed(() => import('../pages/Relatorios/Inadimpl
 const DREReport = lazyNamed(() => import('../pages/Relatorios/DREReport'), 'DREReport')
 const CampanhasReport = lazyNamed(() => import('../pages/Relatorios/CampanhasReport'), 'CampanhasReport')
 const OrigemReport = lazyNamed(() => import('../pages/Relatorios/OrigemReport'), 'OrigemReport')
-const OVYVAReport = lazyNamed(() => import('../pages/Relatorios/OVYVAReport'), 'OVYVAReport')
+const LYRAReport = lazyNamed(() => import('../pages/Relatorios/LYRAReport'), 'LYRAReport')
 const FiscalReport = lazyNamed(() => import('../pages/Relatorios/FiscalReport'), 'FiscalReport')
 
 // ─── Páginas lazy — Financeiro ─────────────────────────
@@ -185,15 +185,15 @@ export function AppRouter() {
           <Route path="/pacientes" element={<PacientesPage />} />
           <Route path="/pacientes/:id" element={<PatientProfilePage />} />
 
-          {/* Módulo OVYVA */}
-          <Route path="/ovyva" element={<OvyvaPage />} />
-          <Route path="/ovyva/configuracoes" element={<RequireRole roles={['administrador']}><OvyvaConfigPage /></RequireRole>} />
-          <Route path="/ovyva/historico" element={<RequireRole roles={['administrador', 'profissional']}><OvyvaHistoryPage /></RequireRole>} />
+          {/* Módulo LYRA */}
+          <Route path="/lyra" element={<LyraPage />} />
+          <Route path="/lyra/configuracoes" element={<RequireRole roles={['administrador']}><LyraConfigPage /></RequireRole>} />
+          <Route path="/lyra/historico" element={<RequireRole roles={['administrador', 'profissional']}><LyraHistoryPage /></RequireRole>} />
 
-          {/* Módulo Verdesk CRM */}
-          <Route path="/verdesk" element={<VerdeskPage />} />
-          <Route path="/verdesk/performance" element={<PerformancePage />} />
-          <Route path="/verdesk/campanhas" element={<CampanhasPage />} />
+          {/* Módulo Nexus CRM */}
+          <Route path="/nexus" element={<NexusPage />} />
+          <Route path="/nexus/performance" element={<PerformancePage />} />
+          <Route path="/nexus/campanhas" element={<CampanhasPage />} />
 
           {/* Módulo Estoque — admin + profissional */}
           <Route path="/estoque" element={<RequireRole roles={['administrador', 'profissional']}><EstoquePage /></RequireRole>} />
@@ -215,7 +215,7 @@ export function AppRouter() {
           <Route path="/relatorios/dre" element={<RequireRole roles={['administrador', 'profissional']}><DREReport /></RequireRole>} />
           <Route path="/relatorios/campanhas" element={<RequireRole roles={['administrador', 'profissional']}><CampanhasReport /></RequireRole>} />
           <Route path="/relatorios/origem" element={<RequireRole roles={['administrador', 'profissional']}><OrigemReport /></RequireRole>} />
-          <Route path="/relatorios/ovyva" element={<RequireRole roles={['administrador', 'profissional']}><OVYVAReport /></RequireRole>} />
+          <Route path="/relatorios/lyra" element={<RequireRole roles={['administrador', 'profissional']}><LYRAReport /></RequireRole>} />
           <Route path="/relatorios/fiscal" element={<RequireRole roles={['administrador', 'profissional']}><FiscalReport /></RequireRole>} />
 
           {/* Módulo Financeiro — admin + profissional */}

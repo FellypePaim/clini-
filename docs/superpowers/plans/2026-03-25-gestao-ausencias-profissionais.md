@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Allow clinic admins to mark professional day-offs/absences, warn about conflicting appointments, optionally notify patients via WhatsApp, and block those slots in the agenda and OVYVA.
+**Goal:** Allow clinic admins to mark professional day-offs/absences, warn about conflicting appointments, optionally notify patients via WhatsApp, and block those slots in the agenda and LYRA.
 
-**Architecture:** New `profissional_ausencias` table with RLS. New `useAusencias` hook for CRUD + conflict detection. Modal in ProfissionaisPage for managing absences with conflict resolution (auto-notify/manual/skip). Visual blocking in DayView/WeekView. OVYVA ai-gateway queries absences before suggesting slots.
+**Architecture:** New `profissional_ausencias` table with RLS. New `useAusencias` hook for CRUD + conflict detection. Modal in ProfissionaisPage for managing absences with conflict resolution (auto-notify/manual/skip). Visual blocking in DayView/WeekView. LYRA ai-gateway queries absences before suggesting slots.
 
 **Tech Stack:** Supabase (PostgreSQL + RLS), React 19, TypeScript, Tailwind CSS, Lucide icons, jsPDF (n/a here)
 
@@ -21,7 +21,7 @@
 | `src/components/agenda/DayView.tsx` | Modify | Show absence blocking overlay |
 | `src/components/agenda/WeekView.tsx` | Modify | Show absence blocking overlay |
 | `src/hooks/useAgenda.ts` | Modify | Load absences alongside appointments |
-| `supabase/functions/ai-gateway/index.ts` | Modify | Query absences in OVYVA context |
+| `supabase/functions/ai-gateway/index.ts` | Modify | Query absences in LYRA context |
 | `src/lib/database.types.ts` | Regenerate | After migration push |
 
 ---
@@ -486,12 +486,12 @@ git commit -m "feat: agenda — bloqueio visual de ausências no DayView e WeekV
 
 ---
 
-## Task 6: OVYVA Integration (ai-gateway)
+## Task 6: LYRA Integration (ai-gateway)
 
 **Files:**
 - Modify: `supabase/functions/ai-gateway/index.ts`
 
-- [ ] **Step 1: Add absence query in OVYVA handler**
+- [ ] **Step 1: Add absence query in LYRA handler**
 
 In the `Promise.all` block (line ~339), add a 4th query:
 
@@ -527,7 +527,7 @@ Run: `npx supabase functions deploy ai-gateway --project-ref mddbbwbwmwcvecbnfmq
 
 ```bash
 git add supabase/functions/ai-gateway/index.ts
-git commit -m "feat: OVYVA — consulta ausências antes de sugerir horários"
+git commit -m "feat: LYRA — consulta ausências antes de sugerir horários"
 ```
 
 ---
@@ -551,6 +551,6 @@ Add to próximos passos or features list.
 
 ```bash
 git add -A
-git commit -m "feat: gestão de ausências — migration, hook, modal, agenda, OVYVA"
+git commit -m "feat: gestão de ausências — migration, hook, modal, agenda, LYRA"
 git push origin main
 ```

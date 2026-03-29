@@ -230,14 +230,14 @@ Deno.serve(async (req) => {
       }
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-      // CLÍNICA — Zerar histórico de conversas OVYVA
+      // CLÍNICA — Zerar histórico de conversas LYRA
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'reset_conversations': {
         const targetId = clinicId ?? pd.clinicaId
         if (!targetId) throw new Error('clinicaId obrigatório')
 
         // Buscar IDs das conversas da clínica
-        const { data: conversas } = await db.from('ovyva_conversas')
+        const { data: conversas } = await db.from('lyra_conversas')
           .select('id').eq('clinica_id', targetId)
         const ids = (conversas ?? []).map((c: any) => c.id)
 
@@ -246,13 +246,13 @@ Deno.serve(async (req) => {
 
         if (ids.length > 0) {
           // Deletar mensagens de todas as conversas
-          const { count: mc } = await db.from('ovyva_mensagens')
+          const { count: mc } = await db.from('lyra_mensagens')
             .delete({ count: 'exact' })
             .in('conversa_id', ids)
           msgsDeletadas = mc ?? 0
 
           // Deletar as conversas
-          const { count: cc } = await db.from('ovyva_conversas')
+          const { count: cc } = await db.from('lyra_conversas')
             .delete({ count: 'exact' })
             .eq('clinica_id', targetId)
           convsDeletadas = cc ?? 0
@@ -262,7 +262,7 @@ Deno.serve(async (req) => {
         try {
           await db.from('auditoria_global').insert({
             usuario_id: user.id, clinica_id: targetId,
-            acao: 'RESET_CONVERSATIONS', recurso: 'ovyva_conversas',
+            acao: 'RESET_CONVERSATIONS', recurso: 'lyra_conversas',
             resultado: 'sucesso',
             dados_depois: { conversas: convsDeletadas, mensagens: msgsDeletadas },
           })

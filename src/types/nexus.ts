@@ -1,6 +1,6 @@
 export type LeadStage = 'Perguntou Valor' | 'Demonstrou Interesse' | 'Quase Fechando' | 'Agendado' | 'Perdido';
 
-export type LeadOrigin = 'WhatsApp OVYVA' | 'Manual' | 'Indicação' | 'Instagram';
+export type LeadOrigin = 'WhatsApp LYRA' | 'Manual' | 'Indicação' | 'Instagram';
 
 export interface LeadInteraction {
   id: string;
@@ -24,7 +24,7 @@ export interface Lead {
   phone: string;
   email?: string;
   notes?: string;
-  ovyvaId?: string; // Link to OVYVA conversation if exists
+  lyraId?: string; // Link to LYRA conversation if exists
   interactions: LeadInteraction[];
 }
 

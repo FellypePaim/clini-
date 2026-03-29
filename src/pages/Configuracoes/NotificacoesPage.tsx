@@ -100,7 +100,7 @@ export function NotificacoesPage() {
           Notificações e Comunicação
         </h2>
         <div className="flex items-center gap-3 mt-1">
-          <p className="text-sm font-medium text-[var(--color-text-muted)]">Configure quais mensagens automáticas a OVYVA envia e quais alertas a equipe recebe.</p>
+          <p className="text-sm font-medium text-[var(--color-text-muted)]">Configure quais mensagens automáticas a LYRA envia e quais alertas a equipe recebe.</p>
           {lastSaved && (Date.now() - lastSaved) < 3000 && (
             <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 animate-fade-in">
               <CheckCircle2 size={12} /> Salvo
@@ -115,7 +115,7 @@ export function NotificacoesPage() {
           <h3 className="text-base font-bold text-[var(--color-text-primary)] mb-1 flex items-center gap-2">
             <Smartphone size={18} className="text-emerald-500" /> WhatsApp Automático (Pacientes)
           </h3>
-          <p className="text-xs text-[var(--color-text-muted)] mb-4">Mensagens enviadas automaticamente pela OVYVA via WhatsApp para os pacientes.</p>
+          <p className="text-xs text-[var(--color-text-muted)] mb-4">Mensagens enviadas automaticamente pela LYRA via WhatsApp para os pacientes.</p>
 
           <div className="space-y-3 max-w-2xl">
             <ToggleRow
@@ -190,7 +190,7 @@ export function NotificacoesPage() {
             />
             <ToggleRow
               label="Consulta pendente de aprovação"
-              description="Alerta quando a OVYVA cria um pré-agendamento que precisa de confirmação"
+              description="Alerta quando a LYRA cria um pré-agendamento que precisa de confirmação"
               value={config.sistema_consulta_pendente}
               onChange={() => toggle('sistema_consulta_pendente')}
             />

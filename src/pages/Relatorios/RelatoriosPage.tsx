@@ -46,9 +46,9 @@ const REPORTS: ReportConfig[] = [
 
   // Marketing / CRM
   { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas', isImplemented: true },
-  { id: 'fun-conv', title: 'Funil de Conversão (Verdesk)', description: 'Análise de perda de leads em cada estágio (Orçamento → Agendado).', category: 'Marketing / CRM', icon: <Target size={24} className="text-amber-500" />, path: '/relatorios/funil-leads', isImplemented: true },
+  { id: 'fun-conv', title: 'Funil de Conversão (Nexus)', description: 'Análise de perda de leads em cada estágio (Orçamento → Agendado).', category: 'Marketing / CRM', icon: <Target size={24} className="text-amber-500" />, path: '/relatorios/funil-leads', isImplemented: true },
   { id: 'ori-pac', title: 'Origem de Pacientes', description: 'Distribuição dos canais de captação (Indicação, Instagram, Google, etc).', category: 'Marketing / CRM', icon: <PieChart size={24} className="text-amber-500" />, path: '/relatorios/origem', isImplemented: true },
-  { id: 'des-ovyva', title: 'Desempenho da OVYVA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/ovyva', isImplemented: true },
+  { id: 'des-lyra', title: 'Desempenho da LYRA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/lyra', isImplemented: true },
 ]
 
 export function RelatoriosPage() {

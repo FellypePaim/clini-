@@ -53,7 +53,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const PIE_COLORS = ['#6366f1', '#f59e0b']
 
-export function OVYVAReport() {
+export function LYRAReport() {
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const [periodo, setPeriodo] = useState('ultimos_30d')
@@ -71,7 +71,7 @@ export function OVYVAReport() {
 
     try {
       const { data: conversasData, error: conversasError } = await supabase
-        .from('ovyva_conversas' as any)
+        .from('lyra_conversas' as any)
         .select('id, status, created_at')
         .eq('clinica_id', clinicaId)
         .gte('created_at', inicioStr)
@@ -86,7 +86,7 @@ export function OVYVAReport() {
 
       if (ids.length > 0) {
         const { data: mensagensData } = await supabase
-          .from('ovyva_mensagens' as any)
+          .from('lyra_mensagens' as any)
           .select('conversa_id')
           .in('conversa_id', ids)
 
@@ -142,7 +142,7 @@ export function OVYVAReport() {
   const exportPDF = () => {
     const doc = new jsPDF()
     doc.setFontSize(16)
-    doc.text('Relatório de Desempenho OVYVA', 14, 18)
+    doc.text('Relatório de Desempenho LYRA', 14, 18)
     doc.setFontSize(10)
     doc.text(`Período: ${periodoLabel}   |   Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 26)
     doc.setFontSize(11)
@@ -164,7 +164,7 @@ export function OVYVAReport() {
       headStyles: { fillColor: [99, 102, 241] },
     })
 
-    doc.save(`relatorio-ovyva-${new Date().toISOString().split('T')[0]}.pdf`)
+    doc.save(`relatorio-lyra-${new Date().toISOString().split('T')[0]}.pdf`)
   }
 
   return (
@@ -177,9 +177,9 @@ export function OVYVAReport() {
             </Link>
             <div>
               <div className="flex gap-2 items-center text-[10px] font-black text-[var(--color-text-muted)] uppercase tracking-[0.2em] mb-1">
-                Relatórios <ArrowLeft size={10} className="rotate-180" /> OVYVA
+                Relatórios <ArrowLeft size={10} className="rotate-180" /> LYRA
               </div>
-              <h1 className="text-2xl font-black text-[var(--color-text-primary)] uppercase">Desempenho da OVYVA</h1>
+              <h1 className="text-2xl font-black text-[var(--color-text-primary)] uppercase">Desempenho da LYRA</h1>
             </div>
           </div>
 
@@ -266,7 +266,7 @@ export function OVYVAReport() {
           <div className="bg-[var(--color-bg-card)] p-8 rounded-[32px] border border-[var(--color-border)] shadow-sm">
             <div className="mb-8">
               <h3 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-widest">Conversas por Dia</h3>
-              <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-1 uppercase tracking-tight">Volume diário de atendimentos OVYVA</p>
+              <p className="text-[11px] text-[var(--color-text-muted)] font-bold mt-1 uppercase tracking-tight">Volume diário de atendimentos LYRA</p>
             </div>
 
             <div className="h-[280px] w-full">
@@ -388,7 +388,7 @@ export function OVYVAReport() {
                 ) : conversas.length === 0 ? (
                   <tr>
                     <td colSpan={3} className="p-12 text-center text-[var(--color-text-muted)] uppercase tracking-widest text-xs">
-                      Nenhuma conversa encontrada. Configure o agente OVYVA para começar a atender seus pacientes automaticamente.
+                      Nenhuma conversa encontrada. Configure o agente LYRA para começar a atender seus pacientes automaticamente.
                     </td>
                   </tr>
                 ) : conversas.map((row) => (

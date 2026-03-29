@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Search, MessageSquare, Clock, UserCheck, CheckCircle2 } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import type { OvyvaConversation } from '../../types/ovyva'
+import type { LyraConversation } from '../../types/lyra'
 import { Avatar } from '../ui/Avatar'
 
 interface ConversationListProps {
-  conversations: OvyvaConversation[]
+  conversations: LyraConversation[]
   selectedId: string | null
   onSelect: (id: string) => void
 }

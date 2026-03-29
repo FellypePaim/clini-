@@ -32,8 +32,8 @@ const ROUTE_INFO: Record<string, { label: string; icon: React.ElementType }> = {
   '/agenda':        { label: 'Agenda',        icon: Calendar         },
   '/pacientes':     { label: 'Pacientes',     icon: Users            },
   '/prontuario':    { label: 'Prontuário',    icon: FileText         },
-  '/ovyva':         { label: 'OVYVA',         icon: MessageSquare    },
-  '/verdesk':       { label: 'Verdesk CRM',   icon: Briefcase        },
+  '/lyra':         { label: 'LYRA',         icon: MessageSquare    },
+  '/nexus':       { label: 'Nexus CRM',   icon: Briefcase        },
   '/financeiro':    { label: 'Financeiro',    icon: DollarSign       },
   '/estoque':       { label: 'Estoque',       icon: Package          },
   '/prescricoes':   { label: 'Prescrições',   icon: ClipboardList    },
@@ -122,14 +122,14 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
           })
         }
 
-        // 2. Pré-agendamentos OVYVA (status agendado + observações com marcador)
+        // 2. Pré-agendamentos LYRA (status agendado + observações com marcador)
         if (config.sistema_consulta_pendente !== false) {
           const { data: pendentes } = await supabase
             .from('consultas')
             .select('id, data_hora_inicio, observacoes')
             .eq('clinica_id', clinicaId)
             .eq('status', 'agendado')
-            .ilike('observacoes', '%PRÉ-AGENDAMENTO OVYVA%')
+            .ilike('observacoes', '%PRÉ-AGENDAMENTO LYRA%')
 
           const pendenteCount = pendentes?.length ?? 0
           if (pendenteCount > 0) {
@@ -137,7 +137,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
               id: 'consultas_pendentes',
               type: 'consulta_pendente',
               title: `${pendenteCount} pré-agendamento${pendenteCount > 1 ? 's' : ''}`,
-              description: 'Criados pela OVYVA, aguardando aprovação',
+              description: 'Criados pela LYRA, aguardando aprovação',
               icon: CalendarClock,
               color: 'text-amber-600 bg-amber-50',
               link: '/agenda',
@@ -163,7 +163,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
               description: 'Contatos recebidos nas últimas 24h',
               icon: UserPlus,
               color: 'text-cyan-500 bg-cyan-500/5',
-              link: '/verdesk',
+              link: '/nexus',
             })
           }
         }

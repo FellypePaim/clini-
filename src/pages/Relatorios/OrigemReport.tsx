@@ -321,7 +321,7 @@ export function OrigemReport() {
                   ) : origens.length === 0 ? (
                     <tr>
                       <td colSpan={3} className="p-12 text-center text-[var(--color-text-muted)] uppercase tracking-widest text-xs">
-                        Nenhum dado de origem encontrado. Os dados são coletados através do módulo Verdesk (CRM).
+                        Nenhum dado de origem encontrado. Os dados são coletados através do módulo Nexus (CRM).
                       </td>
                     </tr>
                   ) : origens.map((row, i) => (

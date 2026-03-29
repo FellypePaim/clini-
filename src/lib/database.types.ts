@@ -964,14 +964,14 @@ export type Database = {
             foreignKeyName: "leads_conversa_id_fkey"
             columns: ["conversa_id"]
             isOneToOne: false
-            referencedRelation: "ovyva_conversas"
+            referencedRelation: "lyra_conversas"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "leads_conversa_id_fkey"
             columns: ["conversa_id"]
             isOneToOne: false
-            referencedRelation: "ovyva_conversas_com_preview"
+            referencedRelation: "lyra_conversas_com_preview"
             referencedColumns: ["id"]
           },
           {
@@ -1180,7 +1180,7 @@ export type Database = {
           },
         ]
       }
-      ovyva_conversas: {
+      lyra_conversas: {
         Row: {
           atendente_id: string | null
           canal: string | null
@@ -1231,21 +1231,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ovyva_conversas_atendente_id_fkey"
+            foreignKeyName: "lyra_conversas_atendente_id_fkey"
             columns: ["atendente_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ovyva_conversas_clinica_id_fkey"
+            foreignKeyName: "lyra_conversas_clinica_id_fkey"
             columns: ["clinica_id"]
             isOneToOne: false
             referencedRelation: "clinicas"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ovyva_conversas_paciente_id_fkey"
+            foreignKeyName: "lyra_conversas_paciente_id_fkey"
             columns: ["paciente_id"]
             isOneToOne: false
             referencedRelation: "pacientes"
@@ -1253,7 +1253,7 @@ export type Database = {
           },
         ]
       }
-      ovyva_mensagens: {
+      lyra_mensagens: {
         Row: {
           audio_url: string | null
           conteudo: string | null
@@ -1298,17 +1298,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ovyva_mensagens_conversa_id_fkey"
+            foreignKeyName: "lyra_mensagens_conversa_id_fkey"
             columns: ["conversa_id"]
             isOneToOne: false
-            referencedRelation: "ovyva_conversas"
+            referencedRelation: "lyra_conversas"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ovyva_mensagens_conversa_id_fkey"
+            foreignKeyName: "lyra_mensagens_conversa_id_fkey"
             columns: ["conversa_id"]
             isOneToOne: false
-            referencedRelation: "ovyva_conversas_com_preview"
+            referencedRelation: "lyra_conversas_com_preview"
             referencedColumns: ["id"]
           },
         ]
@@ -2274,7 +2274,7 @@ export type Database = {
       }
     }
     Views: {
-      ovyva_conversas_com_preview: {
+      lyra_conversas_com_preview: {
         Row: {
           atendente_id: string | null
           canal: string | null
@@ -2296,21 +2296,21 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "ovyva_conversas_atendente_id_fkey"
+            foreignKeyName: "lyra_conversas_atendente_id_fkey"
             columns: ["atendente_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ovyva_conversas_clinica_id_fkey"
+            foreignKeyName: "lyra_conversas_clinica_id_fkey"
             columns: ["clinica_id"]
             isOneToOne: false
             referencedRelation: "clinicas"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "ovyva_conversas_paciente_id_fkey"
+            foreignKeyName: "lyra_conversas_paciente_id_fkey"
             columns: ["paciente_id"]
             isOneToOne: false
             referencedRelation: "pacientes"

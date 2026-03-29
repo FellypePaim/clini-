@@ -11,8 +11,8 @@ import {
   Send,
   Users
 } from 'lucide-react'
-import { useVerdesk } from '../../hooks/useVerdesk'
-import type { CampaignStatus } from '../../types/verdesk'
+import { useNexus } from '../../hooks/useNexus'
+import type { CampaignStatus } from '../../types/nexus'
 import { Badge } from '../../components/ui/Badge'
 
 const STATUS_CONFIG: Record<CampaignStatus, { icon: React.ReactNode, color: string, bg: string }> = {
@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<CampaignStatus, { icon: React.ReactNode, color: stri
 }
 
 export function CampanhasPage() {
-  const { campaigns, sendCampaign, createCampaign } = useVerdesk()
+  const { campaigns, sendCampaign, createCampaign } = useNexus()
   const [isWizardOpen, setIsWizardOpen] = useState(false)
   const [wizardStep, setWizardStep] = useState(1)
 
@@ -54,7 +54,7 @@ export function CampanhasPage() {
     <div className="flex flex-col h-full bg-[var(--color-bg-card)] overflow-y-auto relative">
       <header className="px-6 py-4 bg-[var(--color-bg-card)] border-b border-[var(--color-border)] sticky top-0 z-10 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link to="/verdesk" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
+          <Link to="/nexus" className="p-2 text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-card)] rounded-lg transition-colors">
             <ArrowLeft size={20} />
           </Link>
           <div>

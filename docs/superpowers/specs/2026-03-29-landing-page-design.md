@@ -21,7 +21,7 @@ Landing page inovadora para o Clini+ na rota `/` do app React. Dark mode fixo (s
 ### Navbar Fixa
 - Glassmorphism: `backdrop-filter: blur(12px)`, `bg-[rgba(6,10,20,0.8)]`
 - Logo Clini+ (gradiente cyan→indigo) a esquerda
-- Links: Funcionalidades, OVYVA, Quiz (scroll-to anchors)
+- Links: Funcionalidades, LYRA, Quiz (scroll-to anchors)
 - Botoes: "Entrar" (link `/login`, outline) + "Diagnostico Gratis" (CTA gradient, link pro quiz)
 - Scroll-aware: opacidade do fundo aumenta ao scrollar
 
@@ -42,21 +42,21 @@ Landing page inovadora para o Clini+ na rota `/` do app React. Dark mode fixo (s
 
 ### Secao 3: Features Showcase
 - Layout: tabs verticais a esquerda (6 modulos) + area de mockup a direita
-- Modulos: Dashboard, Agenda, Pacientes/PEP, OVYVA (IA), Verdesk CRM, Financeiro
+- Modulos: Dashboard, Agenda, Pacientes/PEP, LYRA (IA), Nexus CRM, Financeiro
 - Cada tab: icone Lucide + titulo + 1 linha de descricao
 - Tab ativa: `border-left: 3px solid cyan`, background highlight
 - Mockup area: screenshot/ilustracao do modulo com borda glow (`box-shadow: 0 0 30px rgba(cyan,0.1)`)
 - Transicao entre mockups: fade + slide (200ms)
 - Scroll-triggered: secao inteira faz fade-in ao entrar na viewport
 
-### Secao 4: OVYVA IA em Acao
+### Secao 4: LYRA IA em Acao
 - Layout: texto explicativo a esquerda + mockup de chat a direita
 - Chat animado: simulacao de conversa WhatsApp
   - Mensagem paciente: "Ola, gostaria de agendar uma limpeza"
   - Typing dots (3 dots pulsando, 1.5s)
-  - Resposta OVYVA: "Ola! Temos horarios disponiveis amanha as 9h, 14h e 16h. Qual prefere?"
+  - Resposta LYRA: "Ola! Temos horarios disponiveis amanha as 9h, 14h e 16h. Qual prefere?"
   - Paciente: "14h por favor"
-  - OVYVA: "Agendado! Limpeza amanha as 14h com Dr. Ana. Enviaremos um lembrete."
+  - LYRA: "Agendado! Limpeza amanha as 14h com Dr. Ana. Enviaremos um lembrete."
 - Mensagens aparecem sequencialmente (delay 2s entre cada)
 - Inicia ao entrar na viewport (IntersectionObserver)
 - Fundo do chat: glassmorphism card
@@ -119,7 +119,7 @@ Landing page inovadora para o Clini+ na rota `/` do app React. Dark mode fixo (s
 ### Secao 8: Footer
 - CTA final: "Pronto para transformar sua clinica?" + botao gradient para quiz
 - Blobs de fundo (mesmo estilo hero)
-- Grid de links: Produto (Funcionalidades, OVYVA, Quiz), Empresa (Sobre, Contato, Suporte), Legal (LGPD, Termos)
+- Grid de links: Produto (Funcionalidades, LYRA, Quiz), Empresa (Sobre, Contato, Suporte), Legal (LGPD, Termos)
 - Contato: WhatsApp, email
 - Badges: LGPD Compliant, Criptografia, 99.9% Uptime
 - Copyright: "2026 Clini+ — Prontuario Verde"
@@ -137,7 +137,7 @@ Landing page inovadora para o Clini+ na rota `/` do app React. Dark mode fixo (s
 - `HeroSection.tsx` — hero com blobs + mockup 3D
 - `SocialProofSection.tsx` — contadores + marquee
 - `FeaturesSection.tsx` — tabs + mockups
-- `OvyvaSection.tsx` — chat animado
+- `LyraSection.tsx` — chat animado
 - `BenefitsSection.tsx` — cards parallax
 - `TestimonialsSection.tsx` — carousel
 - `QuizSection.tsx` — wizard multi-step + score + WhatsApp

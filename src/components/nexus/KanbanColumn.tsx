@@ -1,7 +1,7 @@
 import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { MoreVertical, Layers } from 'lucide-react'
-import type { Lead } from '../../types/verdesk'
+import type { Lead } from '../../types/nexus'
 import { LeadCard } from './LeadCard'
 import { Badge } from '../ui/Badge'
 

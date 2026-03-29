@@ -19,7 +19,7 @@ interface Conversa {
   leads: boolean
 }
 
-export function OvyvaHistoryPage() {
+export function LyraHistoryPage() {
   const navigate = useNavigate()
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
@@ -42,7 +42,7 @@ export function OvyvaHistoryPage() {
 
     // Buscar conversas
     const { data } = await supabase
-      .from('ovyva_conversas')
+      .from('lyra_conversas')
       .select('id, created_at, contato_nome, contato_telefone, status, total_mensagens, ultimo_contato')
       .eq('clinica_id', clinicaId)
       .order('ultimo_contato', { ascending: false })
@@ -60,12 +60,12 @@ export function OvyvaHistoryPage() {
       const resolvidosIA = mapped.filter(c => c.status === 'ia_ativa' || c.status === 'concluido').length
       const pct = total > 0 ? Math.round((resolvidosIA / total) * 100) : 0
 
-      // Buscar leads gerados a partir do OVYVA
+      // Buscar leads gerados a partir do LYRA
       const { count: leadsCount } = await supabase
         .from('leads')
         .select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId)
-        .eq('origem', 'WhatsApp OVYVA')
+        .eq('origem', 'WhatsApp LYRA')
 
       // Calcular tempo médio entre mensagens
       const totalMsgs = mapped.reduce((acc, c) => acc + (c.total_mensagens || 0), 0)
@@ -127,13 +127,13 @@ export function OvyvaHistoryPage() {
        <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
              <button 
-              onClick={() => navigate('/ovyva')}
+              onClick={() => navigate('/lyra')}
               className="p-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-2xl hover:bg-[var(--color-bg-card-hover)] transition-all text-[var(--color-text-muted)] hover:text-cyan-500"
              >
                 <ArrowLeft className="w-5 h-5" />
              </button>
              <div>
-                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Histórico OVYVA</h1>
+                <h1 className="text-2xl font-black text-[var(--color-text-primary)] border-none uppercase tracking-widest">Histórico LYRA</h1>
                 <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-[0.2em]">
                    Conversas reais com seus pacientes via WhatsApp
                 </p>

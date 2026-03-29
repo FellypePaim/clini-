@@ -1,19 +1,19 @@
 import React from 'react'
 import { MessageSquare, ArrowUpRight, Clock, Smartphone, Instagram, User, ExternalLink } from 'lucide-react'
-import { useVerdesk } from '../../hooks/useVerdesk'
+import { useNexus } from '../../hooks/useNexus'
 import { Avatar } from '../ui/Avatar'
 import { Link } from 'react-router-dom'
 import { cn } from '../../lib/utils'
 
 const ORIGIN_ICONS = {
-  'WhatsApp OVYVA': <Smartphone size={14} className="text-emerald-500" />,
+  'WhatsApp LYRA': <Smartphone size={14} className="text-emerald-500" />,
   'Manual': <User size={14} className="text-slate-400" />,
   'Indicação': <ExternalLink size={14} className="text-indigo-400" />,
   'Instagram': <Instagram size={14} className="text-pink-500" />
 }
 
 export function LeadsRecentes() {
-  const { leads, isLoading } = useVerdesk()
+  const { leads, isLoading } = useNexus()
 
   const recentLeads = leads.slice(0, 5)
 
@@ -25,7 +25,7 @@ export function LeadsRecentes() {
           <p className="text-[10px] text-[var(--color-text-muted)] font-bold uppercase tracking-tight mt-1">Últimos contatos do CRM</p>
         </div>
         <Link 
-          to="/verdesk" 
+          to="/nexus" 
           className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
           title="Ver funil completo"
         >
@@ -88,7 +88,7 @@ export function LeadsRecentes() {
 
       <div className="p-4 bg-[var(--color-bg-deep)] border-t border-[var(--color-border)] rounded-b-2xl">
         <Link 
-          to="/verdesk" 
+          to="/nexus" 
           className="block w-full text-center py-2 text-xs font-black text-indigo-600 uppercase tracking-widest hover:bg-[var(--color-bg-card-hover)] rounded-xl transition-all"
         >
           Gerenciar Funil

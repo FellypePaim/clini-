@@ -15,7 +15,7 @@ import {
   Save,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
-import type { OvyvaConversation } from '../../types/ovyva'
+import type { LyraConversation } from '../../types/lyra'
 import { useNavigate } from 'react-router-dom'
 import { Avatar } from '../ui/Avatar'
 import { supabase } from '../../lib/supabase'
@@ -23,7 +23,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../hooks/useToast'
 
 interface ContactContextProps {
-  conversation: OvyvaConversation
+  conversation: LyraConversation
   onPatientLinked?: () => void
 }
 
@@ -47,7 +47,7 @@ export function ContactContext({ conversation, onPatientLinked }: ContactContext
     cpf: '',
     data_nascimento: '',
     genero: '',
-    como_conheceu: 'WhatsApp OVYVA',
+    como_conheceu: 'WhatsApp LYRA',
   })
 
   const handleSavePaciente = async () => {
@@ -73,7 +73,7 @@ export function ContactContext({ conversation, onPatientLinked }: ContactContext
       if (error) throw error
 
       // Vincular conversa ao paciente
-      await supabase.from('ovyva_conversas')
+      await supabase.from('lyra_conversas')
         .update({ paciente_id: paciente.id })
         .eq('id', conversation.id)
 
@@ -155,14 +155,14 @@ export function ContactContext({ conversation, onPatientLinked }: ContactContext
               <div className="p-4 bg-orange-50 border border-orange-100 rounded-2xl flex flex-col gap-3">
                  <div className="flex items-center justify-between">
                     <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1"><Link2 className="w-3 h-3" /> Origem</span>
-                    <span className="text-[9px] font-black text-orange-600 uppercase bg-orange-100 px-2 py-1 rounded-md">OVYVA AI</span>
+                    <span className="text-[9px] font-black text-orange-600 uppercase bg-orange-100 px-2 py-1 rounded-md">LYRA AI</span>
                  </div>
                  <div className="h-px bg-orange-200/50" />
                  <button
-                   onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)}
+                   onClick={() => navigate(`/nexus?search=${conversation.contato_telefone}`)}
                    className="flex items-center justify-between group"
                  >
-                    <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1 group-hover:underline">Estagio Verdesk</span>
+                    <span className="text-[9px] font-black text-orange-800 uppercase flex items-center gap-1 group-hover:underline">Estagio Nexus</span>
                     <span className="text-[9px] font-black text-[var(--color-text-primary)] uppercase">
                       {conversation.metadata?.lead_stage || 'Novo Lead Remoto'} &rarr;
                     </span>
@@ -179,8 +179,8 @@ export function ContactContext({ conversation, onPatientLinked }: ContactContext
           </h4>
           <div className="grid grid-cols-2 gap-4">
              <ActionButton icon={<Calendar className="w-5 h-5" />} label="Agendar" color="green" onClick={() => navigate(`/agenda?phone=${conversation.contato_telefone}&name=${encodeURIComponent(conversation.contato_nome || '')}`)} />
-             <ActionButton icon={<BarChart3 className="w-5 h-5" />} label="Verdesk" color="blue" onClick={() => navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
-             <ActionButton icon={<Activity className="w-5 h-5" />} label="Historico" color="purple" onClick={() => conversation.paciente_id ? navigate(`/pacientes/${conversation.paciente_id}`) : navigate(`/verdesk?search=${conversation.contato_telefone}`)} />
+             <ActionButton icon={<BarChart3 className="w-5 h-5" />} label="Nexus" color="blue" onClick={() => navigate(`/nexus?search=${conversation.contato_telefone}`)} />
+             <ActionButton icon={<Activity className="w-5 h-5" />} label="Historico" color="purple" onClick={() => conversation.paciente_id ? navigate(`/pacientes/${conversation.paciente_id}`) : navigate(`/nexus?search=${conversation.contato_telefone}`)} />
              <ActionButton icon={<ExternalLink className="w-5 h-5" />} label="WhatsApp" color="gray" onClick={() => window.open(`https://wa.me/${conversation.contato_telefone?.replace(/\D/g, '')}`, '_blank')} />
           </div>
        </div>

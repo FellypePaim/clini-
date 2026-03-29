@@ -51,7 +51,7 @@ export function IntegracoesPage() {
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold text-[var(--color-text-primary)] group-hover:text-indigo-600 transition-colors">WhatsApp & Agente OVYVA</h3>
+            <h3 className="text-lg font-bold text-[var(--color-text-primary)] group-hover:text-indigo-600 transition-colors">WhatsApp & Agente LYRA</h3>
             {whatsappStatus === 'carregando' ? (
               <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-muted)] font-bold border-none px-2.5 py-1">
                 <Loader2 size={14} className="mr-1 inline-block animate-spin" /> Verificando...
@@ -67,7 +67,7 @@ export function IntegracoesPage() {
             )}
           </div>
           <p className="text-sm text-[var(--color-text-muted)] font-medium mb-4">
-            Conecte seu WhatsApp para que a assistente OVYVA atenda seus pacientes automaticamente — agende, cancele e reagende consultas via mensagens.
+            Conecte seu WhatsApp para que a assistente LYRA atenda seus pacientes automaticamente — agende, cancele e reagende consultas via mensagens.
           </p>
 
           <div className="bg-[var(--color-bg-deep)] p-4 rounded-xl border border-[var(--color-border)] flex items-center justify-between">
@@ -86,7 +86,7 @@ export function IntegracoesPage() {
               </div>
             )}
             <a
-              href="/ovyva"
+              href="/lyra"
               className="flex items-center gap-2 px-4 py-2 font-bold text-[var(--color-text-secondary)] bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg shadow-sm hover:bg-[var(--color-bg-card-hover)] transition-colors"
             >
               <RefreshCw size={16} /> Gerenciar
@@ -96,7 +96,7 @@ export function IntegracoesPage() {
           {whatsappStatus === 'desconectado' && (
             <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
               <p className="text-sm text-amber-700">
-                Seu WhatsApp não está conectado. Vá em <a href="/ovyva" className="font-bold underline">OVYVA</a> para conectar uma instância e ativar o atendimento automático.
+                Seu WhatsApp não está conectado. Vá em <a href="/lyra" className="font-bold underline">LYRA</a> para conectar uma instância e ativar o atendimento automático.
               </p>
             </div>
           )}

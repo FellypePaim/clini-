@@ -11,7 +11,7 @@ import {
   ExternalLink,
   Smartphone
 } from 'lucide-react'
-import type { Lead } from '../../types/verdesk'
+import type { Lead } from '../../types/nexus'
 import { Avatar } from '../ui/Avatar'
 
 interface LeadCardProps {
@@ -23,7 +23,7 @@ interface LeadCardProps {
 }
 
 const ORIGIN_ICONS = {
-  'WhatsApp OVYVA': <Smartphone size={14} className="text-emerald-500" />,
+  'WhatsApp LYRA': <Smartphone size={14} className="text-emerald-500" />,
   'Manual': <User size={14} className="text-[var(--color-text-muted)]" />,
   'Indicação': <ExternalLink size={14} className="text-indigo-400" />,
   'Instagram': <Instagram size={14} className="text-pink-500" />

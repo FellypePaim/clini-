@@ -36,7 +36,7 @@ function TypingDots() {
   )
 }
 
-export function OvyvaSection() {
+export function LyraSection() {
   const { ref, isInView } = useInView({ threshold: 0.2 })
   const [visibleCount, setVisibleCount] = useState(0)
 
@@ -71,7 +71,7 @@ export function OvyvaSection() {
   }
 
   return (
-    <section id="ovyva" ref={ref} className="py-24 px-6" style={{ backgroundColor: '#030608' }}>
+    <section id="lyra" ref={ref} className="py-24 px-6" style={{ backgroundColor: '#030608' }}>
       <style>{`
         @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
@@ -79,7 +79,7 @@ export function OvyvaSection() {
         {/* Left side */}
         <div className="flex-1">
           <span className="text-sm font-semibold uppercase tracking-widest" style={{ color: '#06b6d4' }}>
-            OVYVA
+            LYRA
           </span>
           <h2 className="text-3xl font-bold mt-3" style={{ color: '#ffffff' }}>
             Sua secretaria virtual com IA
@@ -111,7 +111,7 @@ export function OvyvaSection() {
             >
               <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#22c55e' }} />
               <span className="text-sm font-semibold" style={{ color: '#ffffff' }}>
-                OVYVA • IA Ativa
+                LYRA • IA Ativa
               </span>
             </div>
 

@@ -15,12 +15,12 @@ import {
   UserPlus,
   Loader2
 } from 'lucide-react'
-import { useVerdesk } from '../../hooks/useVerdesk'
+import { useNexus } from '../../hooks/useNexus'
 import { usePatients } from '../../hooks/usePatients'
 import { useAuthStore } from '../../store/authStore'
 import { Avatar } from '../ui/Avatar'
 import { Badge } from '../ui/Badge'
-import type { LeadStage } from '../../types/verdesk'
+import type { LeadStage } from '../../types/nexus'
 
 interface LeadDrawerProps {
   leadId: string
@@ -44,7 +44,7 @@ const INTERACTION_ICONS = {
 }
 
 export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
-  const { leads, moveLead, addLeadInteraction, updateLead: _updateLead } = useVerdesk()
+  const { leads, moveLead, addLeadInteraction, updateLead: _updateLead } = useNexus()
   const { createPatient, isLoading: isCreatingPatient } = usePatients()
   const { user } = useAuthStore()
   const lead = leads.find((l) => l.id === leadId)
@@ -191,10 +191,10 @@ export function LeadDrawer({ leadId, onClose }: LeadDrawerProps) {
                   {new Date(lead.createdAt).toLocaleDateString('pt-BR')}
                 </span>
               </div>
-              {lead.origin === 'WhatsApp OVYVA' && lead.ovyvaId && (
+              {lead.origin === 'WhatsApp LYRA' && lead.lyraId && (
                 <div>
-                  <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">OVYVA Link</span>
-                  <a href={`/ovyva/historico?id=${lead.ovyvaId}`} className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                  <span className="block text-xs font-medium text-[var(--color-text-muted)] mb-1">LYRA Link</span>
+                  <a href={`/lyra/historico?id=${lead.lyraId}`} className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
                     <LinkIcon size={14} /> Ver Conversa
                   </a>
                 </div>

@@ -45,8 +45,8 @@ export function FooterSection() {
                 </button>
               </li>
               <li>
-                <button onClick={() => scrollTo('ovyva')} className="text-gray-500 hover:text-white text-sm transition-colors">
-                  OVYVA
+                <button onClick={() => scrollTo('lyra')} className="text-gray-500 hover:text-white text-sm transition-colors">
+                  LYRA
                 </button>
               </li>
               <li>

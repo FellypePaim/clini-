@@ -231,7 +231,7 @@ select.input-base option {
   animation: var(--animate-pulse-accent);
 }
 
-.input-ovyva {
+.input-lyra {
   width: 100%;
   background-color: var(--color-bg-base);
   border: 2px solid transparent;
@@ -245,7 +245,7 @@ select.input-base option {
   color: var(--color-text-primary);
 }
 
-.input-ovyva:focus {
+.input-lyra:focus {
   background-color: var(--color-bg-card);
   border-color: rgba(8, 145, 178, 0.2);
   box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.05), inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);

@@ -2,12 +2,12 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Star } from 'lucide-react'
 
 const TESTIMONIALS = [
-  { name: 'Dr. Marina Costa', role: 'Ortodontista', text: 'O Clini+ transformou a gestao da minha clinica. A OVYVA sozinha ja reduziu 70% das ligacoes.', stars: 5 },
+  { name: 'Dr. Marina Costa', role: 'Ortodontista', text: 'O Clini+ transformou a gestao da minha clinica. A LYRA sozinha ja reduziu 70% das ligacoes.', stars: 5 },
   { name: 'Dr. Rafael Santos', role: 'Dentista', text: 'Prontuario eletronico completo, agenda inteligente e tudo integrado. Melhor investimento que fiz.', stars: 5 },
   { name: 'Dra. Julia Mendes', role: 'Dermatologista', text: 'A integracao com WhatsApp e o diferencial. Meus pacientes adoram a praticidade.', stars: 5 },
   { name: 'Dr. Carlos Lima', role: 'Clinico Geral', text: 'Em 3 meses, reduzi no-shows em 60% e aumentei o faturamento em 35%.', stars: 5 },
   { name: 'Dra. Ana Oliveira', role: 'Pediatra', text: 'Interface linda e intuitiva. Minha equipe aprendeu a usar em 1 dia.', stars: 4 },
-  { name: 'Dr. Pedro Almeida', role: 'Cirurgiao', text: 'O CRM Verdesk me deu visibilidade total dos leads. Converto muito mais agora.', stars: 5 },
+  { name: 'Dr. Pedro Almeida', role: 'Cirurgiao', text: 'O CRM Nexus me deu visibilidade total dos leads. Converto muito mais agora.', stars: 5 },
 ]
 
 const AVATAR_COLORS = [

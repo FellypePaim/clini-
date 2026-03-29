@@ -51,7 +51,7 @@ export function SuperWhatsAppPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-white">Monitoramento WhatsApp</h1>
-          <p className="text-[var(--color-text-muted)] font-medium">Controle de instâncias Evolution API e métricas de conversação OVYVA.</p>
+          <p className="text-[var(--color-text-muted)] font-medium">Controle de instâncias Evolution API e métricas de conversação LYRA.</p>
         </div>
         <div className="flex items-center gap-3">
            <button

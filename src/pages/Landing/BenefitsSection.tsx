@@ -4,7 +4,7 @@ import { useInView } from '../../hooks/useInView'
 const BENEFITS = [
   { number: '60%', label: 'Reducao de no-shows', desc: 'Lembretes automaticos via WhatsApp', icon: Calendar, color: '#0891b2' },
   { number: '40%', label: 'Aumento no faturamento', desc: 'CRM e captacao inteligente de leads', icon: TrendingUp, color: '#6366f1' },
-  { number: '24/7', label: 'Atendimento com IA', desc: 'OVYVA responde enquanto voce descansa', icon: Bot, color: '#10b981' },
+  { number: '24/7', label: 'Atendimento com IA', desc: 'LYRA responde enquanto voce descansa', icon: Bot, color: '#10b981' },
   { number: '1', label: 'Unico sistema', desc: 'Agenda, prontuario, financeiro, CRM, WhatsApp', icon: Layers, color: '#f59e0b' },
 ]
 

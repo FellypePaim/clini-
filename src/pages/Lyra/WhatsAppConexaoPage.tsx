@@ -174,7 +174,7 @@ export function WhatsAppConexaoPage() {
         <div>
           <h2 className="text-sm font-black text-[var(--color-text-primary)] uppercase tracking-[0.2em]">Conexões WhatsApp</h2>
           <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 font-bold tracking-wide">
-            Cada clínica pode ter uma instância WhatsApp dedicada para a IA OVYVA
+            Cada clínica pode ter uma instância WhatsApp dedicada para a IA LYRA
           </p>
         </div>
         <button
@@ -195,7 +195,7 @@ export function WhatsAppConexaoPage() {
           <ol className="text-[11px] text-cyan-600 mt-2 space-y-1 list-decimal list-inside leading-relaxed">
             <li>Clique em <strong>Nova Conexão</strong> para criar uma instância WhatsApp dedicada</li>
             <li>Escaneie o <strong>QR Code</strong> com o WhatsApp do número da clínica</li>
-            <li>Pronto! A IA OVYVA começa a responder automaticamente usando as configurações desta clínica</li>
+            <li>Pronto! A IA LYRA começa a responder automaticamente usando as configurações desta clínica</li>
           </ol>
         </div>
       </div>
@@ -325,7 +325,7 @@ export function WhatsAppConexaoPage() {
                   <div className="border-t border-emerald-100 px-6 py-4 bg-emerald-50/30 flex items-center gap-3">
                     <Wifi className="w-4 h-4 text-emerald-600" />
                     <p className="text-xs text-emerald-700 font-bold">
-                      IA OVYVA ativa neste número · Webhook configurado ✓
+                      IA LYRA ativa neste número · Webhook configurado ✓
                     </p>
                   </div>
                 )}

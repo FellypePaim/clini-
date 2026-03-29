@@ -22,7 +22,7 @@
 - `src/pages/Landing/HeroSection.tsx` — Hero with blobs + 3D mockup + CTAs
 - `src/pages/Landing/SocialProofSection.tsx` — Counters + marquee logos
 - `src/pages/Landing/FeaturesSection.tsx` — Interactive tabs + mockup showcase
-- `src/pages/Landing/OvyvaSection.tsx` — Live-typing chat simulation
+- `src/pages/Landing/LyraSection.tsx` — Live-typing chat simulation
 - `src/pages/Landing/BenefitsSection.tsx` — Parallax benefit cards
 - `src/pages/Landing/TestimonialsSection.tsx` — Glassmorphism carousel
 - `src/pages/Landing/QuizSection.tsx` — Multi-step wizard + score + WhatsApp
@@ -150,7 +150,7 @@ git commit -m "feat(landing): scaffold — hooks, route, skeleton"
 
 Glassmorphism fixed navbar with:
 - Logo (gradient cyan→indigo square + "Clini+" text)
-- Links: Funcionalidades, OVYVA, Quiz — use `onClick` with smooth scroll to `#id`
+- Links: Funcionalidades, LYRA, Quiz — use `onClick` with smooth scroll to `#id`
 - "Entrar" button (outline, links to `/login`)
 - "Diagnostico Gratis" button (gradient CTA, scrolls to `#quiz`)
 - Scroll-aware: track `window.scrollY > 50` to increase bg opacity
@@ -208,8 +208,8 @@ git commit -m "feat(landing): navbar glassmorphism + hero com blobs e parallax 3
   Dashboard — Visao completa da clinica em tempo real
   Agenda — Drag-and-drop com recorrencia e conflitos
   Pacientes / PEP — Prontuario eletronico completo
-  OVYVA (IA) — Secretaria virtual 24/7 via WhatsApp
-  Verdesk CRM — Kanban de leads e campanhas
+  LYRA (IA) — Secretaria virtual 24/7 via WhatsApp
+  Nexus CRM — Kanban de leads e campanhas
   Financeiro — Receitas, despesas e DRE
   ```
 - Right side: mockup area — styled div representing each module (different layout per module, simple mock UI with colored blocks/bars)
@@ -227,16 +227,16 @@ git commit -m "feat(landing): social proof contadores + features showcase tabs"
 
 ---
 
-## Task 4: OvyvaSection + BenefitsSection
+## Task 4: LyraSection + BenefitsSection
 
 **Files:**
-- Create: `src/pages/Landing/OvyvaSection.tsx`
+- Create: `src/pages/Landing/LyraSection.tsx`
 - Create: `src/pages/Landing/BenefitsSection.tsx`
 - Modify: `src/pages/Landing/LandingPage.tsx`
 
-- [ ] **Step 1: Create OvyvaSection**
+- [ ] **Step 1: Create LyraSection**
 
-- Left side: text explaining OVYVA capabilities (3-4 bullet points with Lucide icons)
+- Left side: text explaining LYRA capabilities (3-4 bullet points with Lucide icons)
 - Right side: chat mockup with sequential messages
 - Messages array:
   ```
@@ -251,7 +251,7 @@ git commit -m "feat(landing): social proof contadores + features showcase tabs"
 - `useState` for `visibleCount` that increments via `setTimeout`
 - Typing dots: 3 animated circles with staggered opacity
 - Chat card: glassmorphism background
-- `id="ovyva"`
+- `id="lyra"`
 
 - [ ] **Step 2: Create BenefitsSection**
 
@@ -269,7 +269,7 @@ git commit -m "feat(landing): social proof contadores + features showcase tabs"
 
 ```bash
 git add src/pages/Landing/
-git commit -m "feat(landing): OVYVA chat ao vivo + beneficios parallax"
+git commit -m "feat(landing): LYRA chat ao vivo + beneficios parallax"
 ```
 
 ---
@@ -286,12 +286,12 @@ git commit -m "feat(landing): OVYVA chat ao vivo + beneficios parallax"
 - Carousel with 6 testimonial cards
 - Mock data:
   ```
-  { name: 'Dr. Marina Costa', role: 'Ortodontista', text: 'O Clini+ transformou a gestao da minha clinica. A OVYVA sozinha ja reduziu 70% das ligacoes.', stars: 5 }
+  { name: 'Dr. Marina Costa', role: 'Ortodontista', text: 'O Clini+ transformou a gestao da minha clinica. A LYRA sozinha ja reduziu 70% das ligacoes.', stars: 5 }
   { name: 'Dr. Rafael Santos', role: 'Dentista', text: 'Prontuario eletronico completo, agenda inteligente e tudo integrado. Melhor investimento.', stars: 5 }
   { name: 'Dra. Julia Mendes', role: 'Dermatologista', text: 'A integracao com WhatsApp e o diferencial. Meus pacientes adoram a praticidade.', stars: 5 }
   { name: 'Dr. Carlos Lima', role: 'Clinico Geral', text: 'Em 3 meses, reduzi no-shows em 60% e aumentei o faturamento em 35%.', stars: 5 }
   { name: 'Dra. Ana Oliveira', role: 'Pediatra', text: 'Interface linda e intuitiva. Minha equipe aprendeu a usar em 1 dia.', stars: 4 }
-  { name: 'Dr. Pedro Almeida', role: 'Cirurgiao', text: 'O CRM Verdesk me deu visibilidade total dos leads. Converto muito mais agora.', stars: 5 }
+  { name: 'Dr. Pedro Almeida', role: 'Cirurgiao', text: 'O CRM Nexus me deu visibilidade total dos leads. Converto muito mais agora.', stars: 5 }
   ```
 - Auto-scroll: `setInterval` every 5s moves to next card
 - Show 1 card on mobile, 3 on desktop
@@ -402,7 +402,7 @@ Ensure all sections are imported and ordered correctly:
   <HeroSection />
   <SocialProofSection />
   <FeaturesSection />
-  <OvyvaSection />
+  <LyraSection />
   <BenefitsSection />
   <TestimonialsSection />
   <QuizSection />
@@ -442,7 +442,7 @@ Open browser, verify:
 - Hero blobs + 3D mockup + parallax
 - Counters animate on scroll
 - Features tabs switch correctly
-- OVYVA chat types on scroll
+- LYRA chat types on scroll
 - Benefits cards enter with stagger
 - Testimonials carousel auto-plays
 - Quiz all 8 steps + score + WhatsApp link works
@@ -465,7 +465,7 @@ git push
 | 1 | Scaffold | Hooks, route, skeleton | `feat(landing): scaffold` |
 | 2 | Hero | Navbar + Hero | `feat(landing): navbar + hero` |
 | 3 | Middle | SocialProof + Features | `feat(landing): social proof + features` |
-| 4 | Middle | OVYVA + Benefits | `feat(landing): OVYVA + benefits` |
+| 4 | Middle | LYRA + Benefits | `feat(landing): LYRA + benefits` |
 | 5 | Bottom | Testimonials + Footer | `feat(landing): testimonials + footer` |
 | 6 | Quiz | Quiz wizard + WhatsApp | `feat(landing): quiz + WhatsApp` |
 | 7 | Polish | Assembly + meta + test | `feat(landing): polish` |

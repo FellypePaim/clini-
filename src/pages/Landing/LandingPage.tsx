@@ -3,7 +3,7 @@ import { LandingNavbar } from './LandingNavbar'
 import { HeroSection } from './HeroSection'
 import { SocialProofSection } from './SocialProofSection'
 import { FeaturesSection } from './FeaturesSection'
-import { OvyvaSection } from './OvyvaSection'
+import { LyraSection } from './LyraSection'
 import { BenefitsSection } from './BenefitsSection'
 import { TestimonialsSection } from './TestimonialsSection'
 import { QuizSection } from './QuizSection'
@@ -25,7 +25,7 @@ export function LandingPage() {
       <HeroSection />
       <SocialProofSection />
       <FeaturesSection />
-      <OvyvaSection />
+      <LyraSection />
       <BenefitsSection />
       <TestimonialsSection />
       <QuizSection />

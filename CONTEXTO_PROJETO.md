@@ -12,8 +12,8 @@
 - Fase 2: ✅ Módulo Agenda (com drag-and-drop)
 - Fase 3A: ✅ PEP — Pacientes + Anamnese
 - Fase 3B: ✅ PEP — Prontuário + Prescrição + Harmonização
-- Fase 4: ✅ OVYVA (UI + IA v2 — agendar/cancelar/reagendar)
-- Fase 5: ✅ Verdesk CRM Kanban
+- Fase 4: ✅ LYRA (UI + IA v2 — agendar/cancelar/reagendar)
+- Fase 5: ✅ Nexus CRM Kanban
 - Fase 6: ✅ Financeiro
 - Fase 7: ✅ Estoque
 - Fase 8: ✅ Relatórios + Configurações
@@ -30,7 +30,7 @@
 - Fase 18: ✅ **Types sync + ai_usage_logs + Code-splitting (24/03/2026)**
 - Fase 19: ✅ **Gestão de Ausências de Profissionais (25/03/2026)**
 - Fase 20: ✅ **SuperAdmin v2 — 100% dados reais, sem hardcode (27/03/2026)**
-- Fase 21: ✅ **OVYVA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
+- Fase 21: ✅ **LYRA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
 - Fase 22: ✅ **Segurança RBAC + Melhorias por Role (29/03/2026)**
 - Fase 23: ✅ **Dark Clinical Redesign — UI/UX v2.0 (29/03/2026)**
 - Fase 24: ✅ **Landing Page — 8 seções + Quiz WhatsApp (29/03/2026)**
@@ -40,21 +40,21 @@
 ### Tabelas criadas:
 clinicas, profiles, pacientes, anamneses, documentos_paciente,
 procedimentos, consultas, evolucoes, prescricoes, termos_consentimento,
-harmonizacoes, ovyva_conversas, ovyva_mensagens, leads, leads_historico,
+harmonizacoes, lyra_conversas, lyra_mensagens, leads, leads_historico,
 campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
 estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias,
 auditoria_global, feature_flags, tickets_suporte, releases,
 profissional_ausencias, notificacoes_fila
 
 ### Colunas adicionadas:
-- ovyva_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
-- ovyva_mensagens: metadata JSONB, sessao_id UUID, sessao_inicio BOOLEAN
+- lyra_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
+- lyra_mensagens: metadata JSONB, sessao_id UUID, sessao_inicio BOOLEAN
 - harmonizacoes: mapeamento JSONB (dados do mapa facial)
 - documentos_paciente: storage_path TEXT
 - profiles: conselho TEXT, telefone TEXT, clinica_id nullable (para registro pendente)
 
 ### Constraints:
-- ovyva_conversas: UNIQUE (clinica_id, contato_telefone)
+- lyra_conversas: UNIQUE (clinica_id, contato_telefone)
 - whatsapp_instancias: UNIQUE (nome_instancia)
 
 ### Função helper:
@@ -65,7 +65,7 @@ profissional_ausencias, notificacoes_fila
 - Profiles: SELECT/UPDATE via `get_my_clinica_id()` (evita recursão infinita)
 - Profiles: INSERT próprio (`id = auth.uid()`)
 - Clinicas: INSERT para authenticated, SELECT via clinica_id do profile
-- ovyva_conversas, ovyva_mensagens, leads, whatsapp_instancias: RLS por clinica_id
+- lyra_conversas, lyra_mensagens, leads, whatsapp_instancias: RLS por clinica_id
 - Anon policies: anamneses INSERT, pacientes SELECT/UPDATE por paciente_id via JWT
 
 ### Migrations (supabase/migrations/):
@@ -74,7 +74,7 @@ profissional_ausencias, notificacoes_fila
 3. `20260319000003_estoque.sql` — Estoque completo + RLS
 4. `20260321000001_anamnese_public_policy.sql` — Policy anon anamneses
 5. `20260322000001_fix_anon_rls_policies.sql` — Fix cast uuid/text
-6. `20260322000002_rls_ovyva_leads_whatsapp.sql` — RLS OVYVA/leads/WhatsApp
+6. `20260322000002_rls_ovyva_leads_whatsapp.sql` — RLS LYRA/leads/WhatsApp
 7. `20260323000001_profiles_allow_null_clinica.sql` — clinica_id nullable + self-insert
 8. `20260323000002_allow_clinica_creation_on_register.sql` — Policy INSERT clinicas
 9. `20260323000003_add_conselho_telefone_to_profiles.sql` — Colunas conselho/telefone
@@ -91,17 +91,17 @@ Actions:
 - `detect_intent` → gemini-2.5-flash-lite
 - `transcribe_audio` → gemini-2.5-flash
 - `generate_summary` → gemini-2.5-flash
-- `ovyva_respond` → gemini-2.5-flash (prompt compacto, slots reais 3 dias, auto-cadastro paciente, CRM auto, notif profissional)
+- `lyra_respond` → gemini-2.5-flash (prompt compacto, slots reais 3 dias, auto-cadastro paciente, CRM auto, notif profissional)
 - `dashboard_insights` → gemini-2.5-flash-lite
 
-### OVYVA v3 — Funcionalidades (28/03/2026):
+### LYRA v3 — Funcionalidades (28/03/2026):
 - Auto-cadastro de paciente (nome + WhatsApp) quando IA coleta nome completo
 - Agendamento real na tabela `consultas` com timezone BR (-03:00)
 - Anti-duplicata: verifica se já existe consulta no mesmo horário
 - Notificação imediata ao profissional via WhatsApp (agendar/cancelar/reagendar)
 - CRM automático: cria lead + avança estágio baseado na intenção da IA
 - Pausa IA por contato quando humano assume atendimento
-- Chat OVYVA: envio real via whatsapp-send, assinatura do atendente
+- Chat LYRA: envio real via whatsapp-send, assinatura do atendente
 - Lock de concorrência + deduplicação de mensagens
 - Fallback robusto: se IA falha, envia mensagem padrão (nunca fica mudo)
 - Profissionais: só role=profissional no prompt (admin/recepção excluídos)
@@ -189,7 +189,7 @@ Actions:
 - `/superadmin/logs` — Auditoria global com filtros e export CSV
 - `/superadmin/suporte` — Two-panel chat: tickets + mensagens em tempo real
 
-## 8. OVYVA — AGENTE IA v3
+## 8. LYRA — AGENTE IA v3
 
 ### Capacidades:
 - **Agendar**: Cria consulta REAL na tabela `consultas` (timezone BR -03:00)
@@ -229,13 +229,13 @@ Actions:
 - Modal em Configurações > Profissionais com detecção de conflitos
 - 3 opções ao conflitar: cancelar + notificar WhatsApp / cancelar sem notificar / apenas marcar folga
 - Bloqueio visual na Agenda (DayView + WeekView) — overlay "Profissional ausente"
-- OVYVA respeita ausências automaticamente (não sugere horários)
+- LYRA respeita ausências automaticamente (não sugere horários)
 - Notificação enviada DIRETO via whatsapp-send (não espera CRON)
 - CRON (15min): lembrete 2h antes de consultas + aniversários + cobranças
 
 ## 11. ALERTAS DO SISTEMA (SINO)
 - Consultas agendadas hoje
-- Pré-agendamentos OVYVA pendentes (respeita toggle `sistema_consulta_pendente`)
+- Pré-agendamentos LYRA pendentes (respeita toggle `sistema_consulta_pendente`)
 - Novos leads 24h (respeita toggle `sistema_novo_lead`)
 - Estoque crítico (respeita toggle `sistema_estoque_baixo`)
 - Badge vermelho com contador, dropdown clicável, auto-refresh 2min
@@ -246,7 +246,7 @@ Actions:
 - `src/pages/SuperAdmin/*` — Painel de controle global
 - `src/components/superadmin/NovaClinicaModal.tsx` — Modal de criação com admin
 - `src/hooks/useSuperAdmin.ts` — Hook SuperAdmin (createClinic, createUser, etc.)
-- `supabase/functions/ai-gateway/index.ts` — Backend IA (OVYVA, insights, etc.)
+- `supabase/functions/ai-gateway/index.ts` — Backend IA (LYRA, insights, etc.)
 - `supabase/functions/register/index.ts` — Registro público
 - `supabase/functions/user-manager/index.ts` — Gerenciamento de colaboradores
 - `src/hooks/useAusencias.ts` — CRUD ausências + conflitos + notificação
@@ -273,8 +273,8 @@ Actions:
 - Componente `RequireRole` protege rotas por array de roles permitidos
 - `/financeiro`, `/estoque/*`, `/prescricoes`, `/relatorios/*` → admin + profissional
 - `/configuracoes/*` → admin only
-- `/ovyva/configuracoes` → admin only
-- `/ovyva/historico` → admin + profissional
+- `/lyra/configuracoes` → admin only
+- `/lyra/historico` → admin + profissional
 - Recepção redireciona para `/dashboard` se tentar acessar URL restrita
 
 ### usePermissions Reforçado (authStore.ts)
@@ -285,8 +285,8 @@ Actions:
 - **Dashboard**: personalizado por role (recepção sem gráficos/insights), filtro de período (Hoje/Semana/Mês), barras KPI com % real, cálculo de data corrigido
 - **Agenda**: profissional só vê suas consultas, verificação de ausências antes de agendar, profissionais carregados do banco (não dos appointments), recorrência funcional (semanal/quinzenal/mensal), drag-drop com lock anti-double
 - **Pacientes**: botões criar/importar ocultos para recepção, perfil com tabs filtrados por role (recepção só vê resumo/docs/termos)
-- **OVYVA**: config protegida (admin only), clinica_id em takeover/return, metadata do atendente salva, label dinâmico por role, realtime estabilizado
-- **Verdesk**: profissional é somente leitura (sem criar leads, sem drag-drop)
+- **LYRA**: config protegida (admin only), clinica_id em takeover/return, metadata do atendente salva, label dinâmico por role, realtime estabilizado
+- **Nexus**: profissional é somente leitura (sem criar leads, sem drag-drop)
 - **Financeiro**: profissional só vê seus lançamentos, categorias customizáveis da config da clínica
 - **Estoque**: custos ocultos para profissional (mostra "Produtos Ativos" em vez de "Valor em Estoque")
 - **Prescrições**: só dono ou admin pode editar/cancelar/excluir
@@ -302,17 +302,17 @@ Actions:
 - `src/components/dashboard/ConsultasChart.tsx` — error handling
 - `src/components/layout/Header.tsx` — alertas filtrados + dismiss persistente
 - `src/components/layout/Sidebar.tsx` — versão 1.7.0
-- `src/components/ovyva/ChatWindow.tsx` — label dinâmico
+- `src/components/lyra/ChatWindow.tsx` — label dinâmico
 - `src/hooks/useAgenda.ts` — filtro profissional + ausências + recorrência
-- `src/hooks/useOVYVA.ts` — clinica_id + metadata + realtime fix
+- `src/hooks/useLYRA.ts` — clinica_id + metadata + realtime fix
 - `src/hooks/useFinanceiro.ts` — filtro profissional
 - `src/hooks/usePrescricoes.ts` — canModify() check
 - `src/pages/Dashboard/DashboardPage.tsx` — personalizado por role + filtro período
 - `src/pages/Agenda/AgendaPage.tsx` — profissionais do banco + drag lock
 - `src/pages/Pacientes/PacientesPage.tsx` — canManagePatients
 - `src/pages/Pacientes/PatientProfilePage.tsx` — tabs filtrados por role
-- `src/pages/Ovyva/OvyvaPage.tsx` — botões config/histórico por role
-- `src/pages/Verdesk/VerdeskPage.tsx` — permissões por role
+- `src/pages/Lyra/LyraPage.tsx` — botões config/histórico por role
+- `src/pages/Nexus/NexusPage.tsx` — permissões por role
 - `src/pages/Financeiro/FinanceiroPage.tsx` — categorias customizáveis
 - `src/pages/Estoque/EstoquePage.tsx` — custos ocultos
 - `src/pages/Configuracoes/ProfissionaisPage.tsx` — anti-escalação
@@ -339,9 +339,9 @@ Actions:
 - UI: Badge, Avatar, ToastProvider
 - Login: sempre dark (glassmorphism + gradiente brand)
 - Agenda: DayView, WeekView, AppointmentCard, AppointmentModal
-- OVYVA: ChatWindow, ConversationList, ContactContext
+- LYRA: ChatWindow, ConversationList, ContactContext
 - Pacientes: PacientesPage, PatientProfilePage
-- Verdesk: VerdeskPage, LeadCard, KanbanColumn
+- Nexus: NexusPage, LeadCard, KanbanColumn
 - Financeiro, Estoque, Prescrições, Relatórios, Configurações
 - PDF generation: PatientTerms (setFillColor corrigido)
 
@@ -356,7 +356,7 @@ Actions:
 - Hero com blobs animados + mockup 3D parallax
 - Social Proof com contadores animados + marquee
 - Features showcase com tabs interativas (6 modulos)
-- OVYVA chat ao vivo (typing animation sequencial)
+- LYRA chat ao vivo (typing animation sequencial)
 - Beneficios com cards stagger entrance
 - Depoimentos carousel glassmorphism
 - Quiz interativo (8 perguntas) + score + WhatsApp CTA

@@ -1,6 +1,6 @@
 DELETE FROM auditoria_global;
-DELETE FROM ovyva_mensagens;
-DELETE FROM ovyva_conversas;
+DELETE FROM lyra_mensagens;
+DELETE FROM lyra_conversas;
 DELETE FROM leads_historico;
 DELETE FROM leads;
 DELETE FROM evolucoes;
