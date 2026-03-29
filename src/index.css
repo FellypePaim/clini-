@@ -213,6 +213,16 @@ body {
 
 .input-base::placeholder { color: var(--color-text-muted); }
 
+/* Select/option dark mode fix */
+select.input-base option {
+  background: #0c1220;
+  color: #f1f5f9;
+}
+.light select.input-base option {
+  background: #ffffff;
+  color: #0f172a;
+}
+
 .animate-fade-in {
   animation: var(--animate-fade-in);
 }

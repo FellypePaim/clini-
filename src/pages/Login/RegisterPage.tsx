@@ -19,6 +19,14 @@ import {
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 
+// ─── Dark Clinical input classes (same as LoginPage) ─
+const darkInput = [
+  'w-full rounded-xl px-4 py-2.5 text-sm transition-all duration-200 outline-none',
+  'bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)]',
+  'text-[#f1f5f9] placeholder-[#64748b]',
+  'focus:border-[#0891b2] focus:ring-2 focus:ring-[rgba(8,145,178,0.2)]',
+].join(' ')
+
 // ─── Tipo de conta ──────────────────────────────
 type AccountType = 'admin' | 'funcionario' | null
 
@@ -66,7 +74,7 @@ export function RegisterPage() {
   // ── Escolha do tipo de conta ──────────────────
   if (!accountType) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
         <div className="w-full max-w-lg animate-fade-in">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10 justify-center">
@@ -74,50 +82,50 @@ export function RegisterPage() {
               <Stethoscope className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-gray-900 text-2xl font-bold">Prontuário</span>
+              <span className="text-[#f1f5f9] text-2xl font-bold">Prontuário</span>
               <span className="text-cyan-500 text-2xl font-light"> Verde</span>
             </div>
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Criar conta</h1>
-            <p className="text-gray-500 mt-1">Como você deseja se cadastrar?</p>
+            <h1 className="text-2xl font-bold text-[#f1f5f9]">Criar conta</h1>
+            <p className="text-[#64748b] mt-1">Como você deseja se cadastrar?</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Admin / Nova Clínica */}
             <button
               onClick={() => setAccountType('admin')}
-              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-gray-200 bg-white hover:border-cyan-500 hover:shadow-lg transition-all duration-200"
+              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-200"
             >
               <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 group-hover:bg-cyan-500 transition-colors flex items-center justify-center">
                 <Building2 className="w-8 h-8 text-cyan-500 group-hover:text-white transition-colors" />
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-gray-900 text-lg">Administrador</h3>
-                <p className="text-sm text-gray-500 mt-1">Quero cadastrar uma nova clínica</p>
+                <h3 className="font-bold text-[#f1f5f9] text-lg">Administrador</h3>
+                <p className="text-sm text-[#64748b] mt-1">Quero cadastrar uma nova clínica</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-cyan-500 absolute top-4 right-4 transition-colors" />
+              <ArrowRight className="w-5 h-5 text-[#334155] group-hover:text-cyan-500 absolute top-4 right-4 transition-colors" />
             </button>
 
             {/* Funcionário */}
             <button
               onClick={() => setAccountType('funcionario')}
-              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-gray-200 bg-white hover:border-blue-500 hover:shadow-lg transition-all duration-200"
+              className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200"
             >
-              <div className="w-16 h-16 rounded-2xl bg-blue-100 group-hover:bg-blue-500 transition-colors flex items-center justify-center">
-                <Briefcase className="w-8 h-8 text-blue-600 group-hover:text-white transition-colors" />
+              <div className="w-16 h-16 rounded-2xl bg-blue-500/10 group-hover:bg-blue-500 transition-colors flex items-center justify-center">
+                <Briefcase className="w-8 h-8 text-blue-400 group-hover:text-white transition-colors" />
               </div>
               <div className="text-center">
-                <h3 className="font-bold text-gray-900 text-lg">Funcionário</h3>
-                <p className="text-sm text-gray-500 mt-1">Já existe uma clínica cadastrada</p>
+                <h3 className="font-bold text-[#f1f5f9] text-lg">Funcionário</h3>
+                <p className="text-sm text-[#64748b] mt-1">Já existe uma clínica cadastrada</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 absolute top-4 right-4 transition-colors" />
+              <ArrowRight className="w-5 h-5 text-[#334155] group-hover:text-blue-500 absolute top-4 right-4 transition-colors" />
             </button>
           </div>
 
           <div className="mt-8 text-center">
-            <Link to="/login" className="text-sm text-gray-500 hover:text-cyan-500 transition-colors inline-flex items-center gap-1">
+            <Link to="/login" className="text-sm text-[#64748b] hover:text-cyan-500 transition-colors inline-flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Já tenho uma conta
             </Link>
           </div>
@@ -218,10 +226,10 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
       <div className="w-full max-w-lg animate-fade-in">
         {/* Header */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-cyan-500 transition-colors mb-6">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-[#64748b] hover:text-cyan-500 transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
@@ -230,15 +238,15 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
             <Building2 className="w-5 h-5 text-cyan-500" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Cadastrar nova clínica</h2>
-            <p className="text-sm text-gray-500">Preencha os dados da clínica e do administrador</p>
+            <h2 className="text-xl font-bold text-[#f1f5f9]">Cadastrar nova clínica</h2>
+            <p className="text-sm text-[#64748b]">Preencha os dados da clínica e do administrador</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" noValidate>
           {/* ── Dados da Clínica ── */}
           <fieldset className="space-y-4">
-            <legend className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <legend className="text-xs font-bold text-[#64748b] uppercase tracking-wider flex items-center gap-2">
               <Building2 className="w-3.5 h-3.5" /> Dados da Clínica
             </legend>
 
@@ -254,7 +262,7 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
 
           {/* ── Dados do Administrador ── */}
           <fieldset className="space-y-4">
-            <legend className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+            <legend className="text-xs font-bold text-[#64748b] uppercase tracking-wider flex items-center gap-2">
               <UserPlus className="w-3.5 h-3.5" /> Seus dados (Administrador)
             </legend>
 
@@ -274,7 +282,7 @@ function AdminRegisterForm({ isLoading, globalError, showPassword, setShowPasswo
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="text-center text-xs text-[#475569] mt-6">
           <Link to="/login" className="hover:text-cyan-500 transition-colors">Já tenho uma conta</Link>
         </p>
       </div>
@@ -298,20 +306,20 @@ function FuncionarioRegisterForm({ isLoading, globalError, showPassword, setShow
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-indigo-50 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
       <div className="w-full max-w-lg animate-fade-in">
         {/* Header */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 transition-colors mb-6">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-sm text-[#64748b] hover:text-blue-400 transition-colors mb-6">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-            <Briefcase className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+            <Briefcase className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Cadastro de funcionário</h2>
-            <p className="text-sm text-gray-500">Após o cadastro, aguarde o admin vincular você à clínica</p>
+            <h2 className="text-xl font-bold text-[#f1f5f9]">Cadastro de funcionário</h2>
+            <p className="text-sm text-[#64748b]">Após o cadastro, aguarde o admin vincular você à clínica</p>
           </div>
         </div>
 
@@ -336,16 +344,16 @@ function FuncionarioRegisterForm({ isLoading, globalError, showPassword, setShow
             {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Cadastrando...</> : <><Check className="w-4 h-4" /> Criar minha conta</>}
           </button>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-2">
-            <p className="text-xs text-blue-700 leading-relaxed">
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mt-2">
+            <p className="text-xs text-blue-300 leading-relaxed">
               Após criar sua conta, o administrador da clínica precisará adicionar seu e-mail na equipe.
               Você receberá acesso assim que for vinculado.
             </p>
           </div>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          <Link to="/login" className="hover:text-blue-600 transition-colors">Já tenho uma conta</Link>
+        <p className="text-center text-xs text-[#475569] mt-6">
+          <Link to="/login" className="hover:text-blue-400 transition-colors">Já tenho uma conta</Link>
         </p>
       </div>
     </div>
@@ -360,10 +368,10 @@ function InputField({ label, id, type = 'text', placeholder, register, error }: 
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-[#94a3b8] mb-1">{label}</label>
       <input id={id} type={type} placeholder={placeholder} {...register}
-        className={cn('input-base', error && 'border-red-400 focus:ring-red-400')} />
-      {error && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {error}</p>}
+        className={cn(darkInput, error && 'border-red-400 focus:ring-red-400')} />
+      {error && <p className="mt-1 text-xs text-red-400 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {error}</p>}
     </div>
   )
 }
@@ -373,24 +381,24 @@ function PasswordField({ label, id, showPassword, toggle, register, error }: {
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-[#94a3b8] mb-1">{label}</label>
       <div className="relative">
         <input id={id} type={showPassword ? 'text' : 'password'} placeholder="••••••" {...register}
-          className={cn('input-base pr-10', error && 'border-red-400 focus:ring-red-400')} />
-        <button type="button" onClick={toggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+          className={cn(darkInput, 'pr-10', error && 'border-red-400 focus:ring-red-400')} />
+        <button type="button" onClick={toggle} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#475569] hover:text-[#94a3b8]">
           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
-      {error && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {error}</p>}
+      {error && <p className="mt-1 text-xs text-red-400 flex items-center gap-1"><AlertCircle className="w-3 h-3" /> {error}</p>}
     </div>
   )
 }
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
-      <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
-      <p className="text-sm text-red-600">{message}</p>
+    <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5">
+      <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+      <p className="text-sm text-red-300">{message}</p>
     </div>
   )
 }

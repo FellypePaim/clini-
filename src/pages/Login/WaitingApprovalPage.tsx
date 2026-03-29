@@ -61,7 +61,7 @@ export function WaitingApprovalPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
       <div className="w-full max-w-md text-center animate-fade-in">
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-10">
@@ -69,41 +69,41 @@ export function WaitingApprovalPage() {
             <Stethoscope className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="text-gray-900 text-xl font-bold">Prontuário</span>
+            <span className="text-[#f1f5f9] text-xl font-bold">Prontuário</span>
             <span className="text-cyan-500 text-xl font-light"> Verde</span>
           </div>
         </div>
 
         {/* Ícone animado */}
         <div className="relative mx-auto w-24 h-24 mb-8">
-          <div className="absolute inset-0 rounded-full bg-amber-100 animate-pulse" />
-          <div className="relative w-full h-full rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-full bg-amber-500/10 animate-pulse" />
+          <div className="relative w-full h-full rounded-full bg-amber-500/5 border-2 border-amber-500/30 flex items-center justify-center">
             <Clock className="w-10 h-10 text-amber-500" />
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-[#f1f5f9] mb-2">
           Aguardando aprovação{dots}
         </h1>
 
-        <p className="text-gray-500 leading-relaxed mb-8 max-w-sm mx-auto">
-          Sua conta foi criada com sucesso! Agora é preciso que o <strong>administrador da clínica</strong> vincule seu e-mail à equipe.
+        <p className="text-[#94a3b8] leading-relaxed mb-8 max-w-sm mx-auto">
+          Sua conta foi criada com sucesso! Agora é preciso que o <strong className="text-[#f1f5f9]">administrador da clínica</strong> vincule seu e-mail à equipe.
         </p>
 
         {/* Info box */}
-        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6 text-left space-y-3">
+        <div className="bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-xl p-5 mb-6 text-left space-y-3">
           <div className="flex items-start gap-3">
-            <Mail className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+            <Mail className="w-5 h-5 text-blue-400 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Seu e-mail cadastrado</p>
-              <p className="text-sm text-gray-500">{user?.email}</p>
+              <p className="text-sm font-medium text-[#f1f5f9]">Seu e-mail cadastrado</p>
+              <p className="text-sm text-[#64748b]">{user?.email}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
             <CheckCircle className="w-5 h-5 text-cyan-500 mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-gray-900">O que o admin precisa fazer</p>
-              <p className="text-sm text-gray-500">Ir em Configurações → Profissionais → adicionar seu e-mail à equipe</p>
+              <p className="text-sm font-medium text-[#f1f5f9]">O que o admin precisa fazer</p>
+              <p className="text-sm text-[#64748b]">Ir em Configurações → Profissionais → adicionar seu e-mail à equipe</p>
             </div>
           </div>
         </div>
@@ -124,13 +124,13 @@ export function WaitingApprovalPage() {
 
           <button
             onClick={() => { logout(); navigate('/login') }}
-            className="flex items-center justify-center gap-2 w-full py-2.5 text-sm text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="flex items-center justify-center gap-2 w-full py-2.5 text-sm text-[#64748b] hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
           >
             <LogOut className="w-4 h-4" /> Sair
           </button>
         </div>
 
-        <p className="text-xs text-gray-400 mt-8">
+        <p className="text-xs text-[#475569] mt-8">
           Verificação automática a cada 15 segundos
         </p>
       </div>

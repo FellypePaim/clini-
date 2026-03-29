@@ -89,7 +89,7 @@ export function LeadsRecentes() {
       <div className="p-4 bg-[var(--color-bg-deep)] border-t border-[var(--color-border)] rounded-b-2xl">
         <Link 
           to="/verdesk" 
-          className="block w-full text-center py-2 text-xs font-black text-indigo-600 uppercase tracking-widest hover:bg-white rounded-xl transition-all"
+          className="block w-full text-center py-2 text-xs font-black text-indigo-600 uppercase tracking-widest hover:bg-[var(--color-bg-card-hover)] rounded-xl transition-all"
         >
           Gerenciar Funil
         </Link>

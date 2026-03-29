@@ -146,9 +146,14 @@ export function AppointmentModal({ isOpen, onClose, onSubmit, initialDate, initi
 
   const handleFormSubmit = async (values: FormValues) => {
     setIsSubmitting(true)
-    await onSubmit(values as unknown as AppointmentFormData)
-    setIsSubmitting(false)
-    onClose()
+    try {
+      await onSubmit(values as unknown as AppointmentFormData)
+      onClose()
+    } catch {
+      // Error handled by parent (toast) — just reset button
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!isOpen) return null
