@@ -79,17 +79,17 @@ export function AgendamentosList() {
   }, [clinicaId, loadAgendamentos])
 
   return (
-    <article className="bg-white rounded-xl border border-gray-100 p-5">
+    <article className="rounded-xl border border-[var(--color-border)] p-5" style={{ background: 'var(--color-bg-card)' }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800">Agenda de Hoje</h3>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Agenda de Hoje</h3>
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
             {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
           </p>
         </div>
         <button
           onClick={() => navigate('/agenda')}
-          className="flex items-center gap-1 text-xs text-green-600 font-medium hover:text-green-700 transition-colors"
+          className="flex items-center gap-1 text-xs text-cyan-500 font-medium hover:text-cyan-400 transition-colors"
         >
           Ver tudo <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -98,16 +98,16 @@ export function AgendamentosList() {
       {loading ? (
         <div className="space-y-2">
           {[1,2,3].map(i => (
-            <div key={i} className="animate-pulse flex items-center gap-3 p-3 rounded-lg border border-gray-100">
-              <div className="w-20 h-4 bg-gray-100 rounded" />
-              <div className="flex-1 h-4 bg-gray-100 rounded" />
-              <div className="w-16 h-4 bg-gray-100 rounded" />
+            <div key={i} className="animate-pulse flex items-center gap-3 p-3 rounded-lg border border-[var(--color-border)]">
+              <div className="w-20 h-4 bg-[var(--color-bg-deep)] rounded" />
+              <div className="flex-1 h-4 bg-[var(--color-bg-deep)] rounded" />
+              <div className="w-16 h-4 bg-[var(--color-bg-deep)] rounded" />
             </div>
           ))}
         </div>
       ) : agendamentos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-          <Clock className="w-8 h-8 mb-2 text-gray-200" />
+        <div className="flex flex-col items-center justify-center py-8 text-[var(--color-text-muted)]">
+          <Clock className="w-8 h-8 mb-2 text-[var(--color-text-dim)]" />
           <p className="text-sm font-medium">Nenhum agendamento para hoje</p>
         </div>
       ) : (
@@ -121,24 +121,24 @@ export function AgendamentosList() {
                   'flex items-center gap-3 p-3 rounded-lg border transition-all duration-150 group cursor-pointer',
                   apt.status === 'em_atendimento'
                     ? 'border-orange-200 bg-orange-50/50'
-                    : 'border-gray-100 hover:border-green-200 hover:bg-green-50/30'
+                    : 'border-[var(--color-border)] hover:border-cyan-500/30 hover:bg-cyan-500/5'
                 )}
               >
-                <div className="flex items-center gap-1.5 text-gray-500 w-20 shrink-0">
-                  <Clock className="w-3.5 h-3.5 text-gray-300" />
+                <div className="flex items-center gap-1.5 text-[var(--color-text-muted)] w-20 shrink-0">
+                  <Clock className="w-3.5 h-3.5 text-[var(--color-text-dim)]" />
                   <span className="text-xs font-medium">{apt.horaInicio}</span>
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{apt.pacienteNome}</p>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{apt.pacienteNome}</p>
+                  <p className="text-xs text-[var(--color-text-muted)] truncate">
                     {apt.procedimento} · {apt.profissionalNome.split(' ')[0]}
                   </p>
                 </div>
 
                 <div className="flex flex-col items-end gap-1 shrink-0">
                   {apt.valor && (
-                    <span className="text-xs font-semibold text-gray-700">
+                    <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
                       R$ {apt.valor.toLocaleString('pt-BR')}
                     </span>
                   )}

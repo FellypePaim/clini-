@@ -18,7 +18,7 @@ interface KpiData {
 const ICON_MAP = { Calendar, UserPlus, DollarSign, Target }
 
 const COLOR_MAP = {
-  green:  { bg: 'bg-green-50',  icon: 'text-green-600',  bar: 'bg-green-500', ring: 'ring-green-100'  },
+  green:  { bg: 'bg-cyan-500/10',  icon: 'text-cyan-500',  bar: 'bg-cyan-500', ring: 'ring-cyan-500/20'  },
   blue:   { bg: 'bg-blue-50',   icon: 'text-blue-600',   bar: 'bg-blue-500',  ring: 'ring-blue-100'   },
   purple: { bg: 'bg-purple-50', icon: 'text-purple-600', bar: 'bg-purple-500', ring: 'ring-purple-100' },
   orange: { bg: 'bg-orange-50', icon: 'text-orange-600', bar: 'bg-orange-500', ring: 'ring-orange-100' },
@@ -26,13 +26,13 @@ const COLOR_MAP = {
 
 function KpiSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse">
+    <div className="rounded-2xl border border-[var(--color-border)] p-5 animate-pulse" style={{ background: 'var(--color-bg-card)' }}>
       <div className="flex items-center justify-between mb-4">
-        <div className="w-10 h-10 rounded-xl bg-gray-100" />
-        <div className="w-16 h-5 bg-gray-100 rounded-full" />
+        <div className="w-10 h-10 rounded-xl bg-[var(--color-bg-deep)]" />
+        <div className="w-16 h-5 bg-[var(--color-bg-deep)] rounded-full" />
       </div>
-      <div className="h-8 w-24 bg-gray-100 rounded mb-1" />
-      <div className="h-4 w-32 bg-gray-100 rounded" />
+      <div className="h-8 w-24 bg-[var(--color-bg-deep)] rounded mb-1" />
+      <div className="h-4 w-32 bg-[var(--color-bg-deep)] rounded" />
     </div>
   )
 }
@@ -142,9 +142,10 @@ export function KpiCards({ periodo = 'mes' }: { periodo?: 'hoje' | 'semana' | 'm
           <article
             key={kpi.id}
             className={cn(
-              'bg-white rounded-2xl border border-gray-100 p-5 transition-all duration-200',
-              'hover:shadow-lg hover:shadow-gray-100/80 hover:border-gray-200 hover:-translate-y-0.5'
+              'rounded-2xl border border-[var(--color-border)] p-5 transition-all duration-200',
+              'hover:shadow-lg hover:shadow-black/5 hover:border-[var(--color-border-hover)] hover:-translate-y-0.5'
             )}
+            style={{ background: 'var(--color-bg-card)' }}
           >
             <div className="flex items-center justify-between mb-3">
               <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center ring-4', colors.bg, colors.ring)}>
@@ -153,7 +154,7 @@ export function KpiCards({ periodo = 'mes' }: { periodo?: 'hoje' | 'semana' | 'm
               {v !== 0 && (
                 <span className={cn(
                   'flex items-center gap-0.5 text-xs font-semibold px-2 py-0.5 rounded-full',
-                  v > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                  v > 0 ? 'bg-cyan-500/10 text-cyan-500' : 'bg-red-50 text-red-600'
                 )}>
                   {v > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                   {Math.abs(v)}%
@@ -161,10 +162,10 @@ export function KpiCards({ periodo = 'mes' }: { periodo?: 'hoje' | 'semana' | 'm
               )}
             </div>
 
-            <p className="text-2xl font-bold text-gray-900 tracking-tight">{kpi.valor}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{kpi.subtitulo}</p>
+            <p className="text-2xl font-bold text-[var(--color-text-primary)] tracking-tight">{kpi.valor}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{kpi.subtitulo}</p>
 
-            <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="mt-3 h-1.5 bg-[var(--color-border)] rounded-full overflow-hidden">
               <div
                 className={cn('h-full rounded-full transition-all duration-700 ease-out', colors.bar)}
                 style={{ width: `${kpi.progresso}%` }}

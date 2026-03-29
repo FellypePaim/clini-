@@ -13,10 +13,10 @@ interface Paciente {
 }
 
 const BG_COLORS = [
-  'bg-green-100 text-green-700',
-  'bg-blue-100 text-blue-700',
-  'bg-purple-100 text-purple-700',
-  'bg-orange-100 text-orange-700',
+  'bg-cyan-500/10 text-cyan-500',
+  'bg-indigo-500/10 text-indigo-400',
+  'bg-purple-500/10 text-purple-400',
+  'bg-amber-500/10 text-amber-400',
 ]
 
 export function PacientesRecentes() {
@@ -69,15 +69,15 @@ export function PacientesRecentes() {
   }, [clinicaId, loadPacientes])
 
   return (
-    <article className="bg-white rounded-xl border border-gray-100 p-5">
+    <article className="rounded-xl border border-[var(--color-border)] p-5" style={{ background: 'var(--color-bg-card)' }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800">Pacientes Recentes</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Últimas atualizações registradas</p>
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Pacientes Recentes</h3>
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Últimas atualizações registradas</p>
         </div>
         <button
           onClick={() => navigate('/pacientes')}
-          className="flex items-center gap-1 text-xs text-green-600 font-medium hover:text-green-700 transition-colors"
+          className="flex items-center gap-1 text-xs text-cyan-500 font-medium hover:text-cyan-400 transition-colors"
         >
           Ver todos <ChevronRight className="w-3.5 h-3.5" />
         </button>
@@ -87,16 +87,16 @@ export function PacientesRecentes() {
         <div className="space-y-3">
           {[1,2,3,4].map(i => (
             <div key={i} className="animate-pulse flex items-center gap-3 p-2.5 rounded-lg">
-              <div className="w-9 h-9 rounded-xl bg-gray-100 shrink-0" />
+              <div className="w-9 h-9 rounded-xl bg-[var(--color-bg-deep)] shrink-0" />
               <div className="flex-1 space-y-1.5">
-                <div className="h-3.5 w-32 bg-gray-100 rounded" />
-                <div className="h-3 w-24 bg-gray-100 rounded" />
+                <div className="h-3.5 w-32 bg-[var(--color-bg-deep)] rounded" />
+                <div className="h-3 w-24 bg-[var(--color-bg-deep)] rounded" />
               </div>
             </div>
           ))}
         </div>
       ) : pacientes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-8 text-[var(--color-text-muted)]">
           <p className="text-sm font-medium">Nenhum paciente cadastrado ainda</p>
         </div>
       ) : (
@@ -113,22 +113,22 @@ export function PacientesRecentes() {
             return (
               <div
                 key={pac.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
+                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[var(--color-bg-card-hover)] transition-colors cursor-pointer group"
                 onClick={() => navigate(`/pacientes/${pac.id}`)}
               >
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold ${BG_COLORS[idx % BG_COLORS.length]}`}>
                   {initials}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">{pac.nome_completo}</p>
+                  <p className="text-sm font-medium text-[var(--color-text-primary)] truncate">{pac.nome_completo}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <Phone className="w-3 h-3 text-gray-300" />
-                    <p className="text-xs text-gray-400">{pac.contato?.telefone ?? '—'}</p>
+                    <Phone className="w-3 h-3 text-[var(--color-text-dim)]" />
+                    <p className="text-xs text-[var(--color-text-muted)]">{pac.contato?.telefone ?? '—'}</p>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[10px] text-gray-400">Desde</p>
-                  <p className="text-xs font-medium text-gray-700 mt-0.5">
+                  <p className="text-[10px] text-[var(--color-text-muted)]">Desde</p>
+                  <p className="text-xs font-medium text-[var(--color-text-secondary)] mt-0.5">
                     {pac.ultimaConsulta
                       ? new Date(pac.ultimaConsulta + 'T00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
                       : '—'}

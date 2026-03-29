@@ -20,11 +20,11 @@ interface TooltipProps {
 function CustomTooltip({ active, payload, label }: TooltipProps) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-lg shadow-gray-100/50">
-        <p className="text-xs text-gray-500 mb-1">Semana de {label}</p>
-        <p className="text-lg font-bold text-gray-900">
+      <div className="border border-[var(--color-border)] rounded-xl px-4 py-3 shadow-lg shadow-black/5" style={{ background: 'var(--color-bg-card)' }}>
+        <p className="text-xs text-[var(--color-text-muted)] mb-1">Semana de {label}</p>
+        <p className="text-lg font-bold text-[var(--color-text-primary)]">
           {payload[0].value}{' '}
-          <span className="text-sm font-normal text-gray-500">consultas</span>
+          <span className="text-sm font-normal text-[var(--color-text-muted)]">consultas</span>
         </p>
       </div>
     )
@@ -89,14 +89,14 @@ export function ConsultasChart() {
   const positivo = Number(variacao) >= 0
 
   return (
-    <article className="bg-white rounded-xl border border-gray-100 p-5">
+    <article className="rounded-xl border border-[var(--color-border)] p-5" style={{ background: 'var(--color-bg-card)' }}>
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-sm font-semibold text-gray-800">Consultas por Semana</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Últimas 4 semanas</p>
+          <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Consultas por Semana</h3>
+          <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Últimas 4 semanas</p>
         </div>
         {!loading && (
-          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold ${positivo ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+          <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold ${positivo ? 'bg-cyan-500/10 text-cyan-500' : 'bg-red-50 text-red-600'}`}>
             {positivo ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
             {positivo ? '+' : ''}{variacao}%
           </div>
@@ -105,24 +105,24 @@ export function ConsultasChart() {
 
       {loading ? (
         <div className="animate-pulse space-y-2">
-          <div className="h-8 w-24 bg-gray-100 rounded" />
-          <div className="h-40 bg-gray-50 rounded-xl" />
+          <div className="h-8 w-24 bg-[var(--color-bg-deep)] rounded" />
+          <div className="h-40 bg-[var(--color-bg-deep)] rounded-xl" />
         </div>
       ) : error ? (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-8 text-[var(--color-text-muted)]">
           <p className="text-sm font-medium">{error}</p>
-          <button onClick={loadDados} className="mt-2 text-xs text-green-600 font-medium hover:underline">Tentar novamente</button>
+          <button onClick={loadDados} className="mt-2 text-xs text-cyan-500 font-medium hover:underline">Tentar novamente</button>
         </div>
       ) : (
         <>
           <div className="flex items-baseline gap-2 mb-5">
-            <span className="text-3xl font-bold text-gray-900">{total}</span>
-            <span className="text-sm text-gray-400">consultas no período</span>
+            <span className="text-3xl font-bold text-[var(--color-text-primary)]">{total}</span>
+            <span className="text-sm text-[var(--color-text-muted)]">consultas no período</span>
           </div>
 
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={dados} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
               <XAxis
                 dataKey="semana"
                 tick={{ fontSize: 11, fill: '#9CA3AF' }}
@@ -139,10 +139,10 @@ export function ConsultasChart() {
               <Line
                 type="monotone"
                 dataKey="consultas"
-                stroke="#16A34A"
+                stroke="#0891b2"
                 strokeWidth={2.5}
-                dot={{ fill: '#16A34A', strokeWidth: 2, r: 4, stroke: '#fff' }}
-                activeDot={{ r: 6, stroke: '#16A34A', strokeWidth: 2, fill: '#fff' }}
+                dot={{ fill: '#0891b2', strokeWidth: 2, r: 4, stroke: '#fff' }}
+                activeDot={{ r: 6, stroke: '#0891b2', strokeWidth: 2, fill: '#fff' }}
               />
             </LineChart>
           </ResponsiveContainer>

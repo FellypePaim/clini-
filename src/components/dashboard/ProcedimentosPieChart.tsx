@@ -9,7 +9,7 @@ interface ProcData {
   cor: string
 }
 
-const CORES = ['#16A34A', '#2563EB', '#9333EA', '#F97316', '#EC4899', '#14B8A6']
+const CORES = ['#0891b2', '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#14b8a6']
 
 interface TooltipProps {
   active?: boolean
@@ -20,12 +20,12 @@ function CustomTooltip({ active, payload }: TooltipProps) {
   if (active && payload && payload.length) {
     const item = payload[0]
     return (
-      <div className="bg-white border border-gray-100 rounded-xl px-4 py-3 shadow-lg shadow-gray-100/50">
+      <div className="border border-[var(--color-border)] rounded-xl px-4 py-3 shadow-lg shadow-black/5" style={{ background: 'var(--color-bg-card)' }}>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.payload.cor }} />
-          <p className="text-xs font-semibold text-gray-800">{item.name}</p>
+          <p className="text-xs font-semibold text-[var(--color-text-primary)]">{item.name}</p>
         </div>
-        <p className="text-lg font-bold text-gray-900">{item.value}%</p>
+        <p className="text-lg font-bold text-[var(--color-text-primary)]">{item.value}%</p>
       </div>
     )
   }
@@ -83,23 +83,23 @@ export function ProcedimentosPieChart() {
   const _total = procedimentos.reduce((acc, p) => acc + p.valor, 0)
 
   return (
-    <article className="bg-white rounded-xl border border-gray-100 p-5">
+    <article className="rounded-xl border border-[var(--color-border)] p-5" style={{ background: 'var(--color-bg-card)' }}>
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-800">Distribuição por Procedimento</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Este mês</p>
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Distribuição por Procedimento</h3>
+        <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Este mês</p>
       </div>
 
       {loading ? (
         <div className="animate-pulse flex gap-4 items-center">
-          <div className="w-40 h-40 rounded-full bg-gray-100" />
+          <div className="w-40 h-40 rounded-full bg-[var(--color-bg-deep)]" />
           <div className="flex-1 space-y-2">
-            {[1,2,3,4].map(i => <div key={i} className="h-3 bg-gray-100 rounded" />)}
+            {[1,2,3,4].map(i => <div key={i} className="h-3 bg-[var(--color-bg-deep)] rounded" />)}
           </div>
         </div>
       ) : procedimentos.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-8 text-[var(--color-text-muted)]">
           <p className="text-sm font-medium">Sem dados de procedimentos</p>
-          <p className="text-xs text-gray-300 mt-1">Registre consultas para ver o gráfico</p>
+          <p className="text-xs text-[var(--color-text-dim)] mt-1">Registre consultas para ver o gráfico</p>
         </div>
       ) : (
         <div className="flex items-center gap-4">
@@ -130,16 +130,16 @@ export function ProcedimentosPieChart() {
               <div key={proc.nome} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: proc.cor }} />
-                  <span className="text-xs text-gray-600 truncate max-w-[90px]">{proc.nome}</span>
+                  <span className="text-xs text-[var(--color-text-secondary)] truncate max-w-[90px]">{proc.nome}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-1.5 rounded-full bg-gray-100 w-16 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-[var(--color-border)] w-16 overflow-hidden">
                     <div
                       className="h-full rounded-full"
                       style={{ width: `${proc.valor}%`, background: proc.cor }}
                     />
                   </div>
-                  <span className="text-xs font-semibold text-gray-700 w-8 text-right">
+                  <span className="text-xs font-semibold text-[var(--color-text-secondary)] w-8 text-right">
                     {proc.valor}%
                   </span>
                 </div>
