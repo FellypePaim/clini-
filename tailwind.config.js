@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['DM Sans', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -17,17 +17,17 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#16A34A",
-          50: "#F0FDF4",
-          100: "#DCFCE7",
-          200: "#BBF7D0",
-          300: "#86EFAC",
-          400: "#4ADE80",
-          500: "#22C55E",
-          600: "#16A34A",
-          700: "#15803D",
-          800: "#166534",
-          900: "#14532D",
+          DEFAULT: "#0891b2",
+          50: "#ecfeff",
+          100: "#cffafe",
+          200: "#a5f3fc",
+          300: "#67e8f9",
+          400: "#22d3ee",
+          500: "#06b6d4",
+          600: "#0891b2",
+          700: "#0e7490",
+          800: "#155e75",
+          900: "#164e63",
           foreground: "#FFFFFF",
         },
         secondary: {
@@ -43,18 +43,18 @@ export default {
           foreground: "#6B7280",
         },
         accent: {
-          DEFAULT: "#F0FDF4",
-          foreground: "#16A34A",
+          DEFAULT: "#ecfeff",
+          foreground: "#0891b2",
         },
         card: {
           DEFAULT: "#FFFFFF",
           foreground: "#1F2937",
         },
         sidebar: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#1F2937",
-          border: "#E5E7EB",
-          active: "#F0FDF4",
+          DEFAULT: "var(--color-bg-sidebar)",
+          foreground: "var(--color-text-secondary)",
+          border: "var(--color-border)",
+          active: "var(--color-sidebar-active)",
         },
       },
       borderRadius: {
@@ -71,15 +71,15 @@ export default {
           from: { transform: "translateX(-100%)" },
           to: { transform: "translateX(0)" },
         },
-        "pulse-green": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(22, 163, 74, 0.4)" },
-          "50%": { boxShadow: "0 0 0 6px rgba(22, 163, 74, 0)" },
+        "pulse-accent": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(8, 145, 178, 0.4)" },
+          "50%": { boxShadow: "0 0 0 6px rgba(8, 145, 178, 0)" },
         },
       },
       animation: {
         "fade-in": "fade-in 0.3s ease-out",
         "slide-in": "slide-in 0.25s ease-out",
-        "pulse-green": "pulse-green 2s infinite",
+        "pulse-accent": "pulse-accent 2s infinite",
       },
     },
   },
