@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { Plus, ChevronLeft, ChevronRight, Calendar, CalendarDays, CalendarRange, X } from 'lucide-react'
 import type { AgendaView, AgendaAppointment, AppointmentStatus, AppointmentFormData } from '../../types/agenda'
 import { useAgenda } from '../../hooks/useAgenda'
+import { useAuthStore } from '../../store/authStore'
+import { supabase } from '../../lib/supabase'
 import { DayView } from '../../components/agenda/DayView'
 import { WeekView } from '../../components/agenda/WeekView'
 import { MonthView } from '../../components/agenda/MonthView'
@@ -46,22 +48,31 @@ export function AgendaPage() {
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
 
   const { appointments, ausencias, createAppointment, updateAppointment, deleteAppointment } = useAgenda()
+  const clinicaId = useAuthStore(state => state.user?.clinicaId)
 
-  // ── Lista de profissionais únicos (derivada dos agendamentos) ──
-  const profissionaisUnicos = useMemo(() => {
-    const seen = new Map<string, { id: string; nome: string; especialidade: string; cor: string }>()
-    appointments.forEach(a => {
-      if (!seen.has(a.profissionalId)) {
-        seen.set(a.profissionalId, {
-          id: a.profissionalId,
-          nome: a.profissionalNome,
-          especialidade: a.profissionalEspecialidade,
-          cor: a.profissionalCor,
-        })
-      }
-    })
-    return Array.from(seen.values())
-  }, [appointments])
+  // ── Lista de profissionais do banco (não derivada dos agendamentos) ──
+  const [profissionaisUnicos, setProfissionaisUnicos] = useState<{ id: string; nome: string; especialidade: string; cor: string }[]>([])
+
+  const loadProfissionais = useCallback(async () => {
+    if (!clinicaId) return
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, nome_completo, especialidade, cor_agenda')
+      .eq('clinica_id', clinicaId)
+      .in('role', ['profissional', 'admin'])
+      .eq('ativo', true)
+      .order('nome_completo')
+    if (data) {
+      setProfissionaisUnicos(data.map((p: any) => ({
+        id: p.id,
+        nome: p.nome_completo,
+        especialidade: p.especialidade || '',
+        cor: p.cor_agenda || 'blue',
+      })))
+    }
+  }, [clinicaId])
+
+  useEffect(() => { loadProfissionais() }, [loadProfissionais])
 
   // ── Filtrados por profissional ──────────────────────
   const filteredAppointments = useMemo(() =>

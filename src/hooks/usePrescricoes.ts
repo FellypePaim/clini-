@@ -107,8 +107,22 @@ export function usePrescricoes() {
     }
   }, [clinicaId, user, loadPrescricoes, toast])
 
+  // Helper: verifica se user é dono da prescrição ou admin
+  const canModify = useCallback((prescricaoId: string): boolean => {
+    if (user?.role === 'administrador') return true
+    // Verificar via profissional_id (precisa buscar do banco), por segurança via assinatura
+    const presc = prescricoes.find(p => p.id === prescricaoId)
+    if (!presc) return false
+    // Se o profissional_nome bate com o user.nome, é dele
+    return presc.profissional_nome === user?.nome
+  }, [prescricoes, user])
+
   const cancelarPrescricao = useCallback(async (id: string) => {
     if (!clinicaId) return
+    if (!canModify(id)) {
+      toast({ title: 'Atenção', description: 'Você só pode cancelar suas próprias prescrições.', type: 'warning' })
+      return
+    }
     try {
       const { error } = await supabase.from('prescricoes').update({ status: 'cancelada' } as any).eq('id', id).eq('clinica_id', clinicaId)
       if (error) throw error
@@ -117,10 +131,14 @@ export function usePrescricoes() {
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, type: 'error' })
     }
-  }, [clinicaId, toast])
+  }, [clinicaId, canModify, toast])
 
   const updatePrescricao = useCallback(async (id: string, conteudo: string) => {
     if (!clinicaId) return
+    if (!canModify(id)) {
+      toast({ title: 'Atenção', description: 'Você só pode editar suas próprias prescrições.', type: 'warning' })
+      return
+    }
     try {
       const assinatura_hash = btoa(`${user?.id}:${Date.now()}:${clinicaId}`)
       const itensArr = [{ medicamento: 'Prescrição livre', dosagem: '', frequencia: '', duracao: '', observacoes: conteudo }]
@@ -133,10 +151,14 @@ export function usePrescricoes() {
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, type: 'error' })
     }
-  }, [clinicaId, user?.id, loadPrescricoes, toast])
+  }, [clinicaId, user?.id, canModify, loadPrescricoes, toast])
 
   const deletePrescricao = useCallback(async (id: string) => {
     if (!clinicaId) return
+    if (!canModify(id)) {
+      toast({ title: 'Atenção', description: 'Você só pode excluir suas próprias prescrições.', type: 'warning' })
+      return
+    }
     try {
       const { error } = await supabase.from('prescricoes').delete().eq('id', id).eq('clinica_id', clinicaId)
       if (error) throw error
@@ -145,7 +167,7 @@ export function usePrescricoes() {
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, type: 'error' })
     }
-  }, [clinicaId, toast])
+  }, [clinicaId, canModify, toast])
 
   return { prescricoes, isLoading, loadPrescricoes, createPrescricao, cancelarPrescricao, updatePrescricao, deletePrescricao }
 }

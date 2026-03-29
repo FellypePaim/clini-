@@ -3,6 +3,7 @@ import { ConversationList } from '../../components/ovyva/ConversationList'
 import { ChatWindow } from '../../components/ovyva/ChatWindow'
 import { ContactContext } from '../../components/ovyva/ContactContext'
 import { useOVYVA } from '../../hooks/useOVYVA'
+import { usePermissions } from '../../store/authStore'
 import { MessageSquare, Bot, Settings, History, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
@@ -13,6 +14,7 @@ export function OvyvaPage() {
   } = useOVYVA()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const navigate = useNavigate()
+  const { isAdmin, isProfissional } = usePermissions()
 
   const aiName = config?.aiName || 'Sofia'
 
@@ -53,8 +55,12 @@ export function OvyvaPage() {
           </div>
 
           <div className="flex items-center gap-3">
-             <NavButton icon={<History className="w-4 h-4" />} label="Historico" onClick={() => navigate('/ovyva/historico')} />
-             <NavButton icon={<Settings className="w-4 h-4" />} label="Configuracoes" onClick={() => navigate('/ovyva/configuracoes')} />
+             {(isAdmin || isProfissional) && (
+               <NavButton icon={<History className="w-4 h-4" />} label="Historico" onClick={() => navigate('/ovyva/historico')} />
+             )}
+             {isAdmin && (
+               <NavButton icon={<Settings className="w-4 h-4" />} label="Configuracoes" onClick={() => navigate('/ovyva/configuracoes')} />
+             )}
           </div>
        </div>
 

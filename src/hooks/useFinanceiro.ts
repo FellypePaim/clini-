@@ -31,6 +31,7 @@ export function useFinanceiro() {
   const { user } = useAuthStore()
   const { toast } = useToast()
   const clinicaId = user?.clinicaId
+  const isProfissional = user?.role === 'profissional'
 
   const [lancamentos, setLancamentos] = useState<Lancamento[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -51,6 +52,11 @@ export function useFinanceiro() {
 
       if (inicio) query = query.gte('data_competencia', inicio)
       if (fim) query = query.lte('data_competencia', fim)
+
+      // Profissional só vê lançamentos vinculados às suas consultas
+      if (isProfissional && user?.id) {
+        query = query.eq('profissional_id', user.id)
+      }
 
       const { data, error } = await query
       if (error) throw error

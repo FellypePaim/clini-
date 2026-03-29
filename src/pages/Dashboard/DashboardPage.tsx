@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useAuthStore } from '../../store/authStore'
+import { useAuthStore, usePermissions } from '../../store/authStore'
 import { KpiCards } from '../../components/dashboard/KpiCards'
 import { ConsultasChart } from '../../components/dashboard/ConsultasChart'
 import { ProcedimentosPieChart } from '../../components/dashboard/ProcedimentosPieChart'
@@ -28,6 +28,7 @@ function getDateFormatted() {
 
 export function DashboardPage() {
   const { user } = useAuthStore()
+  const { isRecepcao, isAdmin } = usePermissions()
   const firstName = user?.nome?.split(' ')[0] ?? 'Usuário'
   const [insightModal, setInsightModal] = useState(false)
   const [insightText, setInsightText] = useState('')
@@ -72,40 +73,46 @@ export function DashboardPage() {
           >
             Ver agenda <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          <button
-            onClick={handleInsights}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-700 hover:to-emerald-600 transition-all shadow-sm shadow-green-200/50 active:scale-[0.98]"
-          >
-            <Sparkles className="w-4 h-4" />
-            Insights IA
-          </button>
+          {!isRecepcao && (
+            <button
+              onClick={handleInsights}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-500 text-white text-sm font-semibold rounded-xl hover:from-green-700 hover:to-emerald-600 transition-all shadow-sm shadow-green-200/50 active:scale-[0.98]"
+            >
+              <Sparkles className="w-4 h-4" />
+              Insights IA
+            </button>
+          )}
         </div>
       </div>
 
       {/* ── KPI Cards ────────────────────────────────── */}
       <KpiCards />
 
-      {/* ── Gráficos ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
-        <div className="lg:col-span-3">
-          <ConsultasChart />
+      {/* ── Gráficos (ocultos para recepção) ──────────── */}
+      {!isRecepcao && (
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+          <div className="lg:col-span-3">
+            <ConsultasChart />
+          </div>
+          <div className="lg:col-span-2">
+            <ProcedimentosPieChart />
+          </div>
         </div>
-        <div className="lg:col-span-2">
-          <ProcedimentosPieChart />
-        </div>
-      </div>
+      )}
 
       {/* ── Agendamentos + Leads + Pacientes ──────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className={`grid grid-cols-1 gap-5 ${isRecepcao ? 'lg:grid-cols-2' : 'lg:grid-cols-3'}`}>
         <div className="lg:col-span-1">
           <AgendamentosList />
         </div>
         <div className="lg:col-span-1">
           <LeadsRecentes />
         </div>
-        <div className="lg:col-span-1">
-          <PacientesRecentes />
-        </div>
+        {!isRecepcao && (
+          <div className="lg:col-span-1">
+            <PacientesRecentes />
+          </div>
+        )}
       </div>
 
       {/* ── Modal Insights IA ─────────────────────────── */}

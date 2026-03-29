@@ -374,23 +374,25 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                   <p className="text-xs text-gray-400 mt-0.5 truncate">{user?.email}</p>
                 </div>
                 <div className="py-1">
-                  <button
-                    onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
-                               hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                  >
-                    <User className="w-4 h-4" />
-                    Meu Perfil
-                  </button>
                   {isAdmin && (
-                    <button
-                      onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
-                                 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                    >
-                      <Settings className="w-4 h-4" />
-                      Configurações
-                    </button>
+                    <>
+                      <button
+                        onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
+                                   hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      >
+                        <User className="w-4 h-4" />
+                        Meu Perfil
+                      </button>
+                      <button
+                        onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600
+                                   hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                      >
+                        <Settings className="w-4 h-4" />
+                        Configurações
+                      </button>
+                    </>
                   )}
                 </div>
                 <div className="border-t border-gray-100 py-1">
