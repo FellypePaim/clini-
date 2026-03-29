@@ -46,6 +46,7 @@ export function AgendaPage() {
   const [modalInitialDate, setModalInitialDate]   = useState<string>()
   const [modalInitialHour, setModalInitialHour]   = useState<string>()
   const [selectedApt, setSelectedApt]     = useState<AgendaAppointment | null>(null)
+  const [dropping, setDropping]           = useState(false)
 
   const { appointments, ausencias, createAppointment, updateAppointment, deleteAppointment } = useAgenda()
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
@@ -142,7 +143,13 @@ export function AgendaPage() {
   }
 
   const handleDrop = async (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => {
-    await updateAppointment(id, { data: newDate, horaInicio: newHoraInicio, horaFim: newHoraFim })
+    if (dropping) return
+    setDropping(true)
+    try {
+      await updateAppointment(id, { data: newDate, horaInicio: newHoraInicio, horaFim: newHoraFim })
+    } finally {
+      setDropping(false)
+    }
   }
 
   const handleDayClick = (dateStr: string) => {
@@ -239,7 +246,7 @@ export function AgendaPage() {
               onCardClick={handleCardClick}
               onSlotClick={(h) => handleSlotClick(toDateStr(date), h)}
               onStatusChange={handleStatusChange}
-              onDrop={handleDrop}
+              onDrop={dropping ? undefined : handleDrop}
             />
           )}
 
@@ -251,7 +258,7 @@ export function AgendaPage() {
               onCardClick={handleCardClick}
               onSlotClick={handleSlotClick}
               onStatusChange={handleStatusChange}
-              onDrop={handleDrop}
+              onDrop={dropping ? undefined : handleDrop}
             />
           )}
 

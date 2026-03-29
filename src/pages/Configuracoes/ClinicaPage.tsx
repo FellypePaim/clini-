@@ -42,6 +42,28 @@ const DIAS = [
   { key: 'dom', label: 'Dom' },
 ]
 
+// ── Validação CNPJ ─────────────────────────────────────
+function isValidCNPJ(cnpj: string): boolean {
+  const digits = cnpj.replace(/\D/g, '')
+  if (digits.length !== 14) return false
+  if (/^(\d)\1+$/.test(digits)) return false // todos iguais
+
+  const calc = (len: number) => {
+    let sum = 0
+    let pos = len - 7
+    for (let i = 0; i < len; i++) {
+      sum += Number(digits[i]) * pos--
+      if (pos < 2) pos = 9
+    }
+    const rest = sum % 11
+    return rest < 2 ? 0 : 11 - rest
+  }
+
+  if (calc(12) !== Number(digits[12])) return false
+  if (calc(13) !== Number(digits[13])) return false
+  return true
+}
+
 // ── Máscaras ────────────────────────────────────────────
 function maskCNPJ(v: string): string {
   const d = v.replace(/\D/g, '').slice(0, 14)
@@ -183,6 +205,14 @@ export function ClinicaPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!clinicaId) return
+
+    // Validar CNPJ se preenchido
+    const cnpjDigits = form.cnpj.replace(/\D/g, '')
+    if (cnpjDigits.length > 0 && !isValidCNPJ(cnpjDigits)) {
+      toast({ title: 'CNPJ inválido', description: 'Verifique os dígitos do CNPJ informado.', type: 'error' })
+      return
+    }
+
     setIsSaving(true)
     try {
       // Buscar configuracoes atuais para merge

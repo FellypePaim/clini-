@@ -11,11 +11,13 @@ import {
   Plus
 } from 'lucide-react'
 import { useEstoque } from '../../hooks/useEstoque'
+import { usePermissions } from '../../store/authStore'
 import { Badge } from '../../components/ui/Badge'
 import { ShoppingBag } from 'lucide-react'
 
 export function EstoquePage() {
   const { products, getAlerts } = useEstoque()
+  const { isAdmin } = usePermissions()
 
   const stats = useMemo(() => {
     const totalItems = products.length;
@@ -102,17 +104,30 @@ export function EstoquePage() {
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-slate-500">Valor em Estoque</span>
-              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><DollarSign size={18} /></div>
+          {isAdmin ? (
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-slate-500">Valor em Estoque</span>
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><DollarSign size={18} /></div>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-slate-900">
+                  {stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
+                </span>
+              </div>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-slate-900">
-                {stats.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
-              </span>
+          ) : (
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-slate-500">Produtos Ativos</span>
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><Package size={18} /></div>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-slate-900">{products.filter(p => p.currentStock > 0).length}</span>
+                <span className="text-xs font-bold text-slate-400">com estoque</span>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className={`bg-white p-5 rounded-2xl border shadow-sm ${stats.expiredItems > 0 ? 'border-red-200 bg-red-50/30' : 'border-slate-200'}`}>
             <div className="flex items-center justify-between mb-2">

@@ -84,18 +84,18 @@ export function KpiCards() {
       {
         id: 'consultas', titulo: 'Consultas Hoje', valor: String(consultasHoje),
         subtitulo: 'agendadas para hoje', icone: 'Calendar', cor: 'green', variacao: 0,
-        progresso: Math.min(100, consultasHoje * 10),
+        progresso: agendadasMes > 0 ? Math.min(100, Math.round((consultasHoje / (agendadasMes / 30)) * 100)) : 0,
       },
       {
         id: 'pacientes', titulo: 'Novos Pacientes', valor: String(pacientesMes),
         subtitulo: 'este mês', icone: 'UserPlus', cor: 'blue', variacao: varPacientes,
-        progresso: Math.min(100, pacientesMes * 5),
+        progresso: pacientesMesAnt > 0 ? Math.min(100, Math.round((pacientesMes / pacientesMesAnt) * 100)) : (pacientesMes > 0 ? 100 : 0),
       },
       {
         id: 'faturamento', titulo: 'Faturamento',
         valor: faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }),
         subtitulo: 'receita do mês', icone: 'DollarSign', cor: 'purple', variacao: 0,
-        progresso: Math.min(100, faturamento > 0 ? 60 : 0),
+        progresso: agendadasMes > 0 ? Math.min(100, Math.round((concluidasMes / agendadasMes) * 100)) : 0,
       },
       {
         id: 'comparecimento', titulo: 'Comparecimento', valor: `${taxaComparecimento}%`,

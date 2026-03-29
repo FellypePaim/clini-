@@ -37,35 +37,44 @@ export function ConsultasChart() {
   const clinicaId = user?.clinicaId
   const [dados, setDados] = useState<SemanaData[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const loadDados = useCallback(async () => {
     if (!clinicaId) return
     setLoading(true)
-    // Últimas 4 semanas
-    const semanas: SemanaData[] = []
-    const hoje = new Date()
+    setError(null)
+    try {
+      const semanas: SemanaData[] = []
+      const hoje = new Date()
 
-    for (let i = 3; i >= 0; i--) {
-      const inicioSemana = new Date(hoje)
-      inicioSemana.setDate(hoje.getDate() - (i + 1) * 7)
-      const fimSemana = new Date(hoje)
-      fimSemana.setDate(hoje.getDate() - i * 7)
+      for (let i = 3; i >= 0; i--) {
+        const inicioSemana = new Date(hoje)
+        inicioSemana.setDate(hoje.getDate() - (i + 1) * 7)
+        const fimSemana = new Date(hoje)
+        fimSemana.setDate(hoje.getDate() - i * 7)
 
-      const { count } = await supabase
-        .from('consultas')
-        .select('*', { count: 'exact', head: true })
-        .eq('clinica_id', clinicaId)
-        .gte('data_hora_inicio', inicioSemana.toISOString())
-        .lt('data_hora_inicio', fimSemana.toISOString())
+        const { count, error: qErr } = await supabase
+          .from('consultas')
+          .select('*', { count: 'exact', head: true })
+          .eq('clinica_id', clinicaId)
+          .gte('data_hora_inicio', inicioSemana.toISOString())
+          .lt('data_hora_inicio', fimSemana.toISOString())
 
-      semanas.push({
-        semana: inicioSemana.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
-        consultas: count ?? 0,
-      })
+        if (qErr) throw qErr
+
+        semanas.push({
+          semana: inicioSemana.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
+          consultas: count ?? 0,
+        })
+      }
+
+      setDados(semanas)
+    } catch {
+      setError('Erro ao carregar dados')
+      setDados([])
+    } finally {
+      setLoading(false)
     }
-
-    setDados(semanas)
-    setLoading(false)
   }, [clinicaId])
 
   useEffect(() => {
@@ -98,6 +107,11 @@ export function ConsultasChart() {
         <div className="animate-pulse space-y-2">
           <div className="h-8 w-24 bg-gray-100 rounded" />
           <div className="h-40 bg-gray-50 rounded-xl" />
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <p className="text-sm font-medium">{error}</p>
+          <button onClick={loadDados} className="mt-2 text-xs text-green-600 font-medium hover:underline">Tentar novamente</button>
         </div>
       ) : (
         <>
