@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.0.0** (Dark Clinical Redesign — light/dark mode — 29/03/2026)
+- Versão: **v2.1.0** (Landing Page + Dark Clinical Redesign — 29/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -33,6 +33,7 @@
 - Fase 21: ✅ **OVYVA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
 - Fase 22: ✅ **Segurança RBAC + Melhorias por Role (29/03/2026)**
 - Fase 23: ✅ **Dark Clinical Redesign — UI/UX v2.0 (29/03/2026)**
+- Fase 24: ✅ **Landing Page — 8 seções + Quiz WhatsApp (29/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -348,7 +349,31 @@ Actions:
 - Spec: `docs/superpowers/specs/2026-03-29-dark-clinical-redesign-design.md`
 - Plano: `docs/superpowers/plans/2026-03-29-dark-clinical-redesign.md`
 
-## 17. MIGRATIONS ADICIONAIS
+## 17. FASE 24 — LANDING PAGE (29/03/2026)
+
+### Estrutura (8 secoes + navbar)
+- Navbar fixa glassmorphism com scroll-aware opacity
+- Hero com blobs animados + mockup 3D parallax
+- Social Proof com contadores animados + marquee
+- Features showcase com tabs interativas (6 modulos)
+- OVYVA chat ao vivo (typing animation sequencial)
+- Beneficios com cards stagger entrance
+- Depoimentos carousel glassmorphism
+- Quiz interativo (8 perguntas) + score + WhatsApp CTA
+- Footer com CTA final + links + badges LGPD
+
+### Quiz → WhatsApp
+- 8 perguntas diagnosticam + qualificam a clinica
+- Score de digitalizacao calculado (perguntas 4-7)
+- Mensagem pre-preenchida enviada para 5537998195029
+- Confetti no resultado
+
+### Arquivos (12 novos)
+- `src/pages/Landing/LandingPage.tsx` + 9 section components
+- `src/hooks/useInView.ts` + `src/hooks/useCountUp.ts`
+- Dependencia: canvas-confetti
+
+## 18. MIGRATIONS ADICIONAIS
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
 

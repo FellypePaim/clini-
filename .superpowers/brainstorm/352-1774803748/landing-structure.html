@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clini+ Landing Page — Estrutura</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:#030608; color:#f1f5f9; overflow-x:hidden; }
+
+  .page-title { text-align:center; padding:40px 24px 16px; }
+  .page-title h1 { font-size:24px; font-weight:800; background:linear-gradient(135deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent; }
+  .page-title p { color:#64748b; font-size:12px; margin-top:6px; }
+
+  .sections-preview { max-width:900px; margin:0 auto; padding:0 20px 60px; display:flex; flex-direction:column; gap:12px; }
+
+  .section-block { border:1px solid rgba(255,255,255,0.05); border-radius:16px; overflow:hidden; transition:all 0.3s; }
+  .section-block:hover { border-color:rgba(255,255,255,0.1); }
+
+  .section-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(255,255,255,0.02); border-bottom:1px solid rgba(255,255,255,0.04); }
+  .section-header .num { width:28px; height:28px; background:linear-gradient(135deg,#0891b2,#6366f1); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:white; margin-right:12px; flex-shrink:0; }
+  .section-header .title { font-size:14px; font-weight:700; flex:1; }
+  .section-header .tag { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 10px; border-radius:12px; }
+
+  .section-body { padding:20px; }
+  .section-body p { color:#94a3b8; font-size:12px; line-height:1.7; }
+  .section-body .effects { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+  .section-body .effect-tag { font-size:10px; font-weight:600; padding:3px 10px; border-radius:8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); color:#94a3b8; }
+  .section-body .effect-tag.highlight { background:rgba(8,145,178,0.1); border-color:rgba(8,145,178,0.2); color:#22d3ee; }
+
+  .preview-mini { margin-top:16px; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.06); }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>Clini+ Landing Page — Estrutura Proposta</h1>
+  <p>8 secoes com efeitos visuais. Revise e diga se quer mudar algo.</p>
+</div>
+
+<div class="sections-preview">
+
+<!-- SECAO 1: HERO -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">1</div>
+    <div class="title">Hero — Impacto Inicial</div>
+    <span class="tag" style="background:rgba(8,145,178,0.15);color:#22d3ee;">SCROLL-DRIVEN + 3D</span>
+  </div>
+  <div class="section-body">
+    <p>Fundo escuro com <b>blobs de luz animados</b> (cyan + indigo, movendo lento). Titulo grande com gradiente: <b>"A clinica do futuro comeca aqui."</b> Subtitulo: "Prontuario eletronico, IA, WhatsApp e CRM em um unico sistema." Mockup do dashboard <b>flutuando em perspectiva 3D</b> com leve rotacao no mouse (parallax). Dois CTAs: <b>"Iniciar Diagnostico Gratuito"</b> (quiz) + "Ver Funcionalidades" (scroll).</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Blobs animados</span>
+      <span class="effect-tag highlight">Parallax 3D no mockup</span>
+      <span class="effect-tag">Gradiente texto animado</span>
+      <span class="effect-tag">Fade-in sequencial</span>
+    </div>
+    <div class="preview-mini" style="background:linear-gradient(145deg,#060a14,#0c1220);padding:24px;min-height:200px;position:relative;overflow:hidden;">
+      <!-- Blob -->
+      <div style="position:absolute;top:-60px;right:-40px;width:250px;height:250px;background:radial-gradient(circle,rgba(8,145,178,0.12),transparent 70%);border-radius:50%;"></div>
+      <div style="position:absolute;bottom:-80px;left:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(99,102,241,0.08),transparent 70%);border-radius:50%;"></div>
+      <!-- Content -->
+      <div style="position:relative;z-index:1;text-align:center;padding-top:20px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#22d3ee;margin-bottom:8px;">PRONTUARIO VERDE</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:-1px;line-height:1.1;background:linear-gradient(135deg,#f1f5f9 0%,#94a3b8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">A clinica do futuro<br/>comeca aqui.</div>
+        <div style="font-size:11px;color:#64748b;margin-top:8px;max-width:400px;margin-left:auto;margin-right:auto;">Prontuario eletronico, IA, WhatsApp e CRM em um unico sistema.</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
+          <div style="padding:8px 20px;background:linear-gradient(135deg,#0891b2,#6366f1);border-radius:10px;font-size:11px;font-weight:700;color:white;box-shadow:0 4px 16px rgba(8,145,178,0.3);">Iniciar Diagnostico Gratuito</div>
+          <div style="padding:8px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:11px;font-weight:600;color:#94a3b8;">Ver Funcionalidades</div>
+        </div>
+        <!-- Mini mockup -->
+        <div style="margin-top:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:12px;max-width:500px;margin-left:auto;margin-right:auto;transform:perspective(800px) rotateX(4deg) rotateY(-2deg);box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+          <div style="display:flex;gap:8px;">
+            <div style="width:50px;height:30px;background:rgba(8,145,178,0.1);border-radius:6px;"></div>
+            <div style="width:50px;height:30px;background:rgba(99,102,241,0.1);border-radius:6px;"></div>
+            <div style="width:50px;height:30px;background:rgba(16,185,129,0.1);border-radius:6px;"></div>
+            <div style="width:50px;height:30px;background:rgba(245,158,11,0.1);border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 2: SOCIAL PROOF -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">2</div>
+    <div class="title">Social Proof — Numeros que Contam</div>
+    <span class="tag" style="background:rgba(16,185,129,0.15);color:#34d399;">COUNTER ANIMATION</span>
+  </div>
+  <div class="section-body">
+    <p>Faixa com numeros animados (contam de 0 ao valor ao entrar na viewport): <b>"+500 clinicas"</b>, <b>"+50.000 pacientes"</b>, <b>"99.9% uptime"</b>, <b>"4.9/5 avaliacao"</b>. Logos de clinicas parceiras em carousel infinito (marquee).</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Contadores animados</span>
+      <span class="effect-tag">Marquee logos</span>
+      <span class="effect-tag">Fade-in on scroll</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 3: FEATURES -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">3</div>
+    <div class="title">Features — Showcase Interativo</div>
+    <span class="tag" style="background:rgba(99,102,241,0.15);color:#a5b4fc;">MOCKUP ANIMADO + TABS</span>
+  </div>
+  <div class="section-body">
+    <p>Grid de <b>6 modulos</b> do sistema como tabs/cards clicaveis. Ao clicar, o lado direito mostra um <b>mockup animado do modulo</b> (screenshot real que aparece com transicao). Modulos: Dashboard, Agenda, Pacientes/PEP, OVYVA (IA), Verdesk CRM, Financeiro. Cada card tem icone SVG + titulo + descricao curta. O mockup ativo tem <b>borda brilhante</b> (glow animado).</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Tabs interativas</span>
+      <span class="effect-tag highlight">Mockup com glow border</span>
+      <span class="effect-tag">Slide transition</span>
+      <span class="effect-tag">Scroll-triggered entrance</span>
+    </div>
+    <div class="preview-mini" style="background:#060a14;padding:20px;display:flex;gap:16px;">
+      <!-- Tabs -->
+      <div style="display:flex;flex-direction:column;gap:6px;width:160px;">
+        <div style="padding:10px 12px;border-radius:10px;background:linear-gradient(90deg,rgba(8,145,178,0.12),transparent);border-left:3px solid #0891b2;font-size:11px;font-weight:600;color:#22d3ee;">Dashboard</div>
+        <div style="padding:10px 12px;border-radius:10px;font-size:11px;color:#64748b;">Agenda</div>
+        <div style="padding:10px 12px;border-radius:10px;font-size:11px;color:#64748b;">Pacientes / PEP</div>
+        <div style="padding:10px 12px;border-radius:10px;font-size:11px;color:#64748b;">OVYVA (IA)</div>
+        <div style="padding:10px 12px;border-radius:10px;font-size:11px;color:#64748b;">Verdesk CRM</div>
+        <div style="padding:10px 12px;border-radius:10px;font-size:11px;color:#64748b;">Financeiro</div>
+      </div>
+      <!-- Mockup area -->
+      <div style="flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(8,145,178,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;min-height:120px;box-shadow:0 0 30px rgba(8,145,178,0.08);">
+        <span style="color:#475569;font-size:11px;">[ Screenshot do Dashboard animado ]</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 4: OVYVA IA -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">4</div>
+    <div class="title">OVYVA — IA em Acao</div>
+    <span class="tag" style="background:rgba(245,158,11,0.15);color:#fbbf24;">CHAT ANIMADO AO VIVO</span>
+  </div>
+  <div class="section-body">
+    <p>Secao especial para a OVYVA. Mockup de <b>chat que digita ao vivo</b> — simulacao de conversa WhatsApp onde o paciente pergunta horarios e a IA agenda automaticamente. Lado esquerdo: texto explicando as capacidades (agendamento real, CRM auto, 24/7). <b>Typing indicator</b> animado, mensagens que aparecem sequencialmente.</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Chat typing ao vivo</span>
+      <span class="effect-tag highlight">Mensagens sequenciais</span>
+      <span class="effect-tag">Typing dots animados</span>
+      <span class="effect-tag">Glassmorphism no card</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 5: BENEFICIOS -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">5</div>
+    <div class="title">Beneficios — Por que Clini+</div>
+    <span class="tag" style="background:rgba(255,255,255,0.06);color:#94a3b8;">CARDS PARALLAX</span>
+  </div>
+  <div class="section-body">
+    <p>3-4 cards com <b>efeito parallax no scroll</b> (cada card se move em velocidade diferente). Beneficios: "Reduza no-shows em 60%", "Aumente faturamento 40%", "Atenda 24/7 com IA", "Tudo em um so lugar". Cada card com icone grande e numero de impacto em destaque.</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Parallax multi-layer</span>
+      <span class="effect-tag">Counter animation</span>
+      <span class="effect-tag">Stagger entrance</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 6: DEPOIMENTOS -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">6</div>
+    <div class="title">Depoimentos — Prova Social</div>
+    <span class="tag" style="background:rgba(255,255,255,0.06);color:#94a3b8;">CAROUSEL</span>
+  </div>
+  <div class="section-body">
+    <p>Carousel de depoimentos com foto, nome, especialidade e texto. <b>Cards com glassmorphism</b>, transicao suave. Estrelas animadas. 4-6 depoimentos rotacionando.</p>
+    <div class="effects">
+      <span class="effect-tag">Carousel autoplay</span>
+      <span class="effect-tag">Glassmorphism cards</span>
+      <span class="effect-tag">Star rating animado</span>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 7: QUIZ -->
+<div class="section-block" style="border-color:rgba(8,145,178,0.2);">
+  <div class="section-header" style="background:rgba(8,145,178,0.05);">
+    <div class="num">7</div>
+    <div class="title">Quiz — Diagnostico da Clinica</div>
+    <span class="tag" style="background:linear-gradient(135deg,#0891b2,#6366f1);color:white;">FEATURE PRINCIPAL</span>
+  </div>
+  <div class="section-body">
+    <p>Wizard multi-step com <b>progress bar animada</b>. 6-8 perguntas que diagnosticam + qualificam: especialidade, n. profissionais, faturamento, se usa agenda digital, prontuario, etc. Cada step com <b>animacao de entrada</b>. No final: <b>score visual</b> ("Sua clinica esta X% digitalizada") + botao "Falar com Equipe Clini+" que abre WhatsApp com <b>mensagem pre-preenchida</b> contendo todas as respostas.</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Wizard multi-step</span>
+      <span class="effect-tag highlight">Progress bar animada</span>
+      <span class="effect-tag highlight">Score final visual</span>
+      <span class="effect-tag highlight">WhatsApp pre-fill</span>
+      <span class="effect-tag">Slide transitions</span>
+      <span class="effect-tag">Confetti no resultado</span>
+    </div>
+    <div class="preview-mini" style="background:#060a14;padding:20px;">
+      <!-- Progress -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;">
+          <div style="height:100%;width:50%;background:linear-gradient(90deg,#0891b2,#6366f1);border-radius:99px;"></div>
+        </div>
+        <span style="font-size:10px;color:#64748b;font-weight:600;">4/8</span>
+      </div>
+      <!-- Question -->
+      <div style="text-align:center;">
+        <div style="font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:16px;">Quantos profissionais atuam na sua clinica?</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          <div style="padding:10px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:12px;color:#94a3b8;cursor:pointer;">1-3</div>
+          <div style="padding:10px 20px;background:rgba(8,145,178,0.12);border:1px solid rgba(8,145,178,0.3);border-radius:10px;font-size:12px;color:#22d3ee;font-weight:600;">4-10</div>
+          <div style="padding:10px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:12px;color:#94a3b8;cursor:pointer;">11-20</div>
+          <div style="padding:10px 20px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;font-size:12px;color:#94a3b8;cursor:pointer;">20+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECAO 8: FOOTER CTA -->
+<div class="section-block">
+  <div class="section-header">
+    <div class="num">8</div>
+    <div class="title">Footer — CTA Final + Links</div>
+    <span class="tag" style="background:rgba(255,255,255,0.06);color:#94a3b8;">CLOSING</span>
+  </div>
+  <div class="section-body">
+    <p>CTA final grande: <b>"Pronto para transformar sua clinica?"</b> com botao para o quiz. Abaixo: links uteis (Login, Registro, Suporte), contato (WhatsApp, email), e badges de seguranca (LGPD, criptografia, uptime).</p>
+    <div class="effects">
+      <span class="effect-tag">Gradient CTA button</span>
+      <span class="effect-tag">Blobs de fundo</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR FIXA -->
+<div class="section-block" style="border-color:rgba(245,158,11,0.15);">
+  <div class="section-header" style="background:rgba(245,158,11,0.05);">
+    <div class="num" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">+</div>
+    <div class="title">Navbar Fixa (sempre visivel)</div>
+    <span class="tag" style="background:rgba(245,158,11,0.15);color:#fbbf24;">GLOBAL</span>
+  </div>
+  <div class="section-body">
+    <p>Navbar fixa no topo com <b>glassmorphism</b> (blur + transparencia). Logo Clini+ a esquerda. Links: Funcionalidades, OVYVA, Precos(?), Quiz. Botao "Entrar" (link para /login) + <b>"Diagnostico Gratis"</b> (CTA gradient). Navbar fica solida ao scrollar.</p>
+    <div class="effects">
+      <span class="effect-tag highlight">Glassmorphism navbar</span>
+      <span class="effect-tag">Scroll-aware opacity</span>
+    </div>
+    <div class="preview-mini" style="background:#060a14;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:28px;height:28px;background:linear-gradient(135deg,#0891b2,#6366f1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:white;">C+</div>
+        <span style="font-size:13px;font-weight:700;color:#f1f5f9;">Clini+</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:11px;color:#64748b;">Funcionalidades</span>
+        <span style="font-size:11px;color:#64748b;">OVYVA</span>
+        <span style="font-size:11px;color:#64748b;">Quiz</span>
+        <span style="font-size:11px;color:#94a3b8;border:1px solid rgba(255,255,255,0.08);padding:4px 12px;border-radius:8px;">Entrar</span>
+        <span style="font-size:11px;font-weight:700;color:white;background:linear-gradient(135deg,#0891b2,#6366f1);padding:4px 14px;border-radius:8px;">Diagnostico Gratis</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
