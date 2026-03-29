@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v1.7.0** (Segurança RBAC + melhorias por role — 29/03/2026)
+- Versão: **v2.0.0** (Dark Clinical Redesign — light/dark mode — 29/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -32,6 +32,7 @@
 - Fase 20: ✅ **SuperAdmin v2 — 100% dados reais, sem hardcode (27/03/2026)**
 - Fase 21: ✅ **OVYVA v3 — agendamento real, CRM auto, WhatsApp funcional (28/03/2026)**
 - Fase 22: ✅ **Segurança RBAC + Melhorias por Role (29/03/2026)**
+- Fase 23: ✅ **Dark Clinical Redesign — UI/UX v2.0 (29/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -317,7 +318,37 @@ Actions:
 - `src/pages/Configuracoes/SegurancaPage.tsx` — LGPD guard
 - `src/pages/Configuracoes/ClinicaPage.tsx` — CNPJ validação
 
-## 16. MIGRATIONS ADICIONAIS
+## 16. FASE 23 — DARK CLINICAL REDESIGN v2.0 (29/03/2026)
+
+### Design System
+- **Tipografia:** DM Sans (substituiu Inter) — weights 300-800
+- **Paleta:** cyan (#0891b2) + indigo (#6366f1) + emerald (#10b981) + amber (#f59e0b) — substituiu verde #16A34A
+- **Estilo:** Glassmorphism (backdrop-filter blur, rgba borders, radial glows)
+- **Referências:** Apple Health + Figma/Vercel
+
+### Dark/Light Mode
+- **Store:** `src/store/themeStore.ts` (Zustand + persist em localStorage)
+- **Tokens:** CSS custom properties em `src/index.css` (`:root` = dark, `.light` = override)
+- **Toggle:** Botão sol/lua no rodapé da Sidebar
+- **Default:** Dark mode (respeita `prefers-color-scheme` como fallback)
+
+### Componentes Redesenhados (40+ arquivos)
+- Layout: Sidebar, Header, MainLayout
+- Dashboard: KpiCards, ConsultasChart, ProcedimentosPieChart, AgendamentosList, PacientesRecentes, LeadsRecentes
+- UI: Badge, Avatar, ToastProvider
+- Login: sempre dark (glassmorphism + gradiente brand)
+- Agenda: DayView, WeekView, AppointmentCard, AppointmentModal
+- OVYVA: ChatWindow, ConversationList, ContactContext
+- Pacientes: PacientesPage, PatientProfilePage
+- Verdesk: VerdeskPage, LeadCard, KanbanColumn
+- Financeiro, Estoque, Prescrições, Relatórios, Configurações
+- PDF generation: PatientTerms (setFillColor corrigido)
+
+### Spec e Plano
+- Spec: `docs/superpowers/specs/2026-03-29-dark-clinical-redesign-design.md`
+- Plano: `docs/superpowers/plans/2026-03-29-dark-clinical-redesign.md`
+
+## 17. MIGRATIONS ADICIONAIS
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
 
