@@ -1,13 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   DollarSign, TrendingUp, TrendingDown,
   Plus, X, Loader2, Check, Trash2, Filter
 } from 'lucide-react'
 import { useFinanceiro, type NovoLancamento } from '../../hooks/useFinanceiro'
+import { useAuthStore } from '../../store/authStore'
+import { supabase } from '../../lib/supabase'
 import { Badge } from '../../components/ui/Badge'
 
-const CATEGORIAS_RECEITA = ['Consulta', 'Procedimento', 'Convênio', 'Particular', 'Outros']
-const CATEGORIAS_DESPESA = ['Salário', 'Aluguel', 'Materiais', 'Marketing', 'Impostos', 'Outros']
+const DEFAULT_CATEGORIAS_RECEITA = ['Consulta', 'Procedimento', 'Convênio', 'Particular', 'Outros']
+const DEFAULT_CATEGORIAS_DESPESA = ['Salário', 'Aluguel', 'Materiais', 'Marketing', 'Impostos', 'Outros']
 
 const STATUS_CONFIG = {
   pago: { label: 'Pago', cls: 'bg-emerald-100 text-emerald-700' },
@@ -26,8 +28,21 @@ const formVazio: NovoLancamento = {
 
 export function FinanceiroPage() {
   const { lancamentos, isLoading, totais, loadLancamentos, createLancamento, updateLancamentoStatus, deleteLancamento } = useFinanceiro()
+  const clinicaId = useAuthStore(state => state.user?.clinicaId)
+  const [categoriasReceita, setCategoriasReceita] = useState(DEFAULT_CATEGORIAS_RECEITA)
+  const [categoriasDespesa, setCategoriasDespesa] = useState(DEFAULT_CATEGORIAS_DESPESA)
   const [activeTab, setActiveTab] = useState<'receita' | 'despesa' | 'todos'>('todos')
   const [showModal, setShowModal] = useState(false)
+
+  // Carregar categorias customizadas da config da clínica
+  useEffect(() => {
+    if (!clinicaId) return
+    supabase.from('clinicas').select('configuracoes').eq('id', clinicaId).single().then(({ data }) => {
+      const fin = (data?.configuracoes as any)?.financeiro
+      if (fin?.categorias_receita?.length) setCategoriasReceita(fin.categorias_receita)
+      if (fin?.categorias_despesa?.length) setCategoriasDespesa(fin.categorias_despesa)
+    })
+  }, [clinicaId])
   const [form, setForm] = useState<NovoLancamento>(formVazio)
   const [saving, setSaving] = useState(false)
   const [filterMes, setFilterMes] = useState(() => {
@@ -242,7 +257,7 @@ export function FinanceiroPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                   <select className="w-full p-2.5 text-sm border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                     value={form.categoria} onChange={e => setForm(f => ({ ...f, categoria: e.target.value }))}>
-                    {(form.tipo === 'receita' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA).map(c => (
+                    {(form.tipo === 'receita' ? categoriasReceita : categoriasDespesa).map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>

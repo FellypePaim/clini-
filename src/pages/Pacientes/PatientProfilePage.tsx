@@ -25,6 +25,7 @@ import {
   DollarSign
 } from 'lucide-react'
 import { usePatients } from '../../hooks/usePatients'
+import { usePermissions } from '../../store/authStore'
 import { useProntuario } from '../../hooks/useProntuario'
 import { useToast } from '../../hooks/useToast'
 import { supabase } from '../../lib/supabase'
@@ -47,6 +48,7 @@ import { DentalMapping } from '../../components/pacientes/DentalMapping'
 export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { isRecepcao } = usePermissions()
   const [activeTab, setActiveTab] = useState<'resumo' | 'anamnese' | 'odontograma' | 'documentos' | 'financeiro' | 'harmonizacao' | 'termos'>('resumo')
   const { getPatientById, getPatientHistory, getPatientDocuments, getPatientFinancial, sendAnamnesisLink, deleteConsulta, deleteAnamnese, createOrcamento, marcarOrcamentoPago } = usePatients()
   const { saveEvolution, saveHarmonizationSession, generatePrescription } = useProntuario()
@@ -198,9 +200,11 @@ export function PatientProfilePage() {
         </div>
       </div>
 
-      {/* Tabs Menu */}
+      {/* Tabs Menu — recepção só vê resumo, documentos e termos */}
       <div className="flex items-center gap-1 bg-gray-100/50 p-1 rounded-xl border border-gray-100 shrink-0 overflow-x-auto">
-        {(['resumo', 'anamnese', 'odontograma', 'documentos', 'financeiro', 'harmonizacao', 'termos'] as const).map(tab => (
+        {(['resumo', 'anamnese', 'odontograma', 'documentos', 'financeiro', 'harmonizacao', 'termos'] as const)
+          .filter(tab => !isRecepcao || ['resumo', 'documentos', 'termos'].includes(tab))
+          .map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}

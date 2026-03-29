@@ -37,7 +37,7 @@ function KpiSkeleton() {
   )
 }
 
-export function KpiCards() {
+export function KpiCards({ periodo = 'mes' }: { periodo?: 'hoje' | 'semana' | 'mes' }) {
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const [kpis, setKpis] = useState<KpiData[]>([])
@@ -51,6 +51,21 @@ export function KpiCards() {
     const hojeStr = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}`
     const inicioHoje = `${hojeStr}T00:00:00`
     const fimHoje = `${hojeStr}T23:59:59`
+
+    // Calcular início do período baseado no filtro
+    let inicioPeriodo: string
+    if (periodo === 'hoje') {
+      inicioPeriodo = inicioHoje
+    } else if (periodo === 'semana') {
+      const dow = hoje.getDay()
+      const diffToMonday = dow === 0 ? -6 : 1 - dow
+      const monday = new Date(hoje)
+      monday.setDate(hoje.getDate() + diffToMonday)
+      inicioPeriodo = `${monday.getFullYear()}-${pad(monday.getMonth() + 1)}-${pad(monday.getDate())}T00:00:00`
+    } else {
+      inicioPeriodo = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-01T00:00:00`
+    }
+
     const mesAtual = `${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-01T00:00:00`
     const mesAntDate = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1)
     const mesAnterior = `${mesAntDate.getFullYear()}-${pad(mesAntDate.getMonth() + 1)}-01T00:00:00`
@@ -60,15 +75,15 @@ export function KpiCards() {
       supabase.from('consultas').select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId).gte('data_hora_inicio', inicioHoje).lt('data_hora_inicio', fimHoje),
       supabase.from('pacientes').select('*', { count: 'exact', head: true })
-        .eq('clinica_id', clinicaId).gte('created_at', mesAtual),
+        .eq('clinica_id', clinicaId).gte('created_at', inicioPeriodo),
       supabase.from('pacientes').select('*', { count: 'exact', head: true })
         .eq('clinica_id', clinicaId).gte('created_at', mesAnterior).lt('created_at', fimMesAnterior),
       supabase.from('lancamentos').select('valor')
-        .eq('clinica_id', clinicaId).eq('tipo', 'receita').eq('status', 'pago').gte('data_competencia', mesAtual.split('T')[0]),
+        .eq('clinica_id', clinicaId).eq('tipo', 'receita').eq('status', 'pago').gte('data_competencia', inicioPeriodo.split('T')[0]),
       supabase.from('consultas').select('*', { count: 'exact', head: true })
-        .eq('clinica_id', clinicaId).gte('data_hora_inicio', mesAtual),
+        .eq('clinica_id', clinicaId).gte('data_hora_inicio', inicioPeriodo),
       supabase.from('consultas').select('*', { count: 'exact', head: true })
-        .eq('clinica_id', clinicaId).eq('status', 'finalizado').gte('data_hora_inicio', mesAtual),
+        .eq('clinica_id', clinicaId).eq('status', 'finalizado').gte('data_hora_inicio', inicioPeriodo),
     ])
 
     const consultasHoje = consultasRes.count ?? 0
@@ -88,13 +103,13 @@ export function KpiCards() {
       },
       {
         id: 'pacientes', titulo: 'Novos Pacientes', valor: String(pacientesMes),
-        subtitulo: 'este mês', icone: 'UserPlus', cor: 'blue', variacao: varPacientes,
+        subtitulo: periodo === 'hoje' ? 'hoje' : periodo === 'semana' ? 'esta semana' : 'este mês', icone: 'UserPlus', cor: 'blue', variacao: varPacientes,
         progresso: pacientesMesAnt > 0 ? Math.min(100, Math.round((pacientesMes / pacientesMesAnt) * 100)) : (pacientesMes > 0 ? 100 : 0),
       },
       {
         id: 'faturamento', titulo: 'Faturamento',
         valor: faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }),
-        subtitulo: 'receita do mês', icone: 'DollarSign', cor: 'purple', variacao: 0,
+        subtitulo: periodo === 'hoje' ? 'receita hoje' : periodo === 'semana' ? 'receita da semana' : 'receita do mês', icone: 'DollarSign', cor: 'purple', variacao: 0,
         progresso: agendadasMes > 0 ? Math.min(100, Math.round((concluidasMes / agendadasMes) * 100)) : 0,
       },
       {
@@ -104,7 +119,7 @@ export function KpiCards() {
       },
     ])
     setLoading(false)
-  }, [clinicaId])
+  }, [clinicaId, periodo])
 
   useEffect(() => { if (clinicaId) loadKpis() }, [clinicaId, loadKpis])
 

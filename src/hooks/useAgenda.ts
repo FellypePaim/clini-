@@ -223,7 +223,32 @@ export function useAgenda() {
 
         if (pbErr) throw pbErr
 
-        toast({ title: 'Sucesso', description: 'Consulta agendada.', type: 'success' })
+        // ── Criar consultas recorrentes se solicitado ──
+        if (data.repetir && data.recorrenciaTipo && data.quantidadeRepeticoes && data.quantidadeRepeticoes > 0) {
+          const recRows = []
+          for (let i = 1; i <= data.quantidadeRepeticoes; i++) {
+            const baseDate = new Date(`${data.data}T00:00:00`)
+            if (data.recorrenciaTipo === 'semanal') baseDate.setDate(baseDate.getDate() + i * 7)
+            else if (data.recorrenciaTipo === 'quinzenal') baseDate.setDate(baseDate.getDate() + i * 14)
+            else if (data.recorrenciaTipo === 'mensal') baseDate.setMonth(baseDate.getMonth() + i)
+
+            const pad = (n: number) => String(n).padStart(2, '0')
+            const recDateStr = `${baseDate.getFullYear()}-${pad(baseDate.getMonth() + 1)}-${pad(baseDate.getDate())}`
+
+            recRows.push({
+              ...insertData,
+              data_hora_inicio: `${recDateStr}T${data.horaInicio}:00`,
+              data_hora_fim: `${recDateStr}T${data.horaFim}:00`,
+            })
+          }
+          if (recRows.length > 0) {
+            const { error: recErr } = await supabase.from('consultas').insert(recRows)
+            if (recErr) console.error('Erro recorrência:', recErr)
+          }
+        }
+
+        const totalCriadas = 1 + (data.repetir && data.quantidadeRepeticoes ? data.quantidadeRepeticoes : 0)
+        toast({ title: 'Sucesso', description: totalCriadas > 1 ? `${totalCriadas} consultas agendadas.` : 'Consulta agendada.', type: 'success' })
 
         const refreshed = await getAppointments()
         const created = refreshed.find(a => a.id === ret.id)

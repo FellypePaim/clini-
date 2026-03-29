@@ -6,7 +6,7 @@ import { ProcedimentosPieChart } from '../../components/dashboard/ProcedimentosP
 import { AgendamentosList } from '../../components/dashboard/AgendamentosList'
 import { PacientesRecentes } from '../../components/dashboard/PacientesRecentes'
 import { LeadsRecentes } from '../../components/dashboard/LeadsRecentes'
-import { Sparkles, X, Loader2, CalendarDays, ArrowRight } from 'lucide-react'
+import { Sparkles, X, Loader2, CalendarDays, ArrowRight, Calendar } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Link } from 'react-router-dom'
 
@@ -33,6 +33,7 @@ export function DashboardPage() {
   const [insightModal, setInsightModal] = useState(false)
   const [insightText, setInsightText] = useState('')
   const [insightLoading, setInsightLoading] = useState(false)
+  const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes')
   const date = getDateFormatted()
 
   const handleInsights = async () => {
@@ -85,8 +86,24 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {/* ── Filtro de Período ─────────────────────────── */}
+      <div className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-xl p-1 w-fit">
+        {([['hoje', 'Hoje'], ['semana', 'Semana'], ['mes', 'Mês']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setPeriodo(key)}
+            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 ${
+              periodo === key ? 'bg-green-600 text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'
+            }`}
+          >
+            <Calendar className="w-3 h-3" />
+            {label}
+          </button>
+        ))}
+      </div>
+
       {/* ── KPI Cards ────────────────────────────────── */}
-      <KpiCards />
+      <KpiCards periodo={periodo} />
 
       {/* ── Gráficos (ocultos para recepção) ──────────── */}
       {!isRecepcao && (
