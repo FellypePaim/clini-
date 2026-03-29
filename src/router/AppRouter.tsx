@@ -148,8 +148,8 @@ export function AppRouter() {
   return (
     <Suspense fallback={<PageLoader />}>
       <Routes>
-        {/* Landing pública */}
-        <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+        {/* Landing — sempre acessível (logado ou não) */}
+        <Route path="/" element={<LandingPage />} />
 
         {/* Rotas públicas */}
         <Route
