@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useLocation } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, LogIn, AlertCircle, Loader2, UserPlus, KeyRound, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, LogIn, AlertCircle, Loader2, UserPlus, KeyRound, CheckCircle, Sparkles } from 'lucide-react'
 import { CliniPlusLogo } from '../../components/ui/CliniPlusLogo'
 import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
@@ -78,14 +78,8 @@ export function LoginPage() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2" />
 
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-12">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
-              <Stethoscope className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-white text-2xl font-bold tracking-tight">Prontuário</span>
-              <span className="text-cyan-200 text-2xl font-light"> Verde</span>
-            </div>
+          <div className="mb-12">
+            <CliniPlusLogo size={44} textSize="lg" theme="dark" />
           </div>
 
           <h1 className="text-4xl font-bold text-white leading-tight mb-4">
@@ -142,7 +136,7 @@ export function LoginPage() {
             {/* Mensagem de sucesso */}
             {successMessage && (
               <div className="flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-lg px-3 py-2.5 mb-2">
-                <Stethoscope className="w-4 h-4 text-cyan-400 shrink-0" />
+                <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
                 <p className="text-sm text-cyan-300">{successMessage}</p>
               </div>
             )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Stethoscope } from 'lucide-react'
+import { CliniPlusLogo } from '../../components/ui/CliniPlusLogo'
 
 export function LandingNavbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -25,13 +25,9 @@ export function LandingNavbar() {
       }}
     >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 bg-gradient-to-br from-cyan-600 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <Stethoscope className="w-4.5 h-4.5 text-white" />
-          </div>
-          <span className="text-lg font-bold text-white">Clini<span className="text-cyan-400">+</span></span>
-        </div>
+
+
+        <CliniPlusLogo size={32} textSize="md" theme="dark" />
 
         {/* Links */}
         <div className="hidden md:flex items-center gap-8">

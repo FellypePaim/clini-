@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
-  Stethoscope,
   Building2,
   UserPlus,
   ArrowLeft,
@@ -18,6 +17,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
+import { CliniPlusLogo } from '../../components/ui/CliniPlusLogo'
 
 // ─── Dark Clinical input classes (same as LoginPage) ─
 const darkInput = [
@@ -77,14 +77,8 @@ export function RegisterPage() {
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
         <div className="w-full max-w-lg animate-fade-in">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-10 justify-center">
-            <div className="w-12 h-12 bg-cyan-600 rounded-xl flex items-center justify-center">
-              <Stethoscope className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <span className="text-[#f1f5f9] text-2xl font-bold">Prontuário</span>
-              <span className="text-cyan-500 text-2xl font-light"> Verde</span>
-            </div>
+          <div className="flex justify-center mb-10">
+            <CliniPlusLogo size={40} textSize="lg" theme="dark" />
           </div>
 
           <div className="text-center mb-8">
