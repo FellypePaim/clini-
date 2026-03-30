@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.2.0** (Suporte lado clínica + Landing Page + Dark Clinical Redesign — 30/03/2026)
+- Versão: **v2.3.0** (Busca Global + Meu Perfil + Suporte com imagens — 30/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -36,6 +36,7 @@
 - Fase 24: ✅ **Landing Page — 8 seções + Quiz WhatsApp (29/03/2026)**
 - Fase 25: ✅ **Rebranding OVYVA → LYRA e VERDESK → NEXUS — frontend + DB + funções (29/03/2026)**
 - Fase 26: ✅ **Suporte lado clínica — two-panel chat com tickets (30/03/2026)**
+- Fase 27: ✅ **Busca Global (Ctrl+K) + Meu Perfil + Upload imagens suporte (30/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -387,9 +388,22 @@ Actions:
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
 - `20260329000001_rename_ovyva_to_lyra.sql` — Rename tabelas lyra_*, view, RLS policies, JSON config key (clinicas.configuracoes.ovyva → lyra), leads.origem
+- `20260327000001_tickets_rls_clinica.sql` — RLS tickets para clínicas
+- `20260330000001_tickets_mensagens_imagem.sql` — Coluna imagem_url em tickets_mensagens
 
-## 16. PRÓXIMOS PASSOS
+## 16. BUSCA GLOBAL (Ctrl+K)
+- Command palette acessível via Ctrl+K ou botão no header
+- Busca em páginas do sistema + pacientes no banco
+- Navegação por teclado (setas + Enter)
+- Debounce de 300ms na busca de pacientes
+- Componente: `src/components/layout/GlobalSearch.tsx`
+
+## 17. MEU PERFIL
+- Rota `/perfil` acessível por TODOS os roles (admin, profissional, recepção)
+- Editar: nome, especialidade, conselho, telefone
+- Upload de avatar (Supabase Storage, bucket clinica-assets)
+- Exibe: clínica, role, membro desde
+- Link no dropdown do header (avatar)
+
+## 18. PRÓXIMOS PASSOS
 1. Deploy final em produção (Vercel)
-2. Busca Global (Ctrl+K)
-3. Tela "Meu Perfil" acessível por todos os roles (sem Configurações)
-4. Upload de imagens no suporte

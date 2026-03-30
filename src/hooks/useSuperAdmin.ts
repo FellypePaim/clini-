@@ -196,9 +196,9 @@ export function useSuperAdmin() {
     catch { return [] }
   }, [])
 
-  const sendTicketMessage = useCallback(async (ticketId: string, conteudo: string, eSuperadmin = true) => {
+  const sendTicketMessage = useCallback(async (ticketId: string, conteudo: string, eSuperadmin = true, imagemUrl?: string) => {
     try {
-      const d = await invoke('send_ticket_message', { payload: { ticket_id: ticketId, conteudo, e_superadmin: eSuperadmin } })
+      const d = await invoke('send_ticket_message', { payload: { ticket_id: ticketId, conteudo, e_superadmin: eSuperadmin, imagem_url: imagemUrl } })
       return d?.message
     } catch (e: any) {
       toast({ title: 'Erro', description: e.message, type: 'error' })

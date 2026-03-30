@@ -19,6 +19,7 @@ export interface TicketMensagem {
   ticket_id: string
   autor_id: string | null
   conteudo: string
+  imagem_url: string | null
   e_superadmin: boolean | null
   created_at: string
   profiles: {
@@ -42,7 +43,6 @@ export function useSuporteClinica() {
 
       if (error) throw error
 
-      // Contar mensagens por ticket
       const { data: mensagens } = await supabase
         .from('tickets_mensagens')
         .select('ticket_id')
@@ -114,16 +114,17 @@ export function useSuporteClinica() {
   }, [])
 
   const sendMessage = useCallback(
-    async (ticketId: string, conteudo: string): Promise<TicketMensagem | null> => {
+    async (ticketId: string, conteudo: string, imagemUrl?: string): Promise<TicketMensagem | null> => {
       if (!user) return null
       try {
         const { data, error } = await supabase
           .from('tickets_mensagens')
           .insert({
             ticket_id: ticketId,
-            conteudo,
+            conteudo: conteudo || '',
             autor_id: user.id,
             e_superadmin: false,
+            imagem_url: imagemUrl || null,
           })
           .select('*, profiles:autor_id(nome_completo, role, avatar_url)')
           .single()
@@ -138,5 +139,28 @@ export function useSuporteClinica() {
     [user],
   )
 
-  return { getTickets, createTicket, getMessages, sendMessage, isLoading }
+  const uploadImage = useCallback(async (file: File): Promise<string | null> => {
+    if (!user?.clinicaId) return null
+    try {
+      const ext = file.name.split('.').pop() || 'png'
+      const path = `suporte/${user.clinicaId}/${Date.now()}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('clinica-assets')
+        .upload(path, file, { contentType: file.type })
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData } = supabase.storage
+        .from('clinica-assets')
+        .getPublicUrl(path)
+
+      return urlData.publicUrl
+    } catch (err) {
+      console.error('Erro ao fazer upload:', err)
+      return null
+    }
+  }, [user?.clinicaId])
+
+  return { getTickets, createTicket, getMessages, sendMessage, uploadImage, isLoading }
 }

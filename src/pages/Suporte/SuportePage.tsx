@@ -14,6 +14,8 @@ import {
   X,
   Shield,
   User,
+  Image as ImageIcon,
+  Paperclip,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useSuporteClinica, type TicketClinica, type TicketMensagem } from '../../hooks/useSuporteClinica'
@@ -21,17 +23,17 @@ import { useSuporteClinica, type TicketClinica, type TicketMensagem } from '../.
 // ─── Config ──────────────────────────────────────────
 
 const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
-  critica: { label: 'Critica', className: 'bg-red-50 text-red-600 ring-red-200' },
-  alta:    { label: 'Alta',    className: 'bg-amber-50 text-amber-600 ring-amber-200' },
-  media:   { label: 'Media',   className: 'bg-blue-50 text-blue-600 ring-blue-200' },
-  baixa:   { label: 'Baixa',   className: 'bg-gray-50 text-gray-500 ring-gray-200' },
+  critica: { label: 'Critica', className: 'bg-red-500/10 text-red-400 ring-red-500/20' },
+  alta:    { label: 'Alta',    className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
+  media:   { label: 'Media',   className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
+  baixa:   { label: 'Baixa',   className: 'bg-slate-500/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  aberto:       { label: 'Aberto',       className: 'bg-blue-50 text-blue-600 ring-blue-200' },
-  em_andamento: { label: 'Em andamento', className: 'bg-amber-50 text-amber-600 ring-amber-200' },
-  resolvido:    { label: 'Resolvido',    className: 'bg-emerald-50 text-emerald-600 ring-emerald-200' },
-  fechado:      { label: 'Fechado',      className: 'bg-gray-50 text-gray-500 ring-gray-200' },
+  aberto:       { label: 'Aberto',       className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
+  em_andamento: { label: 'Em andamento', className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
+  resolvido:    { label: 'Resolvido',    className: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20' },
+  fechado:      { label: 'Fechado',      className: 'bg-slate-500/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 function formatDate(dateStr: string): string {
@@ -63,7 +65,7 @@ function StatusBadge({ status }: { status: string }) {
 // ─── Page ────────────────────────────────────────────
 
 export function SuportePage() {
-  const { getTickets, createTicket, getMessages, sendMessage, isLoading } = useSuporteClinica()
+  const { getTickets, createTicket, getMessages, sendMessage, uploadImage, isLoading } = useSuporteClinica()
 
   const [tickets, setTickets] = useState<TicketClinica[]>([])
   const [search, setSearch] = useState('')
@@ -80,6 +82,11 @@ export function SuportePage() {
   const [newTicketForm, setNewTicketForm] = useState({ assunto: '', descricao: '', prioridade: 'media' })
   const [creatingTicket, setCreatingTicket] = useState(false)
 
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const selectedTicket = useMemo(
@@ -89,7 +96,6 @@ export function SuportePage() {
 
   const isChatDisabled = selectedTicket?.status === 'fechado' || selectedTicket?.status === 'resolvido'
 
-  // Fetch tickets
   const fetchTickets = useCallback(async () => {
     const res = await getTickets()
     setTickets(res)
@@ -98,7 +104,6 @@ export function SuportePage() {
 
   useEffect(() => { fetchTickets() }, [fetchTickets])
 
-  // Fetch messages when ticket selected
   useEffect(() => {
     if (!selectedTicketId) { setMessages([]); return }
     let cancelled = false
@@ -111,12 +116,10 @@ export function SuportePage() {
     return () => { cancelled = true }
   }, [selectedTicketId, getMessages])
 
-  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Filtered tickets
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim()
     return tickets.filter((t) => {
@@ -126,7 +129,6 @@ export function SuportePage() {
     })
   }, [tickets, search, statusFilter])
 
-  // KPIs
   const kpis = useMemo(() => ({
     total: tickets.length,
     abertos: tickets.filter((t) => t.status === 'aberto').length,
@@ -134,19 +136,40 @@ export function SuportePage() {
     resolvidos: tickets.filter((t) => t.status === 'resolvido').length,
   }), [tickets])
 
-  // Send message
   async function handleSendMessage() {
-    if (!selectedTicketId || !messageText.trim() || sendingMessage || isChatDisabled) return
+    if (!selectedTicketId || sendingMessage || isChatDisabled) return
+    if (!messageText.trim() && !selectedFile) return
+
     setSendingMessage(true)
-    await sendMessage(selectedTicketId, messageText.trim())
+    let imagemUrl: string | undefined
+
+    if (selectedFile) {
+      setUploadingImage(true)
+      imagemUrl = await uploadImage(selectedFile) || undefined
+      setUploadingImage(false)
+    }
+
+    await sendMessage(selectedTicketId, messageText.trim() || (imagemUrl ? '' : ''), imagemUrl)
     setMessageText('')
+    setSelectedFile(null)
+    setImagePreview(null)
     const res = await getMessages(selectedTicketId)
     setMessages(res)
     await fetchTickets()
     setSendingMessage(false)
   }
 
-  // Create ticket
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) return
+    if (file.size > 5 * 1024 * 1024) return
+    setSelectedFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
   async function handleCreateTicket() {
     if (!newTicketForm.assunto.trim() || creatingTicket) return
     setCreatingTicket(true)
@@ -169,7 +192,7 @@ export function SuportePage() {
   if (isLoading && !loaded) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-500" />
       </div>
     )
   }
@@ -179,12 +202,12 @@ export function SuportePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Suporte</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Abra e acompanhe seus tickets de suporte.</p>
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">Suporte</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-0.5">Abra e acompanhe seus tickets de suporte.</p>
         </div>
         <button
           onClick={() => setShowNewTicketModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-xl transition-colors"
         >
           <Plus size={16} />
           Novo Ticket
@@ -194,41 +217,43 @@ export function SuportePage() {
       {/* Two-panel layout */}
       <div className="flex flex-1 gap-4 min-h-0">
         {/* LEFT PANEL — Ticket List */}
-        <div className="w-[38%] flex flex-col min-h-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="w-[38%] flex flex-col min-h-0 rounded-2xl overflow-hidden border border-[var(--color-border)]" style={{ background: 'var(--color-bg-card)' }}>
           {/* KPI Row */}
-          <div className="grid grid-cols-4 gap-2 p-3 border-b border-gray-100">
+          <div className="grid grid-cols-4 gap-2 p-3 border-b border-[var(--color-border)]">
             {[
-              { icon: LifeBuoy, color: 'text-green-500', value: kpis.total, label: 'Total' },
+              { icon: LifeBuoy, color: 'text-cyan-500', value: kpis.total, label: 'Total' },
               { icon: AlertCircle, color: 'text-blue-500', value: kpis.abertos, label: 'Abertos' },
               { icon: Clock, color: 'text-amber-500', value: kpis.emAndamento, label: 'Andamento' },
               { icon: CheckCircle2, color: 'text-emerald-500', value: kpis.resolvidos, label: 'Resolvidos' },
             ].map(({ icon: Icon, color, value, label }) => (
-              <div key={label} className="flex flex-col items-center p-2 rounded-xl bg-gray-50">
+              <div key={label} className="flex flex-col items-center p-2 rounded-xl" style={{ background: 'var(--color-bg-deep)' }}>
                 <Icon size={14} className={cn(color, 'mb-1')} />
-                <span className="text-lg font-bold text-gray-900">{value}</span>
-                <span className="text-[10px] text-gray-400">{label}</span>
+                <span className="text-lg font-bold text-[var(--color-text-primary)]">{value}</span>
+                <span className="text-[10px] text-[var(--color-text-muted)]">{label}</span>
               </div>
             ))}
           </div>
 
           {/* Search + Filter */}
-          <div className="p-3 space-y-2 border-b border-gray-100">
+          <div className="p-3 space-y-2 border-b border-[var(--color-border)]">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por assunto..."
-                className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 placeholder:text-gray-400 transition-all"
+                className="w-full pl-9 pr-3 py-2 border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-xl outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 placeholder:text-[var(--color-text-muted)] transition-all"
+                style={{ background: 'var(--color-bg-deep)' }}
               />
             </div>
             <div className="flex items-center gap-1.5">
-              <Filter size={12} className="text-gray-400 shrink-0" />
+              <Filter size={12} className="text-[var(--color-text-muted)] shrink-0" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 px-2 py-1.5 bg-gray-50 border border-gray-200 text-gray-600 text-xs rounded-lg cursor-pointer outline-none focus:ring-2 focus:ring-green-500/30"
+                className="flex-1 px-2 py-1.5 border border-[var(--color-border)] text-[var(--color-text-secondary)] text-xs rounded-lg cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/30"
+                style={{ background: 'var(--color-bg-deep)' }}
               >
                 <option value="todos">Todos os Status</option>
                 <option value="aberto">Aberto</option>
@@ -242,8 +267,8 @@ export function SuportePage() {
           {/* Ticket List */}
           <div className="flex-1 overflow-y-auto">
             {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                <Inbox size={40} className="mb-3 text-gray-300" />
+              <div className="flex flex-col items-center justify-center py-16 text-[var(--color-text-muted)]">
+                <Inbox size={40} className="mb-3 text-[var(--color-text-dim)]" />
                 <p className="text-sm font-medium">Nenhum ticket encontrado</p>
                 <p className="text-xs mt-1">Abra um ticket para pedir ajuda</p>
               </div>
@@ -254,28 +279,28 @@ export function SuportePage() {
                     key={ticket.id}
                     onClick={() => setSelectedTicketId(ticket.id)}
                     className={cn(
-                      'w-full text-left p-3 rounded-xl transition-all',
-                      'hover:bg-gray-50',
+                      'w-full text-left p-3 rounded-xl transition-all border-2',
+                      'hover:bg-[var(--color-bg-card-hover)]',
                       selectedTicketId === ticket.id
-                        ? 'bg-green-50 border-2 border-green-500/50 shadow-sm'
-                        : 'bg-white border-2 border-transparent',
+                        ? 'border-cyan-500/50 bg-[var(--color-bg-card-hover)]'
+                        : 'border-transparent',
                     )}
                   >
                     <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-1 flex-1">
+                      <h3 className="text-sm font-semibold text-[var(--color-text-primary)] line-clamp-1 flex-1">
                         {ticket.assunto}
                       </h3>
                       <PriorityBadge prioridade={ticket.prioridade} />
                     </div>
                     <div className="flex items-center justify-between gap-2">
                       <StatusBadge status={ticket.status} />
-                      <span className="inline-flex items-center gap-1 text-[11px] text-gray-400">
+                      <span className="inline-flex items-center gap-1 text-[11px] text-[var(--color-text-muted)]">
                         <MessageSquare size={11} />
                         {ticket.total_mensagens}
                       </span>
                     </div>
                     <div className="mt-1.5">
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[11px] text-[var(--color-text-muted)]">
                         {formatDate(ticket.created_at)} {formatTime(ticket.created_at)}
                       </span>
                     </div>
@@ -287,21 +312,21 @@ export function SuportePage() {
         </div>
 
         {/* RIGHT PANEL — Chat */}
-        <div className="w-[62%] flex flex-col min-h-0 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="w-[62%] flex flex-col min-h-0 rounded-2xl overflow-hidden border border-[var(--color-border)]" style={{ background: 'var(--color-bg-card)' }}>
           {!selectedTicket ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-              <MessageSquare size={48} className="mb-4 text-gray-300" />
+            <div className="flex-1 flex flex-col items-center justify-center text-[var(--color-text-muted)]">
+              <MessageSquare size={48} className="mb-4 text-[var(--color-text-dim)]" />
               <p className="text-sm font-medium">Selecione um ticket para ver a conversa</p>
             </div>
           ) : (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-100">
+              <div className="p-4 border-b border-[var(--color-border)]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-lg font-bold text-gray-900 truncate">{selectedTicket.assunto}</h2>
+                    <h2 className="text-lg font-bold text-[var(--color-text-primary)] truncate">{selectedTicket.assunto}</h2>
                     {selectedTicket.descricao && (
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{selectedTicket.descricao}</p>
+                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5 line-clamp-2">{selectedTicket.descricao}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -312,14 +337,14 @@ export function SuportePage() {
               </div>
 
               {/* Message List */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: 'var(--color-bg-deep)' }}>
                 {messagesLoading ? (
                   <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-6 w-6 animate-spin text-green-500" />
+                    <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                    <MessageSquare size={32} className="mb-2 text-gray-300" />
+                  <div className="flex flex-col items-center justify-center py-12 text-[var(--color-text-muted)]">
+                    <MessageSquare size={32} className="mb-2 text-[var(--color-text-dim)]" />
                     <p className="text-sm">Sem mensagens ainda</p>
                     <p className="text-xs mt-1">Envie uma mensagem para iniciar a conversa</p>
                   </div>
@@ -338,13 +363,13 @@ export function SuportePage() {
                         )}
                       >
                         <div className={cn('flex items-center gap-2 mb-1', isSuperAdmin ? 'flex-row' : 'flex-row-reverse')}>
-                          <span className="text-xs font-semibold text-gray-600">{authorName}</span>
+                          <span className="text-xs font-semibold text-[var(--color-text-secondary)]">{authorName}</span>
                           <span
                             className={cn(
                               'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1 ring-inset',
                               isSuperAdmin
-                                ? 'bg-purple-50 text-purple-600 ring-purple-200'
-                                : 'bg-green-50 text-green-600 ring-green-200',
+                                ? 'bg-purple-500/10 text-purple-400 ring-purple-500/20'
+                                : 'bg-cyan-500/10 text-cyan-400 ring-cyan-500/20',
                             )}
                           >
                             {isSuperAdmin ? (
@@ -358,13 +383,22 @@ export function SuportePage() {
                           className={cn(
                             'rounded-2xl px-4 py-2.5 text-sm leading-relaxed',
                             isSuperAdmin
-                              ? 'bg-purple-50 text-purple-900 rounded-tl-md border border-purple-100'
-                              : 'bg-green-600 text-white rounded-tr-md',
+                              ? 'bg-purple-600/20 text-purple-100 rounded-tl-md border border-purple-500/20'
+                              : 'bg-cyan-600 text-white rounded-tr-md',
                           )}
                         >
-                          {msg.conteudo}
+                          {msg.imagem_url && (
+                            <a href={msg.imagem_url} target="_blank" rel="noopener noreferrer" className="block mb-2">
+                              <img
+                                src={msg.imagem_url}
+                                alt="Anexo"
+                                className="max-w-full max-h-48 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                              />
+                            </a>
+                          )}
+                          {msg.conteudo && <p>{msg.conteudo}</p>}
                         </div>
-                        <span className="text-[10px] text-gray-400 mt-1 px-1">
+                        <span className="text-[10px] text-[var(--color-text-muted)] mt-1 px-1">
                           {formatDate(msg.created_at)} {formatTime(msg.created_at)}
                         </span>
                       </div>
@@ -375,37 +409,65 @@ export function SuportePage() {
               </div>
 
               {/* Message Input */}
-              <div className="p-3 border-t border-gray-100 bg-white">
+              <div className="p-3 border-t border-[var(--color-border)]">
                 {isChatDisabled ? (
-                  <div className="text-center py-2 text-sm text-gray-400">
+                  <div className="text-center py-2 text-sm text-[var(--color-text-muted)]">
                     Ticket {selectedTicket.status === 'fechado' ? 'fechado' : 'resolvido'} — mensagens desabilitadas
                   </div>
                 ) : (
-                  <div className="flex items-end gap-2">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      onKeyDown={handleMessageKeyDown}
-                      placeholder="Digite sua mensagem..."
-                      rows={2}
-                      className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 placeholder:text-gray-400 transition-all resize-none"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={!messageText.trim() || sendingMessage}
-                      className={cn(
-                        'p-3 rounded-xl transition-colors shrink-0',
-                        messageText.trim() && !sendingMessage
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'bg-gray-100 text-gray-300 cursor-not-allowed',
-                      )}
-                    >
-                      {sendingMessage ? (
-                        <Loader2 size={18} className="animate-spin" />
-                      ) : (
-                        <Send size={18} />
-                      )}
-                    </button>
+                  <div className="space-y-2">
+                    {imagePreview && (
+                      <div className="relative inline-block">
+                        <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-[var(--color-border)]" />
+                        <button
+                          onClick={() => { setImagePreview(null); setSelectedFile(null) }}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex items-end gap-2">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-cyan-500 hover:bg-[var(--color-bg-card-hover)] transition-colors shrink-0"
+                        title="Enviar imagem"
+                      >
+                        <Paperclip size={18} />
+                      </button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleFileSelect}
+                      />
+                      <textarea
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        onKeyDown={handleMessageKeyDown}
+                        placeholder="Digite sua mensagem..."
+                        rows={2}
+                        className="flex-1 px-4 py-2.5 border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-xl outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
+                        style={{ background: 'var(--color-bg-deep)' }}
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={(!messageText.trim() && !selectedFile) || sendingMessage}
+                        className={cn(
+                          'p-3 rounded-xl transition-colors shrink-0',
+                          (messageText.trim() || selectedFile) && !sendingMessage
+                            ? 'bg-cyan-600 hover:bg-cyan-700 text-white'
+                            : 'bg-[var(--color-bg-card-hover)] text-[var(--color-text-dim)] cursor-not-allowed',
+                        )}
+                      >
+                        {sendingMessage ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                          <Send size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -416,18 +478,18 @@ export function SuportePage() {
 
       {/* New Ticket Modal */}
       {showNewTicketModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-lg p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-lg p-6 rounded-2xl border border-[var(--color-border)] shadow-2xl" style={{ background: 'var(--color-bg-base)' }}>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <LifeBuoy size={20} className="text-green-600" />
+                <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center">
+                  <LifeBuoy size={20} className="text-cyan-500" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">Novo Ticket</h2>
+                <h2 className="text-xl font-bold text-[var(--color-text-primary)]">Novo Ticket</h2>
               </div>
               <button
                 onClick={() => setShowNewTicketModal(false)}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-[var(--color-bg-card-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 <X size={18} />
               </button>
@@ -435,33 +497,36 @@ export function SuportePage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Assunto *</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">Assunto *</label>
                 <input
                   type="text"
                   value={newTicketForm.assunto}
                   onChange={(e) => setNewTicketForm((f) => ({ ...f, assunto: e.target.value }))}
                   placeholder="Ex: Erro ao agendar consulta..."
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 placeholder:text-gray-400 transition-all"
+                  className="w-full px-4 py-2.5 border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-xl outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 placeholder:text-[var(--color-text-muted)] transition-all"
+                  style={{ background: 'var(--color-bg-card)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Descricao</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">Descricao</label>
                 <textarea
                   value={newTicketForm.descricao}
                   onChange={(e) => setNewTicketForm((f) => ({ ...f, descricao: e.target.value }))}
                   placeholder="Descreva o problema com detalhes..."
                   rows={4}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500 placeholder:text-gray-400 transition-all resize-none"
+                  className="w-full px-4 py-2.5 border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-xl outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
+                  style={{ background: 'var(--color-bg-card)' }}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Prioridade</label>
+                <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">Prioridade</label>
                 <select
                   value={newTicketForm.prioridade}
                   onChange={(e) => setNewTicketForm((f) => ({ ...f, prioridade: e.target.value }))}
-                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-xl cursor-pointer outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500"
+                  className="w-full px-3 py-2.5 border border-[var(--color-border)] text-[var(--color-text-secondary)] text-sm rounded-xl cursor-pointer outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500"
+                  style={{ background: 'var(--color-bg-card)' }}
                 >
                   <option value="baixa">Baixa</option>
                   <option value="media">Media</option>
@@ -474,7 +539,7 @@ export function SuportePage() {
             <div className="flex items-center justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowNewTicketModal(false)}
-                className="px-4 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors"
+                className="px-4 py-2.5 text-sm font-medium text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 Cancelar
               </button>
@@ -484,8 +549,8 @@ export function SuportePage() {
                 className={cn(
                   'flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl transition-colors',
                   newTicketForm.assunto.trim() && !creatingTicket
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : 'bg-gray-100 text-gray-400 cursor-not-allowed',
+                    ? 'bg-cyan-600 hover:bg-cyan-700 text-white'
+                    : 'bg-[var(--color-bg-card-hover)] text-[var(--color-text-dim)] cursor-not-allowed',
                 )}
               >
                 {creatingTicket && <Loader2 size={14} className="animate-spin" />}

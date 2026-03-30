@@ -1,5 +1,6 @@
 import React from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { GlobalSearch } from './GlobalSearch'
 import {
   Bell,
   Search,
@@ -71,6 +72,19 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
   const { canManageStock, canViewFinancial, isAdmin } = usePermissions()
   const [showUserMenu, setShowUserMenu] = React.useState(false)
   const [showNotifications, setShowNotifications] = React.useState(false)
+  const [showSearch, setShowSearch] = React.useState(false)
+
+  // Ctrl+K listener
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault()
+        setShowSearch((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
   const [alerts, setAlerts] = React.useState<SystemAlert[]>([])
   const [dismissedIds, setDismissedIds] = React.useState<Set<string>>(() => {
     try {
@@ -224,6 +238,7 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
     : 'U'
 
   return (
+    <>
     <header
       className="fixed top-0 right-0 left-0 md:left-[240px] h-16 border-b border-[var(--color-border)] flex items-center px-4 md:px-6 z-20 transition-all duration-200"
       style={{ background: 'var(--color-bg-sidebar)' }}
@@ -252,13 +267,14 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         {/* Busca rápida */}
         <button
           id="header-search"
+          onClick={() => setShowSearch(true)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[var(--color-border)]
                      text-[var(--color-text-muted)] text-sm hover:border-cyan-500/30 hover:text-cyan-500
                      transition-all duration-150 hidden sm:flex"
         >
           <Search className="w-3.5 h-3.5" />
           <span className="text-xs text-[var(--color-text-muted)]">Buscar...</span>
-          <kbd className="text-[10px] text-[var(--color-text-dim)] border border-[var(--color-border)] rounded px-1">⌘K</kbd>
+          <kbd className="text-[10px] text-[var(--color-text-dim)] border border-[var(--color-border)] rounded px-1">Ctrl+K</kbd>
         </button>
 
         {/* Notificações */}
@@ -375,16 +391,16 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
                   <p className="text-xs text-[var(--color-text-muted)] mt-0.5 truncate">{user?.email}</p>
                 </div>
                 <div className="py-1">
+                  <button
+                    onClick={() => { setShowUserMenu(false); navigate('/perfil') }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-secondary)]
+                               hover:bg-[var(--color-bg-card-hover)] hover:text-[var(--color-text-primary)] transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Meu Perfil
+                  </button>
                   {isAdmin && (
                     <>
-                      <button
-                        onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-secondary)]
-                                   hover:bg-[var(--color-bg-card-hover)] hover:text-[var(--color-text-primary)] transition-colors"
-                      >
-                        <User className="w-4 h-4" />
-                        Meu Perfil
-                      </button>
                       <button
                         onClick={() => { setShowUserMenu(false); navigate('/configuracoes') }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--color-text-secondary)]
@@ -413,5 +429,8 @@ export function Header({ sidebarWidth: _sidebarWidth, onMenuClick }: HeaderProps
         </div>
       </div>
     </header>
+
+    <GlobalSearch open={showSearch} onClose={() => setShowSearch(false)} />
+    </>
   )
 }

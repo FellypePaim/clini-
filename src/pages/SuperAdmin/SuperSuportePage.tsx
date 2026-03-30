@@ -15,7 +15,9 @@ import {
   ChevronDown,
   User,
   Shield,
+  Paperclip,
 } from 'lucide-react'
+import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 
@@ -38,6 +40,7 @@ interface TicketMessage {
   ticket_id: string
   autor_id: string | null
   conteudo: string
+  imagem_url: string | null
   e_superadmin: boolean | null
   created_at: string
   profiles: {
@@ -149,6 +152,10 @@ export function SuperSuportePage() {
   })
   const [creatingTicket, setCreatingTicket] = useState(false)
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
@@ -216,12 +223,45 @@ export function SuperSuportePage() {
     return { total, abertos, emAndamento, resolvidos }
   }, [tickets])
 
+  // Upload image to storage
+  async function uploadImageToStorage(file: File): Promise<string | null> {
+    try {
+      const ext = file.name.split('.').pop() || 'png'
+      const path = `suporte/superadmin/${Date.now()}.${ext}`
+      const { error } = await supabase.storage.from('clinica-assets').upload(path, file, { contentType: file.type })
+      if (error) throw error
+      const { data } = supabase.storage.from('clinica-assets').getPublicUrl(path)
+      return data.publicUrl
+    } catch (err) {
+      console.error('Erro upload:', err)
+      return null
+    }
+  }
+
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return
+    setSelectedFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setImagePreview(ev.target?.result as string)
+    reader.readAsDataURL(file)
+  }
+
   // Send message
   async function handleSendMessage() {
-    if (!selectedTicketId || !messageText.trim() || sendingMessage || isChatDisabled) return
+    if (!selectedTicketId || sendingMessage || isChatDisabled) return
+    if (!messageText.trim() && !selectedFile) return
     setSendingMessage(true)
-    await sendTicketMessage(selectedTicketId, messageText.trim(), true)
+
+    let imagemUrl: string | undefined
+    if (selectedFile) {
+      imagemUrl = (await uploadImageToStorage(selectedFile)) || undefined
+    }
+
+    await sendTicketMessage(selectedTicketId, messageText.trim() || '', true, imagemUrl)
     setMessageText('')
+    setSelectedFile(null)
+    setImagePreview(null)
     const res = await getTicketMessages(selectedTicketId)
     if (Array.isArray(res)) setMessages(res)
     await fetchTickets()
@@ -524,7 +564,12 @@ export function SuperSuportePage() {
                               : 'bg-slate-700/50 text-slate-200 rounded-tl-md',
                           )}
                         >
-                          {msg.conteudo}
+                          {msg.imagem_url && (
+                            <a href={msg.imagem_url} target="_blank" rel="noopener noreferrer" className="block mb-2">
+                              <img src={msg.imagem_url} alt="Anexo" className="max-w-full max-h-48 rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity" />
+                            </a>
+                          )}
+                          {msg.conteudo && <p>{msg.conteudo}</p>}
                         </div>
                         <span className="text-[10px] text-[var(--color-text-muted)] mt-1 px-1">
                           {formatDate(msg.created_at)} {formatTime(msg.created_at)}
@@ -543,31 +588,52 @@ export function SuperSuportePage() {
                     Ticket {selectedTicket.status === 'fechado' ? 'fechado' : 'resolvido'} - mensagens desabilitadas
                   </div>
                 ) : (
-                  <div className="flex items-end gap-2">
-                    <textarea
-                      value={messageText}
-                      onChange={(e) => setMessageText(e.target.value)}
-                      onKeyDown={handleMessageKeyDown}
-                      placeholder="Digite sua mensagem..."
-                      rows={2}
-                      className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
-                    />
-                    <button
-                      onClick={handleSendMessage}
-                      disabled={!messageText.trim() || sendingMessage}
-                      className={cn(
-                        'p-3 rounded-xl transition-colors shrink-0',
-                        messageText.trim() && !sendingMessage
-                          ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                          : 'bg-slate-800/60 text-[var(--color-text-secondary)] cursor-not-allowed',
-                      )}
-                    >
-                      {sendingMessage ? (
-                        <Loader2 size={18} className="animate-spin" />
-                      ) : (
-                        <Send size={18} />
-                      )}
-                    </button>
+                  <div className="space-y-2">
+                    {imagePreview && (
+                      <div className="relative inline-block">
+                        <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-slate-700/50" />
+                        <button
+                          onClick={() => { setImagePreview(null); setSelectedFile(null) }}
+                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <div className="flex items-end gap-2">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-purple-400 hover:bg-slate-800/60 transition-colors shrink-0"
+                        title="Enviar imagem"
+                      >
+                        <Paperclip size={18} />
+                      </button>
+                      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+                      <textarea
+                        value={messageText}
+                        onChange={(e) => setMessageText(e.target.value)}
+                        onKeyDown={handleMessageKeyDown}
+                        placeholder="Digite sua mensagem..."
+                        rows={2}
+                        className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
+                      />
+                      <button
+                        onClick={handleSendMessage}
+                        disabled={(!messageText.trim() && !selectedFile) || sendingMessage}
+                        className={cn(
+                          'p-3 rounded-xl transition-colors shrink-0',
+                          (messageText.trim() || selectedFile) && !sendingMessage
+                            ? 'bg-purple-600 hover:bg-purple-500 text-white'
+                            : 'bg-slate-800/60 text-[var(--color-text-secondary)] cursor-not-allowed',
+                        )}
+                      >
+                        {sendingMessage ? (
+                          <Loader2 size={18} className="animate-spin" />
+                        ) : (
+                          <Send size={18} />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

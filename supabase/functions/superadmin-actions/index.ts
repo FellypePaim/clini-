@@ -390,11 +390,12 @@ Deno.serve(async (req) => {
       }
 
       case 'send_ticket_message': {
-        const { ticket_id: msgTicketId, conteudo, e_superadmin: isSuperAdmin } = pd
-        if (!msgTicketId || !conteudo) throw new Error('ticket_id e conteudo obrigatórios')
+        const { ticket_id: msgTicketId, conteudo, e_superadmin: isSuperAdmin, imagem_url } = pd
+        if (!msgTicketId || (!conteudo && !imagem_url)) throw new Error('ticket_id e conteudo/imagem obrigatórios')
         const { data: msg, error: smErr } = await db.from('tickets_mensagens').insert({
           ticket_id: msgTicketId, autor_id: user.id,
-          conteudo, e_superadmin: isSuperAdmin ?? true,
+          conteudo: conteudo || '', e_superadmin: isSuperAdmin ?? true,
+          imagem_url: imagem_url || null,
         }).select().single()
         if (smErr) throw new Error(smErr.message)
         // Atualizar ticket status para em_andamento se ainda está aberto

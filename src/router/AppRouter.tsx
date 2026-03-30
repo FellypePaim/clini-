@@ -89,6 +89,9 @@ const SegurancaPage = lazyNamed(() => import('../pages/Configuracoes/SegurancaPa
 // ─── Páginas lazy — Suporte ──────────────────────────
 const SuportePage = lazyNamed(() => import('../pages/Suporte/SuportePage'), 'SuportePage')
 
+// ─── Páginas lazy — Perfil ──────────────────────────
+const MeuPerfilPage = lazyNamed(() => import('../pages/Perfil/MeuPerfilPage'), 'MeuPerfilPage')
+
 // ─── Páginas lazy — SuperAdmin ─────────────────────────
 const SuperAdminLayout = lazyNamed(() => import('../components/superadmin/SuperAdminLayout'), 'SuperAdminLayout')
 const SuperDashboardPage = lazyNamed(() => import('../pages/SuperAdmin/SuperDashboardPage'), 'SuperDashboardPage')
@@ -226,6 +229,9 @@ export function AppRouter() {
 
           {/* Módulo Prescrições — admin + profissional */}
           <Route path="/prescricoes" element={<RequireRole roles={['administrador', 'profissional']}><PrescricoesPage /></RequireRole>} />
+
+          {/* Meu Perfil — acessível por todos */}
+          <Route path="/perfil" element={<MeuPerfilPage />} />
 
           {/* Módulo Suporte */}
           <Route path="/suporte" element={<RequireRole roles={['administrador']}><SuportePage /></RequireRole>} />
