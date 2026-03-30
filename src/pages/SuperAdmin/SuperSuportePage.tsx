@@ -16,8 +16,18 @@ import {
   User,
   Shield,
   Paperclip,
+  Star,
+  Zap,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+
+const QUICK_REPLIES = [
+  'Estamos verificando seu caso. Em breve retornaremos.',
+  'Problema identificado e corrigido. Pode testar novamente?',
+  'Poderia enviar um print da tela com o erro?',
+  'Obrigado pelo contato! Seu ticket foi resolvido.',
+  'Vamos encaminhar para a equipe tecnica.',
+]
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { markSuporteAsRead } from '../../hooks/useUnreadSupporte'
@@ -155,6 +165,7 @@ export function SuperSuportePage() {
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [showQuickReplies, setShowQuickReplies] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -196,6 +207,25 @@ export function SuperSuportePage() {
     }
     load()
     return () => { cancelled = true }
+  }, [selectedTicketId, getTicketMessages])
+
+  // Realtime — subscribe to new messages
+  useEffect(() => {
+    if (!selectedTicketId) return
+    const channel = supabase
+      .channel(`sa-ticket-${selectedTicketId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'tickets_mensagens',
+        filter: `ticket_id=eq.${selectedTicketId}`,
+      }, async () => {
+        const res = await getTicketMessages(selectedTicketId)
+        if (Array.isArray(res)) setMessages(res)
+        markSuporteAsRead()
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
   }, [selectedTicketId, getTicketMessages])
 
   // Auto-scroll on new messages
@@ -500,6 +530,16 @@ export function SuperSuportePage() {
                       <option value="baixa">Baixa</option>
                     </select>
                   </div>
+                  {(selectedTicket as any).avaliacao && (
+                    <div className="flex items-center gap-1.5 ml-auto">
+                      <span className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase">Avaliacao:</span>
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((v) => (
+                          <Star key={v} size={14} className={cn(v <= (selectedTicket as any).avaliacao ? 'text-amber-400 fill-amber-400' : 'text-slate-600')} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -591,49 +631,41 @@ export function SuperSuportePage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
+                    {/* Quick Replies */}
+                    {showQuickReplies && (
+                      <div className="flex flex-wrap gap-1.5 pb-1">
+                        {QUICK_REPLIES.map((qr, i) => (
+                          <button key={i}
+                            onClick={() => { setMessageText(qr); setShowQuickReplies(false) }}
+                            className="px-2.5 py-1.5 text-[11px] font-medium text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-lg transition-colors truncate max-w-[250px]">
+                            {qr}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     {imagePreview && (
                       <div className="relative inline-block">
                         <img src={imagePreview} alt="Preview" className="h-20 rounded-lg border border-slate-700/50" />
-                        <button
-                          onClick={() => { setImagePreview(null); setSelectedFile(null) }}
-                          className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                        >
-                          <X size={12} />
-                        </button>
+                        <button onClick={() => { setImagePreview(null); setSelectedFile(null) }} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"><X size={12} /></button>
                       </div>
                     )}
                     <div className="flex items-end gap-2">
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className="p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-purple-400 hover:bg-slate-800/60 transition-colors shrink-0"
-                        title="Enviar imagem"
-                      >
+                      <button onClick={() => setShowQuickReplies(!showQuickReplies)}
+                        className={cn("p-2.5 rounded-xl transition-colors shrink-0", showQuickReplies ? "text-purple-400 bg-purple-500/10" : "text-[var(--color-text-muted)] hover:text-purple-400 hover:bg-slate-800/60")}
+                        title="Respostas rapidas">
+                        <Zap size={18} />
+                      </button>
+                      <button onClick={() => fileInputRef.current?.click()} className="p-2.5 rounded-xl text-[var(--color-text-muted)] hover:text-purple-400 hover:bg-slate-800/60 transition-colors shrink-0" title="Enviar imagem">
                         <Paperclip size={18} />
                       </button>
                       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-                      <textarea
-                        value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
-                        onKeyDown={handleMessageKeyDown}
-                        placeholder="Digite sua mensagem..."
-                        rows={2}
-                        className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none"
-                      />
-                      <button
-                        onClick={handleSendMessage}
-                        disabled={(!messageText.trim() && !selectedFile) || sendingMessage}
-                        className={cn(
-                          'p-3 rounded-xl transition-colors shrink-0',
-                          (messageText.trim() || selectedFile) && !sendingMessage
-                            ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                            : 'bg-slate-800/60 text-[var(--color-text-secondary)] cursor-not-allowed',
-                        )}
-                      >
-                        {sendingMessage ? (
-                          <Loader2 size={18} className="animate-spin" />
-                        ) : (
-                          <Send size={18} />
-                        )}
+                      <textarea value={messageText} onChange={(e) => setMessageText(e.target.value)} onKeyDown={handleMessageKeyDown}
+                        placeholder="Digite sua mensagem..." rows={2}
+                        className="flex-1 px-4 py-2.5 bg-slate-800/60 border border-slate-700/50 text-white text-sm rounded-xl outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 placeholder:text-[var(--color-text-muted)] transition-all resize-none" />
+                      <button onClick={handleSendMessage} disabled={(!messageText.trim() && !selectedFile) || sendingMessage}
+                        className={cn('p-3 rounded-xl transition-colors shrink-0',
+                          (messageText.trim() || selectedFile) && !sendingMessage ? 'bg-purple-600 hover:bg-purple-500 text-white' : 'bg-slate-800/60 text-[var(--color-text-secondary)] cursor-not-allowed')}>
+                        {sendingMessage ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                       </button>
                     </div>
                   </div>

@@ -162,5 +162,33 @@ export function useSuporteClinica() {
     }
   }, [user?.clinicaId])
 
-  return { getTickets, createTicket, getMessages, sendMessage, uploadImage, isLoading }
+  const reopenTicket = useCallback(async (ticketId: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('tickets_suporte')
+        .update({ status: 'aberto', updated_at: new Date().toISOString() })
+        .eq('id', ticketId)
+      if (error) throw error
+      return true
+    } catch (err) {
+      console.error('Erro ao reabrir ticket:', err)
+      return false
+    }
+  }, [])
+
+  const rateTicket = useCallback(async (ticketId: string, avaliacao: number, comentario?: string): Promise<boolean> => {
+    try {
+      const { error } = await supabase
+        .from('tickets_suporte')
+        .update({ avaliacao, avaliacao_comentario: comentario || null })
+        .eq('id', ticketId)
+      if (error) throw error
+      return true
+    } catch (err) {
+      console.error('Erro ao avaliar ticket:', err)
+      return false
+    }
+  }, [])
+
+  return { getTickets, createTicket, getMessages, sendMessage, uploadImage, reopenTicket, rateTicket, isLoading }
 }
