@@ -2055,6 +2055,7 @@ export type Database = {
           created_at: string | null
           e_superadmin: boolean | null
           id: string
+          imagem_url: string | null
           ticket_id: string
         }
         Insert: {
@@ -2063,6 +2064,7 @@ export type Database = {
           created_at?: string | null
           e_superadmin?: boolean | null
           id?: string
+          imagem_url?: string | null
           ticket_id: string
         }
         Update: {
@@ -2071,6 +2073,7 @@ export type Database = {
           created_at?: string | null
           e_superadmin?: boolean | null
           id?: string
+          imagem_url?: string | null
           ticket_id?: string
         }
         Relationships: [
@@ -2093,6 +2096,8 @@ export type Database = {
       tickets_suporte: {
         Row: {
           assunto: string
+          avaliacao: number | null
+          avaliacao_comentario: string | null
           clinica_id: string | null
           created_at: string | null
           descricao: string | null
@@ -2104,6 +2109,8 @@ export type Database = {
         }
         Insert: {
           assunto: string
+          avaliacao?: number | null
+          avaliacao_comentario?: string | null
           clinica_id?: string | null
           created_at?: string | null
           descricao?: string | null
@@ -2115,6 +2122,8 @@ export type Database = {
         }
         Update: {
           assunto?: string
+          avaliacao?: number | null
+          avaliacao_comentario?: string | null
           clinica_id?: string | null
           created_at?: string | null
           descricao?: string | null
@@ -2243,6 +2252,11 @@ export type Database = {
           evolution_api_url: string | null
           id: string
           nome_instancia: string
+          numero_conectado: string | null
+          qr_code_base64: string | null
+          status: string | null
+          status_conexao: string | null
+          updated_at: string | null
         }
         Insert: {
           api_key?: string | null
@@ -2252,6 +2266,11 @@ export type Database = {
           evolution_api_url?: string | null
           id?: string
           nome_instancia: string
+          numero_conectado?: string | null
+          qr_code_base64?: string | null
+          status?: string | null
+          status_conexao?: string | null
+          updated_at?: string | null
         }
         Update: {
           api_key?: string | null
@@ -2261,6 +2280,11 @@ export type Database = {
           evolution_api_url?: string | null
           id?: string
           nome_instancia?: string
+          numero_conectado?: string | null
+          qr_code_base64?: string | null
+          status?: string | null
+          status_conexao?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {

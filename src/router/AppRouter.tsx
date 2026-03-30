@@ -112,6 +112,7 @@ const SuperUsuariosPage = lazyNamed(() => import('../pages/SuperAdmin/SuperUsuar
 const SuperFinanceiroPage = lazyNamed(() => import('../pages/SuperAdmin/SuperFinanceiroPage'), 'SuperFinanceiroPage')
 const SuperLogsPage = lazyNamed(() => import('../pages/SuperAdmin/SuperLogsPage'), 'SuperLogsPage')
 const SuperSuportePage = lazyNamed(() => import('../pages/SuperAdmin/SuperSuportePage'), 'SuperSuportePage')
+const SuperConfiguracoesPage = lazyNamed(() => import('../pages/SuperAdmin/SuperConfiguracoesPage'), 'SuperConfiguracoesPage')
 
 // ─── Páginas lazy — Dev ────────────────────────────────
 const DiagnosticoPage = lazyNamed(() => import('../pages/Dev/DiagnosticoPage'), 'DiagnosticoPage')
@@ -299,6 +300,7 @@ export function AppRouter() {
           <Route path="financeiro" element={<SuperFinanceiroPage />} />
           <Route path="logs" element={<SuperLogsPage />} />
           <Route path="suporte" element={<SuperSuportePage />} />
+          <Route path="configuracoes" element={<SuperConfiguracoesPage />} />
         </Route>
       </Routes>
     </Suspense>

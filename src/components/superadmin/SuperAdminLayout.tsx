@@ -34,6 +34,7 @@ export function SuperAdminLayout() {
     { icon: DollarSign, label: 'Financeiro', path: '/superadmin/financeiro' },
     { icon: FileSearch, label: 'Logs', path: '/superadmin/logs' },
     { icon: LifeBuoy, label: 'Suporte', path: '/superadmin/suporte' },
+    { icon: Settings, label: 'Configurações', path: '/superadmin/configuracoes' },
   ]
 
   return (

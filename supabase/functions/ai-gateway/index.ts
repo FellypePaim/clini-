@@ -368,7 +368,7 @@ async function handleLYRA(payload: any, clinica_id: string, supabase: any) {
       .from("profiles")
       .select("id, nome_completo, especialidade, telefone")
       .eq("clinica_id", clinica_id)
-      .eq("role", "profissional")
+      .in("role", ["profissional", "administrador"])
       .eq("ativo", true)
   ])
 

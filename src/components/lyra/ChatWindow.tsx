@@ -142,7 +142,7 @@ export function ChatWindow({ conversation, onSend, onTakeover, onReturnToAI, aiN
                  <Bot className="w-3.5 h-3.5" /> Devolver para IA
                </button>
              )}
-             <Link to="/lyra/config" className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] transition-colors">
+             <Link to="/lyra/configuracoes" className="p-2.5 hover:bg-[var(--color-bg-card-hover)] rounded-xl text-[var(--color-text-muted)] transition-colors">
                 <Settings className="w-5 h-5" />
              </Link>
           </div>
