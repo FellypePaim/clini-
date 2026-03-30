@@ -12,12 +12,24 @@ function PageLoader() {
   )
 }
 
-// ─── Helper: lazy com named export ─────────────────────
+// ─── Helper: lazy com named export + auto-reload on chunk fail ──
 function lazyNamed<T extends Record<string, any>>(
   factory: () => Promise<T>,
   name: keyof T
 ) {
-  return lazy(() => factory().then(m => ({ default: m[name] })))
+  return lazy(() =>
+    factory()
+      .then(m => ({ default: m[name] }))
+      .catch((err) => {
+        // Chunk desatualizado após deploy — recarrega a página uma vez
+        const key = 'chunk-reload'
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1')
+          window.location.reload()
+        }
+        throw err
+      })
+  )
 }
 
 // ─── Páginas públicas (carregam rápido, manter eager) ──
