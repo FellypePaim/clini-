@@ -6,9 +6,10 @@ import { ProcedimentosPieChart } from '../../components/dashboard/ProcedimentosP
 import { AgendamentosList } from '../../components/dashboard/AgendamentosList'
 import { PacientesRecentes } from '../../components/dashboard/PacientesRecentes'
 import { LeadsRecentes } from '../../components/dashboard/LeadsRecentes'
-import { Sparkles, X, Loader2, CalendarDays, ArrowRight, Calendar } from 'lucide-react'
+import { Sparkles, X, Loader2, CalendarDays, ArrowRight, Calendar, Settings } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { Link } from 'react-router-dom'
+import { useOnboarding } from '../../hooks/useOnboarding'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -35,6 +36,7 @@ export function DashboardPage() {
   const [insightLoading, setInsightLoading] = useState(false)
   const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes')
   const date = getDateFormatted()
+  const { steps, allDone, completedCount, totalCount } = useOnboarding()
 
   const handleInsights = async () => {
     setInsightModal(true)
@@ -55,6 +57,26 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
+      {/* ── Setup Banner ─────────────────────────────── */}
+      {isAdmin && !allDone && totalCount > 0 && (
+        <div className="flex items-center gap-4 p-4 rounded-2xl border border-cyan-500/20" style={{ background: 'var(--color-bg-card)' }}>
+          <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center shrink-0">
+            <Settings size={20} className="text-cyan-500" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-[var(--color-text-primary)]">
+              Configure sua clinica — {completedCount} de {totalCount} passos concluidos
+            </p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
+              Complete a configuracao para aproveitar todos os recursos do sistema.
+            </p>
+          </div>
+          <div className="w-24 h-2 rounded-full overflow-hidden shrink-0" style={{ background: 'var(--color-bg-deep)' }}>
+            <div className="h-full bg-cyan-500 rounded-full transition-all" style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }} />
+          </div>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>

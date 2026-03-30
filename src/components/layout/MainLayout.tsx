@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { ToastProvider } from '../ui/ToastProvider'
+import { OnboardingChecklist } from './OnboardingChecklist'
 
 
 export function MainLayout() {
@@ -32,6 +33,7 @@ export function MainLayout() {
         </main>
       </div>
 
+      <OnboardingChecklist />
       <ToastProvider />
     </div>
   )

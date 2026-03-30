@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { Plus, ChevronLeft, ChevronRight, Calendar, CalendarDays, CalendarRange, X } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Calendar, CalendarDays, CalendarRange, X, AlertCircle, ArrowRight } from 'lucide-react'
 import type { AgendaView, AgendaAppointment, AppointmentStatus, AppointmentFormData } from '../../types/agenda'
 import { useAgenda } from '../../hooks/useAgenda'
 import { useAuthStore } from '../../store/authStore'
@@ -53,6 +53,7 @@ export function AgendaPage() {
 
   // ── Lista de profissionais do banco (não derivada dos agendamentos) ──
   const [profissionaisUnicos, setProfissionaisUnicos] = useState<{ id: string; nome: string; especialidade: string; cor: string }[]>([])
+  const [procCount, setProcCount] = useState<number | null>(null)
 
   const loadProfissionais = useCallback(async () => {
     if (!clinicaId) return
@@ -74,6 +75,13 @@ export function AgendaPage() {
   }, [clinicaId])
 
   useEffect(() => { loadProfissionais() }, [loadProfissionais])
+
+  useEffect(() => {
+    if (!clinicaId) return
+    supabase.from('procedimentos').select('*', { count: 'exact', head: true }).eq('clinica_id', clinicaId).then(r => setProcCount(r.count ?? 0))
+  }, [clinicaId])
+
+  const needsSetup = profissionaisUnicos.length === 0 || procCount === 0
 
   // ── Filtrados por profissional ──────────────────────
   const filteredAppointments = useMemo(() =>
@@ -159,6 +167,21 @@ export function AgendaPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] -m-6 overflow-hidden">
+      {/* ── Setup hint ──────────────────────────────── */}
+      {needsSetup && (
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-amber-500/20" style={{ background: 'rgba(245, 158, 11, 0.05)' }}>
+          <AlertCircle size={16} className="text-amber-500 shrink-0" />
+          <p className="text-sm text-[var(--color-text-secondary)] flex-1">
+            {procCount === 0 && 'Cadastre pelo menos um procedimento. '}
+            {profissionaisUnicos.length === 0 && 'Adicione um profissional. '}
+            <span className="text-[var(--color-text-muted)]">Necessario para criar agendamentos.</span>
+          </p>
+          <a href={procCount === 0 ? '/configuracoes/procedimentos' : '/configuracoes/profissionais'}
+            className="flex items-center gap-1 text-sm font-medium text-amber-500 hover:underline shrink-0">
+            Configurar <ArrowRight size={14} />
+          </a>
+        </div>
+      )}
       {/* ── Barra de ferramentas ──────────────────────── */}
       <div className="bg-[var(--color-bg-card)] border-b border-[var(--color-border)] px-6 py-3 shrink-0">
         <div className="flex flex-col gap-2.5">
