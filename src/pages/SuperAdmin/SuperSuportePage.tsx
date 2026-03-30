@@ -20,6 +20,7 @@ import {
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
 import { useSuperAdmin } from '../../hooks/useSuperAdmin'
+import { markSuporteAsRead } from '../../hooks/useUnreadSupporte'
 
 interface Ticket {
   id: string
@@ -175,6 +176,7 @@ export function SuperSuportePage() {
 
   useEffect(() => {
     fetchTickets()
+    markSuporteAsRead()
   }, [fetchTickets])
 
   // Fetch messages when ticket selected
@@ -515,7 +517,7 @@ export function SuperSuportePage() {
                 ) : (
                   messages.map((msg) => {
                     const isSuperAdmin = !!msg.e_superadmin
-                    const authorName = msg.profiles?.nome_completo ?? 'Desconhecido'
+                    const authorName = msg.profiles?.nome_completo ?? (isSuperAdmin ? 'Equipe de Suporte' : 'Desconhecido')
                     const authorRole = msg.profiles?.role ?? ''
 
                     return (

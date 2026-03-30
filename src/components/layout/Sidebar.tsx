@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { usePermissions } from '../../store/authStore'
 import { useThemeStore } from '../../store/themeStore'
+import { useUnreadSupporte } from '../../hooks/useUnreadSupporte'
 import {
   LayoutDashboard,
   Calendar,
@@ -55,6 +56,7 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
   const location = useLocation()
   const { role } = usePermissions()
   const { theme, toggleTheme } = useThemeStore()
+  const { unreadCount } = useUnreadSupporte()
 
   const groups = [
     { key: 'principal', label: 'Principal' },
@@ -126,7 +128,12 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
                         {!collapsed && (
                           <span className="flex-1 truncate">{itemLabel}</span>
                         )}
-                        {!collapsed && isActive && (
+                        {path === '/suporte' && unreadCount > 0 && (
+                          <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
+                            {unreadCount > 9 ? '9+' : unreadCount}
+                          </span>
+                        )}
+                        {!collapsed && isActive && path !== '/suporte' && (
                           <ChevronRight className="w-3 h-3 text-cyan-400" />
                         )}
                       </NavLink>

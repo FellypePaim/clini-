@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useSuporteClinica, type TicketClinica, type TicketMensagem } from '../../hooks/useSuporteClinica'
+import { markSuporteAsRead } from '../../hooks/useUnreadSupporte'
 
 // ─── Config ──────────────────────────────────────────
 
@@ -102,7 +103,7 @@ export function SuportePage() {
     setLoaded(true)
   }, [getTickets])
 
-  useEffect(() => { fetchTickets() }, [fetchTickets])
+  useEffect(() => { fetchTickets(); markSuporteAsRead() }, [fetchTickets])
 
   useEffect(() => {
     if (!selectedTicketId) { setMessages([]); return }
@@ -351,7 +352,7 @@ export function SuportePage() {
                 ) : (
                   messages.map((msg) => {
                     const isSuperAdmin = !!msg.e_superadmin
-                    const authorName = msg.profiles?.nome_completo ?? 'Desconhecido'
+                    const authorName = msg.profiles?.nome_completo ?? (isSuperAdmin ? 'Equipe de Suporte' : 'Desconhecido')
                     const authorRole = msg.profiles?.role ?? ''
 
                     return (

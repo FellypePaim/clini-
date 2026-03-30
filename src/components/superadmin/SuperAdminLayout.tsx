@@ -19,11 +19,13 @@ import {
 import { useAuthStore } from '../../store/authStore'
 import { ToastProvider } from '../ui/ToastProvider'
 import { cn } from '../../lib/utils'
+import { useUnreadSupporte } from '../../hooks/useUnreadSupporte'
 
 export function SuperAdminLayout() {
   const { user, logout } = useAuthStore()
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false)
+  const { unreadCount } = useUnreadSupporte()
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/superadmin' },
@@ -82,8 +84,13 @@ export function SuperAdminLayout() {
                   )}
                 >
                   <item.icon size={20} className={cn(isActive ? "text-white" : "text-[var(--color-text-muted)] group-hover:text-purple-400")} />
-                  <span className="text-sm font-bold">{item.label}</span>
-                  {isActive && <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-[var(--color-bg-card)] animate-pulse" />}
+                  <span className="text-sm font-bold flex-1">{item.label}</span>
+                  {item.path === '/superadmin/suporte' && unreadCount > 0 && (
+                    <span className="min-w-[20px] h-5 flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1.5 shadow-lg shadow-red-500/30">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                  {isActive && item.path !== '/superadmin/suporte' && <div className="absolute right-2 w-1.5 h-1.5 rounded-full bg-[var(--color-bg-card)] animate-pulse" />}
                 </Link>
               )
             })}
