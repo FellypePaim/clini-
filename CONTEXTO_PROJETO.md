@@ -405,5 +405,64 @@ Actions:
 - Exibe: clínica, role, membro desde
 - Link no dropdown do header (avatar)
 
-## 18. PRÓXIMOS PASSOS
-1. Deploy final em produção (Vercel)
+## 18. ONBOARDING CHECKLIST + EMPTY STATES
+- Checklist flutuante (canto inferior direito) para admins de novas clínicas
+- 5 passos: dados clínica, logo, procedimento, profissional, paciente
+- Barra de progresso visual, celebração ao completar 100%
+- Dismissível via X, persiste no localStorage por clínica
+- Banner de setup no Dashboard com progresso
+- Hint contextual na Agenda quando falta procedimento/profissional
+- Hook: `src/hooks/useOnboarding.ts`
+- Componente: `src/components/layout/OnboardingChecklist.tsx`
+
+## 19. BUG CONHECIDO — ADMIN NÃO É PROFISSIONAL NA LYRA
+- LYRA (ai-gateway) filtra `role = 'profissional'` → admin solo NÃO aparece
+- Agenda frontend já inclui admin (`in('role', ['profissional', 'admin'])`)
+- **Precisa corrigir**: ai-gateway deve incluir admin nos planos solo
+- Impacto: dentista solo se registra como admin e IA não agenda para ela
+
+## 20. PLANOS — PROPOSTA APROVADA (PENDENTE IMPLEMENTAÇÃO)
+
+### 4 Planos definidos:
+| Plano | Preço | Público | Profissionais | Usuários extras |
+|-------|-------|---------|---------------|-----------------|
+| Starter | R$ 97 | Solo iniciante | 1 (admin=profissional) | 0 |
+| Professional | R$ 197 | Solo consolidado | 1 (admin=profissional) | 1 recepção |
+| Clinic | R$ 397 | Clínica pequena/média | Até 5 | 3 |
+| Enterprise | R$ 797 | Clínica grande | Ilimitado | Ilimitado |
+
+### Limites por plano:
+| Funcionalidade | Starter | Professional | Clinic | Enterprise |
+|---|---|---|---|---|
+| Pacientes | 500 | Ilimitado | Ilimitado | Ilimitado |
+| Dashboard IA Insights | Não | Sim | Sim | Sim |
+| Harmonização facial | Não | Sim | Sim | Sim |
+| Estoque | Não | Básico | Completo | Completo |
+| Nexus CRM | Não | Kanban básico | Completo + campanhas | Completo |
+| Relatórios | 3 básicos | 8 | Todos (13+) | Todos + PDF |
+| LYRA IA | Não | 200 msgs/mês | 1000 msgs/mês | Ilimitado |
+| WhatsApp | Não | 1 instância | 2 instâncias | 5 instâncias |
+| Storage | 500 MB | 5 GB | 20 GB | 100 GB |
+| Suporte | Tickets 24h | Tickets 12h | Tickets prioritário 8h | Tickets + WhatsApp 4h |
+| Ausências | Não | Sim | Sim | Sim |
+| Logo clínica | Sim | Sim | Sim | Sim |
+
+### Implementação em 3 Fases:
+**Fase A — Infraestrutura:** Tabela planos, hook usePlan, componente PlanGate, fix admin=profissional, contagem de uso, gates em todas as páginas
+**Fase B — Registro + UX:** Novo fluxo "Solo vs Clínica" → seleção de plano → trial 7 dias, tela pricing
+**Fase C — Pagamento:** Integração Stripe/Mercado Pago, cobrança automática, faturas, cancelamento
+
+### O que falta no sistema para funcionar:
+1. Não existe controle de limites (pacientes, msgs, storage, profissionais)
+2. Não existe gate de funcionalidades (tudo liberado para todos)
+3. Registro não pergunta tipo de uso (solo vs clínica)
+4. Admin não é tratado como profissional na LYRA
+5. Sem integração de pagamento
+6. Sem tela de planos/pricing dentro do app
+7. Sem trial period tracking
+
+## 21. PRÓXIMOS PASSOS
+1. **Fase A dos Planos** — Tabela planos + hook usePlan + PlanGate + fix admin + gates
+2. Fase B dos Planos — Novo registro + pricing page + trial
+3. Fase C dos Planos — Pagamento (Stripe/MP)
+4. Deploy final em produção (Vercel)
