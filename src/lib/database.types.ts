@@ -1400,6 +1400,57 @@ export type Database = {
           },
         ]
       }
+      pagamentos: {
+        Row: {
+          id: string
+          clinica_id: string | null
+          plano_id: string | null
+          provider: string
+          provider_payment_id: string | null
+          provider_subscription_id: string | null
+          valor: number
+          status: string
+          periodo_inicio: string | null
+          periodo_fim: string | null
+          metodo_pagamento: string | null
+          notas: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          clinica_id?: string | null
+          plano_id?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          provider_subscription_id?: string | null
+          valor: number
+          status?: string
+          periodo_inicio?: string | null
+          periodo_fim?: string | null
+          metodo_pagamento?: string | null
+          notas?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          clinica_id?: string | null
+          plano_id?: string | null
+          provider?: string
+          provider_payment_id?: string | null
+          provider_subscription_id?: string | null
+          valor?: number
+          status?: string
+          periodo_inicio?: string | null
+          periodo_fim?: string | null
+          metodo_pagamento?: string | null
+          notas?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pedidos_compra: {
         Row: {
           clinica_id: string | null

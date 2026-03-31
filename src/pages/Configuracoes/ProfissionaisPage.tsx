@@ -122,6 +122,18 @@ export function ProfissionaisPage() {
   const handleCadastrar = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!clinicaId || !form.nome || !form.email || !form.senha) return
+
+    // Verificar limite do plano
+    const PLAN_USER_LIMITS: Record<string, number | null> = {
+      starter: 1, professional: 2, clinic: 8, enterprise: null
+    }
+    const clinicaPlano = user?.clinicaPlano ?? 'professional'
+    const maxUsuarios = PLAN_USER_LIMITS[clinicaPlano] ?? null
+    if (maxUsuarios !== null && profissionais.length >= maxUsuarios) {
+      toast({ title: 'Limite de usuários atingido', description: `O plano ${clinicaPlano} permite até ${maxUsuarios} usuário(s). Faça upgrade para adicionar mais.`, type: 'error' })
+      return
+    }
+
     setSaving(true)
     try {
       // Chama a Edge Function user-manager para criar o usuário com service role

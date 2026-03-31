@@ -10,6 +10,8 @@ import { Sparkles, X, Loader2, CalendarDays, ArrowRight, Calendar, Settings } fr
 import { supabase } from '../../lib/supabase'
 import { Link } from 'react-router-dom'
 import { useOnboarding } from '../../hooks/useOnboarding'
+import { usePlan } from '../../hooks/usePlan'
+import { TrialBanner, SuspensoBanner } from '../../components/ui/TrialBanner'
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -37,6 +39,7 @@ export function DashboardPage() {
   const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes')
   const date = getDateFormatted()
   const { steps, allDone, completedCount, totalCount } = useOnboarding()
+  const { isTrial, isSuspenso, daysLeftInTrial, plano } = usePlan()
 
   const handleInsights = async () => {
     setInsightModal(true)
@@ -57,6 +60,14 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6">
+      {/* ── Suspenso overlay ─────────────────────────── */}
+      {isSuspenso && <SuspensoBanner />}
+
+      {/* ── Trial Banner ─────────────────────────────── */}
+      {isTrial && (
+        <TrialBanner daysLeft={daysLeftInTrial()} plano={plano} />
+      )}
+
       {/* ── Setup Banner ─────────────────────────────── */}
       {isAdmin && !allDone && totalCount > 0 && (
         <div className="flex items-center gap-4 p-4 rounded-2xl border border-cyan-500/20" style={{ background: 'var(--color-bg-card)' }}>

@@ -285,6 +285,30 @@ Deno.serve(async (req) => {
       }
 
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // PLANO — Alterar plano de clínica
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      case 'update_clinic_plan': {
+        const targetId = pd.clinica_id
+        if (!targetId) throw new Error('clinica_id obrigatório')
+        const novoPlano = pd.plano_id as string
+        const novoStatus = (pd.status as string) ?? 'ativo'
+        const trialAte = pd.trial_ate ?? null
+
+        // Buscar configuracoes atuais da clínica
+        const { data: clinicaAtual } = await db.from('clinicas').select('configuracoes').eq('id', targetId).single()
+        const configAtual = (clinicaAtual?.configuracoes as any) ?? {}
+
+        const { error: updErr } = await db.from('clinicas').update({
+          configuracoes: { ...configAtual, plano: novoPlano },
+          status_plano: novoStatus,
+          trial_ate: trialAte,
+        }).eq('id', targetId)
+
+        if (updErr) throw updErr
+        return ok({ success: true })
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       // USUÁRIOS — Lista com auth metadata
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'get_users': {

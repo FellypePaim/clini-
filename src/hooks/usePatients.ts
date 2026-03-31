@@ -10,6 +10,7 @@ export function usePatients() {
   const [error, setError] = useState<string | null>(null)
 
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
+  const clinicaPlano = useAuthStore(state => state.user?.clinicaPlano ?? 'professional')
   const { toast } = useToast()
 
   // ── Buscar lista de pacientes ────────────────────────────────────────
@@ -235,6 +236,23 @@ export function usePatients() {
     if (!clinicaId) return null
     setIsLoading(true)
     try {
+      // Verificar limite do plano
+      const PLAN_PATIENT_LIMITS: Record<string, number | null> = {
+        starter: 500, professional: null, clinic: null, enterprise: null
+      }
+      const maxPacientes = PLAN_PATIENT_LIMITS[clinicaPlano] ?? null
+      if (maxPacientes !== null) {
+        const { count } = await supabase
+          .from('pacientes')
+          .select('*', { count: 'exact', head: true })
+          .eq('clinica_id', clinicaId)
+        if ((count ?? 0) >= maxPacientes) {
+          toast({ title: 'Limite atingido', description: `O plano Starter permite até ${maxPacientes} pacientes. Faça upgrade para continuar.`, type: 'error' })
+          setIsLoading(false)
+          return null
+        }
+      }
+
       const insertData = {
         clinica_id: clinicaId,
         nome_completo: data.nome || '',
@@ -287,7 +305,7 @@ export function usePatients() {
     } finally {
       setIsLoading(false)
     }
-  }, [clinicaId, toast])
+  }, [clinicaId, clinicaPlano, toast])
 
   // ── Atualizar paciente ──────────────────────────────────────────────
   const updatePatient = useCallback(async (id: string, data: Partial<Patient>) => {

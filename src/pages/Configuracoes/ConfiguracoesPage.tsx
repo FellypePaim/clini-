@@ -7,7 +7,8 @@ import {
   Shield,
   Bell,
   Globe,
-  PlusSquare
+  PlusSquare,
+  CreditCard
 } from 'lucide-react'
 
 export function ConfiguracoesLayout() {
@@ -37,6 +38,8 @@ export function ConfiguracoesLayout() {
           <NavItem active={isActive('integracoes')} icon={<Globe size={18} />} title="Integrações" to="/configuracoes/integracoes" />
           <NavItem active={isActive('notificacoes')} icon={<Bell size={18} />} title="Notificações" to="/configuracoes/notificacoes" />
           <NavItem active={isActive('seguranca')} icon={<Shield size={18} />} title="Segurança & Acessos" to="/configuracoes/seguranca" />
+          <div className="h-px bg-[var(--color-border)] my-4" />
+          <NavItem active={isActive('plano')} icon={<CreditCard size={18} />} title="Meu Plano" to="/configuracoes/plano" />
         </aside>
 
         {/* Content Area */}

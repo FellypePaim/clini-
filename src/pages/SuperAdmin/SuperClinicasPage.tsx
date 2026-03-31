@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   Plus,
   Search,
@@ -18,6 +18,7 @@ import { useSuperAdmin } from '../../hooks/useSuperAdmin'
 import { NovaClinicaModal } from '../../components/superadmin/NovaClinicaModal'
 import { useToast } from '../../hooks/useToast'
 import { cn } from '../../lib/utils'
+import { supabase } from '../../lib/supabase'
 
 interface Clinic {
   id: string
@@ -42,6 +43,30 @@ const STATUS_OPTIONS = [
   { value: 'trial', label: 'Trial' },
   { value: 'suspensa', label: 'Suspensas' },
 ] as const
+
+const PLAN_OPTIONS = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'starter', label: 'Starter' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'clinic', label: 'Clinic' },
+  { value: 'enterprise', label: 'Enterprise' },
+] as const
+
+const PLAN_STYLES: Record<string, { bg: string; text: string; border: string; label: string }> = {
+  starter:      { bg: 'bg-cyan-500/10',   text: 'text-cyan-400',   border: 'border-cyan-500/30',   label: 'STARTER' },
+  professional: { bg: 'bg-indigo-500/10', text: 'text-indigo-400', border: 'border-indigo-500/30', label: 'PROFESSIONAL' },
+  clinic:       { bg: 'bg-violet-500/10', text: 'text-violet-400', border: 'border-violet-500/30', label: 'CLINIC' },
+  enterprise:   { bg: 'bg-amber-500/10',  text: 'text-amber-400',  border: 'border-amber-500/30',  label: 'ENTERPRISE' },
+}
+
+function planBadgeStyle(plano: string) {
+  return PLAN_STYLES[plano] ?? {
+    bg: 'bg-slate-700/40',
+    text: 'text-slate-400',
+    border: 'border-slate-600/30',
+    label: 'SEM PLANO',
+  }
+}
 
 function statusBadge(status: string) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
@@ -98,8 +123,11 @@ export function SuperClinicasPage() {
   const [clinics, setClinics] = useState<Clinic[]>([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
+  const [planFilter, setPlanFilter] = useState('todos')
   const [modalOpen, setModalOpen] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null)
+  const [planChangingId, setPlanChangingId] = useState<string | null>(null)
+  const planSelectRef = useRef<HTMLSelectElement | null>(null)
 
   const loadClinics = useCallback(async () => {
     const data = await getClinics()
@@ -118,7 +146,8 @@ export function SuperClinicasPage() {
       (c.cnpj && c.cnpj.toLowerCase().includes(term)) ||
       (c.email && c.email.toLowerCase().includes(term))
     const matchesStatus = statusFilter === 'todos' || c.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesPlan = planFilter === 'todos' || c.plano === planFilter
+    return matchesSearch && matchesStatus && matchesPlan
   })
 
   async function handleSuspend(clinic: Clinic) {
@@ -163,6 +192,29 @@ export function SuperClinicasPage() {
     await resetConversations(clinic.id)
     await loadClinics()
     setActionLoadingId(null)
+  }
+
+  async function handlePlanChange(clinic: Clinic, newPlan: string) {
+    if (!newPlan || newPlan === clinic.plano) return
+    setPlanChangingId(clinic.id)
+    try {
+      const { error } = await supabase.functions.invoke('superadmin-actions', {
+        body: {
+          action: 'update_clinic_plan',
+          clinica_id: clinic.id,
+          plano_id: newPlan,
+          status: 'ativo',
+        },
+      })
+      if (error) throw error
+      await loadClinics()
+      toast({ title: 'Plano atualizado', description: `${clinic.nome} agora esta no plano ${newPlan}.`, variant: 'success' })
+    } catch (err) {
+      console.error(err)
+      toast({ title: 'Erro ao atualizar plano', description: 'Tente novamente.', variant: 'error' })
+    } finally {
+      setPlanChangingId(null)
+    }
   }
 
   return (
@@ -210,6 +262,30 @@ export function SuperClinicasPage() {
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Plan filter */}
+      <div className="flex flex-wrap gap-2">
+        {PLAN_OPTIONS.map((opt) => {
+          const isActive = planFilter === opt.value
+          const style = opt.value !== 'todos' ? PLAN_STYLES[opt.value] : null
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setPlanFilter(opt.value)}
+              className={cn(
+                'px-4 py-1.5 rounded-full text-xs font-black tracking-wider border transition-all',
+                isActive
+                  ? style
+                    ? cn(style.bg, style.text, style.border)
+                    : 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-slate-800/40 text-[var(--color-text-muted)] border-slate-700/50 hover:border-slate-600',
+              )}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
       </div>
 
       {/* Loading */}
@@ -273,11 +349,36 @@ export function SuperClinicasPage() {
                 </div>
               </div>
 
-              {/* Plano label */}
-              <div className="mb-4">
-                <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest">
-                  Plano {clinic.plano}
-                </span>
+              {/* Plano badge + change dropdown */}
+              <div className="mb-4 flex items-center gap-2">
+                {planChangingId === clinic.id ? (
+                  <Loader2 size={14} className="animate-spin text-purple-400" />
+                ) : (() => {
+                  const ps = planBadgeStyle(clinic.plano)
+                  return (
+                    <span
+                      className={cn(
+                        'inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black tracking-wider border',
+                        ps.bg, ps.text, ps.border,
+                      )}
+                    >
+                      {ps.label}
+                    </span>
+                  )
+                })()}
+                <select
+                  ref={planSelectRef}
+                  disabled={planChangingId === clinic.id || actionLoadingId === clinic.id}
+                  value={clinic.plano ?? ''}
+                  onChange={(e) => handlePlanChange(clinic, e.target.value)}
+                  className="text-[10px] font-bold bg-slate-800/60 border border-slate-700/50 text-[var(--color-text-muted)] rounded-lg px-2 py-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-purple-500/50 disabled:opacity-50 transition-all hover:border-slate-600"
+                  title="Alterar plano"
+                >
+                  <option value="" disabled>Alterar plano...</option>
+                  {PLAN_OPTIONS.filter((o) => o.value !== 'todos').map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
               </div>
 
               {/* Metrics */}

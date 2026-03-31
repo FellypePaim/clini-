@@ -44,6 +44,7 @@ import { FacialHarmonization } from '../../components/pacientes/FacialHarmonizat
 import { PatientTerms } from '../../components/pacientes/PatientTerms'
 import { PatientDocumentsTab } from '../../components/pacientes/PatientDocumentsTab'
 import { DentalMapping } from '../../components/pacientes/DentalMapping'
+import { PlanGate } from '../../components/ui/PlanGate'
 
 export function PatientProfilePage() {
   const { id } = useParams<{ id: string }>()
@@ -558,10 +559,12 @@ export function PatientProfilePage() {
         )}
 
         {activeTab === 'harmonizacao' && (
-          <FacialHarmonization 
-            pacienteId={patient.id} 
-            onSave={async (zones) => { await saveHarmonizationSession(patient.id, zones); }}
-          />
+          <PlanGate plansAllowed={['professional', 'clinic', 'enterprise']} featureLabel="Harmonização Facial">
+            <FacialHarmonization
+              pacienteId={patient.id}
+              onSave={async (zones) => { await saveHarmonizationSession(patient.id, zones); }}
+            />
+          </PlanGate>
         )}
 
         {activeTab === 'termos' && (

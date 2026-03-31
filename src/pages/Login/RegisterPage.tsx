@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -14,6 +14,7 @@ import {
   Loader2,
   Check,
   Briefcase,
+  Star,
 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { cn } from '../../lib/utils'
@@ -29,6 +30,49 @@ const darkInput = [
 
 // ─── Tipo de conta ──────────────────────────────
 type AccountType = 'admin' | 'funcionario' | null
+
+// ─── Etapa do fluxo ────────────────────────────
+type RegisterStep = 'type' | 'plano' | 'form'
+
+// ─── Planos ─────────────────────────────────────
+const PLANOS = [
+  {
+    id: 'starter',
+    nome: 'Starter',
+    preco: 'R$ 97/mês',
+    descricao: 'Solo iniciante',
+    badge: 'Teste 7 dias grátis',
+    features: ['1 profissional', 'Agendamento online', 'Prontuário básico'],
+    destaque: false,
+  },
+  {
+    id: 'professional',
+    nome: 'Professional',
+    preco: 'R$ 197/mês',
+    descricao: 'Solo consolidado',
+    badge: 'Mais completo',
+    features: ['1 profissional', 'Financeiro completo', 'IA integrada', 'Relatórios avançados'],
+    destaque: true,
+  },
+  {
+    id: 'clinic',
+    nome: 'Clinic',
+    preco: 'R$ 397/mês',
+    descricao: 'Clínica com equipe',
+    badge: 'Teste 7 dias grátis',
+    features: ['Até 10 profissionais', 'Multi-agenda', 'Faturamento', 'Suporte prioritário'],
+    destaque: false,
+  },
+  {
+    id: 'enterprise',
+    nome: 'Enterprise',
+    preco: 'R$ 797/mês',
+    descricao: 'Clínica grande',
+    badge: 'Falar com vendas',
+    features: ['Profissionais ilimitados', 'API dedicada', 'Onboarding personalizado'],
+    destaque: false,
+  },
+]
 
 // ─── Schemas ────────────────────────────────────
 const adminSchema = z.object({
@@ -66,13 +110,26 @@ type FuncionarioForm = z.infer<typeof funcionarioSchema>
 // ─── Componente ─────────────────────────────────
 export function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const planoFromUrl = searchParams.get('plano')
+
   const [accountType, setAccountType] = useState<AccountType>(null)
+  const [step, setStep] = useState<RegisterStep>('type')
+  const [selectedPlano, setSelectedPlano] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [globalError, setGlobalError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Pre-select plan from URL param
+  useEffect(() => {
+    if (planoFromUrl && accountType === 'admin') {
+      setSelectedPlano(planoFromUrl)
+      setStep('form')
+    }
+  }, [planoFromUrl, accountType])
+
   // ── Escolha do tipo de conta ──────────────────
-  if (!accountType) {
+  if (step === 'type') {
     return (
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
         <div className="w-full max-w-lg animate-fade-in">
@@ -89,7 +146,7 @@ export function RegisterPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Admin / Nova Clínica */}
             <button
-              onClick={() => setAccountType('admin')}
+              onClick={() => { setAccountType('admin'); setStep('plano') }}
               className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-200"
             >
               <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 group-hover:bg-cyan-500 transition-colors flex items-center justify-center">
@@ -104,7 +161,7 @@ export function RegisterPage() {
 
             {/* Funcionário */}
             <button
-              onClick={() => setAccountType('funcionario')}
+              onClick={() => { setAccountType('funcionario'); setStep('form') }}
               className="group relative flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200"
             >
               <div className="w-16 h-16 rounded-2xl bg-blue-500/10 group-hover:bg-blue-500 transition-colors flex items-center justify-center">
@@ -128,6 +185,93 @@ export function RegisterPage() {
     )
   }
 
+  // ── Seleção de plano (admin) ──────────────────
+  if (step === 'plano') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'linear-gradient(145deg, #060a14, #0c1220)' }}>
+        <div className="w-full max-w-3xl animate-fade-in">
+          {/* Back button */}
+          <button
+            onClick={() => { setAccountType(null); setStep('type'); setGlobalError(null) }}
+            className="flex items-center gap-1.5 text-sm text-[#64748b] hover:text-cyan-500 transition-colors mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </button>
+
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-[#f1f5f9]">Escolha seu plano</h1>
+            <p className="text-[#64748b] mt-1">Comece grátis por 7 dias, cancele quando quiser</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {PLANOS.map((plano) => (
+              <button
+                key={plano.id}
+                onClick={() => { setSelectedPlano(plano.id); setStep('form') }}
+                className={cn(
+                  'group relative flex flex-col gap-3 p-5 rounded-2xl border-2 text-left transition-all duration-200',
+                  'hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-500/10',
+                  plano.destaque
+                    ? 'border-indigo-500/50 bg-indigo-500/5'
+                    : 'border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)]'
+                )}
+              >
+                {/* Badge */}
+                <span className={cn(
+                  'inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full self-start',
+                  plano.destaque
+                    ? 'bg-indigo-500/20 text-indigo-300'
+                    : 'bg-[rgba(255,255,255,0.06)] text-[#94a3b8]'
+                )}>
+                  {plano.destaque && <Star className="w-3 h-3" />}
+                  {plano.badge}
+                </span>
+
+                {/* Name & price */}
+                <div>
+                  <h3 className="font-bold text-[#f1f5f9] text-base">{plano.nome}</h3>
+                  <p className="text-xs text-[#64748b]">{plano.descricao}</p>
+                  <p className="text-lg font-bold text-cyan-400 mt-1">{plano.preco}</p>
+                </div>
+
+                {/* Features */}
+                <ul className="space-y-1 flex-1">
+                  {plano.features.map((f) => (
+                    <li key={f} className="text-xs text-[#94a3b8] flex items-start gap-1.5">
+                      <Check className="w-3 h-3 text-cyan-500 mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Select indicator */}
+                <div className={cn(
+                  'text-xs font-semibold text-center py-1.5 rounded-lg transition-colors',
+                  'bg-[rgba(255,255,255,0.05)] text-[#64748b] group-hover:bg-indigo-500/20 group-hover:text-indigo-300',
+                  plano.destaque && 'bg-indigo-500/10 text-indigo-300'
+                )}>
+                  Selecionar
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-col items-center gap-3 mt-2">
+            <Link
+              to="/planos"
+              className="text-sm text-[#64748b] hover:text-cyan-500 transition-colors"
+            >
+              Ver todos os planos e comparar recursos
+            </Link>
+            <Link to="/login" className="text-sm text-[#475569] hover:text-cyan-500 transition-colors inline-flex items-center gap-1">
+              <ArrowLeft className="w-3.5 h-3.5" /> Já tenho uma conta
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // ── Form Admin ────────────────────────────────
   if (accountType === 'admin') {
     return (
@@ -136,7 +280,7 @@ export function RegisterPage() {
         globalError={globalError}
         showPassword={showPassword}
         setShowPassword={setShowPassword}
-        onBack={() => { setAccountType(null); setGlobalError(null) }}
+        onBack={() => { setStep('plano'); setGlobalError(null) }}
         onSubmit={async (data) => {
           setIsLoading(true)
           setGlobalError(null)
@@ -151,6 +295,7 @@ export function RegisterPage() {
                 clinica_cnpj: data.clinica_cnpj || null,
                 clinica_telefone: data.clinica_telefone || null,
                 clinica_endereco: data.clinica_endereco || null,
+                plano_id: selectedPlano ?? 'professional',
               },
             })
             if (error) throw new Error(error.message)
@@ -174,7 +319,7 @@ export function RegisterPage() {
       globalError={globalError}
       showPassword={showPassword}
       setShowPassword={setShowPassword}
-      onBack={() => { setAccountType(null); setGlobalError(null) }}
+      onBack={() => { setAccountType(null); setStep('type'); setGlobalError(null) }}
       onSubmit={async (data) => {
         setIsLoading(true)
         setGlobalError(null)

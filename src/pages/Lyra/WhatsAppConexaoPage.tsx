@@ -48,7 +48,7 @@ async function callManager(action: string, payload: any = {}, token: string) {
 }
 
 export function WhatsAppConexaoPage() {
-  const { user: _user } = useAuthStore()
+  const { user } = useAuthStore()
   const { toast } = useToast()
   const [instancias, setInstancias] = useState<Instancia[]>([])
   const [loading, setLoading] = useState(true)
@@ -98,6 +98,17 @@ export function WhatsAppConexaoPage() {
   }, [pollingId, toast])
 
   const handleCriar = async () => {
+    // Verificar limite do plano
+    const PLAN_WA_LIMITS: Record<string, number> = {
+      starter: 0, professional: 1, clinic: 2, enterprise: 5
+    }
+    const clinicaPlano = user?.clinicaPlano ?? 'professional'
+    const maxInstancias = PLAN_WA_LIMITS[clinicaPlano] ?? 1
+    if (instancias.length >= maxInstancias) {
+      toast({ title: 'Limite atingido', description: `O plano ${clinicaPlano} permite até ${maxInstancias} instância(s) do WhatsApp.`, type: 'error' })
+      return
+    }
+
     setCriando(true)
     try {
       const token = await getToken()

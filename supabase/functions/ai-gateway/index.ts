@@ -335,6 +335,44 @@ async function handleLYRA(payload: any, clinica_id: string, supabase: any) {
     }
   }
 
+  // 4.5 Verificar limite de mensagens LYRA do plano
+  const { data: clinicaPlanoData } = await supabase
+    .from("clinicas")
+    .select("configuracoes")
+    .eq("id", clinica_id)
+    .single()
+
+  const LYRA_LIMITS: Record<string, number | null> = {
+    starter: 0,
+    professional: 200,
+    clinic: 1000,
+    enterprise: null,
+  }
+  const planoId = (clinicaPlanoData?.configuracoes as any)?.plano ?? "professional"
+  const maxMsgs = LYRA_LIMITS[planoId] ?? null
+
+  if (maxMsgs !== null) {
+    const inicioMes = new Date()
+    inicioMes.setDate(1)
+    inicioMes.setHours(0, 0, 0, 0)
+    const { count: msgCount } = await supabase
+      .from("ai_usage_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("clinica_id", clinica_id)
+      .eq("action", "lyra_respond")
+      .gte("created_at", inicioMes.toISOString())
+
+    if ((msgCount ?? 0) >= maxMsgs) {
+      return {
+        data: {
+          reply: "Olá! Nosso atendimento automático atingiu o limite mensal. Por favor, entre em contato diretamente com a clínica.",
+        },
+        modelo: "none",
+        usage: { inputTokens: 0, outputTokens: 0 },
+      }
+    }
+  }
+
   // 5. Buscar configuração da clínica, procedimentos, profissionais e agenda
   // Usar timezone BR para todas as datas
   const nowBR = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }))

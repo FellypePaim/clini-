@@ -14,9 +14,11 @@ import {
   AlertCircle,
   PhoneCall,
   Activity,
-  ChevronRight
+  ChevronRight,
+  Lock
 } from 'lucide-react'
 import { Badge } from '../../components/ui/Badge'
+import { usePlan } from '../../hooks/usePlan'
 
 type ReportCategory = 'Clínico' | 'Financeiro' | 'Marketing / CRM'
 
@@ -28,31 +30,33 @@ interface ReportConfig {
   icon: React.ReactNode
   path: string
   isImplemented?: boolean
+  plansAllowed: string[]
 }
 
 const REPORTS: ReportConfig[] = [
   // Clínico
-  { id: 'prod-prof', title: 'Produção por Profissional', description: 'Volume de atendimentos, procedimentos e receita gerada por especialista.', category: 'Clínico', icon: <Stethoscope size={24} className="text-indigo-500" />, path: '/relatorios/producao-profissional', isImplemented: true },
-  { id: 'proc-real', title: 'Procedimentos Realizados', description: 'Ranking dos tratamentos mais executados e análise de consumo de tempo.', category: 'Clínico', icon: <Activity size={24} className="text-indigo-500" />, path: '/relatorios/procedimentos', isImplemented: true },
-  { id: 'pac-atend', title: 'Pacientes Atendidos', description: 'Demografia, faixa etária e perfil do público-alvo da clínica.', category: 'Clínico', icon: <Users size={24} className="text-indigo-500" />, path: '/relatorios/pacientes', isImplemented: true },
-  { id: 'taxa-ret', title: 'Taxa de Retorno de Pacientes', description: 'Métrica de fidelização: pacientes que voltaram após 6, 12 e 18 meses.', category: 'Clínico', icon: <TrendingUp size={24} className="text-indigo-500" />, path: '/relatorios/retorno', isImplemented: true },
+  { id: 'prod-prof', title: 'Produção por Profissional', description: 'Volume de atendimentos, procedimentos e receita gerada por especialista.', category: 'Clínico', icon: <Stethoscope size={24} className="text-indigo-500" />, path: '/relatorios/producao-profissional', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'proc-real', title: 'Procedimentos Realizados', description: 'Ranking dos tratamentos mais executados e análise de consumo de tempo.', category: 'Clínico', icon: <Activity size={24} className="text-indigo-500" />, path: '/relatorios/procedimentos', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'pac-atend', title: 'Pacientes Atendidos', description: 'Demografia, faixa etária e perfil do público-alvo da clínica.', category: 'Clínico', icon: <Users size={24} className="text-indigo-500" />, path: '/relatorios/pacientes', isImplemented: true, plansAllowed: ['starter', 'professional', 'clinic', 'enterprise'] },
+  { id: 'taxa-ret', title: 'Taxa de Retorno de Pacientes', description: 'Métrica de fidelização: pacientes que voltaram após 6, 12 e 18 meses.', category: 'Clínico', icon: <TrendingUp size={24} className="text-indigo-500" />, path: '/relatorios/retorno', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
 
   // Financeiro
-  { id: 'fat-per', title: 'Faturamento por Período', description: 'Receita Bruta, Deduções e Receita Líquida com evolução analítica.', category: 'Financeiro', icon: <DollarSign size={24} className="text-emerald-500" />, path: '/relatorios/faturamento', isImplemented: true },
-  { id: 'rec-conv', title: 'Receita por Convênio', description: 'Distribuição financeira entre atendimentos Particulares e Convênios médicos.', category: 'Financeiro', icon: <Briefcase size={24} className="text-emerald-500" />, path: '/relatorios/convenios', isImplemented: true },
-  { id: 'inadimp', title: 'Inadimplência', description: 'Boletos vencidos, glosas e contas a receber não liquidadas.', category: 'Financeiro', icon: <AlertCircle size={24} className="text-emerald-500" />, path: '/relatorios/inadimplencia', isImplemented: true },
-  { id: 'dre-simp', title: 'DRE Simplificado', description: 'Demonstrativo de Resultado do Exercício adaptado para clínicas.', category: 'Financeiro', icon: <BarChart size={24} className="text-emerald-500" />, path: '/relatorios/dre', isImplemented: true },
-  { id: 'fiscal', title: 'Relatório Fiscal', description: 'Resumo para DARF/RPA: receitas por forma de pagamento, categoria e alíquotas.', category: 'Financeiro', icon: <FileText size={24} className="text-emerald-500" />, path: '/relatorios/fiscal', isImplemented: true },
+  { id: 'fat-per', title: 'Faturamento por Período', description: 'Receita Bruta, Deduções e Receita Líquida com evolução analítica.', category: 'Financeiro', icon: <DollarSign size={24} className="text-emerald-500" />, path: '/relatorios/faturamento', isImplemented: true, plansAllowed: ['starter', 'professional', 'clinic', 'enterprise'] },
+  { id: 'rec-conv', title: 'Receita por Convênio', description: 'Distribuição financeira entre atendimentos Particulares e Convênios médicos.', category: 'Financeiro', icon: <Briefcase size={24} className="text-emerald-500" />, path: '/relatorios/convenios', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'inadimp', title: 'Inadimplência', description: 'Boletos vencidos, glosas e contas a receber não liquidadas.', category: 'Financeiro', icon: <AlertCircle size={24} className="text-emerald-500" />, path: '/relatorios/inadimplencia', isImplemented: true, plansAllowed: ['starter', 'professional', 'clinic', 'enterprise'] },
+  { id: 'dre-simp', title: 'DRE Simplificado', description: 'Demonstrativo de Resultado do Exercício adaptado para clínicas.', category: 'Financeiro', icon: <BarChart size={24} className="text-emerald-500" />, path: '/relatorios/dre', isImplemented: true, plansAllowed: ['clinic', 'enterprise'] },
+  { id: 'fiscal', title: 'Relatório Fiscal', description: 'Resumo para DARF/RPA: receitas por forma de pagamento, categoria e alíquotas.', category: 'Financeiro', icon: <FileText size={24} className="text-emerald-500" />, path: '/relatorios/fiscal', isImplemented: true, plansAllowed: ['clinic', 'enterprise'] },
 
   // Marketing / CRM
-  { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas', isImplemented: true },
-  { id: 'fun-conv', title: 'Funil de Conversão (Nexus)', description: 'Análise de perda de leads em cada estágio (Orçamento → Agendado).', category: 'Marketing / CRM', icon: <Target size={24} className="text-amber-500" />, path: '/relatorios/funil-leads', isImplemented: true },
-  { id: 'ori-pac', title: 'Origem de Pacientes', description: 'Distribuição dos canais de captação (Indicação, Instagram, Google, etc).', category: 'Marketing / CRM', icon: <PieChart size={24} className="text-amber-500" />, path: '/relatorios/origem', isImplemented: true },
-  { id: 'des-lyra', title: 'Desempenho da LYRA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/lyra', isImplemented: true },
+  { id: 'des-camp', title: 'Desempenho de Campanhas', description: 'Métricas de WhatsApp Marketing: taxa de entrega, abertura e agendamentos.', category: 'Marketing / CRM', icon: <Megaphone size={24} className="text-amber-500" />, path: '/relatorios/campanhas', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'fun-conv', title: 'Funil de Conversão (Nexus)', description: 'Análise de perda de leads em cada estágio (Orçamento → Agendado).', category: 'Marketing / CRM', icon: <Target size={24} className="text-amber-500" />, path: '/relatorios/funil-leads', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'ori-pac', title: 'Origem de Pacientes', description: 'Distribuição dos canais de captação (Indicação, Instagram, Google, etc).', category: 'Marketing / CRM', icon: <PieChart size={24} className="text-amber-500" />, path: '/relatorios/origem', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
+  { id: 'des-lyra', title: 'Desempenho da LYRA', description: 'Taxa de resolução por IA sem necessidade de intervenção humana.', category: 'Marketing / CRM', icon: <PhoneCall size={24} className="text-amber-500" />, path: '/relatorios/lyra', isImplemented: true, plansAllowed: ['professional', 'clinic', 'enterprise'] },
 ]
 
 export function RelatoriosPage() {
   const [activeTab, setActiveTab] = useState<ReportCategory | 'Todos'>('Todos')
+  const { hasRelatorio } = usePlan()
 
   const filteredReports = REPORTS.filter(r => activeTab === 'Todos' || r.category === activeTab)
 
@@ -97,46 +101,54 @@ export function RelatoriosPage() {
                <h2 className="text-lg font-bold text-[var(--color-text-primary)] mb-4 px-1">{category}</h2>
                <div className="grid grid-cols-1 md: lg:grid-cols-3 xl:grid-cols-4 gap-4">
                  {catReports.map((report) => (
-                   <Link 
-                     key={report.id}
-                     to={report.isImplemented ? report.path : '#'}
-                     onClick={(e) => !report.isImplemented && e.preventDefault()}
-                     className={`
-                       group bg-[var(--color-bg-card)] p-5 rounded-2xl border transition-all h-full flex flex-col items-start
-                       ${report.isImplemented 
-                         ? 'border-indigo-100 hover:border-indigo-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer' 
-                         : 'border-[var(--color-border)] opacity-60 hover:opacity-100 cursor-not-allowed'}
-                     `}
-                     title={!report.isImplemented ? "Relatório em desenvolvimento" : undefined}
-                   >
-                     <div className="flex items-start justify-between w-full mb-4">
-                       <div className={`p-3 rounded-xl border ${
-                          report.category === 'Clínico' ? 'bg-indigo-50 border-indigo-100' :
-                          report.category === 'Financeiro' ? 'bg-emerald-50 border-emerald-100' :
-                          'bg-amber-50 border-amber-100'
-                       }`}>
-                         {report.icon}
-                       </div>
-                       {report.isImplemented && (
-                         <div className="w-8 h-8 rounded-full bg-[var(--color-bg-deep)] flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-indigo-50 transition-all text-indigo-500">
-                           <ChevronRight size={18} />
+                   <div key={report.id} className="relative">
+                     <Link
+                       to={report.isImplemented && hasRelatorio(report.id) ? report.path : '#'}
+                       onClick={(e) => (!report.isImplemented || !hasRelatorio(report.id)) && e.preventDefault()}
+                       className={`
+                         group bg-[var(--color-bg-card)] p-5 rounded-2xl border transition-all h-full flex flex-col items-start
+                         ${report.isImplemented
+                           ? 'border-indigo-100 hover:border-indigo-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer'
+                           : 'border-[var(--color-border)] opacity-60 hover:opacity-100 cursor-not-allowed'}
+                         ${!hasRelatorio(report.id) ? 'pointer-events-none' : ''}
+                       `}
+                       title={!report.isImplemented ? "Relatório em desenvolvimento" : undefined}
+                     >
+                       <div className="flex items-start justify-between w-full mb-4">
+                         <div className={`p-3 rounded-xl border ${
+                            report.category === 'Clínico' ? 'bg-indigo-50 border-indigo-100' :
+                            report.category === 'Financeiro' ? 'bg-emerald-50 border-emerald-100' :
+                            'bg-amber-50 border-amber-100'
+                         }`}>
+                           {report.icon}
                          </div>
+                         {report.isImplemented && (
+                           <div className="w-8 h-8 rounded-full bg-[var(--color-bg-deep)] flex items-center justify-center opacity-0 group-hover:opacity-100 group-hover:bg-indigo-50 transition-all text-indigo-500">
+                             <ChevronRight size={18} />
+                           </div>
+                         )}
+                       </div>
+
+                       <h3 className={`font-bold text-base mb-2 ${report.isImplemented ? 'text-[var(--color-text-primary)] group-hover:text-indigo-700' : 'text-[var(--color-text-secondary)]'}`}>
+                         {report.title}
+                       </h3>
+                       <p className="text-sm text-[var(--color-text-muted)] font-medium leading-relaxed mb-4 flex-1">
+                         {report.description}
+                       </p>
+
+                       {!report.isImplemented && (
+                         <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-none font-bold text-[10px] uppercase tracking-widest mt-auto">
+                           Em Breve
+                         </Badge>
                        )}
-                     </div>
-                     
-                     <h3 className={`font-bold text-base mb-2 ${report.isImplemented ? 'text-[var(--color-text-primary)] group-hover:text-indigo-700' : 'text-[var(--color-text-secondary)]'}`}>
-                       {report.title}
-                     </h3>
-                     <p className="text-sm text-[var(--color-text-muted)] font-medium leading-relaxed mb-4 flex-1">
-                       {report.description}
-                     </p>
-                     
-                     {!report.isImplemented && (
-                       <Badge className="bg-[var(--color-bg-card)] text-[var(--color-text-muted)] border-none font-bold text-[10px] uppercase tracking-widest mt-auto">
-                         Em Breve
-                       </Badge>
+                     </Link>
+                     {!hasRelatorio(report.id) && (
+                       <div className="absolute inset-0 rounded-2xl backdrop-blur-sm bg-black/40 flex flex-col items-center justify-center gap-2 cursor-not-allowed">
+                         <Lock className="w-5 h-5 text-white/60" />
+                         <span className="text-xs font-bold text-white/60">Plano Professional+</span>
+                       </div>
                      )}
-                   </Link>
+                   </div>
                  ))}
                </div>
              </section>

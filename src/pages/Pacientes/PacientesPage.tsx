@@ -7,6 +7,8 @@ import { Avatar } from '../../components/ui/Avatar'
 import { Badge } from '../../components/ui/Badge'
 import { cn } from '../../lib/utils'
 import type { Patient, Sexo } from '../../types'
+import { usePlan } from '../../hooks/usePlan'
+import { PlanLimitBanner } from '../../components/ui/PlanLimitBanner'
 
 const PAGE_SIZE = 10
 
@@ -64,6 +66,7 @@ export function PacientesPage() {
   const navigate = useNavigate()
   const { patients, getPatients, createPatient, isLoading } = usePatients()
   const { canManagePatients } = usePermissions()
+  const { limits } = usePlan()
   const [search, setSearch] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [filterConvenio, setFilterConvenio] = useState('todos')
@@ -166,6 +169,15 @@ export function PacientesPage() {
           </div>
         )}
       </div>
+
+      {limits.maxPacientes !== null && (
+        <PlanLimitBanner
+          resource="pacientes"
+          current={patients.length}
+          max={limits.maxPacientes}
+          className="mb-4"
+        />
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

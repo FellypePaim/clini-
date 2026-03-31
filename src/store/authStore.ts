@@ -37,7 +37,7 @@ export const useAuthStore = create<AuthState>()(
           if (data.user) {
             const { data: profileData } = await supabase
               .from('profiles')
-              .select('*, clinicas(nome)')
+              .select('*, clinicas(nome, configuracoes, status_plano, trial_ate)')
               .eq('id', data.user.id)
               .single()
 
@@ -47,6 +47,8 @@ export const useAuthStore = create<AuthState>()(
                                    : dbRole === 'recepcao' ? 'recepção'
                                    : 'profissional'
 
+            const clinicaData = (profileData as any)?.clinicas
+            const clinicaConfig = (clinicaData?.configuracoes as any) ?? {}
             const userParsed: User = {
               id: data.user.id,
               nome: profileData?.nome_completo || data.user.email?.split('@')[0] || 'Usuário',
@@ -55,7 +57,10 @@ export const useAuthStore = create<AuthState>()(
               especialidade: profileData?.especialidade || undefined,
               crm: (profileData as any)?.crm || undefined,
               clinicaId: profileData?.clinica_id || '',
-              clinicaNome: (profileData as any)?.clinicas?.nome || undefined,
+              clinicaNome: clinicaData?.nome || undefined,
+              clinicaPlano: clinicaConfig?.plano || 'professional',
+              clinicaStatusPlano: clinicaData?.status_plano || 'ativo',
+              clinicaTrialAte: clinicaData?.trial_ate || undefined,
               ativo: true,
               criadoEm: data.user.created_at || new Date().toISOString(),
               avatar: profileData?.avatar_url || undefined,

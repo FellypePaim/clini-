@@ -40,6 +40,7 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 
 // ─── Páginas lazy — Landing ───────────────────────────
 const LandingPage = lazyNamed(() => import('../pages/Landing/LandingPage'), 'LandingPage')
+const PlanosPage = lazyNamed(() => import('../pages/Planos/PlanosPage'), 'PlanosPage')
 
 // ─── Páginas lazy — Core ───────────────────────────────
 const DashboardPage = lazyNamed(() => import('../pages/Dashboard/DashboardPage'), 'DashboardPage')
@@ -97,6 +98,7 @@ const ProcedimentosPage = lazyNamed(() => import('../pages/Configuracoes/Procedi
 const IntegracoesPage = lazyNamed(() => import('../pages/Configuracoes/IntegracoesPage'), 'IntegracoesPage')
 const NotificacoesPage = lazyNamed(() => import('../pages/Configuracoes/NotificacoesPage'), 'NotificacoesPage')
 const SegurancaPage = lazyNamed(() => import('../pages/Configuracoes/SegurancaPage'), 'SegurancaPage')
+const MeuPlanoPage = lazyNamed(() => import('../pages/Configuracoes/MeuPlanoPage'), 'MeuPlanoPage')
 
 // ─── Páginas lazy — Suporte ──────────────────────────
 const SuportePage = lazyNamed(() => import('../pages/Suporte/SuportePage'), 'SuportePage')
@@ -169,6 +171,9 @@ export function AppRouter() {
       <Routes>
         {/* Landing — sempre acessível (logado ou não) */}
         <Route path="/" element={<LandingPage />} />
+
+        {/* Página de planos — sempre acessível */}
+        <Route path="/planos" element={<PlanosPage />} />
 
         {/* Rotas públicas */}
         <Route
@@ -257,6 +262,7 @@ export function AppRouter() {
              <Route path="integracoes" element={<IntegracoesPage />} />
              <Route path="notificacoes" element={<NotificacoesPage />} />
              <Route path="seguranca" element={<SegurancaPage />} />
+             <Route path="plano" element={<MeuPlanoPage />} />
              <Route index element={<Navigate to="/configuracoes/clinica" replace />} />
           </Route>
 
