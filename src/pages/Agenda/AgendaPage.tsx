@@ -52,14 +52,14 @@ export function AgendaPage() {
   const clinicaId = useAuthStore(state => state.user?.clinicaId)
 
   // ── Lista de profissionais do banco (não derivada dos agendamentos) ──
-  const [profissionaisUnicos, setProfissionaisUnicos] = useState<{ id: string; nome: string; especialidade: string; cor: string }[]>([])
+  const [profissionaisUnicos, setProfissionaisUnicos] = useState<{ id: string; nome: string; especialidade: string; cor: string; horario_inicio: string; horario_fim: string; dias_atendimento: number[] }[]>([])
   const [procCount, setProcCount] = useState<number | null>(null)
 
   const loadProfissionais = useCallback(async () => {
     if (!clinicaId) return
     const { data } = await supabase
       .from('profiles')
-      .select('id, nome_completo, especialidade, cor_agenda')
+      .select('id, nome_completo, especialidade, cor_agenda, horario_inicio, horario_fim, dias_atendimento')
       .eq('clinica_id', clinicaId)
       .in('role', ['profissional', 'admin'])
       .eq('ativo', true)
@@ -70,6 +70,9 @@ export function AgendaPage() {
         nome: p.nome_completo,
         especialidade: p.especialidade || '',
         cor: p.cor_agenda || 'blue',
+        horario_inicio: p.horario_inicio?.slice(0, 5) || '08:00',
+        horario_fim: p.horario_fim?.slice(0, 5) || '18:00',
+        dias_atendimento: p.dias_atendimento || [1,2,3,4,5],
       })))
     }
   }, [clinicaId])
@@ -266,6 +269,7 @@ export function AgendaPage() {
               date={date}
               appointments={visibleAppointments}
               ausencias={ausencias}
+              profSchedule={profFiltro !== 'todos' ? profissionaisUnicos.find(p => p.id === profFiltro) : undefined}
               onCardClick={handleCardClick}
               onSlotClick={(h) => handleSlotClick(toDateStr(date), h)}
               onStatusChange={handleStatusChange}
@@ -278,6 +282,7 @@ export function AgendaPage() {
               currentDate={date}
               appointments={visibleAppointments}
               ausencias={ausencias}
+              profSchedule={profFiltro !== 'todos' ? profissionaisUnicos.find(p => p.id === profFiltro) : undefined}
               onCardClick={handleCardClick}
               onSlotClick={handleSlotClick}
               onStatusChange={handleStatusChange}

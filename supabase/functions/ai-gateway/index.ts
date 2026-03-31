@@ -404,7 +404,7 @@ async function handleLYRA(payload: any, clinica_id: string, supabase: any) {
       .gte("data_fim", todayBR),
     supabase
       .from("profiles")
-      .select("id, nome_completo, especialidade, telefone")
+      .select("id, nome_completo, especialidade, telefone, horario_inicio, horario_fim, dias_atendimento")
       .eq("clinica_id", clinica_id)
       .in("role", ["profissional", "administrador"])
       .eq("ativo", true)
@@ -426,84 +426,96 @@ async function handleLYRA(payload: any, clinica_id: string, supabase: any) {
     horario_fim: lyraConfig.horario_fim ?? "18:00",
   }
 
-  // 6. Calcular SLOTS LIVRES reais para os próximos 7 dias úteis
+  // 6. Calcular SLOTS LIVRES POR PROFISSIONAL para os próximos dias
   const duracaoPadrao = 30 // minutos
-  const [hIni, mIni] = config.horario_inicio.split(':').map(Number)
-  const [hFim, mFim] = config.horario_fim.split(':').map(Number)
+  const [hIniClinica, mIniClinica] = config.horario_inicio.split(':').map(Number)
+  const [hFimClinica, mFimClinica] = config.horario_fim.split(':').map(Number)
 
-  // Criar set de slots ocupados (chave: "YYYY-MM-DD HH:MM")
+  // Criar set de slots ocupados POR PROFISSIONAL (chave: "profId|YYYY-MM-DD HH:MM")
   const ocupados = new Set<string>()
   for (const c of agendaOcupada) {
-    if (!c.data_hora_inicio) continue
+    if (!c.data_hora_inicio || !c.profissional_id) continue
     const inicio = new Date(c.data_hora_inicio)
-    // Calcular duração a partir de início/fim (coluna duracao_minutos não existe)
     const dur = c.data_hora_fim && c.data_hora_inicio
       ? Math.round((new Date(c.data_hora_fim).getTime() - new Date(c.data_hora_inicio).getTime()) / 60000)
       : duracaoPadrao
-    // Marcar cada bloco de 30min como ocupado
     for (let m = 0; m < dur; m += duracaoPadrao) {
       const slot = new Date(inicio.getTime() + m * 60000)
-      const key = `${slot.toISOString().split('T')[0]} ${String(slot.getHours()).padStart(2,'0')}:${String(slot.getMinutes()).padStart(2,'0')}`
+      const key = `${c.profissional_id}|${slot.toISOString().split('T')[0]} ${String(slot.getHours()).padStart(2,'0')}:${String(slot.getMinutes()).padStart(2,'0')}`
       ocupados.add(key)
     }
   }
 
-  // Criar set de dias com ausências
+  // Criar set de dias com ausências por profissional (chave: "profId|YYYY-MM-DD")
   const diasAusencia = new Set<string>()
   for (const a of ausenciasData) {
     const start = new Date(a.data_inicio)
     const end = new Date(a.data_fim)
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      diasAusencia.add(d.toISOString().split('T')[0])
+      diasAusencia.add(`${a.profissional_id}|${d.toISOString().split('T')[0]}`)
     }
   }
 
-  // Gerar slots livres dos próximos 7 dias úteis
+  // Gerar slots livres por profissional
   const diasSemana = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado']
   const slotsLivres: string[] = []
-  let diasVerificados = 0
 
-  for (let offset = 0; diasVerificados < 3 && offset < 7; offset++) {
-    const dia = new Date(nowBR)
-    dia.setDate(dia.getDate() + offset)
-    const diaStr = dia.toISOString().split('T')[0]
-    const diaSemana = dia.getDay()
+  for (const prof of profissionais) {
+    // Horários do profissional (fallback para horário da clínica)
+    const profHorIni = prof.horario_inicio ? prof.horario_inicio.slice(0, 5) : config.horario_inicio
+    const profHorFim = prof.horario_fim ? prof.horario_fim.slice(0, 5) : config.horario_fim
+    const [hIni, mIni] = profHorIni.split(':').map(Number)
+    const [hFim, mFim] = profHorFim.split(':').map(Number)
+    const diasProf: number[] = prof.dias_atendimento || [1, 2, 3, 4, 5]
 
-    // Pular domingos
-    if (diaSemana === 0) continue
-    // Pular dias com ausência total
-    if (diasAusencia.has(diaStr)) continue
+    let diasVerificados = 0
+    const profSlots: string[] = []
 
-    diasVerificados++
-    const livresNoDia: string[] = []
+    for (let offset = 0; diasVerificados < 3 && offset < 7; offset++) {
+      const dia = new Date(nowBR)
+      dia.setDate(dia.getDate() + offset)
+      const diaStr = dia.toISOString().split('T')[0]
+      const diaSemana = dia.getDay()
 
-    for (let h = hIni; h < hFim; h++) {
-      for (let m = (h === hIni ? mIni : 0); m < 60; m += duracaoPadrao) {
-        if (h === hFim - 1 && m + duracaoPadrao > (mFim || 60)) break
-        const horaStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
-        const key = `${diaStr} ${horaStr}`
+      // Pular dias que o profissional não atende
+      if (!diasProf.includes(diaSemana)) continue
+      // Pular dias com ausência do profissional
+      if (diasAusencia.has(`${prof.id}|${diaStr}`)) continue
 
-        // Se é hoje, pular horários que já passaram
-        if (offset === 0) {
-          const slotTime = h * 60 + m
-          const nowTime = nowBR.getHours() * 60 + nowBR.getMinutes()
-          if (slotTime <= nowTime + 30) continue // margem de 30min
+      diasVerificados++
+      const livresNoDia: string[] = []
+
+      for (let h = hIni; h < hFim; h++) {
+        for (let m = (h === hIni ? mIni : 0); m < 60; m += duracaoPadrao) {
+          if (h === hFim - 1 && m + duracaoPadrao > (mFim || 60)) break
+          const horaStr = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+          const key = `${prof.id}|${diaStr} ${horaStr}`
+
+          if (offset === 0) {
+            const slotTime = h * 60 + m
+            const nowTime = nowBR.getHours() * 60 + nowBR.getMinutes()
+            if (slotTime <= nowTime + 30) continue
+          }
+
+          if (!ocupados.has(key)) {
+            livresNoDia.push(horaStr)
+          }
         }
+      }
 
-        if (!ocupados.has(key)) {
-          livresNoDia.push(horaStr)
-        }
+      if (livresNoDia.length > 0) {
+        const nomeDia = diasSemana[diaSemana]
+        const dataFormatada = dia.toLocaleDateString('pt-BR')
+        const display = livresNoDia.length > 6
+          ? livresNoDia.slice(0, 3).join(', ') + ' ... ' + livresNoDia.slice(-3).join(', ')
+          : livresNoDia.join(', ')
+        profSlots.push(`${nomeDia} (${dataFormatada}): ${display}`)
       }
     }
 
-    if (livresNoDia.length > 0) {
-      const nomeDia = diasSemana[diaSemana]
-      const dataFormatada = dia.toLocaleDateString('pt-BR')
-      // Limitar a 6 slots por dia para não estourar o prompt
-      const display = livresNoDia.length > 6
-        ? livresNoDia.slice(0, 3).join(', ') + ' ... ' + livresNoDia.slice(-3).join(', ')
-        : livresNoDia.join(', ')
-      slotsLivres.push(`${nomeDia} (${dataFormatada}): ${display}`)
+    if (profSlots.length > 0) {
+      const label = profissionais.length > 1 ? `[${prof.nome_completo}] ` : ''
+      slotsLivres.push(...profSlots.map(s => `${label}${s}`))
     }
   }
 

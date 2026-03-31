@@ -15,6 +15,9 @@ interface Profissional {
   ativo: boolean
   role: string
   cor: string
+  horario_inicio: string | null
+  horario_fim: string | null
+  dias_atendimento: number[] | null
 }
 
 interface NovoColaboradorForm {
@@ -75,7 +78,7 @@ export function ProfissionaisPage() {
   const [saving, setSaving] = useState(false)
   const [linking, setLinking] = useState(false)
   const [editingProf, setEditingProf] = useState<Profissional | null>(null)
-  const [editForm, setEditForm] = useState({ nome_completo: '', especialidade: '', conselho: '', role: '' })
+  const [editForm, setEditForm] = useState({ nome_completo: '', especialidade: '', conselho: '', role: '', horario_inicio: '08:00', horario_fim: '18:00', dias_atendimento: [1,2,3,4,5] as number[] })
   const [ausenciaProf, setAusenciaProf] = useState<Profissional | null>(null)
 
   const loadProfissionais = useCallback(async () => {
@@ -83,7 +86,7 @@ export function ProfissionaisPage() {
     setIsLoading(true)
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, nome_completo, especialidade, conselho, ativo, role')
+      .select('id, nome_completo, especialidade, conselho, ativo, role, horario_inicio, horario_fim, dias_atendimento')
       .eq('clinica_id', clinicaId)
       .order('nome_completo', { ascending: true })
 
@@ -181,6 +184,9 @@ export function ProfissionaisPage() {
       especialidade: prof.especialidade || '',
       conselho: prof.conselho || '',
       role: prof.role,
+      horario_inicio: prof.horario_inicio?.slice(0, 5) || '08:00',
+      horario_fim: prof.horario_fim?.slice(0, 5) || '18:00',
+      dias_atendimento: prof.dias_atendimento || [1,2,3,4,5],
     })
   }
 
@@ -196,6 +202,9 @@ export function ProfissionaisPage() {
           especialidade: editForm.especialidade || null,
           conselho: editForm.conselho || null,
           role: editForm.role,
+          horario_inicio: editForm.horario_inicio || '08:00',
+          horario_fim: editForm.horario_fim || '18:00',
+          dias_atendimento: editForm.dias_atendimento,
         })
         .eq('id', editingProf.id)
 
@@ -512,6 +521,47 @@ export function ProfissionaisPage() {
                     value={editForm.conselho} onChange={e => setEditForm(f => ({ ...f, conselho: e.target.value }))} />
                 </div>
               </div>
+
+              {/* Horários de atendimento */}
+              {(editForm.role === 'profissional' || editForm.role === 'admin') && (
+                <>
+                  <div className="pt-2 border-t border-[var(--color-border)]">
+                    <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Horario de Atendimento</p>
+                    <div className="grid grid-cols-2 gap-4 mb-3">
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Inicio</label>
+                        <input type="time" className="input-base" value={editForm.horario_inicio}
+                          onChange={e => setEditForm(f => ({ ...f, horario_inicio: e.target.value }))} />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1">Fim</label>
+                        <input type="time" className="input-base" value={editForm.horario_fim}
+                          onChange={e => setEditForm(f => ({ ...f, horario_fim: e.target.value }))} />
+                      </div>
+                    </div>
+                    <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">Dias de atendimento</label>
+                    <div className="flex gap-1.5">
+                      {[
+                        { d: 1, l: 'Seg' }, { d: 2, l: 'Ter' }, { d: 3, l: 'Qua' },
+                        { d: 4, l: 'Qui' }, { d: 5, l: 'Sex' }, { d: 6, l: 'Sab' }, { d: 0, l: 'Dom' },
+                      ].map(({ d, l }) => {
+                        const active = editForm.dias_atendimento.includes(d)
+                        return (
+                          <button key={d} type="button"
+                            onClick={() => setEditForm(f => ({
+                              ...f,
+                              dias_atendimento: active ? f.dias_atendimento.filter(x => x !== d) : [...f.dias_atendimento, d],
+                            }))}
+                            className={`px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-colors ${active ? 'bg-cyan-500/10 text-cyan-500 border-cyan-500/30' : 'text-[var(--color-text-dim)] border-[var(--color-border)] hover:border-[var(--color-border-hover)]'}`}
+                          >
+                            {l}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setEditingProf(null)} className="btn-secondary flex-1">

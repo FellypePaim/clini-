@@ -45,17 +45,24 @@ function getCardStyle(apt: AgendaAppointment): React.CSSProperties {
   return { position: 'absolute', top, height, left: 2, right: 2 }
 }
 
+interface ProfSchedule {
+  horario_inicio: string
+  horario_fim: string
+  dias_atendimento: number[]
+}
+
 interface WeekViewProps {
   currentDate: Date
   appointments: AgendaAppointment[]
   ausencias?: Array<{ profissional_id: string; data_inicio: string; data_fim: string; tipo: string }>
+  profSchedule?: ProfSchedule
   onCardClick: (apt: AgendaAppointment) => void
   onSlotClick: (date: string, hour: number) => void
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onDrop?: (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => void
 }
 
-export function WeekView({ currentDate, appointments, ausencias, onCardClick, onSlotClick, onStatusChange, onDrop }: WeekViewProps) {
+export function WeekView({ currentDate, appointments, ausencias, profSchedule, onCardClick, onSlotClick, onStatusChange, onDrop }: WeekViewProps) {
   const today      = new Date()
   const weekDays   = getWeekDays(currentDate)
   const totalHeight = HOURS.length * SLOT_HEIGHT
@@ -237,6 +244,35 @@ export function WeekView({ currentDate, appointments, ausencias, onCardClick, on
               ))}
 
               {/* Overlay de ausência */}
+              {/* Schedule overlay — gray out non-working hours */}
+              {profSchedule && (() => {
+                const dayOfWeek = d.getDay()
+                const isOffDay = !profSchedule.dias_atendimento.includes(dayOfWeek)
+                if (isOffDay) {
+                  return (
+                    <div className="absolute inset-0 bg-[var(--color-text-dim)]/10 z-[3] pointer-events-none flex items-start justify-center pt-6">
+                      <span className="text-[10px] font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-2 py-1 rounded-full border border-[var(--color-border)]">
+                        Nao atende
+                      </span>
+                    </div>
+                  )
+                }
+                const schedStart = timeToMinutes(profSchedule.horario_inicio) - 7 * 60
+                const schedEnd = timeToMinutes(profSchedule.horario_fim) - 7 * 60
+                return (
+                  <>
+                    {schedStart > 0 && (
+                      <div className="absolute left-0 right-0 bg-[var(--color-text-dim)]/8 z-[3] pointer-events-none"
+                        style={{ top: 0, height: (schedStart / 60) * SLOT_HEIGHT }} />
+                    )}
+                    {schedEnd < 13 * 60 && (
+                      <div className="absolute left-0 right-0 bg-[var(--color-text-dim)]/8 z-[3] pointer-events-none"
+                        style={{ top: (schedEnd / 60) * SLOT_HEIGHT, bottom: 0 }} />
+                    )}
+                  </>
+                )
+              })()}
+
               {ausencias?.filter(a =>
                 a.data_inicio <= dateStr && a.data_fim >= dateStr
               ).length! > 0 && (

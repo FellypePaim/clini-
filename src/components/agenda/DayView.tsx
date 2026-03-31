@@ -17,17 +17,24 @@ function minutesToTime(min: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
 }
 
+interface ProfSchedule {
+  horario_inicio: string
+  horario_fim: string
+  dias_atendimento: number[]
+}
+
 interface DayViewProps {
   date: Date
   appointments: AgendaAppointment[]
   ausencias?: Array<{ profissional_id: string; data_inicio: string; data_fim: string; tipo: string }>
+  profSchedule?: ProfSchedule
   onCardClick: (apt: AgendaAppointment) => void
   onSlotClick: (hour: number) => void
   onStatusChange: (id: string, status: AppointmentStatus) => void
   onDrop?: (id: string, newDate: string, newHoraInicio: string, newHoraFim: string) => void
 }
 
-export function DayView({ date, appointments, ausencias, onCardClick, onSlotClick, onStatusChange, onDrop }: DayViewProps) {
+export function DayView({ date, appointments, ausencias, profSchedule, onCardClick, onSlotClick, onStatusChange, onDrop }: DayViewProps) {
   const nowLineRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const isToday = date.toDateString() === new Date().toDateString()
@@ -170,6 +177,35 @@ export function DayView({ date, appointments, ausencias, onCardClick, onSlotClic
               </div>
             </div>
           ))}
+
+          {/* Schedule overlay — gray out non-working hours */}
+          {profSchedule && (() => {
+            const dayOfWeek = date.getDay()
+            const isOffDay = !profSchedule.dias_atendimento.includes(dayOfWeek)
+            if (isOffDay) {
+              return (
+                <div className="absolute inset-0 bg-[var(--color-text-dim)]/10 z-[3] pointer-events-none flex items-start justify-center pt-8">
+                  <span className="text-xs font-bold text-[var(--color-text-muted)] bg-[var(--color-bg-card)] px-3 py-1.5 rounded-full border border-[var(--color-border)] shadow-sm">
+                    Nao atende neste dia
+                  </span>
+                </div>
+              )
+            }
+            const schedStart = timeToMinutes(profSchedule.horario_inicio) - 7 * 60
+            const schedEnd = timeToMinutes(profSchedule.horario_fim) - 7 * 60
+            return (
+              <>
+                {schedStart > 0 && (
+                  <div className="absolute left-0 right-0 bg-[var(--color-text-dim)]/8 z-[3] pointer-events-none"
+                    style={{ top: 0, height: (schedStart / 60) * SLOT_HEIGHT }} />
+                )}
+                {schedEnd < 13 * 60 && (
+                  <div className="absolute left-0 right-0 bg-[var(--color-text-dim)]/8 z-[3] pointer-events-none"
+                    style={{ top: (schedEnd / 60) * SLOT_HEIGHT, bottom: 0 }} />
+                )}
+              </>
+            )
+          })()}
 
           {/* Drop preview */}
           {dragPreviewTop !== null && (
