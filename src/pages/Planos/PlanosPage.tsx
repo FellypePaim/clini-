@@ -218,7 +218,7 @@ function PlanCard({
     if (isDowngrade) {
       return (
         <Link
-          to="/suporte"
+          to="/configuracoes/plano"
           className="block w-full py-3 px-4 rounded-xl text-sm font-semibold text-center transition-all duration-200 hover:opacity-80"
           style={{
             background: 'rgba(255,255,255,0.06)',
