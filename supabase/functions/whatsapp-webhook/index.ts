@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
                    req.headers.get("authorization")?.replace("Bearer ", "")
 
     const evolutionKey = (Deno.env.get("EVOLUTION_API_KEY") ?? "").trim()
-    if (!evolutionKey || (apiKey && apiKey !== evolutionKey)) {
+    if (!evolutionKey || !apiKey || apiKey !== evolutionKey) {
       return new Response("Unauthorized", { status: 401 })
     }
 
@@ -87,6 +87,7 @@ Deno.serve(async (req) => {
 
     // 3. Registrar Mensagem e Conversa
     const conversaId = await getOuCriarConversaId(supabase, clinica_id, whatsappNumber, pushName)
+    if (!conversaId) return new Response("Falha ao criar/buscar conversa", { status: 500 })
 
     // Atualizar nome do contato se temos pushName e ainda não tem
     if (pushName && conversaId) {

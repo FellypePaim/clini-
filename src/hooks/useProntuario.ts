@@ -9,6 +9,7 @@ import type {
 } from '../types/prontuario'
 import { supabase } from '../lib/supabase'
 import { useAuthStore } from '../store/authStore'
+import { useToast } from './useToast'
 
 // Lista de CID-10 comuns (dados de referência, não são dados de clínica)
 export const CID10_LISTA: CID10[] = [
@@ -27,6 +28,7 @@ export const CID10_MOCK = CID10_LISTA
 
 export function useProntuario(pacienteId?: string) {
   const { user } = useAuthStore()
+  const { toast } = useToast()
   const clinicaId = user?.clinicaId
   const profissionalId = user?.id
 
