@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.3.0** (Busca Global + Meu Perfil + Suporte com imagens — 30/03/2026)
+- Versão: **v2.4.0** (Sistema de Planos Fase A + B — 30/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -37,6 +37,7 @@
 - Fase 25: ✅ **Rebranding OVYVA → LYRA e VERDESK → NEXUS — frontend + DB + funções (29/03/2026)**
 - Fase 26: ✅ **Suporte lado clínica — two-panel chat com tickets (30/03/2026)**
 - Fase 27: ✅ **Busca Global (Ctrl+K) + Meu Perfil + Upload imagens suporte (30/03/2026)**
+- Fase 28: ✅ **Sistema de Planos Fase A + B — usePlan, PlanGate, gates, pricing, registro, SuperAdmin (30/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -47,7 +48,7 @@ harmonizacoes, lyra_conversas, lyra_mensagens, leads, leads_historico,
 campanhas, orcamentos, lancamentos, convenios, produtos_estoque,
 estoque_movimentacoes, procedimento_insumos, ai_usage_logs, whatsapp_instancias,
 auditoria_global, feature_flags, tickets_suporte, releases,
-profissional_ausencias, notificacoes_fila
+profissional_ausencias, notificacoes_fila, planos (slug), pagamentos
 
 ### Colunas adicionadas:
 - lyra_conversas: metadata JSONB, total_mensagens INTEGER, ultimo_contato TIMESTAMPTZ
@@ -55,6 +56,9 @@ profissional_ausencias, notificacoes_fila
 - harmonizacoes: mapeamento JSONB (dados do mapa facial)
 - documentos_paciente: storage_path TEXT
 - profiles: conselho TEXT, telefone TEXT, clinica_id nullable (para registro pendente)
+- clinicas: status_plano TEXT (ativo/trial/suspenso/cancelado), trial_ate TIMESTAMPTZ
+- planos: slug TEXT UNIQUE (adicionado via migration — identificador semântico)
+- pagamentos: plano_slug TEXT (sem FK UUID para evitar type mismatch)
 
 ### Constraints:
 - lyra_conversas: UNIQUE (clinica_id, contato_telefone)
@@ -88,16 +92,19 @@ profissional_ausencias, notificacoes_fila
 14. `20260325000001_profissional_ausencias.sql` — Tabela ausências/folgas + RLS
 15. `20260325000002_clinicas_update_policy.sql` — Policy UPDATE clínicas
 16. `20260327000001_tickets_rls_clinica.sql` — RLS tickets_suporte + tickets_mensagens para clínicas
+17. `20260330000005_planos_seed.sql` — Adiciona `slug` TEXT UNIQUE à tabela planos + seed 4 planos (starter/professional/clinic/enterprise) + migra clínicas existentes
+18. `20260330000006_pagamentos.sql` — Tabela pagamentos com plano_slug TEXT, status, provider, RLS
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
-### ai-gateway (✅ v5 — atualizada 28/03/2026)
+### ai-gateway (✅ v6 — atualizada 30/03/2026)
 Actions:
 - `detect_intent` → gemini-2.5-flash-lite
 - `transcribe_audio` → gemini-2.5-flash
 - `generate_summary` → gemini-2.5-flash
 - `lyra_respond` → gemini-2.5-flash (prompt compacto, slots reais 3 dias, auto-cadastro paciente, CRM auto, notif profissional)
 - `dashboard_insights` → gemini-2.5-flash-lite
+- **LYRA limit check**: lê `clinicas.configuracoes.plano` → limita msgs/mês (starter:0, professional:200, clinic:1000, enterprise:null)
 
 ### LYRA v3 — Funcionalidades (28/03/2026):
 - Auto-cadastro de paciente (nome + WhatsApp) quando IA coleta nome completo
@@ -130,7 +137,7 @@ Actions:
 - Envia texto/imagem/documento via Evolution API
 - Busca instância dinâmica da clínica no banco (não mais hardcoded)
 
-### superadmin-actions (✅ v4 — reescrita 27/03/2026)
+### superadmin-actions (✅ v5 — atualizada 30/03/2026)
 6 abas 100% funcionais, 0 dados fictícios:
 - get_dashboard — KPIs globais, gráfico 7d, AI usage, últimas clínicas
 - get_clinics — lista enriquecida (users, pacientes, consultas, leads, WhatsApp)
@@ -139,6 +146,7 @@ Actions:
 - get_financeiro — MRR/ARR/LTV baseado no plano (não status), receita real
 - get_audit_logs — auditoria global
 - get_suporte, create_ticket, update_ticket, get_ticket_messages, send_ticket_message
+- `update_clinic_plan` — muda plano da clínica (merge em configuracoes.plano + status_plano + trial_ate)
 
 ### user-manager (✅ v2 — --no-verify-jwt)
 - create_user (admin cria colaborador com auth + profile)
@@ -259,6 +267,12 @@ Actions:
 - `src/pages/Suporte/SuportePage.tsx` — Suporte lado clínica (two-panel chat)
 - `src/hooks/useSuporteClinica.ts` — Hook de suporte para clínicas (queries diretas)
 - `CONTEXTO_PROJETO.md` — Este arquivo
+- `src/hooks/usePlan.ts` — Hook central de planos (plano, status, limits, isAtLimit, usagePercent, daysLeftInTrial, hasRelatorio)
+- `src/components/ui/PlanGate.tsx` — Gate declarativo (`plansAllowed` prop) + UpgradePrompt
+- `src/components/ui/TrialBanner.tsx` — Banner trial + SuspensoBanner (overlay conta suspensa)
+- `src/components/ui/PlanLimitBanner.tsx` — Aviso ≥80% do limite de um recurso
+- `src/pages/Planos/PlanosPage.tsx` — Pricing page pública (`/planos`) com toggle mensal/anual, 4 cards, FAQ
+- `src/pages/Configuracoes/MeuPlanoPage.tsx` — Painel de uso do plano dentro do app (`/configuracoes/plano`)
 
 ## 13. CODE-SPLITTING
 - Todas as 57+ páginas usam `React.lazy()` + `Suspense`
@@ -415,54 +429,66 @@ Actions:
 - Hook: `src/hooks/useOnboarding.ts`
 - Componente: `src/components/layout/OnboardingChecklist.tsx`
 
-## 19. BUG CONHECIDO — ADMIN NÃO É PROFISSIONAL NA LYRA
-- LYRA (ai-gateway) filtra `role = 'profissional'` → admin solo NÃO aparece
-- Agenda frontend já inclui admin (`in('role', ['profissional', 'admin'])`)
-- **Precisa corrigir**: ai-gateway deve incluir admin nos planos solo
-- Impacto: dentista solo se registra como admin e IA não agenda para ela
+## 19. BUG CORRIGIDO — ADMIN + PROFISSIONAL NA LYRA
+- `ai-gateway` agora usa `.in("role", ["profissional", "administrador"])` — admin solo aparece na agenda da IA
 
-## 20. PLANOS — PROPOSTA APROVADA (PENDENTE IMPLEMENTAÇÃO)
+## 20. FASE 28 — SISTEMA DE PLANOS (Fase A + B) — 30/03/2026
 
-### 4 Planos definidos:
-| Plano | Preço | Público | Profissionais | Usuários extras |
-|-------|-------|---------|---------------|-----------------|
-| Starter | R$ 97 | Solo iniciante | 1 (admin=profissional) | 0 |
-| Professional | R$ 197 | Solo consolidado | 1 (admin=profissional) | 1 recepção |
-| Clinic | R$ 397 | Clínica pequena/média | Até 5 | 3 |
-| Enterprise | R$ 797 | Clínica grande | Ilimitado | Ilimitado |
+### Arquitetura de planos:
+- Plano identificado via `clinicas.configuracoes.plano` (JSONB text, ex: `"professional"`)
+- **NÃO usa** `clinicas.plano_id` UUID FK (campo existe na tabela mas não é usado)
+- `planos` table tem `slug TEXT UNIQUE` como identificador semântico
+- `pagamentos` usa `plano_slug TEXT` (sem FK UUID para evitar type mismatch)
 
-### Limites por plano:
-| Funcionalidade | Starter | Professional | Clinic | Enterprise |
-|---|---|---|---|---|
-| Pacientes | 500 | Ilimitado | Ilimitado | Ilimitado |
-| Dashboard IA Insights | Não | Sim | Sim | Sim |
-| Harmonização facial | Não | Sim | Sim | Sim |
-| Estoque | Não | Básico | Completo | Completo |
-| Nexus CRM | Não | Kanban básico | Completo + campanhas | Completo |
-| Relatórios | 3 básicos | 8 | Todos (13+) | Todos + PDF |
-| LYRA IA | Não | 200 msgs/mês | 1000 msgs/mês | Ilimitado |
-| WhatsApp | Não | 1 instância | 2 instâncias | 5 instâncias |
-| Storage | 500 MB | 5 GB | 20 GB | 100 GB |
-| Suporte | Tickets 24h | Tickets 12h | Tickets prioritário 8h | Tickets + WhatsApp 4h |
-| Ausências | Não | Sim | Sim | Sim |
-| Logo clínica | Sim | Sim | Sim | Sim |
+### Hook central — `src/hooks/usePlan.ts`:
+- `plano` — string do plano atual (starter/professional/clinic/enterprise)
+- `status` — ativo/trial/suspenso/cancelado
+- `isSuperAdmin` — SuperAdmin sempre tem enterprise desbloqueado
+- `isActive`, `isTrial`, `isSuspenso` — status checks
+- `limits` — PLAN_LIMITS[plano] (maxPacientes, maxUsuarios, maxIACalls, etc.)
+- `isAtLimit(resource, current)` — boolean se atingiu limite
+- `usagePercent(resource, current)` — 0-100% para barras de uso
+- `daysLeftInTrial()` — dias restantes de trial
+- `hasRelatorio(id)` — se relatório está liberado no plano atual
 
-### Implementação em 3 Fases:
-**Fase A — Infraestrutura:** Tabela planos, hook usePlan, componente PlanGate, fix admin=profissional, contagem de uso, gates em todas as páginas
-**Fase B — Registro + UX:** Novo fluxo "Solo vs Clínica" → seleção de plano → trial 7 dias, tela pricing
-**Fase C — Pagamento:** Integração Stripe/Mercado Pago, cobrança automática, faturas, cancelamento
+### Componentes de gate:
+- `PlanGate` — `<PlanGate plansAllowed={['professional','clinic','enterprise']}>`; mostra `UpgradePrompt` se bloqueado
+- `TrialBanner` — banner no topo do dashboard com countdown
+- `SuspensoBanner` — overlay fullscreen quando conta suspensa
+- `PlanLimitBanner` — aparece nos listings quando ≥80% do limite
 
-### O que falta no sistema para funcionar:
-1. Não existe controle de limites (pacientes, msgs, storage, profissionais)
-2. Não existe gate de funcionalidades (tudo liberado para todos)
-3. Registro não pergunta tipo de uso (solo vs clínica)
-4. Admin não é tratado como profissional na LYRA
-5. Sem integração de pagamento
-6. Sem tela de planos/pricing dentro do app
-7. Sem trial period tracking
+### Gates implementados:
+- **Pacientes**: limite 500 (starter); `PlanLimitBanner` em PacientesPage; bloqueio no createPatient
+- **Profissionais**: limites por plano no cadastro de ProfissionaisPage
+- **Harmonização**: `PlanGate` em PatientProfilePage (professional+)
+- **Relatórios**: cada relatório tem `plansAllowed`; lock overlay via `hasRelatorio()`
+- **WhatsApp**: limite de instâncias por plano (starter:0, professional:1, clinic:2, enterprise:5)
+- **LYRA**: limite de msgs/mês via ai-gateway (lê configuracoes.plano)
+
+### UX de Planos:
+- `/planos` — pricing page pública com toggle mensal/anual, 4 cards, FAQ, CTA para `/register?plano=X`
+- `/configuracoes/plano` — painel de uso do plano (barras, features, CTA upgrade)
+- Dashboard: `TrialBanner` e `SuspensoBanner` montados em DashboardPage
+- ConfiguracoesPage: link "Meu Plano" na sidebar de configurações
+
+### Registro com seleção de plano:
+- `RegisterPage`: 3 steps — tipo (admin/funcionário) → seleção de plano → formulário
+- URL param `?plano=X` pré-seleciona o plano vindo da pricing page
+- Envia `plano_id` ao edge function `register`
+
+### SuperAdmin — gestão de planos:
+- `SuperClinicasPage`: badges coloridos por plano, dropdown inline para mudar plano, filtros por plano
+- Chama `update_clinic_plan` no superadmin-actions (merge em configuracoes + status_plano + trial_ate)
+
+### authStore changes:
+- Login query: `clinicas(nome, configuracoes, status_plano, trial_ate)`
+- User object: `clinicaPlano`, `clinicaStatusPlano`, `clinicaTrialAte`
+
+### Pendente — Fase C (Gateway de Pagamento):
+- Usuário ainda decidindo entre Stripe e Mercado Pago
+- Tabela `pagamentos` já existe com estrutura completa
+- Quando decidido: edge function `payment-webhook`, checkout link, trial→cobrança automática
 
 ## 21. PRÓXIMOS PASSOS
-1. **Fase A dos Planos** — Tabela planos + hook usePlan + PlanGate + fix admin + gates
-2. Fase B dos Planos — Novo registro + pricing page + trial
-3. Fase C dos Planos — Pagamento (Stripe/MP)
-4. Deploy final em produção (Vercel)
+1. **Fase C dos Planos** — Gateway de pagamento (Stripe ou Mercado Pago, a definir)
+2. Deploy final em produção (Vercel)

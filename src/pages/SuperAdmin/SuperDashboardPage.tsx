@@ -59,7 +59,7 @@ function statusColor(status: string): { bg: string; text: string } {
     case 'suspensa':
       return { bg: 'bg-red-500/15', text: 'text-red-400' }
     default:
-      return { bg: 'bg-[var(--color-bg-deep)]0/15', text: 'text-[var(--color-text-muted)]' }
+      return { bg: 'bg-slate-800/15', text: 'text-[var(--color-text-muted)]' }
   }
 }
 

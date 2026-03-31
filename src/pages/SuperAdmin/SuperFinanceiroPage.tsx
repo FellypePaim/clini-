@@ -55,8 +55,8 @@ function statusColor(status: string): string {
   if (s === 'ativa' || s === 'ativo' || s === 'active') return 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
   if (s === 'suspensa' || s === 'suspended') return 'bg-red-500/10 text-red-400 ring-red-500/20'
   if (s === 'trial') return 'bg-amber-500/10 text-amber-400 ring-amber-500/20'
-  if (s === 'inativa' || s === 'inactive') return 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20'
-  return 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20'
+  if (s === 'inativa' || s === 'inactive') return 'bg-slate-800/10 text-[var(--color-text-muted)] ring-slate-500/20'
+  return 'bg-slate-800/10 text-[var(--color-text-muted)] ring-slate-500/20'
 }
 
 export function SuperFinanceiroPage() {

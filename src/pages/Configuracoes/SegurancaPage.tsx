@@ -69,7 +69,7 @@ export function SegurancaPage() {
         supabase.from('prescricoes').select('*').eq('clinica_id', clinicaId),
         supabase.from('termos_consentimento').select('*').eq('clinica_id', clinicaId),
         supabase.from('evolucoes').select('*').eq('clinica_id', clinicaId),
-        supabase.from('anamneses').select('*'),
+        supabase.from('anamneses').select('*').eq('clinica_id', clinicaId),
       ])
 
       const exportData = {

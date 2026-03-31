@@ -74,7 +74,7 @@ function statusBadge(status: string) {
     trial: { bg: 'bg-blue-500/10', text: 'text-blue-400', label: 'TRIAL' },
     suspensa: { bg: 'bg-red-500/10', text: 'text-red-400', label: 'SUSPENSA' },
   }
-  const s = map[status] ?? { bg: 'bg-[var(--color-bg-deep)]0/10', text: 'text-[var(--color-text-muted)]', label: status.toUpperCase() }
+  const s = map[status] ?? { bg: 'bg-slate-800/10', text: 'text-[var(--color-text-muted)]', label: status.toUpperCase() }
   return (
     <span
       className={cn(

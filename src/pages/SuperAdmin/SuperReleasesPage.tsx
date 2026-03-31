@@ -123,7 +123,7 @@ export function SuperReleasesPage() {
       major: { label: 'MAJOR', cls: 'bg-indigo-500/10 text-indigo-400' },
       feature: { label: 'FEATURE', cls: 'bg-blue-500/10 text-blue-400' },
       fix: { label: 'HOTFIX', cls: 'bg-red-500/10 text-red-400' },
-      patch: { label: 'PATCH', cls: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)]' },
+      patch: { label: 'PATCH', cls: 'bg-slate-800/10 text-[var(--color-text-muted)]' },
     }
     const { label, cls } = map[type]
     return <Badge className={cn(cls, 'text-[8px] font-black border-none')}>{label}</Badge>
@@ -276,7 +276,7 @@ export function SuperReleasesPage() {
                         isFeat ? 'bg-blue-500/10 text-blue-400'
                           : isFix ? 'bg-red-500/10 text-red-400'
                           : isInfra ? 'bg-amber-500/10 text-amber-400'
-                          : 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)]'
+                          : 'bg-slate-800/10 text-[var(--color-text-muted)]'
                       )}>
                         {isFeat ? 'FEAT' : isFix ? 'FIX' : isInfra ? 'INFRA' : 'MISC'}
                       </Badge>

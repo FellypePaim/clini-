@@ -71,14 +71,14 @@ const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
   critica: { label: 'Critica', className: 'bg-red-500/10 text-red-400 ring-red-500/20' },
   alta:    { label: 'Alta',    className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
   media:   { label: 'Media',   className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
-  baixa:   { label: 'Baixa',   className: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20' },
+  baixa:   { label: 'Baixa',   className: 'bg-slate-800/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   aberto:       { label: 'Aberto',       className: 'bg-blue-500/10 text-blue-400 ring-blue-500/20' },
   em_andamento: { label: 'Em andamento', className: 'bg-amber-500/10 text-amber-400 ring-amber-500/20' },
   resolvido:    { label: 'Resolvido',    className: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20' },
-  fechado:      { label: 'Fechado',      className: 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20' },
+  fechado:      { label: 'Fechado',      className: 'bg-slate-800/10 text-[var(--color-text-muted)] ring-slate-500/20' },
 }
 
 function formatDate(dateStr: string): string {
@@ -581,7 +581,7 @@ export function SuperSuportePage() {
                                 'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1 ring-inset',
                                 isSuperAdmin
                                   ? 'bg-purple-500/10 text-purple-400 ring-purple-500/20'
-                                  : 'bg-[var(--color-bg-deep)]0/10 text-[var(--color-text-muted)] ring-slate-500/20',
+                                  : 'bg-slate-800/10 text-[var(--color-text-muted)] ring-slate-500/20',
                               )}
                             >
                               {isSuperAdmin ? (

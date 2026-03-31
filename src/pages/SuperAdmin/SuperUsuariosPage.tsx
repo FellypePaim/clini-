@@ -152,7 +152,7 @@ export function SuperUsuariosPage() {
   // ------ Render helpers ------
 
   function RoleBadge({ role }: { role: string }) {
-    const cfg = ROLE_CONFIG[role] ?? { label: role, bg: 'bg-[var(--color-bg-deep)]0/15', text: 'text-[var(--color-text-muted)]' }
+    const cfg = ROLE_CONFIG[role] ?? { label: role, bg: 'bg-slate-800/15', text: 'text-[var(--color-text-muted)]' }
     return (
       <span
         className={cn(

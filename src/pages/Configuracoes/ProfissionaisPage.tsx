@@ -38,7 +38,7 @@ const COR_ROLE: Record<string, string> = {
   admin: 'bg-indigo-500',
   administrador: 'bg-indigo-500',
   profissional: 'bg-emerald-500',
-  recepcao: 'bg-[var(--color-bg-deep)]0',
+  recepcao: 'bg-slate-800',
 }
 
 function roleBadgeStyle(role: string) {
