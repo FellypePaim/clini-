@@ -28,6 +28,10 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
+    // Body precisa ser lido antes de tudo (stream só pode ser consumido uma vez)
+    const body = await req.json().catch(() => ({}))
+    const { action } = body
+
     // Auth
     const authHeader = req.headers.get('Authorization')
     const authClient = createClient(
@@ -45,9 +49,6 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await db.from('profiles').select('clinica_id, nome_completo, email, telefone').eq('id', user.id).single()
     if (!profile?.clinica_id) return err('Sem clínica vinculada', 403)
-
-    const body = await req.json()
-    const { action } = body
 
     const HOOPAY_CLIENT_ID = Deno.env.get('HOOPAY_CLIENT_ID') ?? ''
     const HOOPAY_CLIENT_SECRET = Deno.env.get('HOOPAY_CLIENT_SECRET') ?? ''
