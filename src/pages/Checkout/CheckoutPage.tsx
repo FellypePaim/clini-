@@ -68,8 +68,22 @@ export function CheckoutPage() {
 
       const { data, error } = await supabase.functions.invoke('payment-charge', { body })
 
-      if (error || data?.error) {
-        setErrorMsg(data?.error || error?.message || 'Erro ao processar pagamento')
+      if (error) {
+        // Tentar extrair mensagem real do body da resposta de erro
+        let msg = error.message || 'Erro ao processar pagamento'
+        try {
+          if (error.context && typeof error.context.json === 'function') {
+            const errBody = await error.context.json()
+            if (errBody?.error) msg = errBody.error
+          }
+        } catch {}
+        console.error('Payment error:', msg)
+        setErrorMsg(msg)
+        setStatus('refused')
+        return
+      }
+      if (data?.error) {
+        setErrorMsg(data.error)
         setStatus('refused')
         return
       }

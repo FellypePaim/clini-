@@ -28,16 +28,21 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
-    // Body precisa ser lido antes de tudo (stream só pode ser consumido uma vez)
-    const body = await req.json().catch(() => ({}))
+    // Body — ler raw text e parsear manualmente (evitar problemas de stream)
+    const rawBody = await req.text()
+    let body: any = {}
+    try { body = JSON.parse(rawBody) } catch { body = {} }
     const { action } = body
+    console.log('payment-charge action:', action, 'body keys:', Object.keys(body))
 
     // Auth
     const authHeader = req.headers.get('Authorization')
+    if (!authHeader) return err('Header Authorization ausente', 401)
+
     const authClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader! } } }
+      { global: { headers: { Authorization: authHeader } } }
     )
     const db = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -45,10 +50,15 @@ Deno.serve(async (req) => {
     )
 
     const { data: { user }, error: authErr } = await authClient.auth.getUser()
-    if (authErr || !user) return err('Não autorizado', 401)
+    if (authErr || !user) {
+      console.error('Auth error:', authErr?.message)
+      return err('Não autorizado', 401)
+    }
+    console.log('User authenticated:', user.id)
 
     const { data: profile } = await db.from('profiles').select('clinica_id, nome_completo, email, telefone').eq('id', user.id).single()
     if (!profile?.clinica_id) return err('Sem clínica vinculada', 403)
+    console.log('Profile found, clinica_id:', profile.clinica_id)
 
     const HOOPAY_CLIENT_ID = Deno.env.get('HOOPAY_CLIENT_ID') ?? ''
     const HOOPAY_CLIENT_SECRET = Deno.env.get('HOOPAY_CLIENT_SECRET') ?? ''
@@ -130,6 +140,7 @@ Deno.serve(async (req) => {
         if (address) chargeBody.address = address
 
         // Chamar HooPay API
+        console.log('Calling HooPay:', metodo, valor, 'doc:', doc)
         const hoopayRes = await fetch(`${HOOPAY_API}/charge`, {
           method: 'POST',
           headers: {
@@ -139,9 +150,13 @@ Deno.serve(async (req) => {
           body: JSON.stringify(chargeBody),
         })
 
-        const hoopayData = await hoopayRes.json()
+        const hoopayText = await hoopayRes.text()
+        console.log('HooPay response status:', hoopayRes.status, 'body:', hoopayText.substring(0, 500))
+        let hoopayData: any
+        try { hoopayData = JSON.parse(hoopayText) } catch { return err('Resposta inválida da HooPay') }
 
         if (hoopayData.errors) {
+          console.error('HooPay error:', JSON.stringify(hoopayData.errors))
           return err(hoopayData.errors?.[0]?.message || 'Erro na HooPay')
         }
 
