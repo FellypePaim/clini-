@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.5.0** (Varredura segurança + bugs corrigidos — 31/03/2026)
+- Versão: **v3.0.0** (Planos + HooPay + Horários profissional + PlanGate — 31/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -39,6 +39,9 @@
 - Fase 27: ✅ **Busca Global (Ctrl+K) + Meu Perfil + Upload imagens suporte (30/03/2026)**
 - Fase 28: ✅ **Sistema de Planos Fase A + B — usePlan, PlanGate, gates, pricing, registro, SuperAdmin (30/03/2026)**
 - Fase 29: ✅ **Varredura Segurança + Bugs — 10 bugs corrigidos, LGPD fix, auth bypass fix (31/03/2026)**
+- Fase 30: ✅ **Fase C Planos — HooPay (PIX + Boleto + Cartão), checkout, webhook, billing (31/03/2026)**
+- Fase 31: ✅ **PlanGate completo — bloqueio LYRA/Nexus/Estoque/Ausências/IA por plano + sidebar lock (31/03/2026)**
+- Fase 32: ✅ **Horários por profissional — agenda visual + LYRA inteligente per-professional (31/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -402,9 +405,16 @@ Actions:
 ## 18. MIGRATIONS ADICIONAIS
 - `20260325000002_clinicas_update_policy.sql` — RLS UPDATE para clinicas
 - `20260328000001_whatsapp_instancias_columns.sql` — qr_code_base64, status_conexao, status, numero_conectado, updated_at
-- `20260329000001_rename_ovyva_to_lyra.sql` — Rename tabelas lyra_*, view, RLS policies, JSON config key (clinicas.configuracoes.ovyva → lyra), leads.origem
+- `20260329000001_rename_ovyva_to_lyra.sql` — Rename tabelas lyra_*, view, RLS policies, JSON config key
 - `20260327000001_tickets_rls_clinica.sql` — RLS tickets para clínicas
 - `20260330000001_tickets_mensagens_imagem.sql` — Coluna imagem_url em tickets_mensagens
+- `20260330000002_superadmin_tickets_rls.sql` — SuperAdmin pode ver tickets diretamente
+- `20260330000003_tickets_avaliacao.sql` — Colunas avaliacao (1-5) e avaliacao_comentario
+- `20260330000004_tickets_update_clinica.sql` — RLS UPDATE tickets para clínicas
+- `20260330000005_planos_seed.sql` — Tabela planos com seed dos 4 planos
+- `20260330000006_pagamentos.sql` — Tabela pagamentos + RLS
+- `20260331000001_pagamentos_hoopay.sql` — Colunas HooPay + tabela clinica_card_tokens
+- `20260331000002_profissional_horarios.sql` — horario_inicio, horario_fim, dias_atendimento no profiles
 
 ## 16. BUSCA GLOBAL (Ctrl+K)
 - Command palette acessível via Ctrl+K ou botão no header
@@ -515,6 +525,80 @@ Actions:
 - Build produção: OK
 - Todas as abas SuperAdmin carregando dados reais
 
-## 23. PRÓXIMOS PASSOS
-1. **Fase C dos Planos** — Gateway de pagamento (Stripe ou Mercado Pago, a definir)
-2. Deploy final em produção (Vercel)
+## 23. FASE 30 — HOOPAY INTEGRAÇÃO (31/03/2026)
+
+### Gateway de pagamento:
+- **Provider**: HooPay (api.pay.hoopay.com.br)
+- **Auth**: Basic Auth (HOOPAY_CLIENT_ID:HOOPAY_CLIENT_SECRET)
+- **Métodos**: PIX (funcional), Boleto (funcional), Cartão (pendente ativação na HooPay)
+- **Organization ID**: salvo como secret HOOPAY_ORGANIZATION_ID
+
+### Edge Functions:
+- `payment-charge` — cria cobranças (PIX/Boleto/Cartão), salva no banco, ativa plano
+- `payment-webhook` — recebe callback da HooPay, atualiza status, ativa plano
+
+### Fluxo:
+1. `/planos` → "Fazer Upgrade" → `/checkout?plano=X`
+2. Checkout: CPF/CNPJ + escolhe PIX/Cartão/Boleto
+3. PIX: QR Code + polling 5s para confirmação automática
+4. Boleto: URL + código de barras, ativa via webhook
+5. Cartão: cobrança direta + salva cardToken para recorrência (pendente ativação)
+
+### Tabelas:
+- `pagamentos` — hoopay_order_uuid, card_token, pix_qrcode, pix_payload, boleto_url, boleto_barcode
+- `clinica_card_tokens` — card_token por clínica para recorrência futura
+
+### Pendente:
+- Cartão de crédito bloqueado na conta HooPay ("Tipo de Pagamento não permitido") — resolver com suporte
+- Cron de recorrência mensal usando cardToken
+
+## 24. FASE 31 — PLANGATES COMPLETO (31/03/2026)
+
+### Funcionalidades bloqueadas por plano:
+| Funcionalidade | Starter | Professional | Clinic | Enterprise |
+|---|---|---|---|---|
+| LYRA (IA WhatsApp) | Bloqueado | Livre | Livre | Livre |
+| Nexus CRM | Bloqueado | Básico | Completo | Completo |
+| Campanhas Marketing | Bloqueado | Bloqueado | Livre | Livre |
+| Estoque | Bloqueado | Básico | Completo | Completo |
+| Regras Consumo | Bloqueado | Bloqueado | Livre | Livre |
+| Harmonização Facial | Bloqueado | Livre | Livre | Livre |
+| Insights IA Dashboard | Escondido | Livre | Livre | Livre |
+| Ausências/Folgas | Escondido | Livre | Livre | Livre |
+| Relatórios | 3 básicos | 8 | Todos | Todos |
+
+### Sidebar:
+- Itens bloqueados aparecem com opacity + ícone cadeado
+- Clique redireciona para /planos
+
+### Rotas:
+- PlanGate wrapping em LYRA (3 rotas), Nexus (3 rotas), Estoque (5 rotas)
+
+## 25. FASE 32 — HORÁRIOS POR PROFISSIONAL (31/03/2026)
+
+### Campos no profiles:
+- `horario_inicio` TIME (default 08:00)
+- `horario_fim` TIME (default 18:00)
+- `dias_atendimento` INTEGER[] (default {1,2,3,4,5} = Seg-Sex)
+
+### UI:
+- Configurações > Profissionais > Editar — inputs time + toggle dias da semana
+
+### Agenda visual:
+- DayView/WeekView: overlay cinza semi-transparente nos horários fora do expediente
+- Dias que não atende: label "Não atende neste dia"
+- Funciona quando filtrado por profissional específico
+
+### LYRA inteligente:
+- Slots livres calculados POR PROFISSIONAL (não global)
+- Usa horario_inicio/fim e dias_atendimento de cada profissional
+- Slots ocupados agrupados por profissional_id
+- Multi-profissional: slots rotulados [Dr. Fulano]
+
+## 26. PRÓXIMOS PASSOS
+1. **Ativar cartão de crédito na HooPay** — resolver com suporte
+2. **Cron de recorrência mensal** — cobrar automaticamente via cardToken
+3. **Tela de billing/faturas** — histórico de pagamentos em Meu Plano
+4. **Deploy final em produção (Vercel)** — domínio custom, variáveis de ambiente
+5. **Notificações por email** — confirmação pagamento, trial expirando
+6. **Testes E2E** — fluxos críticos (registro, agendamento, pagamento)
