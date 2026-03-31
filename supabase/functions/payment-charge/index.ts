@@ -60,10 +60,11 @@ Deno.serve(async (req) => {
       // CRIAR COBRANÇA — PIX, BOLETO ou CARTÃO
       // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       case 'create_charge': {
-        const { plano, metodo, card } = body
+        const { plano, metodo, card, documento } = body
         // plano: 'starter' | 'professional' | 'clinic' | 'enterprise'
         // metodo: 'pix' | 'boleto' | 'cartao'
         // card: { number, holder, expirationDate, cvv, installments } (só para cartão)
+        // documento: CPF ou CNPJ (enviado pelo frontend)
 
         const valor = PLAN_PRICES[plano]
         if (!valor) return err('Plano inválido')
@@ -71,11 +72,14 @@ Deno.serve(async (req) => {
         // Buscar dados da clínica para customer
         const { data: clinica } = await db.from('clinicas').select('nome, email, telefone, cnpj, endereco').eq('id', profile.clinica_id).single()
 
+        const doc = (documento || clinica?.cnpj || '').replace(/\D/g, '')
+        if (!doc) return err('CPF ou CNPJ obrigatório para pagamento')
+
         const customer = {
           email: clinica?.email || profile.email || user.email,
           name: clinica?.nome || profile.nome_completo,
-          phone: (clinica?.telefone || profile.telefone || '').replace(/\D/g, ''),
-          document: (clinica?.cnpj || '').replace(/\D/g, ''),
+          phone: (clinica?.telefone || profile.telefone || '').replace(/\D/g, '') || '11999999999',
+          document: doc,
         }
 
         const endereco = clinica?.endereco as any

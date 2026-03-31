@@ -35,6 +35,9 @@ export function CheckoutPage() {
   const [boletoUrl, setBoletoUrl] = useState('')
   const [boletoBarcode, setBoletoBarcode] = useState('')
 
+  // Document (CPF/CNPJ)
+  const [documento, setDocumento] = useState('')
+
   // Card form
   const [card, setCard] = useState({ number: '', holder: '', expirationDate: '', cvv: '', installments: 1 })
 
@@ -60,7 +63,7 @@ export function CheckoutPage() {
     setErrorMsg('')
 
     try {
-      const body: any = { action: 'create_charge', plano, metodo }
+      const body: any = { action: 'create_charge', plano, metodo, documento: documento.replace(/\D/g, '') }
       if (metodo === 'cartao') body.card = card
 
       const { data, error } = await supabase.functions.invoke('payment-charge', { body })
@@ -143,6 +146,15 @@ export function CheckoutPage() {
 
           {/* Payment method selector */}
           <div className="p-6 space-y-6">
+            {/* CPF/CNPJ */}
+            <div>
+              <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-1.5">CPF ou CNPJ *</label>
+              <input type="text" value={documento} onChange={(e) => setDocumento(e.target.value)}
+                placeholder="000.000.000-00 ou 00.000.000/0000-00" maxLength={18}
+                className="w-full px-4 py-2.5 border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-xl outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 placeholder:text-[var(--color-text-muted)]"
+                style={{ background: 'var(--color-bg-deep)' }} />
+            </div>
+
             <div>
               <label className="block text-sm font-semibold text-[var(--color-text-secondary)] mb-3">Forma de pagamento</label>
               <div className="grid grid-cols-3 gap-3">
@@ -255,7 +267,7 @@ export function CheckoutPage() {
             {/* Pay button */}
             {status === 'idle' && (
               <button onClick={handlePay}
-                disabled={metodo === 'cartao' && (!card.number || !card.holder || !card.cvv)}
+                disabled={!documento.replace(/\D/g, '') || (metodo === 'cartao' && (!card.number || !card.holder || !card.cvv))}
                 className={cn('w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold rounded-xl transition-colors',
                   'bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-[var(--color-bg-card-hover)] disabled:text-[var(--color-text-dim)] disabled:cursor-not-allowed')}>
                 <Shield size={16} /> Pagar R$ {valor},00
