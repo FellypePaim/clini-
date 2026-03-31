@@ -5,7 +5,7 @@
 - Gerador: Antigravity
 - Supabase Project Ref: mddbbwbwmwcvecbnfmqg
 - Supabase URL: https://mddbbwbwmwcvecbnfmqg.supabase.co
-- Versão: **v2.4.0** (Sistema de Planos Fase A + B — 30/03/2026)
+- Versão: **v2.5.0** (Varredura segurança + bugs corrigidos — 31/03/2026)
 
 ## 2. STATUS DAS FASES
 - Fase 1: ✅ Estrutura base + Dashboard
@@ -38,6 +38,7 @@
 - Fase 26: ✅ **Suporte lado clínica — two-panel chat com tickets (30/03/2026)**
 - Fase 27: ✅ **Busca Global (Ctrl+K) + Meu Perfil + Upload imagens suporte (30/03/2026)**
 - Fase 28: ✅ **Sistema de Planos Fase A + B — usePlan, PlanGate, gates, pricing, registro, SuperAdmin (30/03/2026)**
+- Fase 29: ✅ **Varredura Segurança + Bugs — 10 bugs corrigidos, LGPD fix, auth bypass fix (31/03/2026)**
 
 ## 3. BACKEND — SUPABASE
 
@@ -97,7 +98,7 @@ profissional_ausencias, notificacoes_fila, planos (slug), pagamentos
 
 ## 4. EDGE FUNCTIONS DEPLOYADAS
 
-### ai-gateway (✅ v6 — atualizada 30/03/2026)
+### ai-gateway (✅ v6 — atualizada 30/03/2026, fix admin role 31/03)
 Actions:
 - `detect_intent` → gemini-2.5-flash-lite
 - `transcribe_audio` → gemini-2.5-flash
@@ -119,7 +120,7 @@ Actions:
 - Profissionais: só role=profissional no prompt (admin/recepção excluídos)
 - Webhook Evolution API v2: campos camelCase, enabled:true, QRCODE_UPDATED
 
-### whatsapp-webhook (✅ v3 — 28/03/2026)
+### whatsapp-webhook (✅ v4 — 31/03/2026, fix auth bypass + null conversaId)
 - Recebe webhook da Evolution API v2
 - Deduplicação de mensagens (mesmo texto + conversa + 60s)
 - Cria lead no CRM automaticamente ao novo contato
@@ -137,7 +138,7 @@ Actions:
 - Envia texto/imagem/documento via Evolution API
 - Busca instância dinâmica da clínica no banco (não mais hardcoded)
 
-### superadmin-actions (✅ v5 — atualizada 30/03/2026)
+### superadmin-actions (✅ v6 — atualizada 31/03/2026, --no-verify-jwt, MRR fix)
 6 abas 100% funcionais, 0 dados fictícios:
 - get_dashboard — KPIs globais, gráfico 7d, AI usage, últimas clínicas
 - get_clinics — lista enriquecida (users, pacientes, consultas, leads, WhatsApp)
@@ -489,6 +490,31 @@ Actions:
 - Tabela `pagamentos` já existe com estrutura completa
 - Quando decidido: edge function `payment-webhook`, checkout link, trial→cobrança automática
 
-## 21. PRÓXIMOS PASSOS
+## 22. FASE 29 — VARREDURA SEGURANÇA + BUGS (31/03/2026)
+
+### Bugs corrigidos (10 total):
+| # | Severidade | Bug | Arquivo |
+|---|-----------|-----|---------|
+| 1 | CRITICAL | Auth bypass webhook — requests sem API key passavam | `whatsapp-webhook:17` |
+| 2 | CRITICAL | LGPD leak — export anamneses sem filtro clinica_id | `SegurancaPage.tsx:72` |
+| 3 | HIGH | `toast()` sem import — crash ao gerar prescrição | `useProntuario.ts:290` |
+| 4 | MEDIUM | Classe Tailwind `md:` incompleta (layout tablet) | `RelatoriosPage.tsx:102` |
+| 5 | MEDIUM | `conversaId` null usado sem validação | `whatsapp-webhook:89` |
+| 6 | MEDIUM | 11x CSS inválido `bg-[var(--color-bg-deep)]0` em 7 arquivos | SuperAdmin + ProfissionaisPage |
+| 7 | MEDIUM | Dashboard SuperAdmin spinner eterno quando fetch falha | `SuperDashboardPage.tsx:84` |
+| 8 | MEDIUM | `handlePlanChange` payload incorreto (clinica_id fora do payload) | `SuperClinicasPage.tsx:201` |
+| 9 | MEDIUM | MRR/ARR nomes de plano antigos (Basico/Pro → starter/professional) | `superadmin-actions` |
+| 10 | LOW | Toast `variant` → `type` (padrão correto useToast) | `SuperClinicasPage.tsx` |
+
+### Edge functions redeployadas com --no-verify-jwt:
+- `superadmin-actions` — resolve Invalid JWT do gateway Supabase
+- `whatsapp-webhook` — fix auth bypass + null conversaId
+
+### Infraestrutura validada:
+- TypeScript: 0 erros
+- Build produção: OK
+- Todas as abas SuperAdmin carregando dados reais
+
+## 23. PRÓXIMOS PASSOS
 1. **Fase C dos Planos** — Gateway de pagamento (Stripe ou Mercado Pago, a definir)
 2. Deploy final em produção (Vercel)
