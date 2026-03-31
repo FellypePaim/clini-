@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { usePermissions } from '../../store/authStore'
 import { useThemeStore } from '../../store/themeStore'
 import { useUnreadSupporte } from '../../hooks/useUnreadSupporte'
+import { usePlan } from '../../hooks/usePlan'
 import {
   LayoutDashboard,
   Calendar,
@@ -19,7 +20,8 @@ import {
   Activity,
   Database,
   Sun,
-  Moon
+  Moon,
+  Lock,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { CliniPlusLogo } from '../ui/CliniPlusLogo'
@@ -36,20 +38,21 @@ interface NavItem {
   icon: any
   group: string
   roles: string[]
+  plans?: string[] // planos que têm acesso (undefined = todos)
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/dashboard',    label: 'Dashboard',   icon: LayoutDashboard, group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/agenda',       label: 'Agenda',       icon: Calendar,        group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/pacientes',    label: 'Pacientes / PEP',    icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/lyra',        label: 'LYRA',        icon: MessageSquare,   group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/nexus',      label: 'Nexus CRM',  icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'profissional', 'recepção'] },
-  { path: '/financeiro',   label: 'Financeiro',   icon: DollarSign,      group: 'gestao',    roles: ['administrador', 'profissional'] },
-  { path: '/estoque',      label: 'Estoque',      icon: Package,         group: 'gestao',    roles: ['administrador', 'profissional'] },
-  { path: '/prescricoes',  label: 'Prescrições',  icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
-  { path: '/relatorios',   label: 'Relatórios',   icon: BarChart3,       group: 'gestao',    roles: ['administrador', 'profissional'] },
-  { path: '/configuracoes',label: 'Configurações', icon: Settings,       group: 'sistema',   roles: ['administrador'] },
-  { path: '/suporte',      label: 'Suporte',        icon: LifeBuoy,       group: 'sistema',   roles: ['administrador'] },
+  { path: '/dashboard',    label: 'Dashboard',      icon: LayoutDashboard, group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/agenda',       label: 'Agenda',          icon: Calendar,        group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/pacientes',    label: 'Pacientes / PEP', icon: Users,           group: 'principal', roles: ['administrador', 'profissional', 'recepção'] },
+  { path: '/lyra',         label: 'LYRA',            icon: MessageSquare,   group: 'principal', roles: ['administrador', 'profissional', 'recepção'], plans: ['professional', 'clinic', 'enterprise'] },
+  { path: '/nexus',        label: 'Nexus CRM',       icon: Briefcase,       group: 'gestao',    roles: ['administrador', 'profissional', 'recepção'], plans: ['professional', 'clinic', 'enterprise'] },
+  { path: '/financeiro',   label: 'Financeiro',      icon: DollarSign,      group: 'gestao',    roles: ['administrador', 'profissional'] },
+  { path: '/estoque',      label: 'Estoque',         icon: Package,         group: 'gestao',    roles: ['administrador', 'profissional'], plans: ['professional', 'clinic', 'enterprise'] },
+  { path: '/prescricoes',  label: 'Prescrições',     icon: ClipboardList,   group: 'gestao',    roles: ['administrador', 'profissional'] },
+  { path: '/relatorios',   label: 'Relatórios',      icon: BarChart3,       group: 'gestao',    roles: ['administrador', 'profissional'] },
+  { path: '/configuracoes',label: 'Configurações',   icon: Settings,        group: 'sistema',   roles: ['administrador'] },
+  { path: '/suporte',      label: 'Suporte',         icon: LifeBuoy,        group: 'sistema',   roles: ['administrador'] },
 ]
 
 export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarProps) {
@@ -57,6 +60,7 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
   const { role } = usePermissions()
   const { theme, toggleTheme } = useThemeStore()
   const { unreadCount } = useUnreadSupporte()
+  const { plano, isSuperAdmin } = usePlan()
 
   const groups = [
     { key: 'principal', label: 'Principal' },
@@ -104,36 +108,42 @@ export function Sidebar({ collapsed = false, isOpen = false, onClose }: SidebarP
                 </p>
               )}
               <ul className="space-y-0.5">
-                {items.map(({ path, label: itemLabel, icon: Icon }) => {
+                {items.map(({ path, label: itemLabel, icon: Icon, plans }) => {
                   const isActive = location.pathname.startsWith(path)
+                  const isLocked = !!(plans && !isSuperAdmin && !plans.includes(plano))
                   return (
                     <li key={path}>
                       <NavLink
-                        to={path}
-                        title={collapsed ? itemLabel : undefined}
+                        to={isLocked ? '/planos' : path}
+                        title={collapsed ? itemLabel : isLocked ? `Disponível no plano ${plans?.[0]}+` : undefined}
                         onClick={onClose}
                         className={cn(
                           'sidebar-item',
                           collapsed && 'justify-center px-0 py-2.5',
-                          isActive && 'active'
+                          isActive && !isLocked && 'active',
+                          isLocked && 'opacity-40',
                         )}
                       >
                         <Icon
                           className={cn(
                             'shrink-0 transition-colors',
                             collapsed ? 'w-5 h-5' : 'w-4 h-4',
+                            isLocked ? 'text-[var(--color-text-dim)]' :
                             isActive ? 'text-cyan-500' : 'text-[var(--color-text-muted)]'
                           )}
                         />
                         {!collapsed && (
                           <span className="flex-1 truncate">{itemLabel}</span>
                         )}
-                        {path === '/suporte' && unreadCount > 0 && (
+                        {isLocked && !collapsed && (
+                          <Lock className="w-3 h-3 text-[var(--color-text-dim)]" />
+                        )}
+                        {!isLocked && path === '/suporte' && unreadCount > 0 && (
                           <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1">
                             {unreadCount > 9 ? '9+' : unreadCount}
                           </span>
                         )}
-                        {!collapsed && isActive && path !== '/suporte' && (
+                        {!isLocked && !collapsed && isActive && path !== '/suporte' && (
                           <ChevronRight className="w-3 h-3 text-cyan-400" />
                         )}
                       </NavLink>

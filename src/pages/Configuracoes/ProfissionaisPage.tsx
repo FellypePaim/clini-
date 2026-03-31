@@ -3,6 +3,7 @@ import { Plus, Edit2, Check, X, UserCog, BriefcaseMedical, Loader2, Mail, Link a
 import { AusenciasModal } from '../../components/configuracoes/AusenciasModal'
 import { Badge } from '../../components/ui/Badge'
 import { useToast } from '../../hooks/useToast'
+import { usePlan } from '../../hooks/usePlan'
 import { supabase } from '../../lib/supabase'
 import { useAuthStore } from '../../store/authStore'
 
@@ -62,6 +63,7 @@ export function ProfissionaisPage() {
   const { user } = useAuthStore()
   const clinicaId = user?.clinicaId
   const isAdmin = user?.role === 'administrador'
+  const { limits } = usePlan()
 
   const [profissionais, setProfissionais] = useState<Profissional[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -323,9 +325,11 @@ export function ProfissionaisPage() {
                     </button>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button onClick={() => setAusenciaProf(prof)} className="p-2 text-[var(--color-text-muted)] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Folgas e Ausências">
-                      <CalendarOff size={16} />
-                    </button>
+                    {limits.temAusencias && (
+                      <button onClick={() => setAusenciaProf(prof)} className="p-2 text-[var(--color-text-muted)] hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors" title="Folgas e Ausências">
+                        <CalendarOff size={16} />
+                      </button>
+                    )}
                     <button onClick={() => openEditModal(prof)} className="p-2 text-[var(--color-text-muted)] hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Perfil">
                       <Edit2 size={16} />
                     </button>

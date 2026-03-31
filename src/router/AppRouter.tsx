@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { MainLayout } from '../components/layout/MainLayout'
+import { PlanGate } from '../components/ui/PlanGate'
 
 // ─── Loading fallback ──────────────────────────────────
 function PageLoader() {
@@ -211,21 +212,21 @@ export function AppRouter() {
           <Route path="/pacientes/:id" element={<PatientProfilePage />} />
 
           {/* Módulo LYRA */}
-          <Route path="/lyra" element={<LyraPage />} />
-          <Route path="/lyra/configuracoes" element={<RequireRole roles={['administrador']}><LyraConfigPage /></RequireRole>} />
-          <Route path="/lyra/historico" element={<RequireRole roles={['administrador', 'profissional']}><LyraHistoryPage /></RequireRole>} />
+          <Route path="/lyra" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="LYRA — Assistente IA"><LyraPage /></PlanGate>} />
+          <Route path="/lyra/configuracoes" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="LYRA — Configurações"><RequireRole roles={['administrador']}><LyraConfigPage /></RequireRole></PlanGate>} />
+          <Route path="/lyra/historico" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="LYRA — Histórico"><RequireRole roles={['administrador', 'profissional']}><LyraHistoryPage /></RequireRole></PlanGate>} />
 
           {/* Módulo Nexus CRM */}
-          <Route path="/nexus" element={<NexusPage />} />
-          <Route path="/nexus/performance" element={<PerformancePage />} />
-          <Route path="/nexus/campanhas" element={<CampanhasPage />} />
+          <Route path="/nexus" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Nexus CRM"><NexusPage /></PlanGate>} />
+          <Route path="/nexus/performance" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Nexus CRM — Performance"><PerformancePage /></PlanGate>} />
+          <Route path="/nexus/campanhas" element={<PlanGate plansAllowed={['clinic','enterprise']} featureLabel="Campanhas de Marketing"><CampanhasPage /></PlanGate>} />
 
           {/* Módulo Estoque — admin + profissional */}
-          <Route path="/estoque" element={<RequireRole roles={['administrador', 'profissional']}><EstoquePage /></RequireRole>} />
-          <Route path="/estoque/produtos" element={<RequireRole roles={['administrador', 'profissional']}><ProdutosPage /></RequireRole>} />
-          <Route path="/estoque/movimentacoes" element={<RequireRole roles={['administrador', 'profissional']}><MovimentacoesPage /></RequireRole>} />
-          <Route path="/estoque/alertas" element={<RequireRole roles={['administrador', 'profissional']}><AlertasPage /></RequireRole>} />
-          <Route path="/estoque/regras" element={<RequireRole roles={['administrador', 'profissional']}><RegrasConsumoPage /></RequireRole>} />
+          <Route path="/estoque" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Estoque"><RequireRole roles={['administrador', 'profissional']}><EstoquePage /></RequireRole></PlanGate>} />
+          <Route path="/estoque/produtos" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Estoque — Produtos"><RequireRole roles={['administrador', 'profissional']}><ProdutosPage /></RequireRole></PlanGate>} />
+          <Route path="/estoque/movimentacoes" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Estoque — Movimentações"><RequireRole roles={['administrador', 'profissional']}><MovimentacoesPage /></RequireRole></PlanGate>} />
+          <Route path="/estoque/alertas" element={<PlanGate plansAllowed={['professional','clinic','enterprise']} featureLabel="Estoque — Alertas"><RequireRole roles={['administrador', 'profissional']}><AlertasPage /></RequireRole></PlanGate>} />
+          <Route path="/estoque/regras" element={<PlanGate plansAllowed={['clinic','enterprise']} featureLabel="Estoque — Regras de Consumo"><RequireRole roles={['administrador', 'profissional']}><RegrasConsumoPage /></RequireRole></PlanGate>} />
 
           {/* Módulo Relatórios — admin + profissional */}
           <Route path="/relatorios" element={<RequireRole roles={['administrador', 'profissional']}><RelatoriosPage /></RequireRole>} />

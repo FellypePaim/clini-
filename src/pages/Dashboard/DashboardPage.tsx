@@ -108,7 +108,7 @@ export function DashboardPage() {
           >
             Ver agenda <ArrowRight className="w-3.5 h-3.5" />
           </Link>
-          {!isRecepcao && (
+          {!isRecepcao && plano !== 'starter' && (
             <button
               onClick={handleInsights}
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-indigo-500 text-white text-sm font-semibold rounded-xl hover:from-cyan-700 hover:to-indigo-600 transition-all shadow-sm shadow-cyan-500/20 active:scale-[0.98]"
