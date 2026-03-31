@@ -81,13 +81,27 @@ export function SuperDashboardPage() {
     return () => { cancelled = true }
   }, [getDashboard])
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
         <Loader2 className="w-10 h-10 animate-spin text-purple-500" />
         <p className="text-xs font-bold uppercase tracking-widest text-[var(--color-text-muted)]">
           Carregando dashboard...
         </p>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
+        <p className="text-sm text-red-400 font-semibold">Erro ao carregar dashboard.</p>
+        <button
+          onClick={() => { setLoading(true); getDashboard().then(r => { setData(r as DashboardData | null); setLoading(false) }) }}
+          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-black rounded-xl"
+        >
+          Tentar novamente
+        </button>
       </div>
     )
   }

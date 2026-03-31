@@ -201,17 +201,19 @@ export function SuperClinicasPage() {
       const { error } = await supabase.functions.invoke('superadmin-actions', {
         body: {
           action: 'update_clinic_plan',
-          clinica_id: clinic.id,
-          plano_id: newPlan,
-          status: 'ativo',
+          payload: {
+            clinica_id: clinic.id,
+            plano_id: newPlan,
+            status: 'ativo',
+          },
         },
       })
       if (error) throw error
       await loadClinics()
-      toast({ title: 'Plano atualizado', description: `${clinic.nome} agora esta no plano ${newPlan}.`, variant: 'success' })
+      toast({ title: 'Plano atualizado', description: `${clinic.nome} agora esta no plano ${newPlan}.`, type: 'success' })
     } catch (err) {
       console.error(err)
-      toast({ title: 'Erro ao atualizar plano', description: 'Tente novamente.', variant: 'error' })
+      toast({ title: 'Erro ao atualizar plano', description: 'Tente novamente.', type: 'error' })
     } finally {
       setPlanChangingId(null)
     }
