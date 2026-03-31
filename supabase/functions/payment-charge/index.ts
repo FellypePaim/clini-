@@ -94,26 +94,30 @@ Deno.serve(async (req) => {
         }
 
         const endereco = clinica?.endereco as any
-        // Extrair estado — pode estar em endereco.estado, ou no final de endereco.cidade (ex: "Doresópolis/MG")
-        let estado = endereco?.estado || endereco?.uf || ''
-        const cidadeRaw = endereco?.cidade || ''
-        let cidade = cidadeRaw
-        if (!estado && cidadeRaw.includes('/')) {
-          const parts = cidadeRaw.split('/')
-          cidade = parts[0].trim()
-          estado = parts[1].trim()
-        }
-        if (!estado) estado = 'SP' // fallback
+        // Montar endereço apenas se tiver dados (HooPay aceita sem endereço para PIX/boleto)
+        // Cartão exige endereço obrigatoriamente
+        let address: any = undefined
+        if (endereco?.logradouro) {
+          let estado = endereco.estado || endereco.uf || ''
+          const cidadeRaw = endereco.cidade || ''
+          let cidade = cidadeRaw
+          if (!estado && cidadeRaw.includes('/')) {
+            const parts = cidadeRaw.split('/')
+            cidade = parts[0].trim()
+            estado = parts[1].trim()
+          }
+          if (!estado) estado = 'SP'
 
-        const address = endereco?.logradouro ? {
-          zipcode: (endereco.cep || '').replace(/\D/g, ''),
-          street: endereco.logradouro || 'Rua',
-          streetNumber: endereco.numero || 'S/N',
-          neighborhood: endereco.bairro || 'Centro',
-          complement: endereco.complemento || '',
-          city: cidade || 'São Paulo',
-          state: estado,
-        } : undefined
+          address = {
+            zipcode: (endereco.cep || '').replace(/\D/g, ''),
+            street: endereco.logradouro,
+            streetNumber: endereco.numero || 'S/N',
+            neighborhood: endereco.bairro || 'Centro',
+            complement: endereco.complemento || 'N/A',
+            city: cidade || 'São Paulo',
+            state: estado,
+          }
+        }
 
         const products = [{ title: `CliniPlus ${plano}`, amount: valor, quantity: 1 }]
 
@@ -121,8 +125,9 @@ Deno.serve(async (req) => {
         if (metodo === 'pix') {
           payments = [{ type: 'pix', amount: valor }]
         } else if (metodo === 'boleto') {
-          payments = [{ type: 'billet' }]
+          payments = [{ type: 'billet', amount: valor }]
         } else if (metodo === 'cartao') {
+          if (!address) return err('Endereço obrigatório para pagamento com cartão. Preencha em Configurações > Dados da Clínica.')
           if (!card) return err('Dados do cartão obrigatórios')
           payments = [{
             type: 'creditCard',
@@ -200,8 +205,8 @@ Deno.serve(async (req) => {
 
         // Boleto — salvar URL e código de barras
         if (metodo === 'boleto' && charge) {
-          pagamento.boleto_url = charge.billetUrl || null
-          pagamento.boleto_barcode = charge.billetBarCode || null
+          pagamento.boleto_url = charge.billetUrl || charge.url || null
+          pagamento.boleto_barcode = charge.billetBarCode || charge.billetLineDigitable || charge.code || null
         }
 
         // Cartão — salvar token para recorrência
@@ -247,8 +252,8 @@ Deno.serve(async (req) => {
           }
         } else if (metodo === 'boleto') {
           response.boleto = {
-            url: charge?.billetUrl,
-            barcode: charge?.billetBarCode,
+            url: charge?.billetUrl || charge?.url,
+            barcode: charge?.billetLineDigitable || charge?.billetBarCode || charge?.code,
             expireAt: charge?.expireAt,
           }
         } else if (metodo === 'cartao') {
