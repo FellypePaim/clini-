@@ -94,14 +94,25 @@ Deno.serve(async (req) => {
         }
 
         const endereco = clinica?.endereco as any
-        const address = endereco ? {
-          zipcode: endereco.cep || '',
-          street: endereco.logradouro || '',
-          streetNumber: endereco.numero || '',
-          neighborhood: endereco.bairro || '',
+        // Extrair estado — pode estar em endereco.estado, ou no final de endereco.cidade (ex: "Doresópolis/MG")
+        let estado = endereco?.estado || endereco?.uf || ''
+        const cidadeRaw = endereco?.cidade || ''
+        let cidade = cidadeRaw
+        if (!estado && cidadeRaw.includes('/')) {
+          const parts = cidadeRaw.split('/')
+          cidade = parts[0].trim()
+          estado = parts[1].trim()
+        }
+        if (!estado) estado = 'SP' // fallback
+
+        const address = endereco?.logradouro ? {
+          zipcode: (endereco.cep || '').replace(/\D/g, ''),
+          street: endereco.logradouro || 'Rua',
+          streetNumber: endereco.numero || 'S/N',
+          neighborhood: endereco.bairro || 'Centro',
           complement: endereco.complemento || '',
-          city: endereco.cidade || '',
-          state: endereco.estado || '',
+          city: cidade || 'São Paulo',
+          state: estado,
         } : undefined
 
         const products = [{ title: `CliniPlus ${plano}`, amount: valor, quantity: 1 }]
