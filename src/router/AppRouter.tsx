@@ -41,6 +41,7 @@ import { NotFoundPage } from '../pages/NotFoundPage'
 // ─── Páginas lazy — Landing ───────────────────────────
 const LandingPage = lazyNamed(() => import('../pages/Landing/LandingPage'), 'LandingPage')
 const PlanosPage = lazyNamed(() => import('../pages/Planos/PlanosPage'), 'PlanosPage')
+const CheckoutPage = lazyNamed(() => import('../pages/Checkout/CheckoutPage'), 'CheckoutPage')
 
 // ─── Páginas lazy — Core ───────────────────────────────
 const DashboardPage = lazyNamed(() => import('../pages/Dashboard/DashboardPage'), 'DashboardPage')
@@ -250,6 +251,9 @@ export function AppRouter() {
 
           {/* Meu Perfil — acessível por todos */}
           <Route path="/perfil" element={<MeuPerfilPage />} />
+
+          {/* Checkout — pagamento de plano */}
+          <Route path="/checkout" element={<CheckoutPage />} />
 
           {/* Módulo Suporte */}
           <Route path="/suporte" element={<RequireRole roles={['administrador']}><SuportePage /></RequireRole>} />

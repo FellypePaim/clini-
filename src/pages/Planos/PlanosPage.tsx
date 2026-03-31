@@ -204,7 +204,7 @@ function PlanCard({
     if (isUpgrade) {
       return (
         <Link
-          to="/suporte"
+          to={`/checkout?plano=${plan.id}`}
           className="block w-full py-3 px-4 rounded-xl text-sm font-semibold text-center transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           style={{
             background: `linear-gradient(135deg, ${plan.color}, #0891b2)`,
