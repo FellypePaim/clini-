@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         })) ?? []
 
         // MRR baseado no plano (não no status)
-        const precos: Record<string, number> = { 'Basico': 197, 'Pro': 397, 'Enterprise': 797 }
+        const precos: Record<string, number> = { starter: 97, professional: 197, clinic: 397, enterprise: 797 }
         const mrr = (clinicas ?? [])
           .filter((c: any) => c.configuracoes?.status !== 'suspensa')
           .reduce((sum: number, c: any) => sum + (precos[c.configuracoes?.plano] ?? 0), 0)
@@ -436,7 +436,7 @@ Deno.serve(async (req) => {
         const { data: clinicas } = await db.from('clinicas').select('id, nome, configuracoes, created_at')
 
         // Preços por plano
-        const precos: Record<string, number> = { 'Basico': 197, 'Pro': 397, 'Enterprise': 797 }
+        const precos: Record<string, number> = { starter: 97, professional: 197, clinic: 397, enterprise: 797 }
         const planosPagos = Object.keys(precos) // planos que geram receita
 
         // Classificar por PLANO (não por status)
@@ -473,7 +473,7 @@ Deno.serve(async (req) => {
         return ok({
           mrr, arr: mrr * 12, ltv, churn: 0,
           receitaClinicas: receitaTotal,
-          planos: Object.entries({ Trial: 0, ...precos }).map(([nome, valor]) => ({
+          planos: Object.entries({ trial: 0, ...precos }).map(([nome, valor]) => ({
             nome, valor, count: planoCount[nome] ?? 0,
           })),
           clinicas: allClinics.map((c: any) => ({
